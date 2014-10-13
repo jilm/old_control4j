@@ -1,0 +1,75 @@
+package control4j.modules;
+
+/*
+ *  Copyright 2013 Jiri Lidinsky
+ *
+ *  This file is part of control4j.
+ *
+ *  control4j is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, version 3.
+ *
+ *  control4j is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+import control4j.Signal;
+import control4j.ConfigItem;
+import control4j.ProcessModule;
+
+/**
+ *  A module which implements functionality of the comparator.
+ *  It compares two input values and returns a boolean value that
+ *  indicates relationship between them.
+ */
+public class PMComparator extends ProcessModule
+{
+  @ConfigItem(optional=true)
+  public double hysteresis = 0;
+
+  private boolean oldValue = false;
+
+  /**
+   *  Compare input signals and returned value indicates
+   *  result of the comparison. It expects two input signals.
+   *  It computes the difference between them: diff = input[1] - input[0].
+   *  The output signal is false if diff <= -hysteresis, the output
+   *  is true if diff >= hysteresis, and the output signal
+   *  stays unchanged otherwise.
+   *
+   *  @param input 
+   *             must contain two Signal objects
+   *
+   *  @return an array of size one. Returned signal is valid
+   *             if and only if both of the input signals are
+   *             valid. Timestamp of the returned signal is set
+   *             to the system time.
+   */
+  public Signal[] process(Signal[] input)
+  {
+    if (input[0].isValid() && input[1].isValid())
+    {
+      double diff = input[1].getValue() - input[0].getValue();
+      boolean value;
+      if (diff >= hysteresis)
+        value = true;
+      else if (diff <= -hysteresis)
+        value = false;
+      else
+        value = oldValue;
+      oldValue = value;
+      input[0] = Signal.getSignal(value);
+      return input;
+    }
+    else
+    {
+      input[0] = Signal.getSignal();
+      return input;
+    }
+  }
+}

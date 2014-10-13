@@ -1,0 +1,79 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <title></title>
+  </head>
+  <body>
+
+<!--  CZ
+
+Cílem tohoto programu je poskytnout prostředek pro řízení pomalých 
+technologických systémů pomocí počítače typu PC. Program se skládá z běhového 
+prostředí které interpretuje aplikaci. Aplikace která určije chování logiku, 
+algoritmus se zapisuje v jednoduchém textovém formátu, nebo v xml formátu.
+
+Základními stavebními kameny aplikace jsou moduly a resource. Data se mezi 
+moduly předávají pomocí tzv. signálů. Resources slouží jako zapouzdření zdrojů,
+jeden zdroj může být přístupný více modulům. Moduly jsou tří typů, vstupní 
+moduly, výstupní moduly a procesní moduly. Vstupní moduly mají pouze vstupy a 
+neposkytují žádný výstup zpět. Tyto moduly nejčastěji zapouzdřují výstup do 
+technologie, nebo výstup pro MMI rozhraní. Výstupní moduly naopak poskytují 
+jen výstupy. Používají se hlavně jako zprostředkovatelé vstupu z technologie. 
+Procesní moduly mají jak vstupy tak výstupy. Jsou to moduly, které 
+zpracovávají vstupy podle nějakého algoritmu a výstupy poskytují zpět do 
+systému k dalšímu zpracování.
+
+Tento program je inspirován programovatelnými logickými kontrolery. Stejně 
+jako ony pracuje v cyklech konstantní délky. Stejně jako ony nejprve shromáždí 
+výstupy z technologie tím, že vyhodnotí výstupní moduly. Poté vyhodnotí 
+procesní moduly a to v takovém pořadí, aby moduly, které poskytují vstupy pro 
+daný modul byly vyhodnoceny dříve. Tato podmínka vylučuje přítomnost cyklů v 
+aplikaci. Nakonec jsou vyhodnoceny vstupní moduly, které poskytují výstup zpět 
+do technologie. Pokud je celá aplikace vyhodnocena dříve, než je zadaná 
+perioda cyklu, tak je program po zbývající čas pozastaven.
+
+Vstupním bodem programu je třída Control. Jako commad line argument je potřeba
+zadat jméno souboru s popisem aplikace.
+
+-->
+
+<p>The aim of this program is to provide a tool for technology or process 
+control by computer. However there could be different use cases. The program 
+consists of a runtime environment that interprets the application. The 
+application determine the the logic (behaviour) and is written as a simple 
+text, or in xml format.
+
+<p>The building blocks of the application are modules and resources. Modules 
+are means to provide a data processing. Resource serves as the hardware 
+resource encapsulation. One resource can be accessed by multiple modules. Data 
+are transfered between modules via {@link control4j.Signal} objects. The 
+modules are of three types, input modules, output modules and process modules. 
+Input modules have only inputs and do not provide any output back into the 
+runtime environment. These modules mostly encapsulate output into the 
+technology, or output for the HMI interface. Output modules in turn provide 
+only outputs. They mainly get input from technology into the runtime 
+environment for later processing. Process modules have both inputs and 
+outputs. These are modules that process data according to some algorithm and 
+provide processed data back to the runtime environment.
+
+<p>The runtime environment is highly inspired by 
+<a href="https://en.wikipedia.org/wiki/Programmable_logic_controller">
+Programmable Logic Controllers</a> (PLCs). Equally as PLCs it is working in 
+cycles of constant length. The output modules are evaluated at the start of 
+the cycle to gather the outcomes of the technology. Then the process modules 
+are evaluated. The process module is executed when all of its input data are 
+available. This condition excludes the presence of cycles between modules. 
+Finally, the input modules are executed to provide output back into the 
+technologz. If evaluation of the entire application is finished before the 
+entered period of the cycle, the runtime environment is suspended for the rest 
+of the period.
+
+<p>The entry point of the program is the class {@link control4j.Control}. It 
+expects a name of the file with the application description as the commad line 
+argument. So the program may be executed as follows:
+
+<p><code>java control4j.Control app.conf</code>
+
+  </body>
+</html>
