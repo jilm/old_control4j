@@ -28,9 +28,6 @@ import javax.swing.JTabbedPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTree;
 import javax.swing.JTable;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import control4j.ConfigurationHelper;
@@ -47,17 +44,38 @@ import control4j.gui.GuiStructureTreeModel;
 import control4j.gui.ChangerIterator;
 import control4j.gui.changers.Changer;
 import control4j.gui.Screens;
+import control4j.tools.DeclarationReference;
 
+/**
+ *  Gets the gui and fill-in missing information mainly about a connection
+ *  to the signals.
+ */
 public class GuiBuilder
 {
 
+  /**
+   *
+   */
   private JFrame frame;
+
+  /**
+   *  A module which is responsible for collecting signals for gui and for
+   *  passing these signals into gui. This module is created by this class
+   *  and it is not neccessary to define it by hand.
+   */
   private IMGui guiModule;
+
+  /**
+   *
+   */
   private String[] signalMap;
 
+  /**
+   *
+   */
   public void build(Application application)
   {
-
+    // Get screen definitions
     Screens screens = application.getScreens();
 
     // Get the set of signals displayed by the gui
@@ -67,10 +85,13 @@ public class GuiBuilder
     {
       Changer changer = changers.next();
       String signalName = changer.getSignalName();
-      if (signalName != null) signalNames.add(signalName);
+      if (signalName != null && signalName.length() > 0) 
+        signalNames.add(signalName);
     }
 
     // Create new processing module
+    DeclarationReference reference = new DeclarationReference();
+    reference.setText("Added by GuiBuilder class");
     signalMap = new String[signalNames.size()];
     ModuleDeclaration guiModuleDecl 
         = new ModuleDeclaration("control4j.modules.IMGui");
@@ -80,6 +101,7 @@ public class GuiBuilder
       signalMap[index] = signalName;
       Input input = new Input(Scope.getGlobal(), signalName);
       input.setIndex(index);
+      input.setDeclarationReference(reference);
       guiModuleDecl.addInput(input);
       index++;
     }
@@ -122,12 +144,18 @@ public class GuiBuilder
     ModuleManager.getInstance().add(guiModule);
   }
 
+  /**
+   *
+   */
   public JFrame getFrame()
   {
     return frame;
   }
 
 
+  /**
+   *
+   */
   private void assignSignalIndexes(Object object, ComponentDeclaration declaration)
   {
     try
@@ -178,6 +206,9 @@ public class GuiBuilder
     return null;
   }
 
+  /**
+   *
+   */
   private class SaveGui implements ActionListener
   {
     JTabbedPane gui;

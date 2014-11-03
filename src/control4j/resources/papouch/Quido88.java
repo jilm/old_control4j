@@ -18,8 +18,8 @@ package control4j.resources.papouch;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import java.util.Date;
 import java.io.IOException;
+import java.util.Date;
 import control4j.Control;
 import control4j.Resource;
 import control4j.ConfigItem;
@@ -28,10 +28,10 @@ import control4j.ICycleEventListener;
 import control4j.resources.IThermometer;
 import control4j.resources.IBinaryInput;
 import control4j.resources.IBinaryOutput;
-import control4j.tools.IResponseCrate;
 import control4j.resources.ValueNotAvailableException;
 import control4j.resources.spinel.Spinel;
 import control4j.protocols.spinel.SpinelMessage;
+import control4j.tools.IResponseCrate;
 
 /**
  *  Encapsulate hardware IO module Quido with eight binary inputs and

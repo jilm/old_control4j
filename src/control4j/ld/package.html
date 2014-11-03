@@ -1,0 +1,220 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <title></title>
+  </head>
+  <body>
+
+<!--  CZ
+
+  Cilem baliku je zpristupnit moznost naprogramovani aplikace pomoci
+  tzv. ladder diagramu. Obsahem baliku na te nejvyssi urovni by mela
+  byt datova struktura pro ulozeni diagramu. Definice alespon jednoho
+  datoveho formatu. Program pro nacteni datove struktury ze souboru
+  a ulozeni datove struktury do souboru. Interaktivni editor diagramu.
+  Dale program pro nacteni do behoveho prostredi control4j.
+  A samozrejme je potreba algoritmus pro vyhodnoceni diagramu.
+
+  Nejvetsi problem vidim s vykonavanim programu napsaneho v LD
+  prostrednictvim control4j. Nejjednodussim prikladem, ktery demonstruje
+  mozne potize je klasicke zapojeni stykace ovladaneho tracitky
+  start stop.
+
+  |        Start        Stop       Motor   |
+  +----+----] [----+-----]/[--------( )----+
+  |    |   Motor   |                       |
+       +----] [----+
+
+  Toto je totiz sekvencni logika realizovana kombinacnimi prvky a 
+  pripadny program  pro vykonavani v control4j musi byt schopen
+  prevodu do napriklad nasledujici formy:
+
+  |         Start    Stop      Motor       |
+  +----------] [------]/[-------(S)--------+
+  |                                        |
+  |         Stop               Motor       |
+  +----------] [----------------(R)--------+
+  |                                        |
+  
+		=== ZNACENI ===
+
+  --] [-- : Normally open contact (XIC) Examine if Closed
+  --]/[-- : Normally closed contact (XIO) Examine if Open
+  --( )-- : Output or Coil (OTE) Output Energize
+  --(/)-- : Not Output or Coil
+  --(S)-- : (OTL) Output Latch
+  --(R)-- : (OTU) Output Unlatch
+  --[OSR]-- : One-Shot Rising; Triggers a one-time event
+              The OSR instruction is a retentive input instruction that
+	      triggers an event to occur only one time. Use OSR instruction
+	      when an event must start based on change of state of the rung
+	      from false to true.
+  --(CTU)-- : Count Up
+  --(CTD)-- : Count Down
+  --(RES)-- : Reset
+  --(TON)-- : Timer On Delay
+  --(TOF)-- : Timer Off Delay
+  --(RTO)-- : Retentive Timer
+
+		=== SYNTAX ===
+
+  <Ladder Diagram> ::= <Rung> | <Rung> <Ladder Diagram>
+
+  <Rung> ::= <Contact Block> "--" <Coil Block>
+  
+  <Coil Block> ::= <Coil> | <Coil> "||" <Coil Block>
+
+  <Contact Block> ::= <Contact> | <Contact Block> "--" <Contact Block> | <Contact Block> "||" <Contact Block>
+
+  <Contact> ::= "--] [--" | "--]/[--"
+
+  <Coil> ::= "--( )--" | "--(/)--" | "--(S)--" | "--(R)--"
+
+		=== XML FILE FORMAT ===
+
+  <ld>
+    <rung>
+
+      <serial>
+        <contact />
+	<parallel>
+	  <contact />
+	  <contact />
+	</parallel>
+      </serial>
+
+      <coil-block>
+        <coil />
+	<coil />
+        ...
+      </coil-block>
+
+    </rung>
+  </ld>
+
+  Relax NG specification:
+
+  <grammer>
+
+    <start>
+      <ref name="root" />
+    </start>
+
+    <define name="root">
+      <element name="ld">
+        <oneOrMore>
+	  <ref name="rung" />
+	</oneOrMore>
+      </element>
+    </define>
+
+    <define name="rung">
+      <element name="rung">
+	<ref name="contact-block" />
+	<choice>
+	  <ref name="coil-block" />
+	  <ref name="coil" />
+	</choice>
+      </element>
+    </define>
+
+    <define name="contact-block">
+      <choice>
+        <ref name="serial" />
+	<ref name="parallel" />
+	<ref name="contact" />
+      </choice>
+    </define>
+
+    <define name="serial">
+      <element name="serial">
+        <oneOrMore>
+	  <ref name="contact-block" />
+	</oneOrMore>
+      </element>
+    </define>
+
+    <define name="parallel">
+      <element name="parallel">
+        <oneOrMore>
+	  <ref name="contact-block" />
+	</oneOrMore>
+      </element>
+    </define>
+
+    <define name="contact">
+      <element name="contact" />
+    </define>
+
+    <define name="coil-block">
+      <oneOrMore>
+        <ref name="coil" />
+      </oneOrMore>
+    </define>
+
+    <define name="coil">
+      <element name="coil" />
+    </define>
+
+  </grammer>
+
+                === DATA STRUCTURE ===
+
+  Objekty:
+    
+    1) LadderDiagram: korenovy objekt, ktery obsahuje cely diagram
+              Obsahuje mnozinu linii (rung)
+	      U linii obecne zalezi na poradi v jakem jsou uvedeny,
+	      pri ruznem poradi vyhodnocovani muze byt vysledek ruzny.
+	      Umoznuje prochazeni mnozinou linii, jejich pridavani
+	      a ubirani.
+
+    2) Rung: jedna linie ladder diagramu
+              Kazda linie obsahuje kontaktni blok, coz je serio-
+	      paralelni propojeni kontaktu a jednu nebo vice civek,
+	      ktere jsou razeny paralelne.
+
+    3) ContactBlock: abstraktni propojeni kontaktu
+              Abstractni objekt, spolecny predek pro SerialContactBlock,
+	      ParallelContactBlock a pro Contact.
+
+    4) SerialContactBlock: seriove propojeni dvou a vice kontaktnich bloku
+              Obsahuje mnozinu objektu ContactBlock.
+	      Umoznuje jejich prochazeni, pridavani, ubirani.
+
+    5) ParallelContactBlock: paralelni spojeni dvou a vice kontaktnich bloku 
+              Obsahuje mnozinu objektu ContactBlock.
+	      Umoznuje jejich prochazeni, pridavani, ubirani.
+
+    6) Contact: jeden zakladni (dale nedelitelny) kontakt
+
+    7) Coil: jedna civka
+
+                === VYHODNOCENI ===
+
+  Tedy stanoveni vystupu na zaklade stavu vsech vstupu. Pro vyhodnoceni je
+  potreba znat stav vsech kontaktu, tedy vstupu. Na jejich zaklade a na
+  zaklade znalosti o propojeni je mozne stanovit novy stav vystupu, tedy
+  civek.
+
+  Blok kontaktu, ktere jsou spojeny paralelne je vyhonocen jako sepnuty
+  pouze v pripade, ze alespon jeden z kontaktu je sepnuty. V opacnem 
+  pripade je vyhodnocen jako rozepnuty.
+
+  Blok kontaktu, ktere jsou zapojeny seriove je chapan jako sepnuty jen
+  tehdy kdyz vsechny kontakty jsou sepnute, jinak je rozepnuty.
+
+  Objektovy model:
+
+    1) Evaluator: objekt, ktery provadi vlastni vyhonoceni. Dostane
+                     stav kontaktu a civek a strukturu zapojeni a
+		     vrati vyhodnoceni pro vsechny linie (rungy)
+
+    2) Status: obsahuje stav vsech vstupu a civek (sepnute/rozepnute).
+  
+
+-->
+
+  </body>
+</html>

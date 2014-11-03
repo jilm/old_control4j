@@ -1,0 +1,104 @@
+  <grammar xmlns="http://relaxng.org/ns/structure/1.0">
+
+    <start>
+      <ref name="root" />
+    </start>
+
+    <define name="root">
+      <element name="ld">
+	<ref name="description" />
+        <oneOrMore>
+	  <ref name="rung" />
+	</oneOrMore>
+      </element>
+    </define>
+
+    <define name="rung">
+      <element name="rung">
+	<ref name="description" />
+	<ref name="contact-block" />
+        <ref name="coil-block" />
+      </element>
+    </define>
+
+    <define name="contact-block">
+      <choice>
+        <ref name="serial" />
+	<ref name="parallel" />
+	<ref name="contact" />
+      </choice>
+    </define>
+
+    <define name="serial">
+      <element name="serial">
+        <oneOrMore>
+	  <choice>
+	    <ref name="parallel" />
+	    <ref name="contact" />
+	  </choice>
+	</oneOrMore>
+      </element>
+    </define>
+
+    <define name="parallel">
+      <element name="parallel">
+        <oneOrMore>
+	  <choice>
+	    <ref name="serial" />
+	    <ref name="contact" />
+	  </choice>
+	</oneOrMore>
+      </element>
+    </define>
+
+    <define name="contact">
+      <element name="contact">
+	<attribute name="name" />
+        <optional>
+	  <attribute name="type">
+	    <choice>
+	      <value>XIO</value>
+	      <value>XIC</value>
+	      <value>OSR</value>
+	    </choice>
+	  </attribute>
+	</optional>
+      </element>
+    </define>
+
+    <define name="coil-block">
+      <oneOrMore>
+        <ref name="coil" />
+      </oneOrMore>
+    </define>
+
+    <define name="coil">
+      <element name="coil">
+        <attribute name="name" />
+	<optional>
+	  <attribute name="type">
+	    <choice>
+	      <value>OTE</value>
+	      <value>OTL</value>
+	      <value>OTU</value>
+	      <value>TON</value>
+	      <value>TOF</value>
+	      <value>RTO</value>
+	      <value>CTU</value>
+	      <value>CTD</value>
+	      <value>RES</value>
+	    </choice>
+	  </attribute>
+	</optional>
+      </element>
+    </define>
+
+    <define name="description">
+      <optional>
+        <element name="description">
+	  <text />
+	</element>
+      </optional>
+    </define>
+
+  </grammar>

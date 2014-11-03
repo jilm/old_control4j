@@ -20,24 +20,44 @@ package control4j.tools;
 
 /**
  *
- *  Serves as an reference to some point in the file for examle where
- *  somethig was declared. It should return this information in the
- *  human readable form. This is used for example in logs or if it
- *  is necessary to report some error or fault.
+ *  Serves as a reference to some point, where somethig was declared. 
+ *  To some line in the configuration file for example. It should 
+ *  return information in the human readable form. This information 
+ *  is used for example in logs or if it is necessary to report some 
+ *  error or fault.
  *
- *  Reference information may be hierarchical, the example of output:
- *  project: project1
- *  file: heating.xml
- *  line: 25, column: 6
+ *  <p>Reference information may and should be hierarchical, the 
+ *  example of output:<br>
+ *  This is the module object, class: PMAnd,<br>
+ *  on line: 25, column: 6,<br>
+ *  in the file: heating.xml,<br>
+ *  project: project1<br>
+ *
+ *  <p>There are two kinds of methods to manipulate the content of the
+ *  object. Methods which names begining word "set", set the content
+ *  of this object. But if you have an object which points to the project
+ *  and you want to create reference to the file within this project,
+ *  use method which name begins to "add" on the project ref object. 
+ *  This method creates and returnes new object and sets the project
+ *  ref object as a parent.
  *
  */
 public class DeclarationReference
 {
 
+  /**
+   *
+   */
   private DeclarationReference parent;
 
+  /**
+   *
+   */
   private String reference;
 
+  /**
+   *  Creates an empty declaration reference.
+   */
   public DeclarationReference()
   {
     parent = null;
@@ -55,12 +75,12 @@ public class DeclarationReference
 
   public void setProject(String projectName)
   {
-    reference = "in project: " + projectName;
+    reference = "in the project: " + projectName;
   }
 
   public void setFile(String fileName)
   {
-    reference = "in file: " + fileName;
+    reference = "in the file: " + fileName;
   }
 
   public DeclarationReference addFile(String filename)
@@ -106,6 +126,20 @@ public class DeclarationReference
     return ref;
   }
 
+  public void setParent(DeclarationReference parent)
+  {
+    this.parent = parent;
+  }
+
+  /**
+   *  Returns the declaration reference as a string. The returned string
+   *  contains not only content of this object but also the whole chain
+   *  of objects. Declaration ref objects are separated by the colon and
+   *  line end. Content of this object is on the firs line, parent on the
+   *  second, and so on.
+   *
+   *  @return a string representation
+   */
   @Override
   public String toString()
   {

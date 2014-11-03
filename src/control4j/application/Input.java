@@ -66,6 +66,17 @@ public class Input extends DeclarationBase
     this.scope = scope;
     this.signal = signal;
     this.index = -1;
+    setObjectIdentification(getThisObjectIdentification());
+  }
+
+  @Override
+  protected DeclarationReference getThisObjectIdentification()
+  {
+    StringBuilder sb = new StringBuilder();
+    sb.append("module input (signal name: ")
+      .append(signal)
+      .append(')');
+    return new DeclarationReference(sb.toString());
   }
 
   public int getIndex()
@@ -98,28 +109,6 @@ public class Input extends DeclarationBase
   public ConfigBuffer getConfiguration()
   {
     return configuration;
-  }
-
-  /**
-   *  Adds an information that this is input of some module.
-   */
-  @Override
-  public void setDeclarationReference(DeclarationReference reference)
-  {
-    StringBuilder sb = new StringBuilder();
-    sb.append("module input (connected signal: ")
-      .append(signal)
-      .append(')');
-    if (reference != null)
-    {
-      sb.append(", declared");
-      super.setDeclarationReference(reference.addText(sb.toString()));
-    }
-    else
-    {
-      reference = new DeclarationReference(sb.toString());
-      super.setDeclarationReference(reference);
-    }
   }
 
 }

@@ -1,0 +1,62 @@
+default namespace = "http://application.control4j.cz"
+
+grammar
+{
+
+  start = element application
+  {
+    Brick+
+  }
+
+  Brick = ( Module | Resource | Signal | Scope )
+
+  Scope = element scope
+  {
+    Brick+
+  }
+
+  Module = element module
+  {
+    attribute class { text },
+    Property*,
+    IO*
+  }
+
+  Resource = element resource
+  {
+    attribute class { text },
+    attribute name { text },
+    Property*
+  }
+
+  Signal = element signal
+  {
+    attribute name { text },
+    attribute unit { text }?,
+    ScopeAttribute?,
+    Property*
+  }
+
+  IO = (Input | Output)
+
+  Input = element input { IOContent }
+
+  Output = element output { IOContent }
+
+  IOContent = 
+    attribute index { xsd:integer }?,
+    attribute signal { text },
+    ScopeAttribute?,
+    Property*
+
+  Property = element property
+  {
+    attribute key { text },
+    attribute value { text }
+  }
+
+  ScopeAttribute = attribute scope { ScopeContent }
+
+  ScopeContent = ( "global" | "file" | "local" )
+
+}  

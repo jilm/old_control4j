@@ -400,26 +400,14 @@ public class ModuleDeclaration extends DeclarationBase
     return left;
   }
 
-  /**
-   *  Adds an information that this is a module.
-   */
   @Override
-  public void setDeclarationReference(DeclarationReference reference)
+  protected DeclarationReference getThisObjectIdentification()
   {
     StringBuilder sb = new StringBuilder();
     sb.append("module (class name: ")
       .append(className)
       .append(')');
-    if (reference != null)
-    {
-      sb.append(", declared");
-      super.setDeclarationReference(reference.addText(sb.toString()));
-    }
-    else
-    {
-      reference = new DeclarationReference(sb.toString());
-      super.setDeclarationReference(reference);
-    }
+    return new DeclarationReference(sb.toString());
   }
 
 }

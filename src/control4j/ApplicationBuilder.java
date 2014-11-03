@@ -49,7 +49,7 @@ public class ApplicationBuilder
   private int fatalErrors = 0;
 
   /**
-   *  Build the application into the executable form from based on the
+   *  Build the application into the executable form based on the
    *  given declaration. The result will be stored in the ResourceManager
    *  and ModuleManager objects.
    *
@@ -80,9 +80,13 @@ public class ApplicationBuilder
         = new control4j.application.gui.GuiBuilder();
       guiBuilder.build(application);
     }
+    // complete the module manager
     ModuleManager.getInstance().complete();
   }
 
+  /**
+   *
+   */
   private void buildResources(Collection<ResourceDeclaration> resourceDeclarations) throws SyntaxErrorException
   {
     ResourceManager manager = ResourceManager.getInstance();
@@ -103,6 +107,12 @@ public class ApplicationBuilder
         fatalErrors ++;
 	reportSystemError1(declaration, e);
       }
+      catch (ClassNotFoundException e)
+      {
+        ErrorManager errors = ErrorManager.getInstance();
+        errors.reportMissingClass(declaration.getClassName()
+	  , declaration.getDeclarationReferenceText());
+      }
     // create potential connections between resources
     for (ResourceDeclaration declaration : resourceDeclarations)
       try
@@ -118,8 +128,15 @@ public class ApplicationBuilder
       {
         fatalErrors ++;
       }
+      catch (java.util.NoSuchElementException e)
+      {
+        fatalErrors ++;
+      }
   }
 
+  /**
+   *
+   */
   private void buildModules(Collection<ModuleDeclaration> moduleDeclarations)
   {
     ModuleManager moduleManager = ModuleManager.getInstance();

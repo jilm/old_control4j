@@ -53,11 +53,8 @@ public class Property extends DeclarationBase
     return value;
   }
 
-  /**
-   *  Adds an information that this is a property.
-   */
   @Override
-  public void setDeclarationReference(DeclarationReference reference)
+  protected DeclarationReference getThisObjectIdentification()
   {
     StringBuilder sb = new StringBuilder();
     sb.append("property (key: ")
@@ -65,16 +62,7 @@ public class Property extends DeclarationBase
       .append("; value: ")
       .append(value)
       .append(')');
-    if (reference != null)
-    {
-      sb.append(", declared");
-      super.setDeclarationReference(reference.addText(sb.toString()));
-    }
-    else
-    {
-      reference = new DeclarationReference(sb.toString());
-      super.setDeclarationReference(reference);
-    }
+    return new DeclarationReference(sb.toString());
   }
 
 }

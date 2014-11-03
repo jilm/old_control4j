@@ -1,0 +1,39 @@
+default namespace = "http://ld.control4j.cz"
+
+start = root
+
+root = element ld { description, rung+ }
+
+rung = element rung { description, contact-block, coil-block }
+
+contact-block = serial | parallel | contact
+
+serial = element serial { (parallel | contact)+ }
+
+parallel = element parallel { (serial | contact)+ }
+
+contact =
+  element contact {
+    attribute name { text },
+    attribute type { "XIO" | "XIC" | "OSR" }?
+  }
+
+coil-block = coil+
+
+coil =
+  element coil {
+    attribute name { text },
+    attribute type {
+      "OTE"
+      | "OTL"
+      | "OTU"
+      | "TON"
+      | "TOF"
+      | "RTO"
+      | "CTU"
+      | "CTD"
+      | "RES"
+    }?
+  }
+
+description = element description { text }?

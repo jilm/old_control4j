@@ -30,6 +30,10 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
+/**
+ *  @deprecated see {@link control4j.tools.SaxReader} instead
+ */
+@Deprecated
 public class SaxReader extends DefaultHandler
 {
   private LinkedList<String> elementStack = new LinkedList<String>();

@@ -31,6 +31,7 @@ public class ResourceDeclaration extends DeclarationBase
     this.className = className;
     this.name = name;
     this.configuration = new ConfigBuffer();
+    setObjectIdentification(getThisObjectIdentification());
   }
 
   public ConfigBuffer getConfiguration()
@@ -53,26 +54,14 @@ public class ResourceDeclaration extends DeclarationBase
     return name;
   }
 
-  /**
-   *  Adds an information that this is a resource.
-   */
   @Override
-  public void setDeclarationReference(DeclarationReference reference)
+  protected DeclarationReference getThisObjectIdentification()
   {
     StringBuilder sb = new StringBuilder();
     sb.append("resource (name: ")
       .append(name)
       .append(')');
-    if (reference != null)
-    {
-      sb.append(", declared");
-      super.setDeclarationReference(reference.addText(sb.toString()));
-    }
-    else
-    {
-      reference = new DeclarationReference(sb.toString());
-      super.setDeclarationReference(reference);
-    }
+    return new DeclarationReference(sb.toString());
   }
 
 }

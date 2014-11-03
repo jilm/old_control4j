@@ -1,0 +1,107 @@
+namespace app = "http://application.control4j.cz"
+namespace ex = "http://application.control4j.cz/extended"
+
+Papouch = ( Spinel | TQS3 | QUIDO88 | DA2 | AD4)
+
+Spinel = element ex:spinel
+{
+  attribute name { text },
+  attribute host { text },
+  attribute port { text }
+}
+
+TQS3 = element ex:tqs3
+{
+  # simply specify tqs3 resource
+  (
+    attribute name { text },    # identification of the resource
+    attribute address { text }, # spinel address
+    attribute spinel { text }   # reference to the spinel resource
+  ) | 
+  # or tqs3 is the only devece on the tcp/ip line
+  (
+    attribute name { text },
+    attribute host { text },
+    attribute port { text },
+    attribute address { text }
+  ) |
+  # or spcify tqs3 resource and simultaneously specify output signal
+  (
+    attribute name { text }?,    # identification of the resource
+    attribute address { text }, # spinel address
+    attribute spinel { text },   # reference to the spinel resource
+    attribute output { text },
+    ScopeAttribute?
+  ) |
+  # or tqs3 is the only device on the tcp/ip and you can simoultaneously
+  # spcify output signal
+  (
+    attribute name { text }?,
+    attribute host { text },
+    attribute port { text },
+    attribute address { text },
+    attribute output { text },
+    ScopeAttribute?
+  )
+}
+
+QUIDO88 = element ex:quido88
+{
+  attribute name { text },
+  attribute spinel { text },
+  attribute address { text }
+}
+
+DA2 = element ex:da2
+{
+  # simply specify the resource
+  (
+    attribute name { text },
+    attribute spinel { text },
+    attribute address { text }
+  ) |
+  # or you can directly specify the inputs,
+  # then the name of the resource is optional
+  (
+    attribute name { text }?,
+    attribute spinel { text },
+    attribute address { text },
+    Input+  
+  )
+}
+
+AD4 = element ex:ad4
+{
+  # simply specify the resource
+  (
+    attribute name { text },
+    attribute spinel { text },
+    attribute address { text }?
+  ) |
+  # or you can directly specify the outputs,
+  # then the name of the resource is optional
+  (
+    attribute name { text }?,
+    attribute spinel { text },
+    attribute address { text }?,
+    Output+
+  ) |
+  # or you can give host and port and then the reference
+  # to the spinel is optional.
+  (
+    attribute name { text },
+    attribute spinel { text }?,
+    attribute host { text },
+    attribute port { text },
+    attribute address { text }?
+  ) |
+  # or you can combine host, port and outputs
+  (
+    attribute name { text }?,
+    attribute spinel { text }?,
+    attribute host { text },
+    attribute port { text },
+    attribute address { text }?,
+    Output+
+  )
+}

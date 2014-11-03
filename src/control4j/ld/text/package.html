@@ -1,0 +1,102 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <title></title>
+  </head>
+  <body>
+
+<!--  CZ
+
+  Cilem baliku je vytvorit tzv. textovou reprezentaci ladder diagramu.
+  Priklad vystupu:
+
+
+  |        Start        Stop       Motor   |
+  +----+----] [----+-----]/[--------( )----+
+  |    |   Motor   |                       |
+  |    +----] [----+                       |
+  |                                        |
+  |         Start    Stop      Motor       |
+  +----------] [------]/[-------(S)--------+
+  |                                        |
+  |         Stop               Motor       |
+  +----------] [----------------(R)--------+
+  |                                        |
+
+  
+  Kazda znacka ma svou minimalni sirku. Sirka znacky muze byt ruzna.
+  Je dana i nejaka doporucena sirka celeho diagramu. Pokud se, ale
+  nejaky rung do teto sirky nevyda, muze byt i sirsi. Vpravo budou
+  zarovnany prvky typu coil. Zbytek prostoru vlevo bude rovnomerne
+  vyuzit na prvky typu contact.
+
+          === OBJEKTOVY MODEL ===
+
+  Render: access point. Tento objekt bude zastresovat cely proces
+          Bude obsahovat metodu, ktera vezme jako parametr ladder
+	  diagram a vrati diagram v textove podobe.
+
+  RungRender: vykresli jeden rung.
+
+  SerialRender:
+
+  ParallelRender:
+
+  ContactRender:
+
+  CoilRender:
+
+  Library: Pro pozadovany typ komponenty vrati velikost a ascii
+          reprezentaci.
+
+  BlockCrate: nese informace o rozmerech, ascii reprezentaci a pripojna
+          mista.
+	  rows: array of StringBuilder - ascii reprezentace
+	  connections: array of int - pripojna mista
+	  getWidth: sirka ve znacich
+	  getHeight: vyska ve znacich
+
+
+          === ALGORITMUS ===
+
+  Cele vykresleni bude muset probihat ve dvou kolech. V prvnim pruchodu
+  se algoritmus pokusi vykreslit diagram do pozadovane sirky. Potom se
+  podiva, ktery rung je nejsirsi a pokud je sirsi nez pozadovana sirka,
+  prekresli ostatni rungy na onu sirku.
+
+  Pro kazdy kontaktni blok a blok civek se nejprve musi zjistit minimalni
+  sirka a vyska a pocet atomickych bloku vedle sebe a pod sebou.
+  Dale se vezme pozadovana sirka bloku a mezi bloky se doplni
+  rovnomerne chybejici pocet znaku.
+
+  Rekurzivni algoritmus pro seriovy blok:
+    1) Pro vsechny podbloky vypocitej potrebnou sirku ve znacich a v 
+       atomickych prvcich.
+    2) Zbyvajici prostor rozdel rovnomerne mizi jednotlive seriove
+       podbloky.
+    3) Nech vykreslit jednotlive podbloky
+    4) Spoj podbloky vedle sebe.
+
+  Algoritmus pro paralelni blok:
+    1) Nech vykreslit jednotlive paralelni podbloky
+    2) Spoj pod sebe
+
+  Atomicky blok
+    1) Vyzvedni reprezentaci bloku z knihovny
+    2) Pridej pojmenovani
+    3) Dopln na potrebne rozmery
+
+
+
+
+  Rozmery atomickeho bloku, tedy bloku typu contact nebo coil je 
+  jednoduche: vezmi blok z knihovny prvku, dopln ho o nazev a vrat.
+
+  Seriove spojeni dvou prvku: 
+
+  
+-->
+
+  </body>
+</html>

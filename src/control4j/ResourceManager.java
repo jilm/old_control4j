@@ -27,16 +27,15 @@ import static control4j.tools.Logger.*;
 
 /**
  *
- *  An object which provides management of the resources. Which means
- *  it mainly provides an access to the resouces to modules.
+ *  An object which provides management of the resources.
  *
  *  <p>Resource is an instance of object which overrides class
  *  {@link control4j.resources.Resource}.
  *  
- *  <p>Each resource is identified by u unique identifier which is
+ *  <p>Each resource is identified by a unique identifier which is
  *  called name or id.
  *
- *  <p>This object is singleton, it is only one instance of it for the
+ *  <p>This object is singleton, there is only one instance of it for the
  *  whole application. You can use method {@link #getInstance} to
  *  obtain the instance.
  *
@@ -131,7 +130,7 @@ public class ResourceManager implements Iterable<control4j.resources.Resource>
     System.out.println(resource);
     if (resource == null)
     {
-      throw new java.util.NoSuchElementException();
+      throw new java.util.NoSuchElementException(id);
     }
     else
     {

@@ -1,0 +1,74 @@
+<?xml version="1.0"?>
+<project name="control4j" basedir="." default="compile">
+
+    <property name="srcdir" location="src" />
+    <property name="bindir" location="bin" />
+    <property name="docdir" location="doc" />
+    <property name="testsrcdir" location="test" />
+    <property name="reports" location="reports" />
+    <property name="jarname" value="control4j.jar" />
+
+    <target name="clean" description="leaves only source code">
+        <delete dir="${bindir}" />
+        <delete dir="${docdir}" />
+        <delete dir="${reports}" />
+    </target>
+
+    <target name="compile" description="Compiles the Task">
+        <mkdir dir="${bindir}" />
+	<depend srcdir="${srcdir}" destdir="${bindir}" />
+        <javac srcdir="${srcdir}" destdir="${bindir}" 
+	  excludes=""
+	  deprecation="no"
+	  />
+        <concat destfile="${bindir}/control4j/messages.properties" >
+            <fileset dir="${srcdir}" includes="**/messages.properties" />
+        </concat>
+    </target>
+
+    <target name="test" depends="compile" >
+        <javac srcdir="${testsrcdir}" destdir="${bindir}" />
+	<mkdir dir="${reports}" />
+        <junit printsummary="yes" haltonfailure="yes">
+	    <formatter type="plain" />
+	    <batchtest fork="yes" todir="${reports}">
+	        <fileset dir="${testsrcdir}">
+		    <include name="**/*Test.java" />
+		</fileset>
+	    </batchtest>
+	</junit>
+    </target>
+    
+    <target name="doc">
+        <javadoc destdir="${docdir}" access="package" >
+            <fileset dir="${srcdir}">
+                <include name="**/*.java" />
+            </fileset>
+        </javadoc>
+    </target>
+    
+    <target name="pack">
+        <zip destfile="control4j.zip">
+            <fileset dir="${srcdir}"  />
+        </zip>
+    </target>
+    
+    <target name="unpack">
+        <delete dir="${srcdir}" />
+        <!--<delete dir="conf" />-->
+        <unzip src="control4j.zip" dest="." />
+        <fixcrlf srcdir="${srcdir}" />
+        <!--<fixcrlf srcdir="conf" />-->
+    </target>
+    
+    <target name="jar" depends="compile">
+    	<jar destfile="${jarname}">
+            <fileset dir="${bindir}" />
+	    <manifest >
+	        <attribute name="Main-Class" value="control4j.Control" />
+	    </manifest>
+	</jar>
+    </target>
+
+</project>
+

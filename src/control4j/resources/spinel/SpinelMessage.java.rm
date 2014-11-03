@@ -1,0 +1,244 @@
+package control4j.resources.spinel;
+
+/*
+ *  Copyright 2013 Jiri Lidinsky
+ *
+ *  This file is part of control4j.
+ *
+ *  control4j is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, version 3.
+ *
+ *  control4j is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+import control4j.tools.LogMessages;
+import static control4j.tools.Logger.*;
+
+public class SpinelMessage
+{
+  /** internal buffer that contains spinel message */
+  private int[] message;
+  private static final int PRE = 0x2A;
+  private static final int FRM = 0x61;
+  private static final int CR = 0x0D;
+  public static final int ADR_BROADCAST = 0xFF;
+  public static final int ADR_UNIVERSAL = 0xFE;
+
+  private SpinelMessage(control4j.resources.Buffer buffer)
+  {
+    int num = buffer.get(2) * 0x100 + buffer.get(3);
+    message = new int[num + 4];
+    for (int i=0; i<num+4; i++)
+      message[i] = buffer.get(i);
+    buffer.remove(0, num+4);
+  }
+
+  public SpinelMessage(int address, int instruction, int[] parameter)
+  {
+    int paramLength = parameter.length;
+    message = new int[9 + paramLength];
+    message[0] = PRE;
+    message[1] = FRM;
+    message[2] = 0x00;  // NUM
+    message[3] = 5 + paramLength;  // NUM
+    message[4] = address;  // ADR
+    message[5] = 0;   // SIG
+    message[6] = instruction; // INST
+    // copy parametr data
+    for (int i=0; i<paramLength; i++) 
+      message[7+i] = parameter[i]; // DATA
+    message[7+paramLength] = getSum();
+    message[8+paramLength] = CR;
+  }
+
+  public SpinelMessage(int address, int instruction)
+  {
+    message = new int[9];
+    message[0] = PRE;
+    message[1] = FRM;
+    message[2] = 0x00;  // NUM
+    message[3] = 5;     // NUM
+    message[4] = address;  // ADR
+    message[5] = 0;   // SIG
+    message[6] = instruction; // INST
+    message[7] = getSum();
+    message[8] = CR;
+  }
+
+  public SpinelMessage(int[] buffer) throws SpinelException
+  {
+    int messageLength = buffer[2] * 0x100 + buffer[3];
+    this.message = new int[messageLength + 4];
+    for (int i=0; i<message.length; i++)
+      message[i] = buffer[i];
+    ErrorCode errorCode = check();
+    if (errorCode != ErrorCode.OK)
+    {
+      String errorMessage = getErrorMessage(errorCode);
+      throw new SpinelException(errorMessage);
+    }
+  }
+
+  public static SpinelMessage getMessage(control4j.resources.Buffer buffer) 
+  throws SpinelException
+  {
+    ErrorCode errorCode;
+    do
+    {
+      errorCode = check(buffer.getBuffer(), 0, buffer.length());
+      if (errorCode == ErrorCode.INCOMPLETE) return null;
+      if (errorCode != ErrorCode.OK)
+      {
+        //throw new SpinelException(getErrorMessage(errorCode, buffer.getBuffer(), 0, buffer.length()));
+      }
+      if (errorCode == ErrorCode.OK) return new SpinelMessage(buffer);
+      buffer.remove(0, 1);
+    } while (buffer.length() > 0);
+    return null;
+  }
+
+  public int[] getMessage()
+  {
+    return message;
+  }
+
+  public int getSig()
+  {
+    return message[5];
+  }
+
+  public void setSig(int sig)
+  {
+    message[5] = sig & 0xFF;
+    message[message.length-2] = getSum();
+  }
+
+  public int getAddress()
+  {
+    return message[4];
+  }
+
+  private int getSum()
+  {
+    int sum = 0xFF;
+    for (int i=0; i<message.length-2; i++)
+      sum -= message[i];
+    return sum & 0xFF;
+  }
+  
+  public String toString()
+  {
+    StringBuffer buffer = new StringBuffer(message.length * 3);
+    for (int i=0; i<message.length; i++)
+    {
+      if (message[i] < 0x10) buffer.append('0');
+      buffer.append(Integer.toHexString(message[i]));
+      if (i < message.length-1) buffer.append(' ');
+    }
+    return buffer.toString();
+  }
+
+  public String toString(int emphasize)
+  {
+    return toString(emphasize, message, 0, message.length);
+  }
+  
+  public static String toString(int emphasize, int[] buffer, int offset, int length)
+  {
+    StringBuffer sb = new StringBuffer(length * 3 + 2);
+    for (int i=0; i<length; i++)
+    {
+      if (i == emphasize) sb.append('[');
+      if (buffer[i+offset] < 0x10) sb.append('0');
+      sb.append(Integer.toHexString(buffer[i+offset]));
+      if (i == emphasize) sb.append(']');
+      if (i < length-1) sb.append(' ');
+    }
+    return sb.toString();
+  }
+
+  public int[] getData()
+  {
+    int[] data = new int[message.length - 9];
+    for (int i=0; i<data.length; i++)
+    {
+      data[i] = message[i+7];
+    }
+    return data;
+  }
+
+  public int getAck()
+  {
+    return message[6];
+  }
+
+  enum ErrorCode
+  {
+    OK, PRE, FRM, NUM, SUM, CR, INCOMPLETE
+  }
+
+  private ErrorCode check()
+  {
+    if (message[0] != PRE) return ErrorCode.PRE;
+    if (message[1] != FRM) return ErrorCode.FRM;
+    int num = message[2] * 0x100 + message[3];
+    if (num != message.length - 4) return ErrorCode.NUM;
+    if ((message[message.length-2] & 0xFF) != getSum())
+      return ErrorCode.SUM ;
+    if (message[message.length-1] != CR) return ErrorCode.CR;
+    return ErrorCode.OK;
+  }
+  
+  private static ErrorCode check(int[] buffer, int offset, int length)
+  {
+    if (length < 9) return ErrorCode.INCOMPLETE;
+    if (buffer[offset+0] != PRE) return ErrorCode.PRE;
+    if (buffer[offset+1] != FRM) return ErrorCode.FRM;
+    int num = buffer[offset+2] * 0x100 + buffer[offset+3];
+    if (num+4 > length) return ErrorCode.INCOMPLETE;
+    int sum = 0xFF;
+    for (int i=0; i<num+2; i++)
+      sum -= buffer[i+offset] & 0xff;
+    sum = sum & 0xFF;
+    if (buffer[offset+num+2] != sum) return ErrorCode.SUM;
+    if (buffer[offset+num+3] != CR) return ErrorCode.CR;
+    return ErrorCode.OK;
+  }
+
+  private String getErrorMessage(ErrorCode errorCode)
+  {
+    return getErrorMessage(errorCode, message, 0, message.length);
+  }
+  
+  private static String getErrorMessage(ErrorCode errorCode, int[] buffer, int offset, int length)
+  {
+    switch (errorCode)
+    {
+      case PRE:
+        String errorMessage = LogMessages.getMessage("spm01", toString(0, buffer, offset, length));
+        return errorMessage;
+      case FRM:
+        errorMessage = LogMessages.getMessage("sm02", toString(1, buffer, offset, length));
+        return errorMessage;
+      case NUM:
+        errorMessage = LogMessages.getMessage("sm03", toString(3, buffer, offset, length));
+        return errorMessage;
+      case SUM:
+        errorMessage = LogMessages.getMessage("sm04", toString(length-2, buffer, offset, length));
+        return errorMessage;
+      case CR:
+        errorMessage = LogMessages.getMessage("sm05", toString(length-1, buffer, offset, length));
+        return errorMessage;
+      default:
+        return null;
+    }
+  }
+  
+}

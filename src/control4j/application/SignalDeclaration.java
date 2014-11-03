@@ -87,25 +87,13 @@ public class SignalDeclaration extends DeclarationBase
     return scope;
   }
 
-  /**
-   *  Adds an information that this is a signal declaration.
-   */
   @Override
-  public void setDeclarationReference(DeclarationReference reference)
+  protected DeclarationReference getThisObjectIdentification()
   {
     StringBuilder sb = new StringBuilder();
     sb.append("signal (with name name: ")
       .append(name)
       .append(')');
-    if (reference != null)
-    {
-      sb.append(", declared");
-      super.setDeclarationReference(reference.addText(sb.toString()));
-    }
-    else
-    {
-      reference = new DeclarationReference(sb.toString());
-      super.setDeclarationReference(reference);
-    }
+    return new DeclarationReference(sb.toString());
   }
 }

@@ -22,6 +22,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Documented;
 
+@Deprecated
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 public @interface XmlStartElement

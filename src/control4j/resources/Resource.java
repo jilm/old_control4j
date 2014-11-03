@@ -97,10 +97,14 @@ public abstract class Resource
    *
    *  @throws SyntaxErrorException
    *
+   *  @throws ClassNotFoundException
+   *             if class with given name was not found
+   *
    *  @see #initialize
    *  @see control4j.ICycleEventListener
    */
   public static Resource createInstance(ResourceDeclaration declaration)
+  throws ClassNotFoundException
   {
     if (declaration == null) throw new NullPointerException();
     String className = declaration.getClassName();
@@ -121,10 +125,6 @@ public abstract class Resource
     catch (ClassCastException e)
     {
       throw new SystemException();
-    }
-    catch (ClassNotFoundException e)
-    {
-      throw new SyntaxErrorException();
     }
     catch (InstantiationException e)
     {

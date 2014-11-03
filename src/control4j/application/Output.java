@@ -66,26 +66,14 @@ public class Output extends DeclarationBase
     return configuration;
   }
 
-  /**
-   *  Adds an information that this is an output of some module.
-   */
   @Override
-  public void setDeclarationReference(DeclarationReference reference)
+  protected DeclarationReference getThisObjectIdentification()
   {
     StringBuilder sb = new StringBuilder();
-    sb.append("module output (connected to signal: ")
+    sb.append("module output (signal name: ")
       .append(signal)
       .append(')');
-    if (reference != null)
-    {
-      sb.append(", declared");
-      super.setDeclarationReference(reference.addText(sb.toString()));
-    }
-    else
-    {
-      reference = new DeclarationReference(sb.toString());
-      super.setDeclarationReference(reference);
-    }
+    return new DeclarationReference(sb.toString());
   }
 
 }

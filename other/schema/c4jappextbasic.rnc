@@ -1,0 +1,57 @@
+namespace app = "http://application.control4j.cz"
+namespace ex = "http://application.control4j.cz/extended"
+
+Basic = ( Comparator | Multiplexer )
+
+Comparator = element ex:comparator
+{
+  attribute hysteresis { xsd:decimal } ?,
+  attribute invert { 'yes' } ?,
+  (
+    (
+      attribute ref-input { text },
+      attribute ref-input-scope { ScopeContent } ?
+    ) | (
+      element ex:ref { IOContent }
+    ) | (
+      attribute ref { xsd:decimal }
+    )
+  ),
+  (
+    (
+      attribute input { text },
+      attribute input-scope { ScopeContent } ?
+    ) | (
+      element ex:input { IOContent }
+    )
+  ),
+  (
+    (
+      attribute output { text },
+      attribute output-scope { ScopeContent } ?
+    ) | (
+      element ex:output { IOContent }
+    )
+  )
+}
+
+Multiplexer = element ex:multiplexer
+{
+  (
+    (
+      attribute select { text },
+      attribute select-scope { ScopeContent } ?
+    ) | (
+      element ex:select { IOContent }
+    )
+  ),
+  (
+    (
+      attribute output { text },
+      attribute output-scope { ScopeContent } ?
+    ) | (
+      element ex:output { IOContent }
+    )
+  ),
+  Input+
+}

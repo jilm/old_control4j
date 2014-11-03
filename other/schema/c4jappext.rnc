@@ -1,0 +1,23 @@
+namespace app = "http://application.control4j.cz"
+namespace ex = "http://application.control4j.cz/extended"
+
+include "c4jappextpapouch.rnc"
+include "c4jappextio.rnc"
+include "c4jappextbasic.rnc"
+
+include "c4japp.rnc" {
+
+  Brick = ( Module | Resource | Signal | Scope | Extra | Basic )
+
+}
+
+Extra = ( Const | Papouch | ExtIO )
+
+Const = element ex:const
+{
+  attribute signal { text },
+  attribute value { text },
+  attribute ex:define-signal { "yes" | "no" }?,
+  ScopeAttribute?
+}
+ 

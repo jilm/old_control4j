@@ -1,0 +1,43 @@
+package control4j.application.text;
+
+import org.junit.*;
+import static org.junit.Assert.*;
+import static org.junit.Assume.*;
+import java.io.StringBufferInputStream;
+import java.util.Collection;
+import control4j.application.Application;
+import control4j.application.ModuleDeclaration;
+
+public class ReaderTest
+{
+  private StringBufferInputStream inputStream;
+
+  @Before
+  public void initialize()
+  {
+    StringBuilder sb = new StringBuilder();
+    sb.append("module=moduleClassName\n");
+    sb.append("  property1=12\n");
+    sb.append("  property2=aaa\n");
+    sb.append("input[3]=in3\n");
+    sb.append("input[0]=in0\n");
+    sb.append("output[5]=out5\n");
+    inputStream = new StringBufferInputStream(sb.toString());
+  }
+
+  @Test
+  public void load()
+  {
+    try
+    {
+      Reader reader = new Reader();
+      Application application = reader.load(inputStream);
+      Collection<ModuleDeclaration> modules = application.getModules();
+      assertEquals(1, modules.size());
+    }
+    catch (Exception e)
+    {
+      assumeNoException(e);
+    }
+  }
+}

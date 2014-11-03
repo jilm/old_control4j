@@ -1,0 +1,120 @@
+package control4j.graph;
+
+/*
+ *  Copyright 2013 Jiri Lidinsky
+ *
+ *  This file is part of control4j.
+ *
+ *  control4j is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, version 3.
+ *
+ *  control4j is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+import java.io.FileReader;
+import java.util.Collection;
+import java.util.HashMap;
+import java.awt.Dimension;
+import javax.swing.JFrame;
+
+import control4j.IModuleDeclaration;
+import control4j.textappreader.Reader;
+
+import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
+import edu.uci.ics.jung.graph.DirectedGraph;
+import edu.uci.ics.jung.algorithms.layout.Layout;
+import edu.uci.ics.jung.algorithms.layout.CircleLayout;
+import edu.uci.ics.jung.algorithms.layout.FRLayout;
+import edu.uci.ics.jung.algorithms.layout.DAGLayout;
+import edu.uci.ics.jung.visualization.BasicVisualizationServer;
+import edu.uci.ics.jung.visualization.VisualizationViewer;
+import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
+import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
+
+public class Test
+{
+  public static void main(String[] args) throws Exception
+  {
+    String filename = args[0];
+    FileReader fileReader = new FileReader(filename);
+    Reader appReader = new Reader(fileReader);
+    Collection<IModuleDeclaration> modules = appReader.getModules();
+    Test test = new Test(modules);
+  }
+
+  public Test(Collection<IModuleDeclaration> modules)
+  {
+    DirectedGraph<IModuleDeclaration, Edge> graph = createGraph(modules);
+    Layout<IModuleDeclaration, Edge> layout = new DAGLayout(graph);
+    layout.setSize(new Dimension(350, 350));
+    VisualizationViewer<IModuleDeclaration, Edge> visual = new VisualizationViewer<IModuleDeclaration, Edge>(layout);
+    visual.setPreferredSize(new Dimension(350,  350));
+
+    // add mouse interaction
+    DefaultModalGraphMouse gm = new DefaultModalGraphMouse();
+    gm.setMode(DefaultModalGraphMouse.Mode.TRANSFORMING);
+    visual.setGraphMouse(gm);
+    visual.addKeyListener(gm.getModeKeyListener());
+
+    visual.getRenderContext().setEdgeLabelTransformer(new ToStringLabeller());
+    visual.getRenderContext().setVertexLabelTransformer(new ModuleToStringLabeller());
+
+    JFrame frame = new JFrame("Simple graph view");
+    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    frame.getContentPane().add(visual);
+    frame.pack();
+    frame.setVisible(true);
+  }
+
+  public DirectedGraph<IModuleDeclaration, Edge> createGraph(Collection<IModuleDeclaration> modules)
+  {
+    DirectedSparseMultigraph<IModuleDeclaration, Edge> graph = new DirectedSparseMultigraph<IModuleDeclaration, Edge>();
+    HashMap<String, IModuleDeclaration> signals = new HashMap<String, IModuleDeclaration>();
+    for (IModuleDeclaration module : modules)
+    {
+      graph.addVertex(module);
+      for (String signal : module.getOutputSignalsArray())
+        signals.put(signal, module);
+    }
+    for (IModuleDeclaration module : modules)
+      for (String signal : module.getInputSignalsArray())
+        if (signal != null)
+          graph.addEdge(new Edge(signal), signals.get(signal), module);
+    return graph;
+  }
+
+  private class Edge
+  {
+    String signal;
+
+    public Edge(String signalName)
+    {
+      signal = signalName;
+    }
+
+    public String getSignal()
+    {
+      return signal;
+    }
+
+    @Override public String toString()
+    {
+      return signal;
+    }
+  }
+
+  private class ModuleToStringLabeller extends ToStringLabeller<IModuleDeclaration>
+  {
+    @Override public String transform(IModuleDeclaration module)
+    {
+      return module.getClassName();
+    }
+  }
+}

@@ -158,4 +158,20 @@ public class ErrorManager
       .append(reference2);
     errors.add(sb.toString());
   }
+
+  /**
+   *
+   */
+  public void reportMissingClass(String className, String reference)
+  {
+    sb.delete(0, sb.length())
+      .append("Unable to find class with name: ")
+      .append(className)
+      .append('\n')
+      .append("which is used here:")
+      .append('\n')
+      .append(reference);
+    errors.add(sb.toString());
+  }
+
 }

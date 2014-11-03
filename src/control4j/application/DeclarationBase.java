@@ -22,14 +22,14 @@ import control4j.tools.DeclarationReference;
 
 /**
  * 
- *  A common base for classes that hold data needed for creation
- *  runtime objects like modules or resources.
+ *  A common base for classes that hold data about the place where
+ *  they were declared or from where they come from.
  *
- *  <p>Declaration that is typicaly content of objects that are
- *  derived from this abstrac class is read from a file. This
- *  class thefore provides common means for keeping information
+ *  <p>This class provides common means for keeping information
  *  about a place whre the object come from or where was declared.
- *  This is useful for solving potential problems.
+ *  This is useful for reporting potential problems.
+ *
+ *  @see control4j.tools.DeclarationReference
  *
  */
 public abstract class DeclarationBase
@@ -37,9 +37,27 @@ public abstract class DeclarationBase
 
   /**
    *  Contains information about a place where the object was
-   *  declared in human readable form. May be null!
+   *  declared in human readable form. May not contain null value!
    */
   private DeclarationReference declarationReference;
+
+  /**
+   *  
+   */
+  public DeclarationBase()
+  {
+    declarationReference = new DeclarationReference(this.getClass().getName());
+  }
+
+  protected DeclarationReference getThisObjectIdentification()
+  {
+    return new DeclarationReference(this.getClass().getName());
+  }
+
+  protected void setObjectIdentification(DeclarationReference identification)
+  {
+    declarationReference = identification;
+  }
 
   /**
    *  Sets the declaration reference.
@@ -49,7 +67,7 @@ public abstract class DeclarationBase
    */
   public void setDeclarationReference(DeclarationReference reference)
   {
-    declarationReference = reference;
+    declarationReference.setParent(reference);
   }
 
   /**
@@ -68,7 +86,7 @@ public abstract class DeclarationBase
   }
 
   /**
-   *  Returns the assigned declaration reference. It may return null.
+   *  Returns the assigned declaration reference. It will never return null.
    *
    *  @return declaration reference or null
    */
@@ -85,10 +103,7 @@ public abstract class DeclarationBase
    */
   public String getDeclarationReferenceText()
   {
-    if (declarationReference != null)
-      return declarationReference.toString();
-    else
-      return "";
+    return declarationReference.toString();
   }
 
 }
