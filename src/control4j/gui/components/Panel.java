@@ -34,10 +34,29 @@ public class Panel extends AbstractPanel
   private int width = 50;
   private int height = 50;
 
+  /**
+   *
+   */
+  private static int counter;
+
+  /**
+   *
+   */
+  private final int number = ++counter;
+
   public Panel()
   {
     super();
     setLayout(null);
+  }
+
+  /**
+   *
+   */
+  @Override
+  protected int getCounter()
+  {
+    return number;
   }
 
   @Override

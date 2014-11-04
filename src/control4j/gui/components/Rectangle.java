@@ -44,6 +44,7 @@ import java.awt.event.ComponentAdapter;
  *  Rectangle element.
  */
 public class Rectangle extends ChangeableComponent
+implements control4j.gui.IComponentName
 {
 
   private int width = 20;
@@ -52,6 +53,36 @@ public class Rectangle extends ChangeableComponent
   private boolean hasBorder = false;
   private Color borderColor = Color.BLACK;
   private int borderThickness = 1;
+
+  /**
+   *
+   */
+  private static int counter;
+
+  /**
+   *
+   */
+  private final int number = ++counter;
+
+  /**
+   *
+   */
+  private String name;
+
+  @Getter(key="Name")
+  public String getName()
+  {
+    if (name != null && name.length() > 0)
+      return name;
+    else
+      return getClass().getSimpleName() + String.valueOf(number);
+  }
+
+  @Setter(key="Name")
+  public void setName(String name)
+  {
+    this.name = name;
+  }
 
   @Override
   @Getter(key="X") 

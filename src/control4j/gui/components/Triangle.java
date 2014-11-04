@@ -30,7 +30,12 @@ import java.awt.Dimension;
  *
  */
 public class Triangle extends ChangeableComponent
+implements control4j.gui.IComponentName
 {
+
+  private static int counter;
+  private final int number = ++counter;
+  private String name;
 
   /**
    *  Delka strany trojuhelnika
@@ -50,6 +55,21 @@ public class Triangle extends ChangeableComponent
   {
     super();
     calculatePoints();
+  }
+
+  @Getter(key="Name")
+  public String getName()
+  {
+    if (name != null && name.length() > 0)
+      return name;
+    else
+      return getClass().getSimpleName() + String.valueOf(number);
+  }
+
+  @Setter(key="Name")
+  public void setName(String name)
+  {
+    this.name = name;
   }
 
   @Override

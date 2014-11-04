@@ -32,10 +32,29 @@ public class Box extends AbstractPanel
 
   private int alignmentPoint = 0;
 
+  /**
+   *
+   */
+  private static int counter;
+
+  /**
+   *
+   */
+  private final int number = ++counter;
+
   public Box()
   {
     super();
     setLayout(new FlowLayout());
+  }
+
+  /**
+   *
+   */
+  @Override
+  protected int getCounter()
+  {
+    return number;
   }
 
   @Setter(key="Alignment Point")

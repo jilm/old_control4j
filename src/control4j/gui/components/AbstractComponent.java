@@ -42,11 +42,55 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentAdapter;
 
 /**
+ *
  *  Provides access to properties that are common to all of the
  *  components.
+ *
  */
 public abstract class AbstractComponent extends ChangeableComponent
+implements control4j.gui.IComponentName
 {
+
+  /**
+   *  A name of the component which was entered by the user.
+   *  If it was not entered yet, appropriate getter method returns
+   *  default name.
+   */
+  private String name = null;
+
+  /**
+   *
+   */
+  @Setter(key="Name")
+  public void setName(String name)
+  {
+    this.name = name;
+  }
+
+  /**
+   *
+   */
+  @Getter(key="Name")
+  public String getName()
+  {
+    if (name == null || name.length() == 0)
+      return getDefaultName();
+    else
+      return name;
+  }
+
+  /**
+   *  Returns a name in the form: ClassName_Number.
+   */
+  protected String getDefaultName()
+  {
+    return getClass().getSimpleName() + String.valueOf(getCounter());
+  }
+
+  /**
+   *
+   */
+  protected abstract int getCounter();
 
   @Getter(key="X") @Override
   public int getX()

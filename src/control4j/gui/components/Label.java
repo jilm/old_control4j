@@ -57,6 +57,32 @@ public class Label extends AbstractComponent
   private double horizontalAlignment = 0.0;
   private double verticalAlignment = 0.5;
 
+  /**
+   *
+   */
+  private static int counter;
+
+  /**
+   *
+   */
+  private final int number = ++counter;
+
+  /**
+   *
+   */
+  public Label()
+  {
+  }
+
+  /**
+   *
+   */
+  @Override
+  protected int getCounter()
+  {
+    return number;
+  }
+
   @Setter(key="Text")
   public void setText(String text)
   {

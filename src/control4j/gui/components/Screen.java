@@ -26,13 +26,33 @@ import javax.swing.JTabbedPane;
 import control4j.scanner.Getter; 
 import control4j.scanner.Setter;
 
+/**
+ *
+ */
 public class Screen extends JPanel
-implements Cloneable
+implements Cloneable, control4j.gui.IComponentName
 {
+
+  private String name;
 
   public Screen()
   {
     super(null);
+  }
+
+  @Getter(key="Name")
+  public String getName()
+  {
+    if (name != null && name.length() > 0)
+      return name;
+    else
+      return getClass().getSimpleName() + String.valueOf(getIndex() + 1);
+  }
+
+  @Setter(key="Name")
+  public void setName(String name)
+  {
+    this.name = name;
   }
 
   @Getter(key="title")

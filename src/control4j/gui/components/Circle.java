@@ -49,9 +49,31 @@ public class Circle extends AbstractComponent
 
   private int size = 20;
 
+  /**
+   *
+   */
+  private static int counter;
+
+  /**
+   *
+   */
+  private final int number = ++counter;
+
+  /**
+   *
+   */
   public Circle()
   {
     super();
+  }
+
+  /**
+   *
+   */
+  @Override
+  protected int getCounter()
+  {
+    return number;
   }
 
   @Getter(key="Size")
