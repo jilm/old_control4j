@@ -31,7 +31,8 @@ import java.lang.reflect.Method;
  *  one property of one gui element to modify.
  *
  */
-public abstract class Changer<T> implements Cloneable
+public abstract class Changer<T> 
+implements Cloneable, control4j.gui.IComponentName
 {
 
   private int signalIndex;
@@ -45,6 +46,25 @@ public abstract class Changer<T> implements Cloneable
   private IChangeable parent;
   private String property;
   private Method propertyMethod;
+
+  private static int counter;
+  private final int number = ++counter;
+  private String name;
+
+  @Getter(key="Name")
+  public String getName()
+  {
+    if (name != null && name.length() > 0)
+      return name;
+    else
+      return getClass().getSimpleName() + String.valueOf(number);
+  }
+
+  @Setter(key="Name")
+  public void setName(String name)
+  {
+    this.name = name;
+  }
 
   /**
    *  This method is called regulary by the runtime machine.
