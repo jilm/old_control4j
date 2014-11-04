@@ -68,7 +68,7 @@ implements ActionListener, TreeSelectionListener, TreeModelListener,
 {
   private JFrame frame;
   private Screens screens;
-  private JTree guiStructureTree;
+  private Tree guiStructureTree;
   private TreeModel treeModel;
   private JTable propertyTable;
   private KeyValueTableModel propertyTableModel;
@@ -144,7 +144,7 @@ implements ActionListener, TreeSelectionListener, TreeModelListener,
 
     // Add component tree navigator
     treeModel = new TreeModel();
-    guiStructureTree = new JTree(treeModel);
+    guiStructureTree = new Tree(treeModel);
     guiStructureTree.getSelectionModel().setSelectionMode(TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
     JScrollPane treeScroll = new JScrollPane(guiStructureTree);
     rightSplit.setLeftComponent(treeScroll);
@@ -172,6 +172,7 @@ implements ActionListener, TreeSelectionListener, TreeModelListener,
     JScrollPane tableScroll = new JScrollPane(propertyTable);
     rightSplit.setBottomComponent(tableScroll);
     guiStructureTree.addTreeSelectionListener(this);
+    propertyTableModel.addTableModelListener(guiStructureTree);
 
     // Add a link component -> tree
     componentToTreeLink = new ComponentToTreeLink(guiStructureTree);
