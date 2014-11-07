@@ -59,6 +59,12 @@ public class Screens extends JTabbedPane
     return screen;
   }
 
+  public Screen addScreen(Screen screen, String title, int index)
+  {
+    insertTab(title, null, screen, null, index);
+    return screen;
+  }
+
   @Override
   public Dimension getPreferredSize()
   {

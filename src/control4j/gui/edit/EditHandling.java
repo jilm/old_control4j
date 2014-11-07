@@ -23,11 +23,15 @@ import java.util.Collection;
 import java.lang.reflect.Constructor;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.awt.Component;
 import java.awt.Container;
 import javax.swing.JTree;
 import javax.swing.JMenu;
+import javax.swing.JMenuItem;
 import javax.swing.JComponent;
+import javax.swing.KeyStroke;
+import javax.swing.TransferHandler;
 import javax.swing.tree.TreePath;
 import control4j.gui.components.AbstractComponent;
 import control4j.gui.components.AbstractPanel;
@@ -38,7 +42,9 @@ import control4j.scanner.Scanner;
 import control4j.scanner.Item;
 
 /**
+ *
  *  Provides operations like copy, cut, paste, delete.
+ *
  */
 class EditHandling
 implements ActionListener
@@ -65,9 +71,18 @@ implements ActionListener
     JMenu editMenu = new JMenu("Edit");
     editMenu.setMnemonic('E');
     menu.add(editMenu);
-    menu.addItem("Copy", "EDIT_COPY", this, 'C');
-    menu.addItem("Cut", "EDIT_CUT", this, 'u');
-    menu.addItem("Paste", "EDIT_PASTE", this, 'P');
+    // Copy
+    //menu.addItem("Copy", "EDIT_COPY", this, 'C');
+    editMenu.add(new JMenuItem(TransferHandler.getCopyAction()));
+    // Cut
+    JMenuItem menuItem = editMenu.add("Cut");
+    menuItem.setAction(TransferHandler.getCutAction());
+    menuItem.setAccelerator(
+      KeyStroke.getKeyStroke(KeyEvent.VK_X, ActionEvent.CTRL_MASK));
+    menuItem.setMnemonic(KeyEvent.VK_T);
+    // Paste
+    //menu.addItem("Paste", "EDIT_PASTE", this, 'P');
+    editMenu.add(new JMenuItem(TransferHandler.getPasteAction()));
     menu.addSeparator();
     menu.addItem("Delete", "EDIT_DELETE", this, 'D');
   }

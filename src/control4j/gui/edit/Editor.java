@@ -63,8 +63,8 @@ import control4j.scanner.KeyValueTableModel;
  *  GUI visual editor.
  */
 public class Editor 
-implements ActionListener, TreeSelectionListener, TreeModelListener, 
-           FileListener
+implements ActionListener, TreeSelectionListener, TreeModelListener
+  , FileListener
 {
   private JFrame frame;
   private Screens screens;
@@ -82,39 +82,42 @@ implements ActionListener, TreeSelectionListener, TreeModelListener,
   /** filename that was given from the command line */
   private String filename;
 
+  /** this object is singleton */
+  private static Editor instance;
+
   /**
    *
    */
   public static void main(String[] args)
   {
     // create an instance of the editor
-    final Editor editor = new Editor();
+    instance = new Editor();
     // create and show gui
-    editor.createMainFrame();
+    instance.createMainFrame();
     // load file from the command line
-    if (args.length > 0) editor.filename = args[0];
+    if (args.length > 0) instance.filename = args[0];
     javax.swing.SwingUtilities.invokeLater(
       new Runnable()
       {
         public void run()
         {
-          if (editor.filename != null)
+          if (instance.filename != null)
           {
             try
             {
-              editor.file.load(editor.filename);
+              instance.file.load(instance.filename);
             }
             catch (java.io.IOException e) { }
           }
           else
 	  {
-            editor.file.fileNew();
+            instance.file.fileNew();
 	  }
         }
       }
     );
     // show the window
-    editor.show();
+    instance.show();
   }
 
   /**
@@ -123,6 +126,14 @@ implements ActionListener, TreeSelectionListener, TreeModelListener,
   public Editor()
   {
     super();
+  }
+
+  /**
+   *
+   */
+  public static Editor getInstance()
+  {
+    return instance;
   }
 
   /**
@@ -145,7 +156,10 @@ implements ActionListener, TreeSelectionListener, TreeModelListener,
     // Add component tree navigator
     treeModel = new TreeModel();
     guiStructureTree = new Tree(treeModel);
-    guiStructureTree.getSelectionModel().setSelectionMode(TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
+    guiStructureTree.getSelectionModel().setSelectionMode(
+      TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
+    guiStructureTree.setDragEnabled(true);
+    guiStructureTree.setTransferHandler(new TreeTransferHandler());
     JScrollPane treeScroll = new JScrollPane(guiStructureTree);
     rightSplit.setLeftComponent(treeScroll);
     treeModel.addTreeModelListener(this);
@@ -422,7 +436,15 @@ implements ActionListener, TreeSelectionListener, TreeModelListener,
       components.next().addMouseListener(componentToTreeLink);
     }
   }
+
+  public static TreeModel getTreeModel()
+  {
+    return instance.treeModel;
+  }
   
+  /**
+   *
+   */
   private class ContainerIterator implements java.util.Iterator<Container>
   {
     private Container root;

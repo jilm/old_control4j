@@ -24,6 +24,7 @@ import java.awt.Container;
 import java.awt.Component;
 import javax.swing.tree.TreePath;
 import javax.swing.JComponent;
+import javax.swing.JPanel;
 //import javax.swing.tree.TreeModel;
 import javax.swing.event.TreeModelListener;
 import javax.swing.event.TreeModelEvent;
@@ -122,6 +123,9 @@ public class TreeModel implements javax.swing.tree.TreeModel, FileListener
     return -1;
   }
 
+  /**
+   *
+   */
   private int getIndexOfChild(Container parent, Object child)
   {
     for (int i=0; i<parent.getComponentCount(); i++)
@@ -167,14 +171,42 @@ public class TreeModel implements javax.swing.tree.TreeModel, FileListener
     fireTreeNodeInserted(root.addScreen());
   }
 
+  /**
+   *
+   */
+  public void addScreen(Screen screen, String title)
+  {
+    fireTreeNodeInserted(root.addScreen(screen, title));
+  }
+
+  /**
+   *
+   */
+  public void addScreen(Screen screen, String title, int index)
+  {
+    fireTreeNodeInserted(root.addScreen(screen, title, index));
+  }
+
+  /**
+   *
+   */
   public void addChild(JComponent parent, JComponent child)
   {
     fireTreeNodeInserted(parent.add(child));
   }
 
+  /**
+   *
+   */
   public void addChild(IChangeable parent, Changer child)
   {
     parent.addChanger(child);
+    fireTreeNodeInserted(child);
+  }
+
+  public void addChild(JPanel parent, JComponent child, int index)
+  {
+    parent.setComponentZOrder(child, index);
     fireTreeNodeInserted(child);
   }
 
