@@ -57,6 +57,43 @@ public class Scanner
   /**
    *
    */
+  public static Map<String, Item2> scanClass(Class _class)
+  {
+    Map<String, Item2> result = new HashMap<String, Item2>();
+    Method[] methods = _class.getMethods();
+    for (Method method : methods)
+    {
+      Getter getterAnno = method.getAnnotation(Getter.class);
+      if (getterAnno != null)
+      {
+        String key = getterAnno.key();
+	Item2 item = result.get(key);
+	if (item == null)
+	{
+	  item = new Item2(key);
+	  result.put(key, item);
+        }
+	item.setGetter(method);
+      }
+      Setter setterAnno = method.getAnnotation(Setter.class);
+      if (setterAnno != null)
+      {
+        String key = setterAnno.key();
+	Item2 item = result.get(key);
+	if (item == null)
+	{
+	  item = new Item2(key);
+	  result.put(key, item);
+	}
+	item.setSetter(method);
+      }
+    }
+    return result;
+  }
+
+  /**
+   *
+   */
   public static Map<String, Item> scanObject(Object object)
   {
     Map<String, Item> result = new HashMap<String, Item>();
@@ -91,6 +128,9 @@ public class Scanner
     return result;
   }
 
+  /**
+   *
+   */
   public void printMap(Map<String, Object> map)
   {
     Set<String> keys = map.keySet();
@@ -109,6 +149,9 @@ public class Scanner
     }
   }
 
+  /**
+   *
+   */
   public static Method getSetter(Object object, String key)
   {
     Method[] methods = object.getClass().getMethods();
