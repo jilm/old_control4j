@@ -48,145 +48,35 @@ implements IChangeListener
   private int height = 600;
 
   /**
-   *  The index of the first Changer object in the children list.
-   */
-  private int firstChangerIndex = 0;
-
-  /**
    *  A component that is responsible for painting. 
    *  May contain null value.
    */
   private JTabbedPane visualComponent;
 
   /**
-   *  Add given screen at the end of the list of children.
-   *  If this object has a visual component, it creates a
-   *  visual component of the given screen as well and adds 
-   *  it as a new tab. Finally it requests repainting.
-   *
-   *  @param screen
-   *             a screen to be added
-   *
-   *  @throws NullPointerException
-   *             if the screen parameter contains null value
+   *  @throws IllegalArgumentException
+   *             if child is not instance of Screen class
    */
-  public void add(Screen screen)
+  @Override
+  public void add(VisualObject child)
   {
-    // add it to the list of children
-    insertChild(screen, firstChangerIndex);
-    firstChangerIndex++;
-    // register as a change listener
-    screen.addChangeListener(this);
-    // create visual component
-    if (visualComponent != null)
-    {
-      JComponent screenComponent 
-	= ((VisualObject)screen).createVisualComponent();
-      visualComponent.addTab(screen.getTitle(), screenComponent);
-      ((VisualObject)screen).configureVisualComponent();
-      visualComponent.repaint();
-    }
+    if (child instanceof Screen)
+      super.add(child);
+    else
+      throw new IllegalArgumentException();
   }
 
   /**
-   *  Inserts given screen at the specified position.
-   *  If this object has a visual component, it creates a
-   *  visual component of the given screen as well and adds 
-   *  it as a new tab. Finally it requests repainting.
-   *
-   *  @param screen
-   *             a screen to be added
-   *
-   *  @param index
-   *             a place where the screen is to be added
-   *
-   *  @throws NullPointerException
-   *             if the screen parameter contains null value
-   *
-   *  @throws IndexOutOfBoundsException
-   *             if index is negative number or is greater than
-   *             the current number of screens
+   *  @throws IllegalArgumentException
+   *             if child is not an instance of Screen class
    */
-  public void insert(Screen screen, int index)
+  @Override
+  public void insert(VisualObject child, int index)
   {
-    // insert it to the list of children
-    if (index > firstChangerIndex)
-      throw new IndexOutOfBoundsException();
-    insertChild(screen, index);
-    firstChangerIndex++;
-    // register change listener
-    screen.addChangeListener(this);
-    // create visual component
-    if (visualComponent != null)
-    {
-      JComponent screenComponent 
-	= ((VisualObject)screen).createVisualComponent();
-      visualComponent.insertTab(
-	screen.getTitle(), null, screenComponent, null, index);
-      ((VisualObject)screen).configureVisualComponent();
-      visualComponent.repaint();
-    }
-  }
-
-  /**
-   *  Removes screen at the given index from the list of children.
-   *  If this object has the visual component, the tab of the screen
-   *  is removed as well. Moreover, the visual component of the
-   *  removed screen is released.
-   *
-   *  @param index
-   *             an index of the screen that will be removed
-   *
-   *  @return the screen object which was removed
-   *
-   *  @throws IndexOutOfBoundsException
-   *             if index is negative number or is greater or equal
-   *             to the number of screens
-   */
-  public Screen removeScreen(int index)
-  {
-    if (index >= firstChangerIndex)
-      throw new IndexOutOfBoundsException();
-    // if there is visual component, release it
-    if (visualComponent != null)
-    {
-      visualComponent.remove(index);
-      ((VisualObject)getScreen(index)).releaseVisualComponent();
-    }
-    // remove it from the list of children
-    Screen screen = (Screen)removeChild(index);
-    firstChangerIndex--;
-    screen.removeChangeListener(this);
-    return screen;
-  }
-
-  /**
-   *  Returns screen at the specified position.
-   *
-   *  @param index
-   *             a zero based index of the screen that will be returned
-   *
-   *  @return a screen at the given index
-   *
-   *  @throws IndexOutOfBoundsException
-   *             if the index is negative number or is greater or equal
-   *             to the number of screens
-   */
-  public Screen getScreen(int index)
-  {
-    if (index >= firstChangerIndex)
-      throw new IndexOutOfBoundsException();
-    return (Screen)getChild(index);
-  }
-
-  /**
-   *  Returns number of screens currently in the list.
-   *
-   *  @return number of screens that are children of this object
-   */
-  public int getScreenCount()
-  {
-    return firstChangerIndex;
+    if (child instanceof Screen)
+      super.insert(child, index);
+    else
+      throw new IllegalArgumentException();
   }
 
   /**
@@ -284,13 +174,12 @@ implements IChangeListener
     if (visualComponent != null)
     {
       visualComponent.setSize(width, height);
-      for (int i=0; i<firstChangerIndex; i++)
+      for (int i=0; i<getVisualObjectCount(); i++)
       {
-	Screen screen = getScreen(i);
-	JComponent screenComponent 
-	  = ((VisualObject)screen).createVisualComponent();
-	visualComponent.addTab(screen.getTitle(), screenComponent);
-	((VisualObject)screen).configureVisualComponent();
+	VisualObject screen = getVisualObject(i);
+	JComponent screenComponent = screen.createVisualComponent();
+	visualComponent.addTab(((Screen)screen).getTitle(), screenComponent);
+	screen.configureVisualComponent();
       }
       visualComponent.repaint();
     }
@@ -316,53 +205,11 @@ implements IChangeListener
   {
     if (visualComponent != null)
     {
-      for (int i=0; i<getScreenCount(); i++)
-	((VisualObject)getScreen(i)).releaseVisualComponent();
+      for (int i=0; i<getVisualObjectCount(); i++)
+	getVisualObject(i).releaseVisualComponent();
       visualComponent.removeAll();
     }
     visualComponent = null;
-  }
-
-  /**
-   *
-   */
-  @Override
-  public void insert(Changer child, int index)
-  {
-    if (index < 0)
-      throw new IndexOutOfBoundsException();
-    insertChild(child, index + firstChangerIndex);
-  }
-
-  /**
-   *
-   */
-  @Override
-  public Changer removeChanger(int index)
-  {
-    if (index < 0)
-      throw new IndexOutOfBoundsException();
-    return (Changer)removeChild(index + firstChangerIndex);
-  }
-
-  /**
-   *
-   */
-  @Override
-  public Changer getChanger(int index)
-  {
-    if (index < 0)
-      throw new IndexOutOfBoundsException();
-    return (Changer)getChild(index + firstChangerIndex);
-  }
-
-  /**
-   *
-   */
-  @Override
-  public int getChangerCount()
-  {
-    return size() - firstChangerIndex;
   }
 
   /**
@@ -376,7 +223,7 @@ implements IChangeListener
       if (e.getKey().equals("Title"))
       {
         int index = children.indexOf(e.getSource());
-        String title = getScreen(index).getTitle();
+        String title = ((Screen)getVisualObject(index)).getTitle();
         visualComponent.setTitleAt(index, title);
       }
   }

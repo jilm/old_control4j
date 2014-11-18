@@ -25,14 +25,14 @@ import javax.swing.JComponent;
 /**
  *
  *  Serves as a facade for objects which are instances of
- *  swing components. But it is not only a facade.
+ *  swing components and a container for properties.
  *
  *  <p>Each instance may contain exactly one swing component
  *  which is responsible for painting. But instance of descendant
  *  of this class may live even without such component. In this
  *  case it serves as a container for visual component settings
  *  or properties. Appropriate swing component is created as
- *  soon as this object is connected as a child to object which
+ *  soon as this object is connected as a child to the object which
  *  contains swing component. Similarly, the swing component is
  *  released as soon as this component or some of the parents of
  *  this component is disconnected.
@@ -47,7 +47,7 @@ public abstract class VisualObject extends GuiObject
    *  A list of all children objects. It contains null until 
    *  first child is added. The list is ordered. At first there
    *  are objects which are derived from VisualObject
-   *  class and then there are objects derived from  Changer.
+   *  class and then there are objects derived from Changer.
    */
   protected ArrayList<GuiObject> children;
 
@@ -192,6 +192,7 @@ public abstract class VisualObject extends GuiObject
    *
    *  @return number of all childeren of this object
    */
+  @Override
   public int size()
   {
     if (children == null)
@@ -292,6 +293,9 @@ public abstract class VisualObject extends GuiObject
     return true;
   }
 
+  /**
+   *  Returns false.
+   */
   @Override
   public boolean isVisualContainer()
   {

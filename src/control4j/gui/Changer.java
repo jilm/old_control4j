@@ -35,7 +35,8 @@ public abstract class Changer<T> extends GuiObject
 {
 
   /**
-   *
+   *  Index of the signal attached to this changer. It is the
+   *  index into the buffer of all signals.
    */
   private int signalIndex;
 
@@ -46,17 +47,21 @@ public abstract class Changer<T> extends GuiObject
   private String signalName;
 
   /**
-   *
+   *  Name of the parent property which will be changed according
+   *  to the state of the signal.
    */
   private String property;
   private Method propertyMethod;
 
   /**
    *  This method is called regulary by the runtime machine.
-   *  As a parameter it gets all of the signals. Than this
-   *  method calls method update with the only chosen signal.
+   *  As a parameter it gets an array of all the signals.
+   *  This method gets only the signal which name correspond
+   *  with content of Signal property and calls update.
+   *
+   *  @see #update(Signal)
    */
-  public void update(Signal[] input)
+  public final void update(Signal[] input)
   {
     if (signalIndex >= 0 && signalIndex < input.length)
     {
@@ -65,7 +70,8 @@ public abstract class Changer<T> extends GuiObject
   }
 
   /**
-   *
+   *  This method should be overridden and should implement
+   *  the functionality of the changer.
    */
   protected abstract void update(Signal input);
 
@@ -76,8 +82,8 @@ public abstract class Changer<T> extends GuiObject
 
   /**
    *  @return the name of the signal that will influence the behaviour
-   *         of parent gui element. May return null if the signal was
-   *         not specified.
+   *             of parent gui element. May return null if the signal 
+   *             was not specified.
    */
   @Getter(key="Signal")
   public String getSignalName()

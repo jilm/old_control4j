@@ -35,16 +35,18 @@ import control4j.gui.Writer;
 import control4j.gui.Screens;
 
 /**
+ *
  *  Provides file handling of the editor.
  *
  *  <p>This is the only object that can replace screens object.
+ *
  */
 class FileHandling 
 implements ActionListener, FileEvent, DataListener, TreeModelListener
 {
 
   /**
-   *  File that was opened or saved as last time.
+   *  File that was opened or saved last time.
    */
   private File file = null;
 
@@ -63,6 +65,9 @@ implements ActionListener, FileEvent, DataListener, TreeModelListener
 
   private JFrame frame;
 
+  /**
+   *
+   */
   FileHandling(JFrame frame)
   {
     super();
@@ -131,6 +136,7 @@ implements ActionListener, FileEvent, DataListener, TreeModelListener
       file = null;
       hasChanged = false;  // nothing interesting to save
       actualizeMenu();
+      Editor.setScreens(screens);
       fireFileChangedEvent();
     }
   }

@@ -64,11 +64,12 @@ import control4j.scanner.Scanner;
 import control4j.scanner.KeyValueTableModel;
 
 /**
+ *
  *  GUI visual editor.
+ *
  */
-public class Editor 
-implements ActionListener, TreeSelectionListener, TreeModelListener
-  , FileListener
+public class Editor implements ActionListener, TreeSelectionListener, 
+TreeModelListener, FileListener
 {
 
   private JFrame frame;
@@ -128,7 +129,7 @@ implements ActionListener, TreeSelectionListener, TreeModelListener
   /**
    *
    */
-  public Editor()
+  private Editor()
   {
     super();
   }
@@ -434,15 +435,6 @@ implements ActionListener, TreeSelectionListener, TreeModelListener
    */
   public void treeStructureChanged(TreeModelEvent e)
   {
-    System.out.println("treeStructureChanged");
-    Object[] path = e.getPath();
-    // if there is new Screens object
-    if (path.length == 1 && path[0] != split.getLeftComponent())
-    {
-      Screens screens = (Screens)path[0];
-      split.setLeftComponent(screens.getVisualComponent());
-      screens.getVisualComponent().addMouseListener(componentToTreeLink);
-    }
   }
 
   /**
@@ -465,66 +457,15 @@ implements ActionListener, TreeSelectionListener, TreeModelListener
   }
   
   /**
-   *
+   *  Place new screens visual component into the left split window.
    */
-  private class ContainerIterator implements java.util.Iterator<Container>
+  public static void setScreens(Screens screens)
   {
-    private Container root;
-    private boolean end = false;
-    private java.util.ArrayList<Integer> indexes 
-        = new java.util.ArrayList<Integer>();
-
-    public ContainerIterator(Container root)
-    {
-      this.root = root;
-    }
-
-    public boolean hasNext()
-    {
-      return !end;
-    }
-
-    public Container next()
-    {
-      if (end) new java.util.NoSuchElementException();
-      // find the element to return
-      Container result = root;
-      for (Integer i : indexes)
-        result = (Container)result.getComponent(i);
-      // find next element
-      if (result.getComponentCount() > 0)
-        indexes.add(0);
-      else
-      {
-	Container parent = (Container)result.getParent();
-        while(true)
-        {
-          int lastIndex = indexes.size()-1;
-	  if (lastIndex < 0)
-	  {
-	    end = true;
-	    break;
-	  }
-	  int index = indexes.get(lastIndex);
-          if (parent.getComponentCount() > index+1)
-	  {
-	    indexes.set(lastIndex, index+1);
-	    break;
-	  }
-	  else
-	  {
-	    indexes.remove(lastIndex);
-	    parent = (Container)parent.getParent();
-	  }
-        }
-      }
-      return result;
-    }
-
-    public void remove()
-    {
-    }
-
+    instance.screens = screens;
+    JComponent visualComponent = screens.createVisualComponent();
+    instance.split.setLeftComponent(visualComponent);
+      visualComponent.addMouseListener(instance.componentToTreeLink);
+    screens.configureVisualComponent();
   }
 
 }
