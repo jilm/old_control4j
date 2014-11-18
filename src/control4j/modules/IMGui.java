@@ -22,7 +22,7 @@ import java.util.LinkedList;
 import javax.swing.JFrame;
 import control4j.Signal;
 import control4j.InputModule;
-import control4j.gui.changers.Changer;
+import control4j.gui.Changer;
 
 public class IMGui extends InputModule
 {

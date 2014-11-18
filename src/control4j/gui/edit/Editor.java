@@ -55,6 +55,10 @@ import control4j.gui.components.*;
 import control4j.gui.Writer;
 import control4j.gui.changers.*;
 import control4j.gui.ComponentIterator;
+import control4j.gui.GuiObject;
+import control4j.gui.VisualObject;
+import control4j.gui.VisualContainer;
+import control4j.gui.Changer;
 
 import control4j.scanner.Scanner;
 import control4j.scanner.KeyValueTableModel;
@@ -66,6 +70,7 @@ public class Editor
 implements ActionListener, TreeSelectionListener, TreeModelListener
   , FileListener
 {
+
   private JFrame frame;
   private Screens screens;
   private Tree guiStructureTree;
@@ -248,7 +253,7 @@ implements ActionListener, TreeSelectionListener, TreeModelListener
       if (selectedPath.getPathCount() > 1)
       {
         Screen screen = (Screen)selectedPath.getPathComponent(1);
-        ((Screens)treeModel.getRoot()).setSelectedComponent(screen);
+        ((Screens)treeModel.getRoot()).showScreen(screen);
       }
     }
     else
@@ -267,7 +272,9 @@ implements ActionListener, TreeSelectionListener, TreeModelListener
   {
     if (e.getActionCommand().equals("STRUCTURE_ADD_SCREEN")) 
     { 
-      treeModel.addScreen();
+      Screen newScreen = new Screen();
+      screens.add(newScreen);
+      treeModel.fireTreeNodeInserted(newScreen);
     }
     else if (e.getActionCommand().equals("STRUCTURE_DELETE"))
     {
@@ -293,7 +300,11 @@ implements ActionListener, TreeSelectionListener, TreeModelListener
       TreePath[] selectionPaths = guiStructureTree.getSelectionPaths();
       for (TreePath path : selectionPaths)
       {
-        treeModel.remove(path);
+	GuiObject node = (GuiObject)path.getLastPathComponent();
+        VisualObject parent = (VisualObject)node.getParent();
+	int index = parent.getIndexOfChild(node);
+	parent.removeChild(index);
+        treeModel.fireTreeNodeRemoved(parent, node, index);
       }
     }
   }
@@ -307,21 +318,25 @@ implements ActionListener, TreeSelectionListener, TreeModelListener
     TreePath selectPath = guiStructureTree.getLeadSelectionPath();
     if (selectPath == null) return;
     if (selectPath.getPathCount() <= 1) return;
-    Object selected = selectPath.getLastPathComponent();
-    if (!(selected instanceof JPanel)) return;
+    GuiObject selected 
+      = (GuiObject)selectPath.getLastPathComponent();
+    if (! selected.isVisualContainer()) return;
+    VisualContainer container = (VisualContainer)selected;
     // ask a user which component wants to add
     String componentName = letSelectComponent();
     if (componentName != null)
     {
       // create an instance of selected component
-      JComponent component 
-        = ComponentFactory.getInstance().createInstance(componentName);
+      VisualObject component 
+        = (VisualObject)ComponentFactory.getInstance()
+	.createInstance(componentName);
       // add the component to the appropriate place
-      treeModel.addChild((JComponent)selected, component);
+      container.add(component);
+      treeModel.fireTreeNodeInserted(component);
       // end.
       //component.setSize(component.getPreferredSize());
-      component.revalidate();
-      component.repaint();
+      //component.revalidate();
+      //component.repaint();
     }
   }
 
@@ -330,22 +345,28 @@ implements ActionListener, TreeSelectionListener, TreeModelListener
    */
   private void addChanger()
   {
-    // Is the editor in the appropriate mode ?
-    TreePath selectPath = guiStructureTree.getLeadSelectionPath();
-    if (selectPath == null) return;
-    Object selected = selectPath.getLastPathComponent();
-    if (!(selected instanceof IChangeable)) return;
-    // ask a user which component wants to add
-    String name = letSelectChanger();
-    if (name != null)
+    try
     {
-      // create an instance of selected component
-      Changer changer 
-        = ChangerFactory.getInstance().createInstance(name);
-      // add the component to the appropriate place
-      IChangeable parent = (IChangeable)selected;
-      treeModel.addChild(parent, changer);
-      // end.
+      // Is the editor in the appropriate mode ?
+      TreePath selectPath = guiStructureTree.getLeadSelectionPath();
+      if (selectPath == null) return;
+      VisualObject selected 
+	= (VisualObject)selectPath.getLastPathComponent();
+      // ask a user which component wants to add
+      String name = letSelectChanger();
+      if (name != null)
+      {
+        // create an instance of selected component
+        Changer changer 
+          = ChangerFactory.getInstance().createInstance(name);
+        // add the component to the appropriate place
+	selected.add(changer);
+        treeModel.fireTreeNodeInserted(changer);
+      }
+    }
+    catch (ClassCastException e)
+    {
+      return;
     }
   }
 
@@ -419,8 +440,8 @@ implements ActionListener, TreeSelectionListener, TreeModelListener
     if (path.length == 1 && path[0] != split.getLeftComponent())
     {
       Screens screens = (Screens)path[0];
-      split.setLeftComponent(screens);
-      screens.addMouseListener(componentToTreeLink);
+      split.setLeftComponent(screens.getVisualComponent());
+      screens.getVisualComponent().addMouseListener(componentToTreeLink);
     }
   }
 
@@ -433,7 +454,8 @@ implements ActionListener, TreeSelectionListener, TreeModelListener
     ComponentIterator components = new ComponentIterator(e.getScreens());
     while (components.hasNext())
     {
-      components.next().addMouseListener(componentToTreeLink);
+      ((VisualObject)components.next()).getVisualComponent()
+	.addMouseListener(componentToTreeLink);
     }
   }
 

@@ -35,8 +35,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import control4j.scanner.Getter;
-import control4j.gui.changers.IChangeable;
-import control4j.gui.changers.Changer;
+import control4j.gui.components.Screen;
 
 /**
  *  Writes given gui into the output streem in XML format.
@@ -50,7 +49,7 @@ public class Writer
   /**
    *  Writes given gui into the given output stream in XML format.
    */
-  public void write(JTabbedPane gui, OutputStream outputStream)
+  public void write(Screens gui, OutputStream outputStream)
   {
     try
     {
@@ -87,48 +86,45 @@ public class Writer
   /**
    *
    */
-  private void writeScreens(Element parent, JTabbedPane screens)
+  private void writeScreens(Element parent, Screens screens)
   {
     // write all the screens
-    for (int i=0; i<screens.getTabCount(); i++)
+    for (int i=0; i<screens.getVisualObjectCount(); i++)
     {
       // create screen element with label attribute
-      Element screen = document.createElementNS(NS, "screen");
-      Attr label = document.createAttribute("label");
-      label.setValue(screens.getTitleAt(i));
-      screen.setAttributeNode(label);
-      parent.appendChild(screen);
+      Element screenElement = document.createElementNS(NS, "screen");
+      parent.appendChild(screenElement);
       // write preferences of the screen
-      Container container = (Container)screens.getComponentAt(i);
-      writePreferences(screen, container);
+      Screen screen = (Screen)screens.getVisualObject(i);
+      writePreferences(screenElement, screen);
       // write all the components of the screen
-      for (int j=0; j<container.getComponentCount(); j++)
-        writeChild(screen, container.getComponent(j));
+      for (int j=0; j<screen.getVisualObjectCount(); j++)
+        writeChild(screenElement, screen.getVisualObject(j));
     }
   }
 
   /**
    *
    */
-  private void writeChild(Element parent, Component component)
+  private void writeChild(Element parent, GuiObject component)
   {
       System.out.println(component);
-    if (component instanceof Container)
+    if (component instanceof VisualContainer)
     {
-      Container container = (Container)component;
-      if (container.getComponentCount() > 0)
+      VisualContainer container = (VisualContainer)component;
+      if (container.getVisualObjectCount() > 0)
       {
         writeContainer(parent, container);
         return;
       }
     }
-    writeComponent(parent, component);
+    writeComponent(parent, (VisualObject)component);
   }
 
   /**
    *
    */
-  private void writeContainer(Element parent, Container container)
+  private void writeContainer(Element parent, VisualContainer container)
   {
     Element element = document.createElementNS(NS, "panel");
     Attr classAttr = document.createAttribute("class");
@@ -136,16 +132,15 @@ public class Writer
     element.setAttributeNode(classAttr);
     writePreferences(element, container);
     parent.appendChild(element);
-    for (int i=0; i<container.getComponentCount(); i++)
-      writeChild(element, container.getComponent(i));
-    if (container instanceof IChangeable)
-      writeChangers(element, (IChangeable)container);
+    for (int i=0; i<container.getVisualObjectCount(); i++)
+      writeChild(element, container.getVisualObject(i));
+    writeChangers(element, container);
   }
 
   /**
    *
    */
-  private void writeComponent(Element parent, Component component)
+  private void writeComponent(Element parent, VisualObject component)
   {
     Element element = document.createElementNS(NS, "component");
     Attr classAttr = document.createAttribute("class");
@@ -153,15 +148,14 @@ public class Writer
     element.setAttributeNode(classAttr);
     writePreferences(element, component);
     parent.appendChild(element);
-    if (component instanceof IChangeable)
-      writeChangers(element, (IChangeable)component);
+    writeChangers(element, component);
     System.out.println("component written");
   }
 
   /**
    *
    */
-  private void writeChangers(Element parent, IChangeable component)
+  private void writeChangers(Element parent, VisualObject component)
   {
     for (int i=0; i<component.getChangerCount(); i++)
     {

@@ -18,120 +18,385 @@ package control4j.gui;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import javax.swing.JComponent;
 import javax.swing.JTabbedPane;
-import javax.swing.JPanel;
 import java.awt.Dimension;
 import control4j.scanner.Getter;
 import control4j.scanner.Setter;
 import control4j.gui.components.Screen;
-import control4j.gui.changers.IChangeable;
 
 /**
- *  Set of screens that contains the GUI components.
+ *
+ *  Maintains set of screens that contains the GUI components. 
+ *  This is the root object in the gui tree.
+ *
+ *  <p>The only child of Screens may be a screen or a changer.
+ *
  */
-public class Screens extends JTabbedPane
+public class Screens extends VisualContainer
+implements IChangeListener
 {
+
+  /**
+   *  The width of the area for screens.
+   */
   private int width = 800;
+
+  /**
+   *  The height of the area for screens.
+   */
   private int height = 600;
 
-  public Screens()
+  /**
+   *  The index of the first Changer object in the children list.
+   */
+  private int firstChangerIndex = 0;
+
+  /**
+   *  A component that is responsible for painting. 
+   *  May contain null value.
+   */
+  private JTabbedPane visualComponent;
+
+  /**
+   *  Add given screen at the end of the list of children.
+   *  If this object has a visual component, it creates a
+   *  visual component of the given screen as well and adds 
+   *  it as a new tab. Finally it requests repainting.
+   *
+   *  @param screen
+   *             a screen to be added
+   *
+   *  @throws NullPointerException
+   *             if the screen parameter contains null value
+   */
+  public void add(Screen screen)
   {
-    super();
+    // add it to the list of children
+    insertChild(screen, firstChangerIndex);
+    firstChangerIndex++;
+    // register as a change listener
+    screen.addChangeListener(this);
+    // create visual component
+    if (visualComponent != null)
+    {
+      JComponent screenComponent 
+	= ((VisualObject)screen).createVisualComponent();
+      visualComponent.addTab(screen.getTitle(), screenComponent);
+      ((VisualObject)screen).configureVisualComponent();
+      visualComponent.repaint();
+    }
   }
 
   /**
-   *  Adds one screen with default parameters at the end of the screens.
+   *  Inserts given screen at the specified position.
+   *  If this object has a visual component, it creates a
+   *  visual component of the given screen as well and adds 
+   *  it as a new tab. Finally it requests repainting.
+   *
+   *  @param screen
+   *             a screen to be added
+   *
+   *  @param index
+   *             a place where the screen is to be added
+   *
+   *  @throws NullPointerException
+   *             if the screen parameter contains null value
+   *
+   *  @throws IndexOutOfBoundsException
+   *             if index is negative number or is greater than
+   *             the current number of screens
    */
-  public Screen addScreen()
+  public void insert(Screen screen, int index)
   {
-    return addScreen("Screen" + (getTabCount() + 1));
+    // insert it to the list of children
+    if (index > firstChangerIndex)
+      throw new IndexOutOfBoundsException();
+    insertChild(screen, index);
+    firstChangerIndex++;
+    // register change listener
+    screen.addChangeListener(this);
+    // create visual component
+    if (visualComponent != null)
+    {
+      JComponent screenComponent 
+	= ((VisualObject)screen).createVisualComponent();
+      visualComponent.insertTab(
+	screen.getTitle(), null, screenComponent, null, index);
+      ((VisualObject)screen).configureVisualComponent();
+      visualComponent.repaint();
+    }
   }
 
-  public Screen addScreen(String title)
+  /**
+   *  Removes screen at the given index from the list of children.
+   *  If this object has the visual component, the tab of the screen
+   *  is removed as well. Moreover, the visual component of the
+   *  removed screen is released.
+   *
+   *  @param index
+   *             an index of the screen that will be removed
+   *
+   *  @return the screen object which was removed
+   *
+   *  @throws IndexOutOfBoundsException
+   *             if index is negative number or is greater or equal
+   *             to the number of screens
+   */
+  public Screen removeScreen(int index)
   {
-    Screen screen = new Screen();
-    return addScreen(screen, title);
-  }
-
-  public Screen addScreen(Screen screen, String title)
-  {
-    addTab(title, screen);
+    if (index >= firstChangerIndex)
+      throw new IndexOutOfBoundsException();
+    // if there is visual component, release it
+    if (visualComponent != null)
+    {
+      visualComponent.remove(index);
+      ((VisualObject)getScreen(index)).releaseVisualComponent();
+    }
+    // remove it from the list of children
+    Screen screen = (Screen)removeChild(index);
+    firstChangerIndex--;
+    screen.removeChangeListener(this);
     return screen;
   }
 
-  public Screen addScreen(Screen screen, String title, int index)
+  /**
+   *  Returns screen at the specified position.
+   *
+   *  @param index
+   *             a zero based index of the screen that will be returned
+   *
+   *  @return a screen at the given index
+   *
+   *  @throws IndexOutOfBoundsException
+   *             if the index is negative number or is greater or equal
+   *             to the number of screens
+   */
+  public Screen getScreen(int index)
   {
-    insertTab(title, null, screen, null, index);
-    return screen;
+    if (index >= firstChangerIndex)
+      throw new IndexOutOfBoundsException();
+    return (Screen)getChild(index);
   }
 
-  @Override
-  public Dimension getPreferredSize()
+  /**
+   *  Returns number of screens currently in the list.
+   *
+   *  @return number of screens that are children of this object
+   */
+  public int getScreenCount()
   {
-    return new Dimension(width, height);
+    return firstChangerIndex;
   }
 
-  @Override
-  public Dimension getMinimumSize()
-  {
-    return new Dimension(width, height);
-  }
-
-  @Override
-  public Dimension getMaximumSize()
-  {
-    return new Dimension(width, height);
-  }
-
+  /**
+   *  Returns width of the screens area.
+   */
   @Getter(key="Width")
-  public int getScreensWidth()
+  public int getWidth()
   {
     return width;
   }
 
+  /**
+   *  Sets new width of the screens area. If the visual component
+   *  exists, the width of its area will be changed and repaint
+   *  will be requested.
+   *
+   *  @param width
+   *             new width of the screens area in pixels
+   *
+   *  @throws IllegalArgumentException
+   *             if the width is negative number
+   */
   @Setter(key="Width")
-  public void setScreensWidth(int width)
+  public void setWidth(int width)
   {
+    if (width < 0)
+      throw new IllegalArgumentException();
     this.width = width;
-    setSize(width, height);
+    if (visualComponent != null)
+    {
+      visualComponent.setSize(width, height);
+    }
+    fireChangeEvent(new ChangeEvent(this, "Width", this.width));
   }
   
+  /**
+   *  Returns height of the screens area.
+   */
   @Getter(key="Height")
-  public int getScreensHeight()
+  public int getHeight()
   {
     return height;
   }
 
+  /**
+   *  Sets new height of the screens area. If the visual component
+   *  exists, the height of its area will be changed and repaint
+   *  will be requested.
+   *
+   *  @param height
+   *             new height of the screens area in pixels
+   *
+   *  @throws IllegalArgumentException
+   *             if the height is negative number
+   *
+   */
   @Setter(key="Height")
-  public void setScreensHeight(int height)
+  public void setHeight(int height)
   {
+    if (height < 0)
+      throw new IllegalArgumentException();
     this.height = height;
-    setSize(width, height);
+    if (visualComponent != null)
+    {
+      visualComponent.setSize(width, height);
+    }
+    fireChangeEvent(new ChangeEvent(this, "Height", this.height));
+  }
+
+  /**
+   *  Creates and returns new instance of JTabbedPane.
+   */
+  @Override
+  public JComponent createVisualComponent()
+  {
+    if (visualComponent == null)
+      visualComponent = new JTabbedPane();
+    else
+      assert false;
+    return visualComponent;
+  }
+
+  /**
+   *  Provides configuration of visual component. This method
+   *  is called after the visual component si created and added
+   *  as a child to parent visual component. The purpouse of
+   *  this method is to take all of the properties like widht,
+   *  height and set the size of visual component. After that,
+   *  it calls createVisualComponent and configureVisualComponent
+   *  even for all of the visual children.
+   */
+  @Override
+  public void configureVisualComponent()
+  {
+    if (visualComponent != null)
+    {
+      visualComponent.setSize(width, height);
+      for (int i=0; i<firstChangerIndex; i++)
+      {
+	Screen screen = getScreen(i);
+	JComponent screenComponent 
+	  = ((VisualObject)screen).createVisualComponent();
+	visualComponent.addTab(screen.getTitle(), screenComponent);
+	((VisualObject)screen).configureVisualComponent();
+      }
+      visualComponent.repaint();
+    }
+    else
+      assert false;
+  }
+
+  /**
+   *  Returns the visual component if exists, otherwise returns null.
+   */
+  @Override
+  public JComponent getVisualComponent()
+  {
+    return visualComponent;
+  }
+
+  /**
+   *  Releases the visual component. It subsequently releases visual
+   *  components of all the children.
+   */
+  @Override
+  protected void releaseVisualComponent()
+  {
+    if (visualComponent != null)
+    {
+      for (int i=0; i<getScreenCount(); i++)
+	((VisualObject)getScreen(i)).releaseVisualComponent();
+      visualComponent.removeAll();
+    }
+    visualComponent = null;
   }
 
   /**
    *
    */
-  public Screen getSelectedScreen()
+  @Override
+  public void insert(Changer child, int index)
   {
-    return (Screen)getSelectedComponent();
+    if (index < 0)
+      throw new IndexOutOfBoundsException();
+    insertChild(child, index + firstChangerIndex);
   }
 
-  public Screen getScreen(int index)
+  /**
+   *
+   */
+  @Override
+  public Changer removeChanger(int index)
   {
-    return (Screen)getComponentAt(index);
+    if (index < 0)
+      throw new IndexOutOfBoundsException();
+    return (Changer)removeChild(index + firstChangerIndex);
   }
 
-  public int getScreenCount()
+  /**
+   *
+   */
+  @Override
+  public Changer getChanger(int index)
   {
-    return getTabCount();
+    if (index < 0)
+      throw new IndexOutOfBoundsException();
+    return (Changer)getChild(index + firstChangerIndex);
   }
 
-  public Screen removeScreen(int index)
+  /**
+   *
+   */
+  @Override
+  public int getChangerCount()
   {
-    Screen removed = getScreen(index);
-    remove(index);
-    return removed;
+    return size() - firstChangerIndex;
+  }
+
+  /**
+   *  This method is called by screen objects if something is changed.
+   *  If the title of the screen has changed, it actualize appropriate
+   *  tab title.
+   */
+  public void propertyChanged(ChangeEvent e)
+  {
+    if (visualComponent != null)
+      if (e.getKey().equals("Title"))
+      {
+        int index = children.indexOf(e.getSource());
+        String title = getScreen(index).getTitle();
+        visualComponent.setTitleAt(index, title);
+      }
+  }
+
+  /**
+   *
+   */
+  public void showScreen(int index)
+  {
+    if (visualComponent != null)
+      visualComponent.setSelectedIndex(index);
+  }
+
+  /**
+   *
+   */
+  public void showScreen(Screen screen)
+  {
+    if (visualComponent != null)
+      visualComponent.setSelectedComponent(screen.getVisualComponent());
   }
 
 }

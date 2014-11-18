@@ -19,30 +19,32 @@ package control4j.gui.edit;
  */
 
 import java.util.HashMap;
-import javax.swing.JComponent;
 import control4j.gui.components.*;
+import control4j.gui.GuiObject;
 
 /**
+ *
  *  Creates instances of new components. This class is singleton.
+ *
  */
 class ComponentFactory
 {
 
   private static final ComponentFactory instance = new ComponentFactory();
 
-  private final HashMap<String, Class<? extends JComponent>> components
-    = new HashMap<String, Class<? extends JComponent>>();
+  private final HashMap<String, String> components
+    = new HashMap<String, String>();
 
   private ComponentFactory()
   {
-    components.put("Circle", Circle.class);
-    components.put("Quantity", Quantity.class);
-    components.put("Label", Label.class);
-    components.put("Panel", Panel.class);
-    components.put("Titled Panel", TitledPanel.class);
-    components.put("Box Panel", Box.class);
-    components.put("Rectangle", Rectangle.class);
-    components.put("Triangle", Triangle.class);
+    components.put("Circle", "control4j.gui.components.Circle");
+    components.put("Quantity", "control4j.gui.components.Quantity");
+    components.put("Label", "control4j.gui.components.Label");
+    components.put("Panel", "control4j.gui.components.Panel");
+    components.put("Titled Panel", "control4j.gui.components.TitledPanel");
+    components.put("Box Panel", "control4j.gui.components.Box");
+    components.put("Rectangle", "control4j.gui.components.Rectangle");
+    components.put("Triangle", "control4j.gui.components.Triangle");
   }
 
   /**
@@ -63,11 +65,12 @@ class ComponentFactory
     return list;
   }
 
-  public JComponent createInstance(String name)
+  public GuiObject createInstance(String name)
   {
     try
     {
-      return components.get(name).newInstance();
+      return (GuiObject)Class.forName(components.get(name))
+	.newInstance();
     }
     catch (InstantiationException e)
     {
@@ -77,6 +80,10 @@ class ComponentFactory
     catch (IllegalAccessException e)
     {
       // should not happen as well
+      assert false;
+    }
+    catch (ClassNotFoundException e)
+    {
       assert false;
     }
     return null;

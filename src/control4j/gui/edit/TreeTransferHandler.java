@@ -146,15 +146,15 @@ extends javax.swing.TransferHandler
 	  if (targetObject instanceof Screen)
 	  {
 	    Screens root = (Screens)((Screen)targetObject).getParent();
-	    int index = root.indexOfComponent((Screen)targetObject);
+	    int index = root.getIndexOfChild((Screen)targetObject);
 	    System.out.println("Copy screen at index: " + index);
-	    Copy.copy(sourceObject, root, index);
+	    //Copy.copy(sourceObject, root, index);
 	  }
           // if the target is root, place screen at the end
 	  else if(targetObject instanceof Screens)
 	  {
 	    System.out.println("Copy screen at the end of screens");
-	    Copy.copy(sourceObject, targetObject, -1);
+	    //Copy.copy(sourceObject, targetObject, -1);
 	  }
 	  // else do nothing
 	  else
@@ -167,7 +167,7 @@ extends javax.swing.TransferHandler
 	  && targetObject instanceof JPanel)
 	{
 	  System.out.println("Component -> Panel");
-	  Copy.copy(sourceObject, targetObject, -1);
+	  //Copy.copy(sourceObject, targetObject, -1);
 	}
 	// Component at the position of another component
 	else if (sourceObject instanceof JComponent
@@ -178,7 +178,7 @@ extends javax.swing.TransferHandler
 	  JComponent targetComponent = (JComponent)targetObject;
 	  JPanel parent = (JPanel)targetComponent.getParent();
           int index = parent.getComponentZOrder(targetComponent);
-	  parent.setComponentZOrder((JComponent)Copy.copy(source, parent, -1), index);
+	  //parent.setComponentZOrder((JComponent)Copy.copy(source, parent, -1), index);
 	  return true;
 	}
 	// Changer -> changeble
@@ -186,7 +186,7 @@ extends javax.swing.TransferHandler
 	  && targetObject instanceof IChangeable)
         {
 	  System.out.println("Changer -> Changeable");
-	  Copy.copy(sourceObject, targetObject, -1);
+	  //Copy.copy(sourceObject, targetObject, -1);
 	}
 	else
 	{

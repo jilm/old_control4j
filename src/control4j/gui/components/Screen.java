@@ -22,115 +22,121 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Component;
 import javax.swing.JPanel;
-import javax.swing.JTabbedPane;
+import javax.swing.JComponent;
 import control4j.scanner.Getter; 
 import control4j.scanner.Setter;
+import control4j.gui.ChangeEvent;
 
 /**
  *
+ *
+ *
  */
-public class Screen extends JPanel
-implements Cloneable, control4j.gui.IComponentName
+public class Screen extends control4j.gui.VisualContainer
 {
 
-  private String name;
+  /**
+   *  Screen title.
+   */
+  private String title;
 
-  public Screen()
-  {
-    super(null);
-  }
+  /**
+   *
+   */
+  private Color background = Color.gray;
 
-  @Getter(key="Name")
-  public String getName()
-  {
-    if (name != null && name.length() > 0)
-      return name;
-    else
-      return getClass().getSimpleName() + String.valueOf(getIndex() + 1);
-  }
+  /**
+   *  A swing component which is responsible for painting.
+   *  This field may contain null value.
+   */
+  private JPanel panel;
 
-  @Setter(key="Name")
-  public void setName(String name)
-  {
-    this.name = name;
-  }
-
-  @Getter(key="title")
+  /**
+   *
+   */
+  @Getter(key="Title")
   public String getTitle()
   {
-    int index = getIndex();
-    if (index >= 0)
-    {
-      JTabbedPane parent = (JTabbedPane)getParent();
-      return parent.getTitleAt(index);
-    }
-    return "";
+    if (title != null && title.length() > 0)
+      return title;
+    else
+      return getName();
   }
 
-  @Setter(key="title")
+  /**
+   *
+   */
+  @Setter(key="Title")
   public void setTitle(String title)
   {
-    int index = getIndex();
-    if (index >= 0)
-    {
-      JTabbedPane parent = (JTabbedPane)getParent();
-      parent.setTitleAt(index, title);
-    }
+    // set internal field
+    if (title != null)
+      this.title = title.trim();
+    else
+      this.title = null;
+    // if there is a visual component, set the title !
+    fireChangeEvent(new ChangeEvent(this, "Title", getTitle()));
   }
 
-  @Getter(key="background-color")
-  @Override
+  /**
+   *
+   */
+  @Getter(key="Background Color")
   public Color getBackground()
   {
-    return super.getBackground();
+    return background;
   }
 
-  @Override
-  @Setter(key="background-color")
+  /**
+   *
+   */
+  @Setter(key="Background Color")
   public void setBackground(Color color)
   {
-    super.setBackground(color);
-  }
-
-  private int getIndex()
-  {
-    JTabbedPane parent = (JTabbedPane)getParent();
-    for (int i=0; i<parent.getTabCount(); i++)
-      if (parent.getComponentAt(i) == this)
-        return i;
-    return -1;
-  }
-
-  @Override
-  public void doLayout()
-  {
-    super.doLayout();
-    for (int i=0; i<getComponentCount(); i++)
+    this.background = color;
+    if (panel != null)
     {
-      Component component = getComponent(i);
-      Dimension size = component.getPreferredSize();
-      if (size != null) component.setSize(size);
+      panel.setBackground(color);
     }
   }
 
+  /**
+   *
+   */
   @Override
-  public Object clone() throws CloneNotSupportedException
+  protected JComponent createVisualComponent()
   {
-    Screen clone = (Screen)super.clone();
-    clone.removeAll();
-    for (int i=0; i<getComponentCount(); i++)
-    {
-      Component child = getComponent(i);
-      Component childClone = null;
-      if (child instanceof AbstractComponent)
-        childClone = (Component)((AbstractComponent)child).clone();
-      else if (child instanceof AbstractPanel)
-        childClone = (Component)((AbstractPanel)child).clone();
-      else
-        assert false;
-      clone.add(childClone);
-    }
-    return clone;
+    if (panel == null)
+      panel = new JPanel();
+    return panel;
+  }
+
+  /**
+   *
+   */
+  @Override
+  protected void configureVisualComponent()
+  {
+    panel.setBackground(background);
+  }
+
+  /**
+   *
+   */
+  @Override
+  protected void releaseVisualComponent()
+  {
+    super.releaseVisualComponent();
+    panel = null;
+  }
+
+  /**
+   *
+   */
+  @Override
+  public JComponent getVisualComponent()
+  {
+    return panel;
   }
 
 }

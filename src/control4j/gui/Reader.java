@@ -25,31 +25,43 @@ import java.util.LinkedList;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
-import control4j.application.gui.SaxReader;
-import control4j.application.gui.XmlStartElement;
-import control4j.application.gui.XmlEndElement;
-import control4j.gui.Screens;
+import control4j.tools.SaxReader;
+import control4j.tools.XmlStartElement;
+import control4j.tools.XmlEndElement;
 import control4j.gui.components.Screen;
 import java.awt.Container;
 import java.awt.Component;
 import java.awt.Color;
 import java.lang.reflect.Method;
 import control4j.scanner.Setter;
-import control4j.gui.changers.Changer;
-import control4j.gui.changers.IChangeable;
 
+/**
+ *
+ *  Reads the gui object tree from the XML file.
+ *
+ */
 public class Reader extends SaxReader
 {
+
   private Screens screens;
   private Screen screen;
-  private Container component;
+  private VisualObject component;
+  private VisualContainer container;
   private Changer changer;
 
+  /**
+   *  Loads the whole XML from given intput stream.
+   */
   public void load(InputStream inputStream) throws IOException
   {
     super.load(inputStream);
   }
 
+  /**
+   *  Returns object structure which was reconstructed from the given
+   *  XML document. The output is available, after the loas method
+   *  was successfuly called (no exception was thrown).
+   */
   public Screens get()
   {
     return screens;
@@ -66,14 +78,15 @@ public class Reader extends SaxReader
   public void screen(Attributes attributes)
   {
     System.out.println("screen");
-    screen = screens.addScreen();
+    screen = new Screen();
+    screens.add(screen);
   }
 
   @XmlStartElement(parent="screen", localName="panel")
   public void panel(Attributes attributes)
   {
     String className = attributes.getValue("class");
-    component = (Container)createInstance(className);
+    component = (VisualObject)createInstance(className);
     screen.add(component);
   }
 
@@ -81,7 +94,7 @@ public class Reader extends SaxReader
   public void screenComponent(Attributes attributes)
   {
     String className = attributes.getValue("class");
-    component = (Container)createInstance(className);
+    component = (VisualObject)createInstance(className);
     screen.add(component);
   }
 
@@ -89,18 +102,18 @@ public class Reader extends SaxReader
   public void panelContent(Attributes attributes)
   {
     String className = attributes.getValue("class");
-    Container component = (Container)createInstance(className);
-    this.component.add(component);
-    this.component = component;
+    VisualContainer container 
+      = (VisualContainer)createInstance(className);
+    this.container.add(container);
+    this.container = container;
   }
 
   @XmlStartElement(parent="panel", localName="component")
   public void component(Attributes attributes)
   {
     String className = attributes.getValue("class");
-    Container component = (Container)createInstance(className);
-    this.component.add(component);
-    this.component = component;
+    component = (VisualObject)createInstance(className);
+    this.container.add(component);
   }
 
   @XmlStartElement(parent="component", localName="changer")
@@ -108,7 +121,7 @@ public class Reader extends SaxReader
   {
     String className = attributes.getValue("class");
     changer = (Changer)createInstance(className);
-    ((IChangeable)component).addChanger(changer);
+    component.add(changer);
   }
 
   @XmlStartElement(parent="changer", localName="preference")
@@ -124,7 +137,7 @@ public class Reader extends SaxReader
   {
     String key = attributes.getValue("key");
     String value = attributes.getValue("value");
-    setPreference(component, key, value);
+    setPreference(container, key, value);
   }
 
   @XmlStartElement(parent="component", localName="preference")
@@ -181,13 +194,13 @@ public class Reader extends SaxReader
   @XmlEndElement(parent="panel", localName="panel")
   public void endPanelPanel()
   {
-    component = component.getParent();
+    container = (VisualContainer)container.getParent();
   }
 
   @XmlEndElement(parent="panel", localName="component")
   public void endPanelComponent()
   {
-    component = component.getParent();
+    component = (VisualObject)component.getParent();
   }
 
   private Object createInstance(String className)

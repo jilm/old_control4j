@@ -28,11 +28,16 @@ import javax.swing.JPanel;
 //import javax.swing.tree.TreeModel;
 import javax.swing.event.TreeModelListener;
 import javax.swing.event.TreeModelEvent;
-import control4j.gui.changers.IChangeable;
-import control4j.gui.changers.Changer;
+import control4j.gui.Changer;
+import control4j.gui.GuiObject;
+import control4j.gui.VisualObject;
+import control4j.gui.VisualContainer;
 import control4j.gui.Screens;
 import control4j.gui.components.Screen;
 
+/**
+ *
+ */
 public class TreeModel implements javax.swing.tree.TreeModel, FileListener
 {
   private LinkedList<TreeModelListener> listeners 
@@ -74,16 +79,12 @@ public class TreeModel implements javax.swing.tree.TreeModel, FileListener
    */
   public Object getChild(Object parent, int index)
   {
-    Container parentContainer = (Container)parent;
-    int size = parentContainer.getComponentCount();
-    Object result;
-    if (index < size)
-      result = parentContainer.getComponent(index);
-    else if (parent instanceof IChangeable)
-      result = ((IChangeable)parent).getChanger(index - size);
-    else
-      result = null;
-    return result;
+    if (parent instanceof VisualObject)
+    {
+      VisualObject container = (VisualObject)parent;
+      return container.getChild(index);
+    }
+    return null;
   }
 
   /**
@@ -91,11 +92,7 @@ public class TreeModel implements javax.swing.tree.TreeModel, FileListener
    */
   public int getChildCount(Object parent)
   {
-    if (parent instanceof Changer) return 0;
-    int count = ((Container)parent).getComponentCount();
-    if (parent instanceof IChangeable)
-      count += ((IChangeable)parent).getChangerCount();
-    return count;
+    return ((GuiObject)parent).size();
   }
 
   /**
@@ -103,35 +100,14 @@ public class TreeModel implements javax.swing.tree.TreeModel, FileListener
    */
   public int getIndexOfChild(Object parent, Object child)
   {
-    if (child instanceof Changer)
+    try
     {
-      int index = getIndexOfChild((IChangeable)parent, (Changer)child);
-      return index + ((Container)parent).getComponentCount();
+      return ((GuiObject)parent).getIndexOfChild((GuiObject)child);
     }
-    else
-      return getIndexOfChild((Container)parent, child);
-  }
-
-  /**
-   *
-   */
-  private int getIndexOfChild(IChangeable parent, Changer child)
-  {
-    for (int i=0; i<parent.getChangerCount(); i++)
-      if (child == parent.getChanger(i))
-        return i;
-    return -1;
-  }
-
-  /**
-   *
-   */
-  private int getIndexOfChild(Container parent, Object child)
-  {
-    for (int i=0; i<parent.getComponentCount(); i++)
-      if (child == parent.getComponent(i))
-        return i;
-    return -1;
+    catch (Exception e)
+    {
+      return -1;
+    }
   }
 
   /**
@@ -147,7 +123,7 @@ public class TreeModel implements javax.swing.tree.TreeModel, FileListener
    */
   public boolean isLeaf(Object node)
   {
-    return getChildCount(node) == 0;
+    return ! ((GuiObject)node).hasChildren();
   }
 
   /**
@@ -164,84 +140,12 @@ public class TreeModel implements javax.swing.tree.TreeModel, FileListener
   }
 
   /**
-   *  Adds a new screen at the end of all the screens.
-   */
-  public void addScreen()
-  {
-    fireTreeNodeInserted(root.addScreen());
-  }
-
-  /**
-   *
-   */
-  public void addScreen(Screen screen, String title)
-  {
-    fireTreeNodeInserted(root.addScreen(screen, title));
-  }
-
-  /**
-   *
-   */
-  public void addScreen(Screen screen, String title, int index)
-  {
-    fireTreeNodeInserted(root.addScreen(screen, title, index));
-  }
-
-  /**
-   *
-   */
-  public void addChild(JComponent parent, JComponent child)
-  {
-    fireTreeNodeInserted(parent.add(child));
-  }
-
-  /**
-   *
-   */
-  public void addChild(IChangeable parent, Changer child)
-  {
-    parent.addChanger(child);
-    fireTreeNodeInserted(child);
-  }
-
-  public void addChild(JPanel parent, JComponent child, int index)
-  {
-    parent.setComponentZOrder(child, index);
-    fireTreeNodeInserted(child);
-  }
-
-  /**
-   *  Removes one object which path is given as an parameter.
-   */
-  public void remove(TreePath nodePath)
-  {
-    Object node = nodePath.getLastPathComponent();
-    if (node instanceof Component)
-    {
-      Component component = (Component)node;
-      Container parent = component.getParent();
-      int index = getIndexOfChild(parent, node);
-      parent.remove(component);
-      fireTreeNodeRemoved(nodePath.getParentPath(), node, index);
-    }
-    else if (node instanceof Changer)
-    {
-      Changer changer = (Changer)node;
-      IChangeable parent = changer.getParent();
-      int index = getIndexOfChild(parent, node);
-      parent.removeChanger(changer);
-      fireTreeNodeRemoved(nodePath.getParentPath(), node, index);
-    }
-    else
-    {
-      assert false;
-    }
-  }
-
-  /**
    *  Notify all of the registered listeners, that a node was added.
+   *
+   *  @param node
+   *             an object which was added
    */
-  protected void fireTreeNodeInserted(Object node)
+  void fireTreeNodeInserted(Object node)
   {
     Object parent = getParent(node);
     Object[] path = getPath(parent);
@@ -252,7 +156,7 @@ public class TreeModel implements javax.swing.tree.TreeModel, FileListener
       listener.treeNodesInserted(e);
   }
 
-  protected void fireTreeNodeChanged(Object node)
+  void fireTreeNodeChanged(Object node)
   {
     Object[] path = getPath(getParent(node));
     int[] indexes = new int[] {getIndexOfChild(getParent(node), node)};
@@ -268,8 +172,9 @@ public class TreeModel implements javax.swing.tree.TreeModel, FileListener
    *  @param node
    *             a node that has been deleted
    */
-  protected void fireTreeNodeRemoved(TreePath parentPath, Object node, int index)
+  void fireTreeNodeRemoved(Object parent, Object node, int index)
   {
+    Object[] parentPath = getPath(parent);
     int[] indexes = new int[] { index };
     Object[] children = new Object[] { node };
     TreeModelEvent e = new TreeModelEvent(this, parentPath, indexes, children);
@@ -283,7 +188,7 @@ public class TreeModel implements javax.swing.tree.TreeModel, FileListener
    *  @param node
    *             object indentifying modified subtree
    */
-  protected void fireTreeStructureChanged(Object node)
+  void fireTreeStructureChanged(Object node)
   {
     TreeModelEvent e = new TreeModelEvent(this, getPath(node));
     for (TreeModelListener listener : listeners)
@@ -306,15 +211,11 @@ public class TreeModel implements javax.swing.tree.TreeModel, FileListener
   }
 
   /**
-   *  Returns parent of the given node. Node may be a componenet
-   *  or a changer.
+   *  Returns parent of the given node.
    */
   public static Object getParent(Object node)
   {
-    if (node instanceof Changer)
-      return ((Changer)node).getParent();
-    else
-      return ((Container)node).getParent();
+    return ((GuiObject)node).getParent();
   }
 
   public void fileChanged(FileEvent e)

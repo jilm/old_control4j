@@ -18,66 +18,98 @@ package control4j.gui;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import java.awt.Container;
-import java.util.ArrayList;
+import java.util.LinkedList;
 
 /**
+ *
  *  Iterates over all of the components.
+ *
  */
-public class ComponentIterator implements java.util.Iterator<Container>
+public class ComponentIterator implements java.util.Iterator<GuiObject>
 {
-  private Container root;
-  private boolean end = false;
-  private java.util.ArrayList<Integer> indexes 
-      = new java.util.ArrayList<Integer>();
 
-  public ComponentIterator(Container root)
+  /**
+   *  A buffer that contains nodes to be expanded. At the begining it
+   *  contains only the root element. At the end, this buffer is empty.
+   */
+  private LinkedList<GuiObject> buffer 
+    = new LinkedList<GuiObject>();
+
+  private Class<? extends GuiObject> filter = GuiObject.class;
+
+  private GuiObject next;
+
+  /**
+   *
+   */
+  public ComponentIterator(GuiObject root)
   {
-    this.root = root;
+    buffer.add(root);
   }
 
+  /**
+   *
+   */
+  public ComponentIterator(GuiObject root, Class<? extends GuiObject> filter)
+  {
+    buffer.add(root);
+    this.filter = filter;
+  }
+
+  /**
+   *
+   */
   public boolean hasNext()
   {
-    return !end;
+    return next != null;
   }
 
-  public Container next()
+  /**
+   *
+   */
+  public GuiObject next()
   {
-    if (end) new java.util.NoSuchElementException();
-    // find the element to return
-    Container result = root;
-    for (Integer i : indexes)
-      result = (Container)result.getComponent(i);
-    // find next element
-    if (result.getComponentCount() > 0)
-      indexes.add(0);
-    else
-    {
-      Container parent = (Container)result.getParent();
-      while(true)
-      {
-        int lastIndex = indexes.size()-1;
-        if (lastIndex < 0)
-        {
-          end = true;
-          break;
-        }
-        int index = indexes.get(lastIndex);
-        if (parent.getComponentCount() > index+1)
-        {
-          indexes.set(lastIndex, index+1);
-          break;
-        }
-        else
-        {
-          indexes.remove(lastIndex);
-          parent = (Container)parent.getParent();
-        }
-      }
-    }
+    if (!hasNext()) new java.util.NoSuchElementException();
+    GuiObject result = next;
+    next = filteredNext();
     return result;
   }
 
+  /**
+   *
+   */
+  private GuiObject filteredNext()
+  {
+    GuiObject node;
+    while (buffer.size() > 0)
+    {
+      node = findNext();
+      if (node.getClass().isAssignableFrom(filter)) return node;
+    }
+    return null;
+  }
+
+  /**
+   *
+   */
+  private GuiObject findNext()
+  {
+    // get first element from the buffer
+    GuiObject node = buffer.removeFirst();
+    // insert all of its children at the end of the buffer
+    if (node.hasChildren())
+    {
+      VisualObject container = (VisualObject)node;
+      for (int i=0; i<container.size(); i++)
+        buffer.add(container.getChild(i));
+    }
+    // return the node
+    return node;
+  }
+
+  /**
+   *  Not implemented.
+   */
   public void remove()
   {
   }

@@ -19,7 +19,7 @@ package control4j.gui.edit;
  */
 
 import java.util.HashMap;
-import control4j.gui.changers.*;
+import control4j.gui.Changer;
 
 /**
  *  Creates instances of new changers. This class is singleton.
@@ -29,15 +29,15 @@ class ChangerFactory
 
   private static final ChangerFactory instance = new ChangerFactory();
 
-  private final HashMap<String, Class<? extends Changer>> changers
-    = new HashMap<String, Class<? extends Changer>>();
+  private final HashMap<String, String> changers 
+    = new HashMap<String, String>();
 
   private ChangerFactory()
   {
-    changers.put("LED", Led.class);
-    changers.put("Quantity", SetQuantity.class);
-    changers.put("Move", Move.class);
-    changers.put("Set text", SetText.class);
+    changers.put("LED", "control4j.gui.changers.Led");
+    changers.put("Quantity", "control4j.gui.changers.SetQuantity");
+    changers.put("Move", "control4j.gui.changers.Move");
+    changers.put("Set text", "control4j.gui.changers.SetText");
   }
 
   /**
@@ -62,7 +62,7 @@ class ChangerFactory
   {
     try
     {
-      return changers.get(name).newInstance();
+      return (Changer)Class.forName(changers.get(name)).newInstance();
     }
     catch (InstantiationException e)
     {
@@ -72,6 +72,10 @@ class ChangerFactory
     catch (IllegalAccessException e)
     {
       // should not happen as well
+      assert false;
+    }
+    catch (ClassNotFoundException e)
+    {
       assert false;
     }
     return null;

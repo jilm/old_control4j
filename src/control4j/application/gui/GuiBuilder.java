@@ -41,14 +41,16 @@ import control4j.modules.IMGui;
 import control4j.modules.IGuiUpdateListener;
 import control4j.gui.SignalAssignment;
 import control4j.gui.GuiStructureTreeModel;
-import control4j.gui.ChangerIterator;
-import control4j.gui.changers.Changer;
+import control4j.gui.ComponentIterator;
+import control4j.gui.Changer;
 import control4j.gui.Screens;
 import control4j.tools.DeclarationReference;
 
 /**
+ *
  *  Gets the gui and fill-in missing information mainly about a connection
  *  to the signals.
+ *
  */
 public class GuiBuilder
 {
@@ -80,10 +82,11 @@ public class GuiBuilder
 
     // Get the set of signals displayed by the gui
     Set<String> signalNames = new HashSet<String>();
-    ChangerIterator changers = new ChangerIterator(screens);
+    ComponentIterator changers 
+      = new ComponentIterator(screens, Changer.class);
     while (changers.hasNext())
     {
-      Changer changer = changers.next();
+      Changer changer = (Changer)changers.next();
       String signalName = changer.getSignalName();
       if (signalName != null && signalName.length() > 0) 
         signalNames.add(signalName);
@@ -108,10 +111,10 @@ public class GuiBuilder
     guiModule = (IMGui)Module.getInstance(guiModuleDecl);
 
     // Set signal indexes for changers
-    changers = new ChangerIterator(screens);
+    changers = new ComponentIterator(screens, Changer.class);
     while (changers.hasNext())
     {
-      Changer changer = changers.next();
+      Changer changer = (Changer)changers.next();
       String signalName = changer.getSignalName();
       if (signalName == null)
         changer.setSignalIndex(-1);
@@ -126,10 +129,10 @@ public class GuiBuilder
     }
 
     // Register all of the changers to get updates
-    changers = new ChangerIterator(screens);
+    changers = new ComponentIterator(screens, Changer.class);
     while (changers.hasNext())
     {
-      Changer changer = changers.next();
+      Changer changer = (Changer)changers.next();
       if (changer.getSignalName() != null)
         guiModule.registerUpdateListener(changer);
     }
@@ -138,7 +141,9 @@ public class GuiBuilder
     frame = new JFrame("Top level demo");
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-    frame.add(screens);
+    JComponent screensComponent = screens.createVisualComponent();
+    frame.add(screensComponent);
+    screens.configureVisualComponent();
 
     guiModule.setMainFrame(frame);
     ModuleManager.getInstance().add(guiModule);
@@ -204,34 +209,6 @@ public class GuiBuilder
     {
     }
     return null;
-  }
-
-  /**
-   *
-   */
-  private class SaveGui implements ActionListener
-  {
-    JTabbedPane gui;
-
-    public SaveGui(JTabbedPane gui)
-    {
-      this.gui = gui;
-    }
-
-    public void actionPerformed(ActionEvent e)
-    {
-      try
-      {
-      System.out.println("Goingt to save gui ..." + e.getActionCommand());
-      control4j.gui.Writer writer = new control4j.gui.Writer();
-      java.io.OutputStream os = new java.io.FileOutputStream("/home/jilm/gui.xml");
-      writer.write(gui, os);
-      }
-      catch (java.io.IOException ex)
-      {
-        System.exit(1);
-      }
-    }
   }
 
 }
