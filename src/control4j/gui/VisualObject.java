@@ -117,9 +117,7 @@ public abstract class VisualObject extends GuiObject
       throw new NullPointerException();
     if (children == null && index == 0)
       children = new ArrayList<GuiObject>();
-    else
-      throw new IndexOutOfBoundsException();
-    if (index < 0 || index > children.size())
+    if (children == null)
       throw new IndexOutOfBoundsException();
     children.add(index, child);
     child.setParent(this);

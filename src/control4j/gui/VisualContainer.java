@@ -94,16 +94,25 @@ public abstract class VisualContainer extends VisualObject
   {
     if (index >= firstChangerIndex)
       throw new IndexOutOfBoundsException();
-    VisualObject child = (VisualObject)removeChild(index);
-    firstChangerIndex--;
-    JComponent visualComponent = getVisualComponent();
-    if (visualComponent != null)
+    return (VisualObject)removeChild(index);
+  }
+
+  @Override 
+  public GuiObject removeChild(int index)
+  {
+    GuiObject child = getChild(index);
+    if (child.isVisual()) 
     {
-      visualComponent.remove(index);
-      visualComponent.validate();
-      child.releaseVisualComponent();
+      firstChangerIndex--;
+      JComponent visualComponent = getVisualComponent();
+      if (visualComponent != null)
+      {
+	visualComponent.remove(index);
+	visualComponent.validate();
+	((VisualObject)child).releaseVisualComponent();
+      }
     }
-    return child;
+    return super.removeChild(index);
   }
 
   /**

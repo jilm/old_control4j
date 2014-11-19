@@ -61,7 +61,16 @@ implements IChangeListener
   public void add(VisualObject child)
   {
     if (child instanceof Screen)
+    {
       super.add(child);
+      child.addChangeListener(this);
+      // insert a tab title for the screen
+      if (visualComponent != null)
+      {
+	int index = getVisualObjectCount()-1;
+	visualComponent.setTitleAt(index, ((Screen)child).getTitle());
+      }
+    }
     else
       throw new IllegalArgumentException();
   }
@@ -74,9 +83,22 @@ implements IChangeListener
   public void insert(VisualObject child, int index)
   {
     if (child instanceof Screen)
+    {
       super.insert(child, index);
+      child.addChangeListener(this);
+      // insert a tab title for the screen
+      if (visualComponent != null)
+	visualComponent.setTitleAt(index, ((Screen)child).getTitle());
+    }
     else
       throw new IllegalArgumentException();
+  }
+
+  @Override
+  public GuiObject removeChild(int index)
+  {
+    getChild(index).removeChangeListener(this);
+    return super.removeChild(index);
   }
 
   /**
@@ -223,7 +245,7 @@ implements IChangeListener
   public void propertyChanged(ChangeEvent e)
   {
     if (visualComponent != null)
-      if (e.getKey().equals("Title"))
+      if (e.getKey().equals("Title") || e.getKey().equals("Name"))
       {
         int index = children.indexOf(e.getSource());
         String title = ((Screen)getVisualObject(index)).getTitle();

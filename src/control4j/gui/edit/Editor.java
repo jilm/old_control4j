@@ -271,6 +271,7 @@ TreeModelListener, FileListener
    */
   public void actionPerformed(ActionEvent e)
   {
+    // add new screen
     if (e.getActionCommand().equals("STRUCTURE_ADD_SCREEN")) 
     { 
       Screen newScreen = new Screen();
@@ -411,19 +412,21 @@ TreeModelListener, FileListener
   public void treeNodesInserted(TreeModelEvent e)
   {
     // add a link component -> tree
-    Object[] parentPath = e.getPath();
-    Container parent = (Container)parentPath[parentPath.length-1];
+    TreePath parentPath = e.getTreePath();
+    GuiObject parent = (GuiObject)parentPath.getLastPathComponent();
     int[] indexes = e.getChildIndices();
     for (int i : indexes)
     {
-      Object object = treeModel.getChild(parent, i); 
-      if (object instanceof Component)
-        ((Component)object).addMouseListener(componentToTreeLink);
+      GuiObject child = parent.getChild(i); 
+      if (child.isVisual())
+      {
+	JComponent visualComponent = ((VisualObject)child).getVisualComponent();
+        visualComponent.addMouseListener(componentToTreeLink);
+      }
     }
     // select last inserted node
-    Object object = treeModel.getChild(parent, indexes[indexes.length-1]);
-    guiStructureTree
-      .setSelectionPath((new TreePath(parentPath)).pathByAddingChild(object));
+    GuiObject child = parent.getChild(indexes[indexes.length-1]);
+    guiStructureTree.setSelectionPath(parentPath.pathByAddingChild(child));
   }
 
   public void treeNodesRemoved(TreeModelEvent e)
