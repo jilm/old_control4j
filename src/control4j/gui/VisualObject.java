@@ -52,6 +52,11 @@ public abstract class VisualObject extends GuiObject
   protected ArrayList<GuiObject> children;
 
   /**
+   *
+   */
+  public static final String LINK_KEY = "facade";
+
+  /**
    *  Appends given changer at the end of the list of all changers.
    *  Moreover it sets a parent of the given changer to this object.
    *

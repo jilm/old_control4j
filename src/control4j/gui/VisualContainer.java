@@ -43,6 +43,7 @@ public abstract class VisualContainer extends VisualObject
     if (getVisualComponent() != null)
     {
       JComponent childComponent = child.createVisualComponent();
+      childComponent.putClientProperty(LINK_KEY, child);
       getVisualComponent().add(childComponent);
       child.configureVisualComponent();
       getVisualComponent().validate();
@@ -68,6 +69,7 @@ public abstract class VisualContainer extends VisualObject
     if (getVisualComponent() != null)
     {
       JComponent childComponent = child.createVisualComponent();
+      childComponent.putClientProperty(LINK_KEY, child);
       getVisualComponent().add(childComponent);
       child.configureVisualComponent();
       getVisualComponent().validate();

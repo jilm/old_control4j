@@ -21,12 +21,14 @@ package control4j.gui.edit;
 import java.util.ArrayList;
 import javax.swing.JTabbedPane;
 import javax.swing.JTree;
+import javax.swing.JComponent;
 import javax.swing.tree.TreePath;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseEvent;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Point;
+import control4j.gui.VisualObject;
 
 public class ComponentToTreeLink implements MouseListener
 {
@@ -41,7 +43,10 @@ public class ComponentToTreeLink implements MouseListener
   public void mouseClicked(MouseEvent e)
   {
     TreeModel model = (TreeModel)tree.getModel();
-    Object[] path = model.getPath(e.getComponent());
+    JComponent component = (JComponent)e.getComponent();
+    VisualObject visualObject 
+      = (VisualObject)component.getClientProperty(VisualObject.LINK_KEY);
+    Object[] path = model.getPath(visualObject);
     tree.setSelectionPath(new TreePath(path));
   }
 

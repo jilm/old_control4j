@@ -153,7 +153,10 @@ implements IChangeListener
   public JComponent createVisualComponent()
   {
     if (visualComponent == null)
+    {
       visualComponent = new JTabbedPane();
+      visualComponent.putClientProperty(LINK_KEY, this);
+    }
     else
       assert false;
     return visualComponent;

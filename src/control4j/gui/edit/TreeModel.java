@@ -145,9 +145,9 @@ public class TreeModel implements javax.swing.tree.TreeModel, FileListener
    *  @param node
    *             an object which was added
    */
-  void fireTreeNodeInserted(Object node)
+  void fireTreeNodeInserted(GuiObject node)
   {
-    Object parent = getParent(node);
+    GuiObject parent = node.getParent();
     Object[] path = getPath(parent);
     int[] indexes = new int[] {getIndexOfChild(parent, node)};
     Object[] children = new Object[] {node};
@@ -156,9 +156,9 @@ public class TreeModel implements javax.swing.tree.TreeModel, FileListener
       listener.treeNodesInserted(e);
   }
 
-  void fireTreeNodeChanged(Object node)
+  void fireTreeNodeChanged(GuiObject node)
   {
-    Object[] path = getPath(getParent(node));
+    Object[] path = getPath(node.getParent());
     int[] indexes = new int[] {getIndexOfChild(getParent(node), node)};
     Object[] children = new Object[] {node};
     TreeModelEvent e = new TreeModelEvent(this, path, indexes, children);
@@ -172,7 +172,7 @@ public class TreeModel implements javax.swing.tree.TreeModel, FileListener
    *  @param node
    *             a node that has been deleted
    */
-  void fireTreeNodeRemoved(Object parent, Object node, int index)
+  void fireTreeNodeRemoved(GuiObject parent, GuiObject node, int index)
   {
     Object[] parentPath = getPath(parent);
     int[] indexes = new int[] { index };
@@ -188,7 +188,7 @@ public class TreeModel implements javax.swing.tree.TreeModel, FileListener
    *  @param node
    *             object indentifying modified subtree
    */
-  void fireTreeStructureChanged(Object node)
+  void fireTreeStructureChanged(GuiObject node)
   {
     TreeModelEvent e = new TreeModelEvent(this, getPath(node));
     for (TreeModelListener listener : listeners)
@@ -198,15 +198,14 @@ public class TreeModel implements javax.swing.tree.TreeModel, FileListener
   /**
    *  Returns a path for a given node.
    */
-  protected Object[] getPath(Object node)
+  protected Object[] getPath(GuiObject node)
   {
     ArrayList<Object> path = new ArrayList<Object>();
-    while (node != root)
+    while (node != null)
     {
       path.add(0, node);
-      node = getParent(node);
+      node = node.getParent();
     }
-    path.add(0, node);
     return path.toArray();
   }
 
