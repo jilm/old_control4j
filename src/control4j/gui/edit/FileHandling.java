@@ -224,6 +224,10 @@ implements ActionListener, FileEvent, DataListener, TreeModelListener
       {
         file = null;
       }
+      catch (javax.xml.stream.XMLStreamException e)
+      {
+	System.out.println(e.getMessage());
+      }
     actualizeMenu();
   }
 
