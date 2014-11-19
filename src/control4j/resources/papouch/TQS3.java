@@ -52,13 +52,19 @@ implements ICycleEventListener, IThermometer
   public Spinel spinel;
 
   /* temperature measurement */
-  private SpinelMessage temperatureRequest 
-    = new SpinelMessage(address, control4j.hw.papouch.TQS3.MEASUREMENT); 
+  private SpinelMessage temperatureRequest;
   private IResponseCrate<SpinelMessage> temperatureResponse; 
   private String temperatureUnit = "stC";
   private double temperature;
   private Date temperatureTimestamp;
   private int temperatureStatus = 10;
+
+  @Override
+  public void prepare()
+  {
+    temperatureRequest 
+      = new SpinelMessage(address, control4j.hw.papouch.TQS3.MEASUREMENT); 
+  }
 
   public double getTemperature(int index) throws ValueNotAvailableException
   {

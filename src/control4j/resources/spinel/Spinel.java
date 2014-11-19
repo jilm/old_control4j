@@ -23,6 +23,7 @@ import control4j.resources.Resource;
 import control4j.tools.IResponseCrate;
 import control4j.protocols.spinel.SpinelOverTcp;
 import control4j.protocols.spinel.SpinelMessage;
+import static control4j.tools.Logger.*;
 
 public class Spinel extends Resource 
 {
@@ -42,6 +43,7 @@ public class Spinel extends Resource
 
   public IResponseCrate<SpinelMessage> write(SpinelMessage message)
   {
+    finest("Sending request: " + message.toString());
     return channel.write(message);
   }
 
