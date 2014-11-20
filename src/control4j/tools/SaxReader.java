@@ -104,7 +104,9 @@ public abstract class SaxReader extends DefaultHandler
 	{
 	  try
 	  {
+	    method.setAccessible(true);
 	    method.invoke(this, attributes);
+	    method.setAccessible(false);
 	  } 
 	  catch (Exception e) 
 	  {
@@ -135,7 +137,9 @@ public abstract class SaxReader extends DefaultHandler
 	{
 	  try
 	  {
+	    method.setAccessible(true);
 	    method.invoke(this);
+	    method.setAccessible(false);
 	  } 
 	  catch (Exception e) 
 	  {

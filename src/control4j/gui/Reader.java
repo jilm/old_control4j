@@ -72,7 +72,7 @@ public class Reader extends SaxReader
    *
    */
   @XmlStartElement(parent="", localName="gui")
-  public void gui(Attributes attributes)
+  private void gui(Attributes attributes)
   {
     finest("gui");
     gui = new Screens();
@@ -82,7 +82,7 @@ public class Reader extends SaxReader
    *
    */
   @XmlStartElement(parent="gui", localName="screen")
-  public void screen(Attributes attributes)
+  private void screen(Attributes attributes)
   {
     finest("screen");
     Screen screen = new Screen();
@@ -94,7 +94,7 @@ public class Reader extends SaxReader
    *
    */
   @XmlStartElement(parent="*", localName="panel")
-  public void panel(Attributes attributes)
+  private void panel(Attributes attributes)
   {
     finest("panel");
     String className = attributes.getValue("class");
@@ -107,7 +107,7 @@ public class Reader extends SaxReader
    *
    */
   @XmlStartElement(parent="*", localName="component")
-  public void component(Attributes attributes)
+  private void component(Attributes attributes)
   {
     finest("component");
     String className = attributes.getValue("class");
@@ -120,7 +120,7 @@ public class Reader extends SaxReader
    *
    */
   @XmlStartElement(parent="*", localName="changer")
-  public void changer(Attributes attributes)
+  private void changer(Attributes attributes)
   {
     finest("changer");
     String className = attributes.getValue("class");
@@ -133,7 +133,7 @@ public class Reader extends SaxReader
    *
    */
   @XmlStartElement(parent="*", localName="preference")
-  public void preference(Attributes attributes)
+  private void preference(Attributes attributes)
   {
     String key = attributes.getValue("key");
     String value = attributes.getValue("value");
@@ -145,7 +145,7 @@ public class Reader extends SaxReader
    *
    */
   @XmlEndElement(parent="", localName="gui")
-  public void endGui()
+  private void endGui()
   {
     finest("/gui");
     //gui = gui.getParent();
@@ -155,7 +155,7 @@ public class Reader extends SaxReader
    *
    */
   @XmlEndElement(parent="*", localName="screen")
-  public void endScreen()
+  private void endScreen()
   {
     finest("/screen");
     gui = gui.getParent();
@@ -165,7 +165,7 @@ public class Reader extends SaxReader
    *
    */
   @XmlEndElement(parent="*", localName="panel")
-  public void endPanel()
+  private void endPanel()
   {
     finest("/panel");
     gui = gui.getParent();
@@ -175,7 +175,7 @@ public class Reader extends SaxReader
    *
    */
   @XmlEndElement(parent="*", localName="component")
-  public void endComponent()
+  private void endComponent()
   {
     finest("/component");
     gui = gui.getParent();
