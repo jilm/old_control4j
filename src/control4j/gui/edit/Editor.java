@@ -445,8 +445,16 @@ TreeModelListener, FileListener
    */
   public void fileChanged(FileEvent e)
   {
+    // release old screens object
+    if (screens != null)
+      screens.releaseVisualComponent();
+    // show new screens object in the main window
+    screens = e.getScreens();
+    JComponent visualComponent = screens.createVisualComponent();
+    split.setLeftComponent(visualComponent);
+    screens.configureVisualComponent();
     // add a link component -> tree structure to each of the components
-    ComponentIterator components = new ComponentIterator(e.getScreens());
+    ComponentIterator components = new ComponentIterator(screens);
     while (components.hasNext())
     {
       ((VisualObject)components.next()).getVisualComponent()
@@ -459,16 +467,4 @@ TreeModelListener, FileListener
     return instance.treeModel;
   }
   
-  /**
-   *  Place new screens visual component into the left split window.
-   */
-  public static void setScreens(Screens screens)
-  {
-    instance.screens = screens;
-    JComponent visualComponent = screens.createVisualComponent();
-    instance.split.setLeftComponent(visualComponent);
-      visualComponent.addMouseListener(instance.componentToTreeLink);
-    screens.configureVisualComponent();
-  }
-
 }

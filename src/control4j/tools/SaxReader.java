@@ -99,7 +99,8 @@ public abstract class SaxReader extends DefaultHandler
       XmlStartElement annotation = method.getAnnotation(XmlStartElement.class);
       if (annotation != null)
         if (annotation.localName().equals(localName) 
-	    && annotation.parent().equals(elementStack.getLast()))
+	    && (annotation.parent().equals(elementStack.getLast())
+	    || annotation.parent().equals("*")))
 	{
 	  try
 	  {
@@ -129,7 +130,8 @@ public abstract class SaxReader extends DefaultHandler
       XmlEndElement annotation = method.getAnnotation(XmlEndElement.class);
       if (annotation != null)
         if (annotation.localName().equals(lastElement) 
-	    && annotation.parent().equals(elementStack.getLast()))
+	    && (annotation.parent().equals(elementStack.getLast())
+            || annotation.parent().equals("*")))
 	{
 	  try
 	  {

@@ -226,7 +226,7 @@ implements IChangeListener
    *  components of all the children.
    */
   @Override
-  protected void releaseVisualComponent()
+  public void releaseVisualComponent()
   {
     if (visualComponent != null)
     {
