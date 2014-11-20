@@ -62,6 +62,7 @@ import control4j.gui.Changer;
 
 import control4j.scanner.Scanner;
 import control4j.scanner.KeyValueTableModel;
+import static control4j.tools.Logger.*;
 
 /**
  *
@@ -454,11 +455,12 @@ TreeModelListener, FileListener
     split.setLeftComponent(visualComponent);
     screens.configureVisualComponent();
     // add a link component -> tree structure to each of the components
-    ComponentIterator components = new ComponentIterator(screens);
+    ComponentIterator components 
+      = new ComponentIterator(screens, VisualObject.class);
     while (components.hasNext())
     {
-      ((VisualObject)components.next()).getVisualComponent()
-	.addMouseListener(componentToTreeLink);
+      VisualObject component = (VisualObject)components.next();
+      component.getVisualComponent().addMouseListener(componentToTreeLink);
     }
   }
 
