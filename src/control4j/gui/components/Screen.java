@@ -104,7 +104,7 @@ public class Screen extends control4j.gui.VisualContainer
    *
    */
   @Override
-  protected JComponent createVisualComponent()
+  protected JComponent createSwingComponent()
   {
     if (panel == null)
       panel = new JPanel();

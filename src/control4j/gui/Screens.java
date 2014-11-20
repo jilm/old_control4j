@@ -172,12 +172,11 @@ implements IChangeListener
    *  Creates and returns new instance of JTabbedPane.
    */
   @Override
-  public JComponent createVisualComponent()
+  protected JComponent createSwingComponent()
   {
     if (visualComponent == null)
     {
       visualComponent = new JTabbedPane();
-      visualComponent.putClientProperty(LINK_KEY, this);
     }
     else
       assert false;

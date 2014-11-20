@@ -210,15 +210,33 @@ public abstract class VisualObject extends GuiObject
   public abstract JComponent getVisualComponent();
 
   /**
-   *  This method should create instance of appropriate swing
-   *  component which will be responsible for painting. Such
-   *  swing component must be configured in accordance with
-   *  content of properties of this object.
+   *  Calls createSwingComponent method to create new visual
+   *  component. Than sets the link JComponent to this object.
+   *  The createSwingComponent method should be called only
+   *  through this method.
+   *
+   *  @see #createSwingComponent
    */
-  protected abstract JComponent createVisualComponent();
+  public final JComponent createVisualComponent()
+  {
+    JComponent component = createSwingComponent();
+    component.putClientProperty(LINK_KEY, this);
+    return component;
+  }
 
   /**
+   *  This method should create instance of appropriate swing
+   *  component which will be responsible for painting. This
+   *  method should not be called directly, call
+   *  createVisualComponent instead.
    *
+   *  @see #createVisualComponent
+   */
+  protected abstract JComponent createSwingComponent();
+
+  /**
+   *  This method shoudl configure visual component to be
+   *  in accordance with this object settings.
    */
   protected abstract void configureVisualComponent();
 
