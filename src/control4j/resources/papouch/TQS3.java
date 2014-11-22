@@ -30,6 +30,7 @@ import control4j.resources.ValueNotAvailableException;
 import control4j.resources.spinel.Spinel;
 import control4j.protocols.spinel.SpinelMessage;
 import control4j.tools.IResponseCrate;
+import static control4j.tools.Logger.*;
 
 /**
  *
@@ -52,13 +53,19 @@ implements ICycleEventListener, IThermometer
   public Spinel spinel;
 
   /* temperature measurement */
-  private SpinelMessage temperatureRequest 
-    = new SpinelMessage(address, control4j.hw.papouch.TQS3.MEASUREMENT); 
+  private SpinelMessage temperatureRequest;
   private IResponseCrate<SpinelMessage> temperatureResponse; 
   private String temperatureUnit = "stC";
   private double temperature;
   private Date temperatureTimestamp;
   private int temperatureStatus = 10;
+
+  @Override
+  public void prepare()
+  {
+    temperatureRequest 
+      = new SpinelMessage(address, control4j.hw.papouch.TQS3.MEASUREMENT); 
+  }
 
   public double getTemperature(int index) throws ValueNotAvailableException
   {
@@ -129,8 +136,10 @@ implements ICycleEventListener, IThermometer
       try
       {
         SpinelMessage response = temperatureResponse.getResponse();
+        finest("response: " + response.toString());
         temperature = control4j.hw.papouch.TQS3.getOneTimeMeasurement(response);
         temperatureStatus = 0;
+        temperatureTimestamp = temperatureResponse.getTimestamp();
       }
       catch (control4j.protocols.spinel.SpinelException e)
       {

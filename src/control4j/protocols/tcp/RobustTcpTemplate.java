@@ -143,6 +143,7 @@ public abstract class RobustTcpTemplate<I, O>
           specificInputStream = getSpecificInputStream(inputStream);
           specificOutputStream = getSpecificOutputStream(outputStream);
 	  logFlag = true;
+          fine("Connection has been estabilished");
 
 	  // enter the request / response loop
 	  TransactionCrate transaction = null;
@@ -179,6 +180,7 @@ public abstract class RobustTcpTemplate<I, O>
         }
         finally   // close all resources
         {
+          fine("Going to close connection ...");
           close();
           try { sleep(1000); } catch (InterruptedException ex) {}
         }
