@@ -130,6 +130,8 @@ implements IChangeListener
     if (visualComponent != null)
     {
       visualComponent.setSize(width, height);
+      visualComponent.revalidate();
+      visualComponent.repaint();
     }
     fireChangeEvent(new ChangeEvent(this, "Width", this.width));
   }
@@ -164,6 +166,8 @@ implements IChangeListener
     if (visualComponent != null)
     {
       visualComponent.setSize(width, height);
+      visualComponent.revalidate();
+      visualComponent.repaint();
     }
     fireChangeEvent(new ChangeEvent(this, "Height", this.height));
   }
@@ -198,6 +202,7 @@ implements IChangeListener
     if (visualComponent != null)
     {
       visualComponent.setSize(width, height);
+      visualComponent.setPreferredSize(new Dimension(width, height));
       for (int i=0; i<getVisualObjectCount(); i++)
       {
 	VisualObject screen = getVisualObject(i);
@@ -205,6 +210,7 @@ implements IChangeListener
 	visualComponent.addTab(((Screen)screen).getTitle(), screenComponent);
 	screen.configureVisualComponent();
       }
+      visualComponent.revalidate();
       visualComponent.repaint();
     }
     else
