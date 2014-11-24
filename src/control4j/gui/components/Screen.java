@@ -111,6 +111,7 @@ public class Screen extends control4j.gui.VisualContainer
   protected void configureVisualComponent()
   {
     component.setBackground(background);
+    super.configureVisualComponent();
     component.repaint();
   }
 

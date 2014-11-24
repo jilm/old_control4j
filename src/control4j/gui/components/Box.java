@@ -118,6 +118,9 @@ public class Box extends VisualContainer
   protected void configureVisualComponent()
   {
     component.setLocation(x, y);
+    super.configureVisualComponent();
+    component.revalidate();
+    component.repaint();
   }
 
 }

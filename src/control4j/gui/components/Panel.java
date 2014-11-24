@@ -77,6 +77,10 @@ public class Panel extends VisualContainer
   @Override
   protected void configureVisualComponent()
   {
+    component.setBounds(x, y, width, height);
+    super.configureVisualComponent();
+    component.revalidate();
+    component.repaint();
   }
 
 }

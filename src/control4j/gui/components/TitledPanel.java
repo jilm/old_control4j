@@ -63,7 +63,7 @@ public class TitledPanel extends Panel
   @Override
   protected void configureVisualComponent()
   {
-    
+    super.configureVisualComponent();
   }
 
 }

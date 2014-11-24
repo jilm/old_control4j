@@ -154,6 +154,23 @@ public abstract class VisualContainer extends VisualObject
   }
 
   /**
+   *  Creates a visual component for each VisualObject child.
+   *  Child visual component is than added to this visual component
+   *  and finally, configureVisualComponent is called for each
+   *  VisualObject child.
+   */
+  @Override
+  protected void configureVisualComponent()
+  {
+    for (int i=0; i<getVisualObjectCount(); i++)
+    {
+      JComponent childComponent = getVisualObject(i).createVisualComponent();
+      component.add(childComponent);
+      getVisualObject(i).configureVisualComponent();
+    }
+  }
+
+  /**
    *  Calls a releseVisualComponent for all of the visual child objects.
    *  Moreover, it removes child visual components from this visual 
    *  component. 
