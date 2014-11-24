@@ -58,12 +58,6 @@ public class TitledPanel extends Panel
     return title;
   }
 
-  @Override
-  protected JComponent createSwingComponent()
-  {
-    return new JPanel();
-  }
-
   /**
    *
    */
