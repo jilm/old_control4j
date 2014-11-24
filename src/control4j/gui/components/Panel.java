@@ -121,7 +121,9 @@ public class Panel extends VisualContainer
   @Override
   protected JComponent createSwingComponent()
   {
-    return new JPanel(null);
+    JPanel panel = new PanelPainter();
+    panel.setLayout(null);
+    return panel;
   }
 
   @Override
@@ -132,6 +134,23 @@ public class Panel extends VisualContainer
     super.configureVisualComponent();
     component.revalidate();
     component.repaint();
+  }
+
+  private class PanelPainter extends JPanel
+  {
+
+    @Override
+    public void doLayout()
+    {
+      super.doLayout();
+      for (int i=0; i<getComponentCount(); i++)
+      {
+	Component component = getComponent(i);
+	Dimension size = component.getPreferredSize();
+	if (size != null) component.setSize(size);
+      }
+    }
+
   }
 
 }
