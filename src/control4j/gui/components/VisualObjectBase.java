@@ -19,60 +19,20 @@ package control4j.gui.components;
  */
 
 import java.awt.Color;
-import java.awt.Rectangle;
-import java.awt.FlowLayout;
-import javax.swing.JComponent;
-import javax.swing.JPanel;
+import control4j.gui.VisualObject;
 import control4j.scanner.Setter;
 import control4j.scanner.Getter;
-import control4j.gui.VisualContainer;
 
 /**
  *
- *  Panel that uses Flow layout.
- *
  */
-public class Box extends VisualContainer
+public abstract class VisualObjectBase extends VisualObject
 {
 
-  /**
-   *
-   */
-  private int alignmentPoint = 0;
   private int x;
   private int y;
-
-  /**
-   *
-   */
-  private JPanel panel;
-
-  /**
-   *
-   */
-  public Box()
-  {
-    super();
-    //setLayout(new FlowLayout());
-  }
-
-  /**
-   *
-   */
-  @Setter(key="Alignment Point")
-  public void setAlignmentPoint(int index)
-  {
-    alignmentPoint = index;
-  }
-
-  /**
-   *
-   */
-  @Getter(key="Alignment Point")
-  public int getAlignmentPoint()
-  {
-    return alignmentPoint;
-  }
+  private Color foreground = Color.blue;
+  private Color background = Color.gray;
 
   @Getter(key="X")
   public int getX()
@@ -84,8 +44,8 @@ public class Box extends VisualContainer
   public void setX(int x)
   {
     this.x = x;
-    if (panel != null)
-      panel.setLocation(x, y);
+    if (component != null)
+      component.setLocation(x, y);
   }
 
   @Getter(key="Y")
@@ -98,26 +58,44 @@ public class Box extends VisualContainer
   public void setY(int y)
   {
     this.y = y;
-    if (panel != null)
-      panel.setLocation(x, y);
+    if (component != null)
+      component.setLocation(x, y);
   }
 
-  /**
-   *
-   */
-  @Override
-  protected JComponent createSwingComponent()
+  @Getter(key="Foreground Color")
+  public Color getForeground()
   {
-    return new JPanel(new FlowLayout());
+    return foreground;
   }
 
-  /**
-   *
-   */
+  @Setter(key="Foreground Color")
+  public void setForeground(Color color)
+  {
+    foreground = color;
+    if (component != null)
+      component.setForeground(foreground);
+  }
+
+  @Getter(key="Background Color")
+  public Color getBackground()
+  {
+    return background;
+  }
+
+  @Setter(key="Background Color")
+  public void setBackground(Color color)
+  {
+    background = color;
+    if (component != null)
+      component.setBackground(background);
+  }
+
   @Override
   protected void configureVisualComponent()
   {
     component.setLocation(x, y);
+    component.setBackground(background);
+    component.setForeground(foreground);
   }
 
 }

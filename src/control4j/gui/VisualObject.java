@@ -57,6 +57,12 @@ public abstract class VisualObject extends GuiObject
   public static final String LINK_KEY = "facade";
 
   /**
+   *  Swing component that is responsible for painting. This
+   *  field may contain null value.
+   */
+  protected JComponent component;
+
+  /**
    *  Appends given changer at the end of the list of all changers.
    *  Moreover it sets a parent of the given changer to this object.
    *
@@ -207,7 +213,10 @@ public abstract class VisualObject extends GuiObject
   /**
    *
    */
-  public abstract JComponent getVisualComponent();
+  public JComponent getVisualComponent()
+  {
+    return component;
+  }
 
   /**
    *  Calls createSwingComponent method to create new visual
@@ -219,7 +228,7 @@ public abstract class VisualObject extends GuiObject
    */
   public final JComponent createVisualComponent()
   {
-    JComponent component = createSwingComponent();
+    component = createSwingComponent();
     component.putClientProperty(LINK_KEY, this);
     return component;
   }
@@ -243,7 +252,10 @@ public abstract class VisualObject extends GuiObject
   /**
    *
    */
-  protected abstract void releaseVisualComponent();
+  protected void releaseVisualComponent()
+  {
+    component = null;
+  }
 
   /**
    *  Sets the parent object. This method is called by methods

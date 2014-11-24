@@ -22,89 +22,61 @@ import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.Dimension;
 import java.awt.Component;
+import javax.swing.JComponent;
+import javax.swing.JPanel;
 import control4j.scanner.Setter;
 import control4j.scanner.Getter;
+import control4j.gui.VisualContainer;
 
 /**
  *
  */
-public class Panel extends AbstractPanel
+public class Panel extends VisualContainer
 {
 
+  private int x;
+  private int y;
   private int width = 50;
   private int height = 50;
-
-  /**
-   *
-   */
-  private static int counter;
-
-  /**
-   *
-   */
-  private final int number = ++counter;
 
   public Panel()
   {
     super();
-    setLayout(null);
   }
 
-  /**
-   *
-   */
-  @Override
-  protected int getCounter()
-  {
-    return number;
-  }
-
-  @Override
   @Getter(key="Width")
   public int getWidth()
   {
-    return super.getWidth();
+    return width;
   }
 
   @Setter(key="Width")
   public void setWidth(int width)
   {
     this.width = width;
-    revalidate();
-    repaint();
   }
 
-  @Override
   @Getter(key="Height")
   public int getHeight()
   {
-    return super.getHeight();
+    return height;
   }
 
   @Setter(key="Height")
   public void setHeight(int height)
   {
     this.height = height;
-    revalidate();
-    repaint();
   }
 
   @Override
-  public void doLayout()
+  protected JComponent createSwingComponent()
   {
-    super.doLayout();
-    for (int i=0; i<getComponentCount(); i++)
-    {
-      Component component = getComponent(i);
-      Dimension size = component.getPreferredSize();
-      if (size != null) component.setSize(size);
-    }
+    return new JPanel();
   }
 
   @Override
-  public Dimension getPreferredSize()
+  protected void configureVisualComponent()
   {
-    return new Dimension(width, height);
   }
 
 }

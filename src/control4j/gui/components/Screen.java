@@ -46,12 +46,6 @@ public class Screen extends control4j.gui.VisualContainer
   private Color background = Color.gray;
 
   /**
-   *  A swing component which is responsible for painting.
-   *  This field may contain null value.
-   */
-  private JPanel panel;
-
-  /**
    *
    */
   @Getter(key="Title")
@@ -94,9 +88,10 @@ public class Screen extends control4j.gui.VisualContainer
   public void setBackground(Color color)
   {
     this.background = color;
-    if (panel != null)
+    if (component != null)
     {
-      panel.setBackground(color);
+      component.setBackground(color);
+      component.repaint();
     }
   }
 
@@ -106,9 +101,7 @@ public class Screen extends control4j.gui.VisualContainer
   @Override
   protected JComponent createSwingComponent()
   {
-    if (panel == null)
-      panel = new JPanel();
-    return panel;
+    return new JPanel(null);
   }
 
   /**
@@ -117,26 +110,8 @@ public class Screen extends control4j.gui.VisualContainer
   @Override
   protected void configureVisualComponent()
   {
-    panel.setBackground(background);
-  }
-
-  /**
-   *
-   */
-  @Override
-  protected void releaseVisualComponent()
-  {
-    super.releaseVisualComponent();
-    panel = null;
-  }
-
-  /**
-   *
-   */
-  @Override
-  public JComponent getVisualComponent()
-  {
-    return panel;
+    component.setBackground(background);
+    component.repaint();
   }
 
 }

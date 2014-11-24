@@ -22,8 +22,11 @@ import java.awt.Color;
 import java.awt.Rectangle;
 import javax.swing.BorderFactory;
 import javax.swing.border.TitledBorder;
+import javax.swing.JComponent;
+import javax.swing.JPanel;
 import control4j.scanner.Setter;
 import control4j.scanner.Getter;
+import control4j.gui.VisualContainer;
 
 /**
  *
@@ -31,25 +34,36 @@ import control4j.scanner.Getter;
 public class TitledPanel extends Panel
 {
 
+  private String title;
+
   public TitledPanel()
   {
     super();
-    setBorder(BorderFactory.createTitledBorder("Title"));
+    //setBorder(BorderFactory.createTitledBorder("Title"));
   }
 
   @Setter(key="Title")
   public void setTitle(String title)
   {
-    TitledBorder border = (TitledBorder)getBorder();
-    border.setTitle(title);
-    repaint();
+    this.title = title;
   }
 
   @Getter(key="Title")
   public String getTitle()
   {
-    TitledBorder border = (TitledBorder)getBorder();
-    return border.getTitle();
+    return title;
+  }
+
+  @Override
+  protected JComponent createSwingComponent()
+  {
+    return new JPanel();
+  }
+
+  @Override
+  protected void configureVisualComponent()
+  {
+    
   }
 
 }

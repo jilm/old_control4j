@@ -40,12 +40,13 @@ public abstract class VisualContainer extends VisualObject
   {
     insertChild(child, firstChangerIndex);
     firstChangerIndex++;
-    if (getVisualComponent() != null)
+    if (component != null)
     {
       JComponent childComponent = child.createVisualComponent();
-      getVisualComponent().add(childComponent);
+      component.add(childComponent);
       child.configureVisualComponent();
-      getVisualComponent().validate();
+      component.revalidate();
+      component.repaint();
     }
   }
 
@@ -70,7 +71,8 @@ public abstract class VisualContainer extends VisualObject
       JComponent childComponent = child.createVisualComponent();
       getVisualComponent().add(childComponent);
       child.configureVisualComponent();
-      getVisualComponent().validate();
+      component.revalidate();
+      component.repaint();
     }
   }
 
@@ -102,11 +104,11 @@ public abstract class VisualContainer extends VisualObject
     if (child.isVisual()) 
     {
       firstChangerIndex--;
-      JComponent visualComponent = getVisualComponent();
-      if (visualComponent != null)
+      if (component != null)
       {
-	visualComponent.remove(index);
-	visualComponent.validate();
+	component.remove(index);
+	component.revalidate();
+	component.repaint();
 	((VisualObject)child).releaseVisualComponent();
       }
     }
@@ -154,19 +156,18 @@ public abstract class VisualContainer extends VisualObject
   /**
    *  Calls a releseVisualComponent for all of the visual child objects.
    *  Moreover, it removes child visual components from this visual 
-   *  component. The descendant of this class shoud first call super, 
-   *  and than release its own visual object.
+   *  component. 
    */
   @Override
   protected void releaseVisualComponent()
   {
-    JComponent component = getVisualComponent();
     if (component != null)
     {
       for (int i=0; i<getVisualObjectCount(); i++)
         getVisualObject(i).releaseVisualComponent();
       component.removeAll();
     }
+    super.releaseVisualComponent();
   }
 
   @Override

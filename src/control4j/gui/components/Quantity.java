@@ -22,6 +22,7 @@ import control4j.ConfigItem;
 import control4j.Signal;
 import control4j.SignalFormat;
 import control4j.modules.IGuiUpdateListener;
+import control4j.gui.VisualObject;
 import javax.swing.JLabel;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
@@ -37,7 +38,12 @@ import control4j.scanner.Setter;
 import control4j.scanner.Getter;
 import java.text.DecimalFormat;
 
-public class Quantity extends Label
+/**
+ *
+ *
+ *
+ */
+public class Quantity extends VisualObject
 {
 
   /** The number which will be displayed */
@@ -49,7 +55,7 @@ public class Quantity extends Label
   public Quantity()
   {
     super();
-    setHorizontalAlignment(1.0);
+    //setHorizontalAlignment(1.0);
   }
 
   @Getter(key="Fraction Digits")
@@ -63,9 +69,6 @@ public class Quantity extends Label
   {
     format.setMaximumFractionDigits(digits);
     format.setMinimumFractionDigits(digits);
-    update();
-    computeSize();
-    repaint();
   }
 
   @Getter(key="Digits")
@@ -79,8 +82,6 @@ public class Quantity extends Label
   {
     format.setMaximumIntegerDigits(digits);
     this.digits = digits;
-    update();
-    computeSize();
   }
 
   @Getter(key="Value")
@@ -93,49 +94,17 @@ public class Quantity extends Label
   public void setValue(double value)
   {
     this.value = value;
-    update();
-    repaint();
   }
 
   @Override
-  protected void computeSize()
+  protected JComponent createSwingComponent()
   {
-    // get the metrics of the font
-    FontMetrics metrics = getFontMetrics(getFont());
-    // get the text of the appropriate size
-    int digits = getDigits();
-    double number = (Math.pow(10.0d, digits) - 1) * -1;
-    String text = format.format(number);
-    // get rectangles for particular text
-    int width = metrics.stringWidth(text);
-    if (!isFixedWidth()) dimension.width = width;
-    if (!isFixedHeight()) dimension.height = metrics.getHeight();
-    setSize(dimension);
+    return new JLabel();
   }
 
   @Override
-  protected void paintComponent(java.awt.Graphics g)
+  protected void configureVisualComponent()
   {
-    super.paintComponent(g);
   }
-
-  protected void update()
-  {
-    String strValue;
-    if (Double.isNaN(value))
-      this.text = "?";
-    else
-      this.text = format.format(value);
-  }
-
-
-  @Override
-  public Object clone() throws CloneNotSupportedException
-  {
-    Quantity clone = (Quantity)super.clone();
-    clone.format = (DecimalFormat)format.clone();
-    return clone;
-  }
-
 
 }

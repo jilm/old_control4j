@@ -20,44 +20,24 @@ package control4j.gui.components;
 
 import control4j.scanner.Getter;
 import control4j.scanner.Setter;
-import control4j.ConfigItem;
-import control4j.Signal;
-import control4j.SignalFormat;
-import control4j.modules.IGuiUpdateListener;
 import control4j.tools.Preferences;
 import control4j.gui.ColorParser;
-import control4j.gui.SignalAssignment;
+import control4j.gui.VisualObject;
 import javax.swing.JComponent;
-import javax.swing.JPanel;
-import javax.swing.AbstractButton;
-import java.awt.FlowLayout;
 import java.awt.Graphics;
 import java.awt.Color;
-import java.awt.Font;
-import java.awt.FontMetrics;
 import java.awt.Dimension;
 import java.awt.Rectangle;
-import java.awt.geom.Rectangle2D;
-import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentAdapter;
 
 /**
- *  Two state indicator which simulates LED.
+ *
+ *  Paints circle
+ *
  */
-public class Circle extends AbstractComponent
+public class Circle extends VisualObjectBase
 {
 
   private int size = 20;
-
-  /**
-   *
-   */
-  private static int counter;
-
-  /**
-   *
-   */
-  private final int number = ++counter;
 
   /**
    *
@@ -67,41 +47,56 @@ public class Circle extends AbstractComponent
     super();
   }
 
-  /**
-   *
-   */
-  @Override
-  protected int getCounter()
-  {
-    return number;
-  }
-
   @Getter(key="Size")
-  public int getLedSize()
+  public int getSize()
   {
     return this.size;
   }
 
   @Setter(key="Size")
-  public void setLedSize(int size)
+  public void setSize(int size)
   {
     this.size = size;
-    revalidate();
-    repaint();
+    if (component != null)
+    {
+      component.setSize(size, size);
+      component.setPreferredSize(new Dimension(size, size));
+    }
   }
 
   @Override
-  public Dimension getPreferredSize()
+  protected JComponent createSwingComponent()
   {
-    return new Dimension(size, size);
+    return new CirclePainter();
   }
 
   @Override
-  public void paintComponent(Graphics g)
+  protected void configureVisualComponent()
   {
-    super.paintComponent(g);
-    // paint an indicator
-    g.fillOval(0, 0, size, size);
+    super.configureVisualComponent();
+    component.setSize(size, size);
+    component.setPreferredSize(new Dimension(size, size));
+    component.revalidate();
+    component.repaint();
+  }
+
+  /**
+   *  Painter class
+   */
+  private class CirclePainter extends JComponent
+  {
+
+    /**
+     *
+     */
+    @Override
+    public void paintComponent(Graphics g)
+    {
+      super.paintComponent(g);
+      // paint an indicator
+      g.fillOval(0, 0, size, size);
+    }
+
   }
 
 }
