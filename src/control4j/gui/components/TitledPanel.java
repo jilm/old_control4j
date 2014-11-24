@@ -39,13 +39,17 @@ public class TitledPanel extends Panel
   public TitledPanel()
   {
     super();
-    //setBorder(BorderFactory.createTitledBorder("Title"));
   }
 
   @Setter(key="Title")
   public void setTitle(String title)
   {
     this.title = title;
+    if (component != null)
+    {
+      ((TitledBorder)component.getBorder()).setTitle(title);
+      component.repaint();
+    }
   }
 
   @Getter(key="Title")
@@ -60,9 +64,13 @@ public class TitledPanel extends Panel
     return new JPanel();
   }
 
+  /**
+   *
+   */
   @Override
   protected void configureVisualComponent()
   {
+    component.setBorder(BorderFactory.createTitledBorder(title));
     super.configureVisualComponent();
   }
 
