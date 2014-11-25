@@ -66,10 +66,10 @@ public abstract class VisualContainer extends VisualObject
   {
     insertChild(child, index);
     firstChangerIndex++;
-    if (getVisualComponent() != null)
+    if (component != null)
     {
       JComponent childComponent = child.createVisualComponent();
-      getVisualComponent().add(childComponent);
+      component.add(childComponent, index);
       child.configureVisualComponent();
       component.revalidate();
       component.repaint();
@@ -97,6 +97,9 @@ public abstract class VisualContainer extends VisualObject
     return (VisualObject)removeChild(index);
   }
 
+  /**
+   *
+   */
   @Override 
   public GuiObject removeChild(int index)
   {
@@ -107,9 +110,9 @@ public abstract class VisualContainer extends VisualObject
       if (component != null)
       {
 	component.remove(index);
+	((VisualObject)child).releaseVisualComponent();
 	component.revalidate();
 	component.repaint();
-	((VisualObject)child).releaseVisualComponent();
       }
     }
     return super.removeChild(index);
@@ -162,6 +165,7 @@ public abstract class VisualContainer extends VisualObject
   @Override
   protected void configureVisualComponent()
   {
+    System.out.println("Going to create child VC for: " + this.toString() + " ;children: " + getVisualObjectCount());
     for (int i=0; i<getVisualObjectCount(); i++)
     {
       JComponent childComponent = getVisualObject(i).createVisualComponent();
@@ -191,6 +195,17 @@ public abstract class VisualContainer extends VisualObject
   public boolean isVisualContainer()
   {
     return true;
+  }
+
+  /**
+   *
+   */
+  @Override
+  public GuiObject clone(boolean full)
+  {
+    VisualContainer clone = (VisualContainer)super.clone(full);
+    clone.firstChangerIndex = this.firstChangerIndex;
+    return clone;
   }
 
 }
