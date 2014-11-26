@@ -184,6 +184,16 @@ public class Reader extends SaxReader
   /**
    *
    */
+  @XmlEndElement(parent="*", localName="changer")
+  private void endChanger()
+  {
+    finest("/changer");
+    gui = gui.getParent();
+  }
+
+  /**
+   *
+   */
   private GuiObject createInstance(String className)
   {
     try

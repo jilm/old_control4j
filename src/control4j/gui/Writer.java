@@ -156,6 +156,7 @@ public class Writer
         // get key and value
         String key = preference.getKey();
         Object value = preference.getValue(object);
+	if (value == null) continue;
 	// convert value into string
 	String strValue = null;
 	if (value instanceof control4j.gui.Color)
