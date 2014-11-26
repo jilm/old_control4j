@@ -43,7 +43,7 @@ public class ControlLoop
 
   /** Duration of the whole cycle in ms */
   private int cyclePeriod = 1000;
-  private int startCycleDelay;
+  private int startCycleDelay = 200;
   private long cycleStartTime;
   private LinkedList<ICycleEventListener> eventListeners 
     = new LinkedList<ICycleEventListener>();
