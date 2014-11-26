@@ -25,17 +25,13 @@ import java.awt.Graphics;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Dimension;
+import javax.swing.JComponent;
 
 /**
  *
  */
-public class Triangle extends ChangeableComponent
-implements control4j.gui.IComponentName
+public class Triangle extends VisualObjectBase
 {
-
-  private static int counter;
-  private final int number = ++counter;
-  private String name;
 
   /**
    *  Delka strany trojuhelnika
@@ -51,109 +47,87 @@ implements control4j.gui.IComponentName
   private int[] yPoints = new int[3];
   private int width;
 
+  /**
+   *
+   */
   public Triangle()
   {
     super();
-    calculatePoints();
   }
 
-  @Getter(key="Name")
-  public String getName()
-  {
-    if (name != null && name.length() > 0)
-      return name;
-    else
-      return getClass().getSimpleName() + String.valueOf(number);
-  }
-
-  @Setter(key="Name")
-  public void setName(String name)
-  {
-    this.name = name;
-  }
-
-  @Override
-  @Getter(key="X") 
-  public int getX()
-  {
-    return super.getX();
-  }
-
-  @Setter(key="X")
-  public void setX(int x)
-  {
-    Point location = getLocation();
-    location.x = x;
-    setLocation(location);
-  }
-
-  @Override
-  @Getter(key="Y")
-  public int getY()
-  {
-    return super.getY();
-  }
-
-  @Setter(key="Y")
-  public void setY(int y)
-  {
-    Point location = getLocation();
-    location.y = y;
-    setLocation(location);
-  }
-
+  /**
+   *
+   */
   @Getter(key="Size")
   public double getTriangleSize()
   {
     return size;
   }
 
+  /**
+   *
+   */
   @Setter(key="Size")
   public void setTriangleSize(double size)
   {
     this.size = size;
     calculatePoints();
-    revalidate();
-    repaint();
+    if (component != null)
+    {
+      component.setPreferredSize(new Dimension(width, width));
+      component.setBounds(getX(), getY(), width, width);
+      component.revalidate();
+      component.repaint();
+    }
   }
 
+  /**
+   *
+   */
   @Getter(key="Rotation")
   public double getRotation()
   {
     return rotation / Math.PI * 180.0;
   }
 
+  /**
+   *
+   */
   @Setter(key="Rotation")
   public void setRotation(double rotation)
   {
     this.rotation = rotation / 180.0 * Math.PI;
     calculatePoints();
-    revalidate();
-    repaint();
+    if (component != null)
+    {
+      component.setPreferredSize(new Dimension(width, width));
+      component.setBounds(getX(), getY(), width, width);
+      component.revalidate();
+      component.repaint();
+    }
   }
 
-  @Getter(key="Foreground Color") @Override
-  public Color getForeground()
-  {
-    return super.getForeground();
-  }
-
-  @Setter(key="Foreground Color") @Override
-  public void setForeground(Color color)
-  {
-    super.setForeground(color);
-  }
-
+  /**
+   *
+   */
   @Override
-  public Dimension getPreferredSize()
+  protected JComponent createSwingComponent()
   {
-    return new Dimension(width, width);
+    return new TrianglePainter();
   }
 
+  /**
+   *
+   */
   @Override
-  public void paintComponent(Graphics g)
+  protected void configureVisualComponent()
   {
-    g.fillPolygon(xPoints, yPoints, 3);
+    super.configureVisualComponent();
+    calculatePoints();
+    component.setPreferredSize(new Dimension(width, width));
+    component.setBounds(getX(), getY(), width, width);
+    component.revalidate();
+    component.repaint();
   }
 
   /**
@@ -177,13 +151,21 @@ implements control4j.gui.IComponentName
     width = (int)Math.round(2.0 * v);
   }
 
-  @Override
-  public Object clone() throws CloneNotSupportedException
+  /**
+   *
+   */
+  private class TrianglePainter extends JComponent
   {
-    Triangle clone = (Triangle)super.clone();
-    clone.xPoints = new int[3];
-    clone.yPoints = new int[3];
-    return clone;
+
+    /**
+     *
+     */
+    @Override
+    protected void paintComponent(Graphics g)
+    {
+      g.fillPolygon(xPoints, yPoints, 3);
+    }
+
   }
 
 }

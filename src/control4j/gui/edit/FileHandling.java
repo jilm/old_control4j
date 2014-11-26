@@ -136,7 +136,6 @@ implements ActionListener, FileEvent, DataListener, TreeModelListener
       file = null;
       hasChanged = false;  // nothing interesting to save
       actualizeMenu();
-      Editor.setScreens(screens);
       fireFileChangedEvent();
     }
   }

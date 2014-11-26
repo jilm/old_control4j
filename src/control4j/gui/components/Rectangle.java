@@ -41,10 +41,11 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentAdapter;
 
 /**
+ *
  *  Rectangle element.
+ *
  */
-public class Rectangle extends ChangeableComponent
-implements control4j.gui.IComponentName
+public class Rectangle extends VisualObjectBase
 {
 
   private int width = 20;
@@ -57,166 +58,161 @@ implements control4j.gui.IComponentName
   /**
    *
    */
-  private static int counter;
-
-  /**
-   *
-   */
-  private final int number = ++counter;
-
-  /**
-   *
-   */
-  private String name;
-
-  @Getter(key="Name")
-  public String getName()
-  {
-    if (name != null && name.length() > 0)
-      return name;
-    else
-      return getClass().getSimpleName() + String.valueOf(number);
-  }
-
-  @Setter(key="Name")
-  public void setName(String name)
-  {
-    this.name = name;
-  }
-
-  @Override
-  @Getter(key="X") 
-  public int getX()
-  {
-    return super.getX();
-  }
-
-  @Setter(key="X")
-  public void setX(int x)
-  {
-    Point location = getLocation();
-    location.x = x;
-    setLocation(location);
-  }
-
-  @Override
-  @Getter(key="Y")
-  public int getY()
-  {
-    return super.getY();
-  }
-
-  @Setter(key="Y")
-  public void setY(int y)
-  {
-    Point location = getLocation();
-    location.y = y;
-    setLocation(location);
-  }
-  
-  @Getter(key="Width")
-  public int getWidth()
-  {
-    return width;
-  }
-
   @Setter(key="Width")
   public void setWidth(int width)
   {
     this.width = width;
-    revalidate();
-    repaint();
+    if (component != null)
+    {
+      component.setPreferredSize(new Dimension(width, height));
+      component.setSize(width, height);
+      component.revalidate();
+      component.repaint();
+    }
   }
 
+  /**
+   *
+   */
   @Getter(key="Height")
   public int getHeight()
   {
     return height;
   }
 
+  /**
+   *
+   */
   @Setter(key="Height")
   public void setHeight(int height)
   {
     this.height = height;
-    revalidate();
-    repaint();
+    if (component != null)
+    {
+      component.setPreferredSize(new Dimension(width, height));
+      component.setSize(width, height);
+      component.revalidate();
+      component.repaint();
+    }
   }
 
-  @Getter(key="Foreground Color") @Override
-  public Color getForeground()
-  {
-    return super.getForeground();
-  }
-
-  @Setter(key="Foreground Color") @Override
-  public void setForeground(Color color)
-  {
-    super.setForeground(color);
-  }
-
+  /**
+   *
+   */
   @Getter(key="Border")
   public boolean hasBorder()
   {
     return hasBorder;
   }
 
+  /**
+   *
+   */
   @Setter(key="Border")
   public void setBorder(boolean border)
   {
     this.hasBorder = border;
-    repaint();
+    if (component != null)
+    {
+      component.repaint();
+    }
   }
 
+  /**
+   *
+   */
   @Getter(key="Border Color")
   public Color getBorderColor()
   {
     return borderColor;
   }
 
+  /**
+   *
+   */
   @Setter(key="Border Color")
   public void setBorderColor(Color color)
   {
     borderColor = color;
-    repaint();
+    if (component != null)
+    {
+      component.repaint();
+    }
   }
 
+  /**
+   *
+   */
   @Getter(key="Border Thickness")
   public int getBorderThickness()
   {
     return borderThickness;
   }
 
+  /**
+   *
+   */
   @Setter(key="Border Thickness")
   public void setBorderThickness(int thickness)
   {
     borderThickness = thickness;
-    repaint();
+    if (component != null)
+    {
+      component.repaint();
+    }
   }
 
+  /**
+   *
+   */
   @Override
-  public Dimension getPreferredSize()
+  protected JComponent createSwingComponent()
   {
-    return new Dimension(width, height);
+    return new RectanglePainter();
   }
 
+  /**
+   *
+   */
   @Override
-  public void paintComponent(Graphics g)
+  protected void configureVisualComponent()
   {
-    super.paintComponent(g);
-    if (hasBorder)
+    super.configureVisualComponent();
+    component.setPreferredSize(new Dimension(width, height));
+    component.setSize(width, height);
+    component.revalidate();
+    component.repaint();
+  }
+
+  /**
+   *
+   */
+  private class RectanglePainter extends JComponent
+  {
+
+    /**
+     *
+     */
+    @Override
+    protected void paintComponent(Graphics g)
     {
-      // paint a border rectangle
-      g.setColor(borderColor);
-      g.fillRect(0, 0, width, height);
-      // paint the interior of the rectangle
-      g.setColor(getForeground());
-      g.fillRect(borderThickness, borderThickness, width-2*borderThickness, height-2*borderThickness);
+      super.paintComponent(g);
+      if (hasBorder)
+      {
+        // paint a border rectangle
+        g.setColor(borderColor);
+        g.fillRect(0, 0, width, height);
+        // paint the interior of the rectangle
+        g.setColor(getForeground());
+        g.fillRect(borderThickness, borderThickness, width-2*borderThickness, height-2*borderThickness);
+      }
+      else
+      {
+        // paint the rectangle
+        g.fillRect(0, 0, width, height);
+      }
     }
-    else
-    {
-      // paint the rectangle
-      g.fillRect(0, 0, width, height);
-    }
+
   }
 
 }

@@ -35,52 +35,38 @@ import java.awt.Dimension;
 import java.awt.geom.Rectangle2D;
 import control4j.scanner.Setter;
 import control4j.scanner.Getter;
+import control4j.gui.VisualObject;
 import java.text.DecimalFormat;
 
 /**
+ *
  *  A component dedicated to show a line of text.
+ *
  */
-public class Label extends AbstractComponent
+public class Label extends VisualObject
 {
   /** font size */
-  private double fontSize = 12;
+  private float fontSize = 12;
 
   /** The text that will be displayed */
   protected String text = "";
 
-  /** Dimension of the window */
-  protected Dimension dimension = new Dimension(50, 50);
-
   private boolean isFixedWidth = false;
   private boolean isFixedHeight = false;
 
-  private double horizontalAlignment = 0.0;
-  private double verticalAlignment = 0.5;
+  private float horizontalAlignment = 0.0f;
+  private float verticalAlignment = 0.5f;
 
-  /**
-   *
-   */
-  private static int counter;
-
-  /**
-   *
-   */
-  private final int number = ++counter;
+  private int x;
+  private int y;
+  private int width;
+  private int height;
 
   /**
    *
    */
   public Label()
   {
-  }
-
-  /**
-   *
-   */
-  @Override
-  protected int getCounter()
-  {
-    return number;
   }
 
   @Setter(key="Text")
@@ -90,9 +76,8 @@ public class Label extends AbstractComponent
       this.text = "";
     else
       this.text = text;
-    computeSize();
-    revalidate();
-    repaint();
+    if (component != null)
+      ((JLabel)component).setText(this.text);
   }
 
   @Getter(key="Text")
@@ -104,11 +89,12 @@ public class Label extends AbstractComponent
   @Setter(key="Font Size")
   public void setFontSize(double size)
   {
-    fontSize = size;
-    setFont(getFont().deriveFont((float)fontSize));
-    computeSize();
-    revalidate();
-    repaint();
+    fontSize = (float)size;
+    if (component != null)
+    {
+      Font font = component.getFont();
+      component.setFont(font.deriveFont(fontSize));
+    }
   }
 
   @Getter(key="Font Size")
@@ -127,9 +113,6 @@ public class Label extends AbstractComponent
   public void setFixedWidth(boolean value)
   {
     isFixedWidth = value;
-    computeSize();
-    revalidate();
-    repaint();
   }
 
   @Getter(key="Fixed Height")
@@ -142,43 +125,36 @@ public class Label extends AbstractComponent
   public void setFixedHeight(boolean value)
   {
     isFixedHeight = value;
-    computeSize();
-    revalidate();
-    repaint();
   }
 
   @Getter(key="Width")
-  @Override
   public int getWidth()
   {
-    return super.getWidth();
+    return width;
   }
 
   @Setter(key="Width")
   public void setWidth(int width)
   {
     isFixedWidth = true;
-    dimension.width = width;
-    computeSize();
-    revalidate();
-    repaint();
+    this.width = width;
+    if (component != null)
+      component.setSize(width, height);
   }
 
   @Getter(key="Height")
-  @Override
   public int getHeight()
   {
-    return super.getHeight();
+    return height;
   }
 
   @Setter(key="Height")
   public void setHeight(int height)
   {
     isFixedHeight = true;
-    dimension.height = height;
-    computeSize();
-    revalidate();
-    repaint();
+    this.height = height;
+    if (component != null)
+      component.setSize(width, height);
   }
 
   @Getter(key="Horizontal Alignment")
@@ -190,9 +166,7 @@ public class Label extends AbstractComponent
   @Setter(key="Horizontal Alignment")
   public void setHorizontalAlignment(double value)
   {
-    horizontalAlignment = value;
-    revalidate();
-    repaint();
+    horizontalAlignment = (float)value;
   }
 
   @Getter(key="Vertical Alignment")
@@ -204,50 +178,22 @@ public class Label extends AbstractComponent
   @Setter(key="Vertical Alignment")
   public void setVerticalAlignment(double value)
   {
-    verticalAlignment = value;
-    revalidate();
-    repaint();
-  }
-
-  protected void computeSize()
-  {
-    // get the metrics of the font
-    FontMetrics metrics = getFontMetrics(getFont());
-    // get rectangles for particular text
-    int width = metrics.stringWidth(text);
-    if (!isFixedWidth) dimension.width = width;
-    if (!isFixedHeight) dimension.height = metrics.getHeight();
+    verticalAlignment = (float)value;
   }
 
   @Override
-  protected void paintComponent(Graphics g)
+  protected JComponent createSwingComponent()
   {
-    super.paintComponent(g);
-    // paint background
-    g.setColor(getBackground());
-    g.fillRect(0, 0, dimension.width, dimension.height);
-    // get text dimension and coordinates
-    FontMetrics metrics = g.getFontMetrics();
-    int width = metrics.stringWidth(text);
-    int x = (int)Math.round((dimension.width - width) * horizontalAlignment);
-    int height = metrics.getHeight();
-    int y = (int)Math.round((dimension.height - height) * verticalAlignment);
-    // paint value
-    g.setColor(getForeground());
-    g.drawString(text, x, g.getFontMetrics().getAscent() + y);
+    return new JLabel();
   }
 
   @Override
-  public Dimension getPreferredSize()
+  protected void configureVisualComponent()
   {
-    return dimension;
+    component.setLocation(x, y);
+    ((JLabel)component).setText(text);
+    Font font = component.getFont();
+    component.setFont(font.deriveFont(fontSize));
   }
-
-  @Override
-  public Dimension getMinimumSize()
-  {
-    return dimension;
-  }
-  
 
 }
