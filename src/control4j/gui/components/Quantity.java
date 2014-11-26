@@ -40,15 +40,16 @@ import java.text.DecimalFormat;
 
 /**
  *
- *
+ *  A component which purpose is to show real numbers.
  *
  */
-public class Quantity extends VisualObject
+public class Quantity extends VisualObjectBase
 {
 
   /** The number which will be displayed */
   private double value = Double.NaN;
   private DecimalFormat format = new DecimalFormat();
+  private float fontSize = 12.0f;
 
   public int digits = 5;
 
@@ -69,6 +70,13 @@ public class Quantity extends VisualObject
   {
     format.setMaximumFractionDigits(digits);
     format.setMinimumFractionDigits(digits);
+    if (component != null) 
+    {
+      update();
+      component.setPreferredSize(computeSize());
+      component.revalidate();
+      component.repaint();
+    }
   }
 
   @Getter(key="Digits")
@@ -82,6 +90,13 @@ public class Quantity extends VisualObject
   {
     format.setMaximumIntegerDigits(digits);
     this.digits = digits;
+    if (component != null) 
+    {
+      update();
+      component.setPreferredSize(computeSize());
+      component.revalidate();
+      component.repaint();
+    }
   }
 
   @Getter(key="Value")
@@ -94,6 +109,27 @@ public class Quantity extends VisualObject
   public void setValue(double value)
   {
     this.value = value;
+    if (component != null)
+    {
+      update();
+    }
+  }
+
+  @Getter(key="Font Size")
+  public double getFontSize()
+  {
+    return fontSize;
+  }
+
+  @Setter(key="Font Size")
+  public void setFontSize(double size)
+  {
+    fontSize = (float)size;
+    if (component != null)
+    {
+      component.setFont(component.getFont().deriveFont(fontSize));
+      component.setPreferredSize(computeSize());
+    }
   }
 
   @Override
@@ -105,6 +141,35 @@ public class Quantity extends VisualObject
   @Override
   protected void configureVisualComponent()
   {
+    super.configureVisualComponent();
+    ((JLabel)component).setHorizontalAlignment(JLabel.RIGHT);
+    component.setFont(component.getFont().deriveFont(fontSize));
+    component.setPreferredSize(computeSize());
+    update();
+    component.revalidate();
+    component.repaint();
+  }
+
+  private void update()
+  {
+    if (Double.isNaN(value))
+      ((JLabel)component).setText("?");
+    else
+      ((JLabel)component).setText(format.format(value));
+  }
+
+  private Dimension computeSize()
+  {
+    // get the metrics of the font
+    FontMetrics metrics = component.getFontMetrics(component.getFont());
+    // create the text of the appropriate size
+    int digits = getDigits();
+    double number = (Math.pow(10.0d, digits) - 1) * -1;
+    String text = format.format(number);
+    // get rectangles for particular text
+    int width = metrics.stringWidth(text);
+    int height = metrics.getHeight();
+    return new Dimension(width, height);
   }
 
 }

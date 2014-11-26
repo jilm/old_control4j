@@ -33,6 +33,7 @@ public abstract class VisualObjectBase extends VisualObject
   private int y;
   private Color foreground = Color.blue;
   private Color background = Color.gray;
+  private boolean isOpaque;
 
   @Getter(key="X")
   public int getX()
@@ -90,10 +91,28 @@ public abstract class VisualObjectBase extends VisualObject
       component.setBackground(background);
   }
 
+  @Getter(key="Is Opaque")
+  public boolean isOpaque()
+  {
+    return isOpaque;
+  }
+
+  @Setter(key="Is Opaque")
+  public void setOpaque(boolean isOpaque)
+  {
+    this.isOpaque = isOpaque;
+    if (component != null)
+    {
+      component.setOpaque(isOpaque);
+      component.repaint();
+    }
+  }
+
   @Override
   protected void configureVisualComponent()
   {
     component.setLocation(x, y);
+    component.setOpaque(isOpaque);
     component.setBackground(background);
     component.setForeground(foreground);
   }
