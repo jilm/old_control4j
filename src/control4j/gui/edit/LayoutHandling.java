@@ -33,7 +33,7 @@ import javax.swing.tree.TreePath;
 import control4j.gui.GuiObject;
 import control4j.gui.VisualObject;
 import control4j.gui.VisualContainer;
-import control4j.gui.changers.Changer;
+import control4j.gui.Changer;
 import control4j.gui.components.Screen;
 import control4j.scanner.Scanner;
 import control4j.scanner.Item;

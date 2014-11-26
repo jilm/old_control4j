@@ -39,7 +39,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import control4j.gui.changers.Changer;
+import control4j.gui.Changer;
 import control4j.scanner.KeyValueTableModel;
 import control4j.scanner.Setter;
 
