@@ -19,6 +19,7 @@ package control4j.gui.components;
  */
 
 import java.awt.Color;
+import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.FlowLayout;
 import javax.swing.JComponent;
@@ -41,20 +42,6 @@ public class Box extends VisualContainer
   private int alignmentPoint = 0;
   private int x;
   private int y;
-
-  /**
-   *
-   */
-  private JPanel panel;
-
-  /**
-   *
-   */
-  public Box()
-  {
-    super();
-    //setLayout(new FlowLayout());
-  }
 
   /**
    *
@@ -84,8 +71,12 @@ public class Box extends VisualContainer
   public void setX(int x)
   {
     this.x = x;
-    if (panel != null)
-      panel.setLocation(x, y);
+    if (component != null)
+    {
+      JComponent parent = (JComponent)component.getParent();
+      Insets insets = parent.getInsets();
+      component.setLocation(x + insets.left, y + insets.top);
+    }
   }
 
   @Getter(key="Y")
@@ -98,8 +89,12 @@ public class Box extends VisualContainer
   public void setY(int y)
   {
     this.y = y;
-    if (panel != null)
-      panel.setLocation(x, y);
+    if (component != null)
+    {
+      JComponent parent = (JComponent)component.getParent();
+      Insets insets = parent.getInsets();
+      component.setLocation(x + insets.left, y + insets.top);
+    }
   }
 
   /**
@@ -117,7 +112,9 @@ public class Box extends VisualContainer
   @Override
   protected void configureVisualComponent()
   {
-    component.setLocation(x, y);
+    JComponent parent = (JComponent)component.getParent();
+    Insets insets = parent.getInsets();
+    component.setLocation(x + insets.left, y + insets.top);
     super.configureVisualComponent();
     component.revalidate();
     component.repaint();
