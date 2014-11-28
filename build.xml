@@ -4,6 +4,8 @@
     <property name="srcdir" location="src" />
     <property name="bindir" location="bin" />
     <property name="docdir" location="doc" />
+    <property name="apbindir" location="apbin" />
+    <property name="apsrcdir" location="src/control4j/annotations" />
     <property name="testsrcdir" location="test" />
     <property name="reports" location="reports" />
     <property name="jarname" value="control4j.jar" />
@@ -18,9 +20,10 @@
         <mkdir dir="${bindir}" />
 	<depend srcdir="${srcdir}" destdir="${bindir}" />
         <javac srcdir="${srcdir}" destdir="${bindir}" 
-	  excludes=""
-	  deprecation="no"
-	  />
+	    excludes="${srcdir}/annotations/process/*"
+	    deprecation="no"
+	    classpath="ap.jar"
+	/>
         <concat destfile="${bindir}/control4j/messages.properties" >
             <fileset dir="${srcdir}" includes="**/messages.properties" />
         </concat>
@@ -68,6 +71,24 @@
 	        <attribute name="Main-Class" value="control4j.Control" />
 	    </manifest>
 	</jar>
+    </target>
+
+    <target name="ap">
+        <mkdir dir="${apbindir}" />
+	<depend srcdir="${apsrcdir}" destdir="${apbindir}" />
+        <javac srcdir="${apsrcdir}" destdir="${apbindir}" 
+            excludes=""
+	    deprecation="no"
+	/>
+        <mkdir dir="${apbindir}/META-INF" />
+        <mkdir dir="${apbindir}/META-INF/services" />
+        <echo
+	    message="control4j.annotations.process.GuiObjectProcessor"
+	    file="${apbindir}/META-INF/services/javax.annotation.processing.Processor" />
+    	<jar destfile="ap.jar">
+            <fileset dir="${apbindir}" />
+	</jar>
+        <delete dir="${apbindir}" />
     </target>
 
 </project>
