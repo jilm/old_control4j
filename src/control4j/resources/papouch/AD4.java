@@ -30,6 +30,11 @@ import control4j.resources.ValueNotAvailableException;
 import control4j.resources.spinel.Spinel;
 import control4j.protocols.spinel.SpinelMessage;
 
+/**
+ *
+ *  Analog input module.
+ *
+ */
 public class AD4 extends control4j.resources.Resource
 implements IAnalogInput, ICycleEventListener
 {
@@ -52,8 +57,14 @@ implements IAnalogInput, ICycleEventListener
   private int[] measurementStatus = new int[channels];
   private double[] values = new double[channels];
   private Date timestamp;
-  private SpinelMessage request = new SpinelMessage(address, 0x51);
+  private SpinelMessage request;
   private IResponseCrate<SpinelMessage> response = null;
+
+  @Override
+  public void prepare()
+  {
+    request = new SpinelMessage(address, 0x51);
+  }
 
   public double getAnalogInput(int index) throws ValueNotAvailableException
   {

@@ -71,20 +71,27 @@ implements ICycleEventListener, IThermometer, IBinaryInput, IBinaryOutput
 
   /* binary input */
   private final int inputs = 8;  // number of inputs
-  private SpinelMessage inputRequest = new SpinelMessage(address, 0x31);
+  private SpinelMessage inputRequest;
   private IResponseCrate<SpinelMessage> inputResponse;
   private boolean[] binaryInput = new boolean[inputs];
   private Date binaryInputTimestamp;
   private int binaryInputStatus = -1;
 
   /* temperature measurement */
-  private SpinelMessage temperatureRequest = new SpinelMessage(address, 0x51, new int[] { 1 });
+  private SpinelMessage temperatureRequest;
   private IResponseCrate<SpinelMessage> temperatureUnitResponse;
   private IResponseCrate<SpinelMessage> temperatureResponse;
   private String temperatureUnit = null;
   private double temperature;
   private Date temperatureTimestamp;
   private int temperatureStatus = 10;
+
+  @Override
+  public void prepare()
+  {
+    inputRequest = new SpinelMessage(address, 0x31);
+    temperatureRequest = new SpinelMessage(address, 0x51, new int[] { 1 });
+  }
 
   public void setBinaryOutput(int index, boolean value)
   {
