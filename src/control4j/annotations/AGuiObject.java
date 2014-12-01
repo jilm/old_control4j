@@ -24,4 +24,6 @@ import java.lang.annotation.RetentionPolicy;
 @Retention(RetentionPolicy.SOURCE)
 public @interface AGuiObject
 {
+  String name();
+  String[] tags();
 }

@@ -16,7 +16,7 @@
         <delete dir="${reports}" />
     </target>
 
-    <target name="compile" description="Compiles the Task">
+    <target name="compile" depends="ap" description="Compiles the Task">
         <mkdir dir="${bindir}" />
 	<depend srcdir="${srcdir}" destdir="${bindir}" />
         <javac srcdir="${srcdir}" destdir="${bindir}" 
@@ -73,22 +73,18 @@
 	</jar>
     </target>
 
-    <target name="ap">
-        <mkdir dir="${apbindir}" />
-	<depend srcdir="${apsrcdir}" destdir="${apbindir}" />
-        <javac srcdir="${apsrcdir}" destdir="${apbindir}" 
+    <target name="ap" depends="clean" >
+        <mkdir dir="${bindir}" />
+	<depend srcdir="${srcdir}" destdir="${bindir}" />
+        <javac srcdir="${srcdir}/control4j/annotations" destdir="${bindir}" 
             excludes=""
 	    deprecation="no"
 	/>
-        <mkdir dir="${apbindir}/META-INF" />
-        <mkdir dir="${apbindir}/META-INF/services" />
+        <mkdir dir="${bindir}/META-INF" />
+        <mkdir dir="${bindir}/META-INF/services" />
         <echo
 	    message="control4j.annotations.process.GuiObjectProcessor"
 	    file="${apbindir}/META-INF/services/javax.annotation.processing.Processor" />
-    	<jar destfile="ap.jar">
-            <fileset dir="${apbindir}" />
-	</jar>
-        <delete dir="${apbindir}" />
     </target>
 
 </project>
