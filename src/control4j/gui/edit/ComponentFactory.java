@@ -45,6 +45,7 @@ class ComponentFactory
     components.put("Box Panel", "control4j.gui.components.Box");
     components.put("Rectangle", "control4j.gui.components.Rectangle");
     components.put("Triangle", "control4j.gui.components.Triangle");
+    components.put("BoxFiller", "control4j.gui.components.BoxFiller");
   }
 
   /**

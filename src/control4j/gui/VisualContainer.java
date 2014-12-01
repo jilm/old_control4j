@@ -34,7 +34,14 @@ public abstract class VisualContainer extends VisualObject
   private int firstChangerIndex = 0;
 
   /**
+   *  Adds a given child at the end of visual children list. If this
+   *  object has a visual component, visual component is created even
+   *  for the child. Created component is added at the end of this
+   *  visual component children list. And finally configureVisualComponent
+   *  is called for the child.
    *
+   *  @param child
+   *             object to be added as a child
    */
   public void add(VisualObject child)
   {
@@ -165,7 +172,6 @@ public abstract class VisualContainer extends VisualObject
   @Override
   protected void configureVisualComponent()
   {
-    System.out.println("Going to create child VC for: " + this.toString() + " ;children: " + getVisualObjectCount());
     for (int i=0; i<getVisualObjectCount(); i++)
     {
       JComponent childComponent = getVisualObject(i).createVisualComponent();

@@ -74,7 +74,10 @@ public class Quantity extends VisualObjectBase
     if (component != null) 
     {
       update();
-      component.setPreferredSize(computeSize());
+      Dimension size = computeSize();
+      component.setPreferredSize(size);
+      component.setMaximumSize(size);
+      component.setMinimumSize(size);
       component.revalidate();
       component.repaint();
     }
@@ -94,7 +97,10 @@ public class Quantity extends VisualObjectBase
     if (component != null) 
     {
       update();
-      component.setPreferredSize(computeSize());
+      Dimension size = computeSize();
+      component.setPreferredSize(size);
+      component.setMaximumSize(size);
+      component.setMinimumSize(size);
       component.revalidate();
       component.repaint();
     }
@@ -123,13 +129,16 @@ public class Quantity extends VisualObjectBase
   }
 
   @Setter(key="Font Size")
-  public void setFontSize(double size)
+  public void setFontSize(double fontSize)
   {
-    fontSize = (float)size;
+    this.fontSize = (float)fontSize;
     if (component != null)
     {
-      component.setFont(component.getFont().deriveFont(fontSize));
-      component.setPreferredSize(computeSize());
+      component.setFont(component.getFont().deriveFont(this.fontSize));
+      Dimension size = computeSize();
+      component.setPreferredSize(size);
+      component.setMaximumSize(size);
+      component.setMinimumSize(size);
     }
   }
 
@@ -145,7 +154,10 @@ public class Quantity extends VisualObjectBase
     super.configureVisualComponent();
     ((JLabel)component).setHorizontalAlignment(JLabel.RIGHT);
     component.setFont(component.getFont().deriveFont(fontSize));
-    component.setPreferredSize(computeSize());
+    Dimension size = computeSize();
+    component.setPreferredSize(size);
+    component.setMaximumSize(size);
+    component.setMinimumSize(size);
     update();
     component.revalidate();
     component.repaint();

@@ -64,6 +64,8 @@ public class Circle extends VisualObjectBase
     {
       component.setSize(size, size);
       component.setPreferredSize(new Dimension(size, size));
+      component.setMaximumSize(new Dimension(size, size));
+      component.setMinimumSize(new Dimension(size, size));
     }
   }
 
@@ -79,6 +81,8 @@ public class Circle extends VisualObjectBase
     super.configureVisualComponent();
     component.setSize(size, size);
     component.setPreferredSize(new Dimension(size, size));
+    component.setMaximumSize(new Dimension(size, size));
+    component.setMinimumSize(new Dimension(size, size));
     component.revalidate();
     component.repaint();
   }
