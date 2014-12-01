@@ -31,6 +31,7 @@ import static control4j.tools.Logger.*;
  *  Change color of gui component according to boolean interpretation of
  *  input signal. Color of component property may have tree values.
  */
+@control4j.annotations.AGuiObject(name="LED", tags={"color"})
 public class Led extends Changer<Color>
 {
 

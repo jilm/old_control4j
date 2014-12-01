@@ -29,6 +29,7 @@ import static control4j.tools.Logger.*;
 /**
  *
  */
+@control4j.annotations.AGuiObject(name="Set quantity", tags={"real number"})
 public class SetQuantity extends Changer<Double>
 {
 

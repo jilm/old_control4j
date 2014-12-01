@@ -30,6 +30,7 @@ import static control4j.tools.Logger.*;
  *  Changes integer property of its parent. Typicaly it change position or
  *  dimension of some component depends on the value from technology.
  */
+@control4j.annotations.AGuiObject(name="Move", tags={"integer"})
 public class Move extends Changer<Integer>
 {
   

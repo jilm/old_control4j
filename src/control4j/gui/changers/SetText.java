@@ -30,6 +30,7 @@ import static control4j.tools.Logger.*;
 /**
  *
  */
+@control4j.annotations.AGuiObject(name="Set text", tags={"text"})
 public class SetText extends Changer<String>
 {
 
