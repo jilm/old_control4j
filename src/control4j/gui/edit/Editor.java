@@ -280,17 +280,15 @@ TreeModelListener, FileListener
       treeModel.fireTreeNodeInserted(newScreen);
     }
     else if (e.getActionCommand().equals("STRUCTURE_DELETE"))
-    {
       delete();
-    }
     else if (e.getActionCommand().equals("STRUCTURE_ADD_COMPONENT"))
-    {
       addComponent();
-    }
     else if (e.getActionCommand().equals("STRUCTURE_ADD_CHANGER"))
-    {
       addChanger();
-    }
+    else if (e.getActionCommand().equals("STRUCTURE_MOVE_UP"))
+      moveUp();
+    else if (e.getActionCommand().equals("STRUCTURE_MOVE_DOWN"))
+      moveDown();
   }
 
   /**
@@ -373,6 +371,48 @@ TreeModelListener, FileListener
       System.out.println("Class cast exception: " + e.getMessage());
       return;
     }
+  }
+
+  /**
+   *  Takes a selected gui object and moves it up. It means, that if some
+   *  visual container has tree children and the second is selected, before
+   *  this method is invoked, first and second child exchange theirs positions
+   *  afterwards.
+   */
+  private void moveUp()
+  {
+    TreePath selectionPath = guiStructureTree.getLeadSelectionPath();
+    if (selectionPath == null) return;
+    GuiObject selection = (GuiObject)selectionPath.getLastPathComponent();
+    if (!selection.isVisual()) return;
+    VisualContainer parent = (VisualContainer)selection.getParent();
+    int index = parent.getIndexOfChild(selection);
+    if (index < 1) return;
+    parent.removeChild(index);
+    treeModel.fireTreeNodeRemoved(parent, selection, index);
+    parent.insert((VisualObject)selection, index - 1);
+    treeModel.fireTreeNodeInserted(selection);
+  }
+
+  /**
+   *  Takes a selected gui object and moves it down. It means, that if some
+   *  visual container has tree children and the second is selected, before
+   *  this method is invoked, socond and third child exchange theirs positions
+   *  afterwards.
+   */
+  private void moveDown()
+  {
+    TreePath selectionPath = guiStructureTree.getLeadSelectionPath();
+    if (selectionPath == null) return;
+    GuiObject selection = (GuiObject)selectionPath.getLastPathComponent();
+    if (!selection.isVisual()) return;
+    VisualContainer parent = (VisualContainer)selection.getParent();
+    int index = parent.getIndexOfChild(selection);
+    if (index >= parent.getVisualObjectCount() - 1) return;
+    parent.removeChild(index);
+    treeModel.fireTreeNodeRemoved(parent, selection, index);
+    parent.insert((VisualObject)selection, index + 1);
+    treeModel.fireTreeNodeInserted(selection);
   }
 
   /**
