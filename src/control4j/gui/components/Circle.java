@@ -29,11 +29,14 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Rectangle;
 
+import control4j.annotations.AGuiObject;
+
 /**
  *
  *  Paints circle
  *
  */
+@AGuiObject(name="Circle", tags={"basic shape"})
 public class Circle extends VisualObjectBase
 {
 

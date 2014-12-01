@@ -40,11 +40,14 @@ import java.awt.Dimension;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentAdapter;
 
+import control4j.annotations.AGuiObject;
+
 /**
  *
  *  Rectangle element.
  *
  */
+@AGuiObject(name="Rectangle", tags={"basic shape"})
 public class Rectangle extends VisualObjectBase
 {
 

@@ -33,6 +33,7 @@ import control4j.gui.VisualContainer;
  *  Panel that uses Flow layout.
  *
  */
+@control4j.annotations.AGuiObject(name="Box", tags={"box layout"})
 public class Box extends VisualContainer
 {
 

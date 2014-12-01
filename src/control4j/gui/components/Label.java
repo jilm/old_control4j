@@ -43,6 +43,7 @@ import java.text.DecimalFormat;
  *  A component dedicated to show a line of text.
  *
  */
+@control4j.annotations.AGuiObject(name="Label")
 public class Label extends VisualObject
 {
   /** font size */

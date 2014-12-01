@@ -31,6 +31,7 @@ import control4j.gui.VisualContainer;
 /**
  *
  */
+@control4j.annotations.AGuiObject(name="Titled panel")
 public class TitledPanel extends Panel
 {
 

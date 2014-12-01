@@ -31,6 +31,7 @@ import control4j.gui.VisualContainer;
 /**
  *
  */
+@control4j.annotations.AGuiObject(name="Panel")
 public class Panel extends VisualContainer
 {
 

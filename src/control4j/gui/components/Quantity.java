@@ -43,6 +43,7 @@ import java.text.DecimalFormat;
  *  A component which purpose is to show real numbers.
  *
  */
+@control4j.annotations.AGuiObject(name="Quantity")
 public class Quantity extends VisualObjectBase
 {
 

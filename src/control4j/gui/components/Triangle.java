@@ -30,6 +30,7 @@ import javax.swing.JComponent;
 /**
  *
  */
+@control4j.annotations.AGuiObject(name="Triangle", tags={"basic shape"})
 public class Triangle extends VisualObjectBase
 {
 
