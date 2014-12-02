@@ -23,7 +23,7 @@ import java.util.Collection;
 import java.util.ArrayList;
 import java.util.NoSuchElementException;
 import control4j.ErrorManager;
-import control4j.application.gui.ScreenDeclaration;
+//import control4j.application.gui.ScreenDeclaration;
 import control4j.gui.Screens;
 
 /**
