@@ -20,23 +20,26 @@ package control4j.modules;
 
 import java.util.LinkedList;
 import javax.swing.JFrame;
+import javax.swing.JComponent;
 import control4j.Signal;
 import control4j.InputModule;
 import control4j.gui.Changer;
+import control4j.gui.Screens;
 
 public class IMGui extends InputModule
 {
 
   private JFrame mainFrame;
 
-  private LinkedList<Changer> updateListeners
-    = new LinkedList<Changer>();
+  private Screens gui;
 
-  private Signal[] buffer;
+  private LinkedList<Changer> updateListeners = new LinkedList<Changer>();
 
-  public void setMainFrame(JFrame frame)
+  //private Signal[] buffer;
+
+  public void setGui(Screens gui)
   {
-    mainFrame = frame;
+    this.gui = gui;
   }
 
   public void registerUpdateListener(Changer listener)
@@ -51,7 +54,14 @@ public class IMGui extends InputModule
   public void prepare()
   {
     super.prepare();
-    buffer = new Signal[getNumberOfAssignedInputs()];
+    //buffer = new Signal[getNumberOfAssignedInputs()];
+    // Create and set up the window
+    mainFrame = new JFrame("Top level demo");
+    mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    JComponent screensComponent = gui.createVisualComponent();
+    mainFrame.add(screensComponent);
+    gui.configureVisualComponent();
+    // Show the main window
     javax.swing.SwingUtilities.invokeLater(
       new Runnable()
       {
