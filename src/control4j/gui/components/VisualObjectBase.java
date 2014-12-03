@@ -19,11 +19,14 @@ package control4j.gui.components;
  */
 
 import java.awt.Color;
+import java.awt.Insets;
 import control4j.gui.VisualObject;
 import control4j.scanner.Setter;
 import control4j.scanner.Getter;
 
 /**
+ *
+ *  Define some properties that are common to most of the visual objects.
  *
  */
 public abstract class VisualObjectBase extends VisualObject
@@ -47,7 +50,9 @@ public abstract class VisualObjectBase extends VisualObject
     this.x = x;
     if (component != null)
     {
-      component.setLocation(x, y);
+      Insets insets 
+	  = ((VisualObject)getParent()).getVisualComponent().getInsets();
+      component.setLocation(x + insets.left, y + insets.top);
       component.revalidate();
       component.repaint();
     }
@@ -65,7 +70,9 @@ public abstract class VisualObjectBase extends VisualObject
     this.y = y;
     if (component != null)
     {
-      component.setLocation(x, y);
+      Insets insets 
+	  = ((VisualObject)getParent()).getVisualComponent().getInsets();
+      component.setLocation(x + insets.left, y + insets.top);
       component.revalidate();
       component.repaint();
     }
@@ -125,7 +132,9 @@ public abstract class VisualObjectBase extends VisualObject
   @Override
   protected void configureVisualComponent()
   {
-    component.setLocation(x, y);
+    Insets insets 
+        = ((VisualObject)getParent()).getVisualComponent().getInsets();
+    component.setLocation(x + insets.left, y + insets.top);
     component.setOpaque(isOpaque);
     component.setBackground(background);
     component.setForeground(foreground);

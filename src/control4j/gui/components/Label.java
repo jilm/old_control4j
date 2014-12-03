@@ -18,25 +18,12 @@ package control4j.gui.components;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import control4j.ConfigItem;
-import control4j.Signal;
-import control4j.SignalFormat;
-import control4j.modules.IGuiUpdateListener;
-import javax.swing.JLabel;
-import javax.swing.JComponent;
-import javax.swing.JPanel;
-import java.awt.FlowLayout;
-import java.awt.Rectangle;
-import java.awt.Graphics;
 import java.awt.Font;
 import java.awt.Color;
-import java.awt.FontMetrics;
-import java.awt.Dimension;
-import java.awt.geom.Rectangle2D;
+import javax.swing.JLabel;
+import javax.swing.JComponent;
 import control4j.scanner.Setter;
 import control4j.scanner.Getter;
-import control4j.gui.VisualObject;
-import java.text.DecimalFormat;
 
 /**
  *
@@ -44,31 +31,14 @@ import java.text.DecimalFormat;
  *
  */
 @control4j.annotations.AGuiObject(name="Label")
-public class Label extends VisualObject
+public class Label extends VisualObjectBase
 {
+
   /** font size */
   private float fontSize = 12;
 
   /** The text that will be displayed */
   protected String text = "";
-
-  private boolean isFixedWidth = false;
-  private boolean isFixedHeight = false;
-
-  private float horizontalAlignment = 0.0f;
-  private float verticalAlignment = 0.5f;
-
-  private int x;
-  private int y;
-  private int width;
-  private int height;
-
-  /**
-   *
-   */
-  public Label()
-  {
-  }
 
   @Setter(key="Text")
   public void setText(String text)
@@ -104,82 +74,22 @@ public class Label extends VisualObject
     return fontSize;
   }
 
-  @Getter(key="Fixed Width")
-  public boolean isFixedWidth()
-  {
-    return isFixedWidth;
-  }
-
-  @Setter(key="Fixed Width")
-  public void setFixedWidth(boolean value)
-  {
-    isFixedWidth = value;
-  }
-
-  @Getter(key="Fixed Height")
-  public boolean isFixedHeight()
-  {
-    return isFixedHeight;
-  }
-
-  @Setter(key="Fixed Height")
-  public void setFixedHeight(boolean value)
-  {
-    isFixedHeight = value;
-  }
-
   @Getter(key="Width")
   public int getWidth()
   {
-    return width;
-  }
-
-  @Setter(key="Width")
-  public void setWidth(int width)
-  {
-    isFixedWidth = true;
-    this.width = width;
     if (component != null)
-      component.setSize(width, height);
+      return component.getWidth();
+    else
+      return 0;
   }
 
   @Getter(key="Height")
   public int getHeight()
   {
-    return height;
-  }
-
-  @Setter(key="Height")
-  public void setHeight(int height)
-  {
-    isFixedHeight = true;
-    this.height = height;
     if (component != null)
-      component.setSize(width, height);
-  }
-
-  @Getter(key="Horizontal Alignment")
-  public double getHorizontalAlignment()
-  {
-    return horizontalAlignment;
-  }
-
-  @Setter(key="Horizontal Alignment")
-  public void setHorizontalAlignment(double value)
-  {
-    horizontalAlignment = (float)value;
-  }
-
-  @Getter(key="Vertical Alignment")
-  public double getVerticalAlignment()
-  {
-    return verticalAlignment;
-  }
-
-  @Setter(key="Vertical Alignment")
-  public void setVerticalAlignment(double value)
-  {
-    verticalAlignment = (float)value;
+      return component.getHeight();
+    else
+      return 0;
   }
 
   @Override
@@ -191,7 +101,7 @@ public class Label extends VisualObject
   @Override
   protected void configureVisualComponent()
   {
-    component.setLocation(x, y);
+    super.configureVisualComponent();
     ((JLabel)component).setText(text);
     Font font = component.getFont();
     component.setFont(font.deriveFont(fontSize));
