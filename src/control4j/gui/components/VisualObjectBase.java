@@ -46,7 +46,11 @@ public abstract class VisualObjectBase extends VisualObject
   {
     this.x = x;
     if (component != null)
+    {
       component.setLocation(x, y);
+      component.revalidate();
+      component.repaint();
+    }
   }
 
   @Getter(key="Y")
@@ -60,7 +64,11 @@ public abstract class VisualObjectBase extends VisualObject
   {
     this.y = y;
     if (component != null)
+    {
       component.setLocation(x, y);
+      component.revalidate();
+      component.repaint();
+    }
   }
 
   @Getter(key="Foreground Color")
@@ -74,7 +82,10 @@ public abstract class VisualObjectBase extends VisualObject
   {
     foreground = color;
     if (component != null)
+    {
       component.setForeground(foreground);
+      component.repaint();
+    }
   }
 
   @Getter(key="Background Color")
@@ -88,7 +99,10 @@ public abstract class VisualObjectBase extends VisualObject
   {
     background = color;
     if (component != null)
+    {
       component.setBackground(background);
+      component.repaint();
+    }
   }
 
   @Getter(key="Is Opaque")
