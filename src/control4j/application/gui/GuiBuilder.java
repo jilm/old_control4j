@@ -26,12 +26,15 @@ import control4j.application.ModuleDeclaration;
 import control4j.application.Input;
 import control4j.application.Scope;
 import control4j.Module;
+import control4j.Control;
 import control4j.ModuleManager;
+import control4j.ICycleEventListener;
 import control4j.modules.IMGui;
 import control4j.modules.IGuiUpdateListener;
-import control4j.gui.ComponentIterator;
+import control4j.gui.GuiObject;
 import control4j.gui.Changer;
 import control4j.gui.Screens;
+import control4j.gui.ComponentIterator;
 import control4j.tools.DeclarationReference;
 
 /**
@@ -121,6 +124,18 @@ public class GuiBuilder
         guiModule.registerUpdateListener(changer);
     }
 
+    // If some gui object implements ICycleEventListener interface,
+    // subscribe it.
+    ComponentIterator guiObjects
+      = new ComponentIterator(screens, GuiObject.class);
+    while (guiObjects.hasNext())
+    {
+      GuiObject guiObject = guiObjects.next();
+      if (guiObject instanceof ICycleEventListener)
+	Control.registerCycleEventListener((ICycleEventListener)guiObject);
+    }
+
+    // finally add the gui module into the module manager
     guiModule.setGui(screens);
     ModuleManager.getInstance().add(guiModule);
   }
