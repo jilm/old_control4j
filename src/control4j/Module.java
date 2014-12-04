@@ -20,6 +20,7 @@ package control4j;
 
 import java.lang.reflect.Field;
 import control4j.application.ModuleDeclaration;
+import control4j.application.SignalManager;
 import control4j.tools.DeclarationReference;
 import static control4j.tools.LogMessages.*;
 
@@ -152,6 +153,30 @@ public abstract class Module
       return declarationReference.toString();
     else
       return "";
+  }
+
+  /**
+   *  Assign a unit that is specified in the signal declaration to all of 
+   *  the given signals which doesn't have already the unit attached.
+   *
+   *  @param map
+   *             a mapping from signals array into the signal declaration
+   *             indexes
+   *
+   *  @param signals
+   *             signals that will be updated
+   */
+  protected void assignUnits(int[] map, Signal[] signals)
+  {
+    SignalManager signalManager = SignalManager.getInstance();
+    for (int i=0; i<map.length; i++)
+    {
+      if (signals[i].getUnit() == null || signals[i].getUnit().length() == 0)
+      {
+	String unit = signalManager.get(map[i]).getUnit();
+	signals[i].setUnit(unit);
+      }
+    }
   }
 
 }

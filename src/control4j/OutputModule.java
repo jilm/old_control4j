@@ -112,6 +112,8 @@ public abstract class OutputModule extends Module
   {
     // call the exec function
     Signal[] output = get();
+    // assign units
+    assignUnits(outputMap, output);
     // store the output into the data buffer
     data.put(output, outputMap);
   }

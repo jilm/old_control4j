@@ -97,6 +97,8 @@ public abstract class ProcessModule extends Module
     Signal[] input = data.get(inputMap);
     // call the exec function
     Signal[] output = process(input);
+    // assign units
+    assignUnits(outputMap, output);
     // store the output into the data buffer
     data.put(output, outputMap);
   }
