@@ -75,5 +75,24 @@ argument. So the program may be executed as follows:
 
 <p><code>java control4j.Control app.conf</code>
 
+<h2>Units</h2>
+
+<p>If the application works with data and signals that are measured somewhere
+in the technology and the data represents temperature, preasure, flow, etc., 
+it is typically necessary to handle units of these signals. Therefore the
+basic datatype the {@link control4j.Signal} class has a unit property attached.
+The unit property may be set in two ways. If the module, which is the source
+of some signal, knows the unit, then it is responsible for setting the unit
+property of the output signal. If some module reads data from AD converter,
+for example, which measure electric current in mA, then the module should set 
+the unit of output signal to mA. Sometimes the module is not able to determine
+the unit of output signal. If you multiply the input signal by a constant, for
+instance, the unit may change, but the only developer of the application is
+able to derive how. That is why, there is a second option for unit settings.
+The unit may be stated in the application description in the signal 
+declaration. In cases when the unit is set even by the module and 
+simoultaneously it is mentioned in the declaration of the signal, the unit 
+set by the module is prefered.
+
   </body>
 </html>
