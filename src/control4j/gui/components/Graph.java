@@ -18,11 +18,15 @@ package control4j.gui.components;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import java.awt.Graphics;
+import java.awt.BasicStroke;
+import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Stroke;
 import javax.swing.JComponent;
-import control4j.scanner.Setter;
 import control4j.scanner.Getter;
+import control4j.scanner.Setter;
 
 /**
  *
@@ -73,6 +77,18 @@ implements control4j.ICycleEventListener
 
   /** Counter for avg calculation */
   private int[] count = new int[channels];
+
+  /** Colors of the curves */
+  private Color[] curveColors = new Color[channels];
+
+  /** Number of horizontal lines */
+  private static final int horizontalLinesCount = 4;
+
+  /** Horizontal line positions */
+  private float[] horizontalLineValues = new float[horizontalLinesCount];
+
+  /** Horizontal line colors */
+  private Color[] horizontalLineColors = new Color[horizontalLinesCount];
 
   public Graph()
   {
@@ -183,6 +199,199 @@ implements control4j.ICycleEventListener
     newData((float)value, 0);
   }
 
+  @Setter(key="Value 2")
+  public void setValue2(double value)
+  {
+    newData((float)value, 1);
+  }
+
+  @Setter(key="Value 3")
+  public void setValue3(double value)
+  {
+    newData((float)value, 2);
+  }
+
+  @Setter(key="Value 4")
+  public void setValue4(double value)
+  {
+    newData((float)value, 3);
+  }
+
+  @Setter(key="Value 5")
+  public void setValue5(double value)
+  {
+    newData((float)value, 4);
+  }
+
+  @Getter(key="Curve Color 1")
+  public Color getCurveColor1()
+  {
+    return curveColors[0];
+  }
+
+  @Setter(key="Curve Color 1")
+  public void setCurveColor1(Color color)
+  {
+    curveColors[0] = color;
+    if (component != null) component.repaint();
+  }
+
+  @Getter(key="Curve Color 2")
+  public Color getCurveColor2()
+  {
+    return curveColors[1];
+  }
+
+  @Setter(key="Curve Color 2")
+  public void setCurveColor2(Color color)
+  {
+    curveColors[1] = color;
+    if (component != null) component.repaint();
+  }
+
+  @Getter(key="Curve Color 3")
+  public Color getCurveColor3()
+  {
+    return curveColors[2];
+  }
+
+  @Setter(key="Curve Color 3")
+  public void setCurveColor3(Color color)
+  {
+    curveColors[2] = color;
+    if (component != null) component.repaint();
+  }
+
+  @Getter(key="Curve Color 4")
+  public Color getCurveColor4()
+  {
+    return curveColors[3];
+  }
+
+  @Setter(key="Curve Color 4")
+  public void setCurveColor4(Color color)
+  {
+    curveColors[3] = color;
+    if (component != null) component.repaint();
+  }
+
+  @Getter(key="Curve Color 5")
+  public Color getCurveColor5()
+  {
+    return curveColors[4];
+  }
+
+  @Setter(key="Curve Color 5")
+  public void setCurveColor5(Color color)
+  {
+    curveColors[4] = color;
+    if (component != null) component.repaint();
+  }
+
+  @Getter(key="Horizonal Line 1")
+  public double getHorizontalLine1Value()
+  {
+    return horizontalLineValues[0];
+  }
+
+  @Setter(key="Horizonal Line 1")
+  public void setHorizontalLine1Value(double value)
+  {
+    horizontalLineValues[0] = (float)value;
+    if (component != null) component.repaint();
+  }
+
+  @Getter(key="Horizonal Line 2")
+  public double getHorizontalLine2Value()
+  {
+    return horizontalLineValues[1];
+  }
+
+  @Setter(key="Horizonal Line 2")
+  public void setHorizontalLine2Value(double value)
+  {
+    horizontalLineValues[1] = (float)value;
+    if (component != null) component.repaint();
+  }
+
+  @Getter(key="Horizonal Line 3")
+  public double getHorizontalLine3Value()
+  {
+    return horizontalLineValues[2];
+  }
+
+  @Setter(key="Horizonal Line 3")
+  public void setHorizontalLine3Value(double value)
+  {
+    horizontalLineValues[2] = (float)value;
+    if (component != null) component.repaint();
+  }
+
+  @Getter(key="Horizonal Line 4")
+  public double getHorizontalLine4Value()
+  {
+    return horizontalLineValues[3];
+  }
+
+  @Setter(key="Horizonal Line 4")
+  public void setHorizontalLine4Value(double value)
+  {
+    horizontalLineValues[3] = (float)value;
+    if (component != null) component.repaint();
+  }
+
+  @Getter(key="Horizontal Line 1 Color")
+  public Color getHorizontal1Color()
+  {
+    return horizontalLineColors[0];
+  }
+
+  @Setter(key="Horizontal Line 1 Color")
+  public void setHorzontal1Color(Color color)
+  {
+    horizontalLineColors[0] = color;
+    if (component != null) component.repaint();
+  }
+
+  @Getter(key="Horizontal Line 2 Color")
+  public Color getHorizontal2Color()
+  {
+    return horizontalLineColors[1];
+  }
+
+  @Setter(key="Horizontal Line 2 Color")
+  public void setHorzontal2Color(Color color)
+  {
+    horizontalLineColors[1] = color;
+    if (component != null) component.repaint();
+  }
+
+  @Getter(key="Horizontal Line 3 Color")
+  public Color getHorizontal3Color()
+  {
+    return horizontalLineColors[2];
+  }
+
+  @Setter(key="Horizontal Line 3 Color")
+  public void setHorzontal3Color(Color color)
+  {
+    horizontalLineColors[2] = color;
+    if (component != null) component.repaint();
+  }
+
+  @Getter(key="Horizontal Line 4 Color")
+  public Color getHorizontal4Color()
+  {
+    return horizontalLineColors[3];
+  }
+
+  @Setter(key="Horizontal Line 4 Color")
+  public void setHorzontal4Color(Color color)
+  {
+    horizontalLineColors[3] = color;
+    if (component != null) component.repaint();
+  }
+
   /**
    *  Add new data into the internal buffer. 
    */
@@ -291,11 +500,32 @@ implements control4j.ICycleEventListener
 	g.setColor(getBackground());
 	g.fillRect(0, 0, width, height);
       }
-      // paint graph
-      g.setColor(getForeground());
+
+      // paint horizontal lines
+      //g.setColor(getForeground());
+      BasicStroke dashed = new BasicStroke(1.0f, BasicStroke.CAP_BUTT, 
+	  BasicStroke.JOIN_ROUND, 1.0f, new float[] { 10.0f }, 0.0f);
+      Graphics2D g2 = (Graphics2D)g;
+      Stroke solid = g2.getStroke();
+      g2.setStroke(dashed);
+      for (int i=0; i<horizontalLinesCount; i++)
+      {
+	g2.setColor(horizontalLineColors[i]);
+	float value = horizontalLineValues[i];
+	if (!Float.isNaN(value))
+	{
+          int y = height 
+	      - Math.round((value - yMin) / (yMax - yMin) * (float)height);
+	  g2.drawLine(0, y, width, y);
+	}
+      }
+
+      // paint graph curves
+      g2.setStroke(solid);
       int x1=0, y1=0, x2, y2;
       for (int channel=0; channel<channels; channel++)
       {
+	g.setColor(curveColors[channel]);
 	boolean firstPoint = false;
 	for (int index=0; index < width; index++)
         {
