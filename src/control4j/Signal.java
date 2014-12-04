@@ -255,7 +255,7 @@ public abstract class Signal implements java.io.Serializable, Cloneable
    *  @param unit desired signal unit
    *  @see #getUnit()
    */
-  void setUnit(String unit)
+  public void setUnit(String unit)
   {
     this.unit = unit;
   }

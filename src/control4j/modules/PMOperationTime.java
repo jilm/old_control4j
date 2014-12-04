@@ -92,7 +92,10 @@ public class PMOperationTime extends ProcessModule
     }
     Signal[] result = new Signal[sum.length];
     for (int i=0; i<result.length; i++)
+    {
       result[i] = Signal.getSignal((double)((sum[i] + diff[i]) / 1000l));
+      result[i].setUnit("sec");
+    }
     return result;
   }
 }
