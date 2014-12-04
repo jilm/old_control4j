@@ -38,6 +38,7 @@ class ChangerFactory
     changers.put("Quantity", "control4j.gui.changers.SetQuantity");
     changers.put("Move", "control4j.gui.changers.Move");
     changers.put("Set text", "control4j.gui.changers.SetText");
+    changers.put("Set unit", "control4j.gui.changers.SetUnit");
   }
 
   /**
