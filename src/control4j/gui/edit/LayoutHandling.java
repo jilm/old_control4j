@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.lang.reflect.Constructor;
+import java.awt.Insets;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.Component;
@@ -64,7 +65,7 @@ class LayoutHandling implements ActionListener
     menu.addItem("Full width", "LAYOUT_FULL_WIDTH", this, 'w');
     menu.addItem("Full height", "LAYOUT_FULL_HEIGHT", this, 'h');
     menu.addSeparator();
-    menu.addItem("Align left", "LAYOUT_ALIGN_LEFT", this, 'l');
+    menu.addItem("Center vertically", "LAYOUT_CENTER_VERTICALLY", this, 'v');
   }
 
   /**
@@ -76,7 +77,8 @@ class LayoutHandling implements ActionListener
       doFullWidth();
     if (e.getActionCommand().equals("LAYOUT_FULL_HEIGHT"))
       doFullHeight();
-    
+    if (e.getActionCommand().equals("LAYOUT_CENTER_VERTICALLY"))
+      doCenterVertically();
   }
 
   /**
@@ -196,4 +198,72 @@ class LayoutHandling implements ActionListener
       y = sum;
     }
   }
+
+  /**
+   *  Center selected components vertically inside theirs parent.
+   */
+  private void doCenterVertically()
+  {
+    // get selected components
+    ArrayList<VisualObject> selection = getSelection();
+    // find common parent
+    VisualContainer parent = getParent(selection);
+    if (parent == null) return;
+    // get height of the whole selection
+    int yMin = Integer.MAX_VALUE;
+    int yMax = Integer.MIN_VALUE;
+    for (VisualObject object : selection)
+    {
+      int y = object.getVisualComponent().getY();
+      int height = object.getVisualComponent().getHeight();
+      yMin = Math.min(y, yMin);
+      yMax = Math.max(y + height, yMax);
+    }
+    // get height of the parent
+    int parentHeight = parent.getVisualComponent().getHeight();
+    Insets insets = parent.getVisualComponent().getInsets();
+    parentHeight -= insets.top + insets.bottom;
+    // compute additional constant
+    int yAdd = ((parentHeight - yMax + yMin) / 2) - yMin;
+    // shift all of the components
+    for (VisualObject object : selection)
+    {
+      int y = object.getVisualComponent().getY();
+      try 
+      { 
+	object.set("Y", y + yAdd); 
+      } catch (Exception e) { }    // TODO
+    }
+  }
+
+  /**
+   *  Returns all of the selected visual objects.
+   */
+  private ArrayList<VisualObject> getSelection()
+  {
+    // get all of the selected components
+    TreePath[] selectionPaths = tree.getSelectionPaths();
+    ArrayList<VisualObject> selection = new ArrayList<VisualObject>();
+    for (TreePath path : selectionPaths)
+      if (((GuiObject)path.getLastPathComponent()).isVisual())
+	selection.add((VisualObject)path.getLastPathComponent());
+    return selection;
+  }
+
+  /**
+   *  Return a parent which is common for all of the given children.
+   *  If the given list is empty or if the given children do not have
+   *  common parent, it returns null.
+   */
+  private VisualContainer getParent(ArrayList<VisualObject> children)
+  {
+    // find a common parent of all of the selected components
+    if (children.size() == 0) return null;
+    VisualContainer parent = (VisualContainer)children.get(0).getParent();
+    for (VisualObject object : children)
+      if (object.getParent() != parent)
+	return null;
+    return parent;
+  }
+
 }
