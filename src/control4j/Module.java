@@ -171,7 +171,9 @@ public abstract class Module
     SignalManager signalManager = SignalManager.getInstance();
     for (int i=0; i<map.length; i++)
     {
-      if (signals[i].getUnit() == null || signals[i].getUnit().length() == 0)
+      if (map[i] >= 0 
+          && (signals[i].getUnit() == null 
+          || signals[i].getUnit().length() == 0))
       {
 	String unit = signalManager.get(map[i]).getUnit();
 	signals[i].setUnit(unit);
