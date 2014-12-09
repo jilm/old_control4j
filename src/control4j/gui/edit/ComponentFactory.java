@@ -51,6 +51,9 @@ class ComponentFactory
     components.put("Three-way valve", "control4j.gui.components.ThreeWayValve");
     components.put("Valve", "control4j.gui.components.Valve");
     components.put("Line", "control4j.gui.components.Line");
+    components.put("Valve solenoid", "control4j.gui.components.Solenoid");
+    components.put("Valve motor", "control4j.gui.components.ValveMotor");
+    components.put("Arrow", "control4j.gui.components.Arrow");
   }
 
   /**

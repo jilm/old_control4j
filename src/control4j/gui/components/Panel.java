@@ -137,21 +137,4 @@ public class Panel extends VisualContainer
     component.repaint();
   }
 
-  private class PanelPainter extends JPanel
-  {
-
-    @Override
-    public void doLayout()
-    {
-      super.doLayout();
-      for (int i=0; i<getComponentCount(); i++)
-      {
-	Component component = getComponent(i);
-	Dimension size = component.getPreferredSize();
-	if (size != null) component.setSize(size);
-      }
-    }
-
-  }
-
 }

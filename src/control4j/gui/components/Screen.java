@@ -101,7 +101,7 @@ public class Screen extends control4j.gui.VisualContainer
   @Override
   protected JComponent createSwingComponent()
   {
-    return new JPanel(null);
+    return new PanelPainter();
   }
 
   /**

@@ -61,6 +61,15 @@ public class Rectangle extends VisualObjectBase
   /**
    *
    */
+  @Getter(key="Width")
+  public int getWidth()
+  {
+    return width;
+  }
+
+  /**
+   *
+   */
   @Setter(key="Width")
   public void setWidth(int width)
   {
