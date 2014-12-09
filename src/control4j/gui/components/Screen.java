@@ -43,7 +43,7 @@ public class Screen extends control4j.gui.VisualContainer
   /**
    *
    */
-  private Color background = Color.gray;
+  private Color background = null;
 
   /**
    *
@@ -78,7 +78,12 @@ public class Screen extends control4j.gui.VisualContainer
   @Getter(key="Background Color")
   public Color getBackground()
   {
-    return background;
+    if (background != null)
+      return background;
+    else if (component != null)
+      return component.getBackground();
+    else
+      return null;
   }
 
   /**
@@ -90,7 +95,8 @@ public class Screen extends control4j.gui.VisualContainer
     this.background = color;
     if (component != null)
     {
-      component.setBackground(color);
+      if (background != null)
+        component.setBackground(background);
       component.repaint();
     }
   }
@@ -110,7 +116,8 @@ public class Screen extends control4j.gui.VisualContainer
   @Override
   protected void configureVisualComponent()
   {
-    component.setBackground(background);
+    if (background != null)
+      component.setBackground(background);
     super.configureVisualComponent();
     component.revalidate();
     component.repaint();
