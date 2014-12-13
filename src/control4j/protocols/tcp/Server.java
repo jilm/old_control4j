@@ -27,7 +27,7 @@ import static control4j.tools.Logger.*;
 /**
  *
  *  Listen on the specified port, and creates a client for each new request.
- *  The server runs as a separate thread and repeatedly tries to create
+ *  The server runs as a separate thread and repeatedly tries to recreate
  *  server socket whenever something goes wrong. The thead must be started
  *  from outside.
  *
@@ -49,7 +49,7 @@ public class Server extends Thread
    */
   public Server(int port, IClientFactory clientFactory)
   {
-    super("IMNetOutput:Server");
+    super("Server");
     this.port = port;
     this.clientFactory = clientFactory;
   }
@@ -72,13 +72,13 @@ public class Server extends Thread
           }
           catch (IOException ioe)
           {
-            catched("IMNetOutput$Server", "run", ioe);
+            catched(getClass().getName(), "run", ioe);
           }
         }
       }
       catch (IOException e)
       {
-        catched("IMNetOutput$Server", "run", e);
+        catched(getClass().getName(), "run", e);
         long waitTime = Math.round(Math.random() * 4000.0 + 1000.0);
         try { Thread.sleep(waitTime); } catch (InterruptedException ie) {}
       }

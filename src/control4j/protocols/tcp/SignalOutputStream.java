@@ -1,4 +1,4 @@
-package control4j.modules;
+package control4j.protocols.tcp;
 
 /*
  *  Copyright 2013 Jiri Lidinsky
@@ -18,33 +18,34 @@ package control4j.modules;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import control4j.Module;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import control4j.Signal;
-import control4j.ConfigItem;
-import control4j.InputModule;
-import control4j.Resource;
-import control4j.resources.communication.SignalServer;
-import static control4j.tools.Logger.*;
 
 /**
- *  Sends input data to the client over the TCP protocol.
- */ 
-public class IMNetOutput extends InputModule
+ */
+public class SignalOutputStream extends ObjectOutputStream
+implements IOutputStream<Signal[]>
 {
 
-  @Resource
-  public SignalServer server;
-  
-  /**
-   *  Sends input data to a client over the TCP protocol.
-   *  
-   *  @param input 
-   *             data so send
-   */         
-  @Override
-  protected void put(Signal[] input)
+  public SignalOutputStream(OutputStream outputStream) throws IOException
   {
-    server.send(input, getNumberOfAssignedInputs());
+    super(outputStream);
   }
-  
+
+  /**
+   *  Send given message via the underlaying output stream.
+   *
+   *  @param message
+   *             message to be sent
+   *
+   *  @throws IOException
+   *             if somethig wend wrong
+   */
+  public void write(Signal[] message) throws IOException
+  {
+    writeObject(message);
+  }
+
 }
