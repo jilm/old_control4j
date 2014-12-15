@@ -84,7 +84,7 @@
         <mkdir dir="${bindir}/META-INF/services" />
         <echo
 	    message="control4j.annotations.process.GuiObjectProcessor"
-	    file="${apbindir}/META-INF/services/javax.annotation.processing.Processor" />
+	    file="${bindir}/META-INF/services/javax.annotation.processing.Processor" />
     </target>
 
 </project>
