@@ -56,7 +56,7 @@ public class SignalClient extends Resource implements ICycleEventListener
     try
     {
       if (response != null && response.isFinished())
-        return response.getResponse();
+	return response.getResponse();
       else
         return null;
     }

@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import control4j.Signal;
+import static control4j.tools.Logger.*;
 
 /**
  */
@@ -49,6 +50,7 @@ implements IInputStream<Signal[]>
     }
     catch (ClassNotFoundException e)
     {
+      catched(getClass().getName(), "readMessage", e);
       return null; // TODO
     }
   }

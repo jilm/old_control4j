@@ -42,9 +42,8 @@ public class Respondent<I, O> implements Runnable
   private InterchangePoint<I> request = new InterchangePoint<I>();
   private InterchangePoint<O> response = new InterchangePoint<O>();
 
-  /** Signal that the request has been picked up and the response may be
-      accepted. */
-  private boolean isRequestPickedUp = false;
+  /** Signal that the request has been received. */
+  private boolean gotRequest = false;
 
   /** Contains an exception thrown during proccessing, if there is one */
   private Exception exception = null;
@@ -78,11 +77,8 @@ public class Respondent<I, O> implements Runnable
    */
   public void write(O response)
   {
-    if (!isRequestPickedUp)
-      throw new IllegalStateException();
     this.response.forcedSet(response);
     this.request.forcedSet(null);
-    isRequestPickedUp = false;
     new Thread(this).start();
   }
 
@@ -97,9 +93,6 @@ public class Respondent<I, O> implements Runnable
    */
   public I read()
   {
-    if (isRequestPickedUp)
-      throw new IllegalStateException();
-    isRequestPickedUp = !request.isEmpty();
     return request.tryGet();
   }
 
@@ -113,10 +106,16 @@ public class Respondent<I, O> implements Runnable
     try
     {
       // send response
-      if (!response.isEmpty())
+      if (gotRequest && !response.isEmpty())
+      {
+	finest("Going to send response");
         outputStream.write(response.get());
+	gotRequest = false;
+      }
       // wait for request
       request.forcedSet(inputStream.readMessage());
+      finest("Got request");
+      gotRequest = true;
     }
     catch (IOException e)
     {

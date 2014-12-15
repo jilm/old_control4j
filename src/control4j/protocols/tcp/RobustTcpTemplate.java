@@ -72,6 +72,15 @@ public abstract class RobustTcpTemplate<I, O>
     connection.start();
   }
 
+  public RobustTcpTemplate(String host, int port, int timeout)
+  {
+    this.host = host;
+    this.port = port;
+    this.timeout = timeout;
+    connection = new Connection();
+    connection.start();
+  }
+
   /**
    *  Create and return input stream which correspond to the required
    *  protocol.
@@ -138,10 +147,10 @@ public abstract class RobustTcpTemplate<I, O>
           InetAddress address = InetAddress.getByName(host);
           socket = new Socket(address, port);
 	  socket.setSoTimeout(timeout);
-          inputStream = socket.getInputStream();
           outputStream = socket.getOutputStream();
-          specificInputStream = getSpecificInputStream(inputStream);
           specificOutputStream = getSpecificOutputStream(outputStream);
+          inputStream = socket.getInputStream();
+          specificInputStream = getSpecificInputStream(inputStream);
 	  logFlag = true;
           fine("Connection has been estabilished");
 
@@ -155,15 +164,22 @@ public abstract class RobustTcpTemplate<I, O>
 	      // send request
 	      transaction.markRequest();
 	      specificOutputStream.write(transaction.getRequest());
+	      finest("Request has been sent.");
 	      // wait for response
 	      I response = specificInputStream.readMessage();
+	      finest("Response received");
 	      transaction.setResponse(response, null);
 	    }
 	  }
 	  catch (IOException e)
 	  {
 	    transaction.setResponse(null, e);
+	    catched(getClass().getName(), "run", e);
 	    throw e;
+	  }
+	  catch (Exception e)
+	  {
+	    catched(getClass().getName(), "run", e);
 	  }
 	}
         catch (UnknownHostException e)

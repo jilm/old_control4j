@@ -25,6 +25,7 @@ import control4j.Signal;
 import control4j.protocols.tcp.IInputStream;
 import control4j.protocols.tcp.IOutputStream;
 import control4j.protocols.tcp.RobustTcpTemplate;
+import static control4j.tools.Logger.*;
 
 /**
  */
@@ -42,7 +43,7 @@ public class SignalOverTcp extends RobustTcpTemplate<Signal[], Signal[]>
    */
   public SignalOverTcp(String host, int port)
   {
-    super(host, port);
+    super(host, port, 7777);
   }
 
   @Override
@@ -53,7 +54,11 @@ public class SignalOverTcp extends RobustTcpTemplate<Signal[], Signal[]>
     {
       return new SignalInputStream(inputStream);
     }
-    catch (IOException e) { return null; } // TODO
+    catch (IOException e) 
+    { 
+      catched(getClass().getName(), "getSpecificInputStream", e);
+      return null; 
+    } // TODO
   }
 
   @Override
@@ -64,7 +69,11 @@ public class SignalOverTcp extends RobustTcpTemplate<Signal[], Signal[]>
     {
       return new SignalOutputStream(outputStream);
     }
-    catch (IOException e) { return null; } // TODO
+    catch (IOException e) 
+    { 
+      catched(getClass().getName(), "getSpecificOutputStream", e);
+      return null; 
+    } // TODO
   }
 
 }
