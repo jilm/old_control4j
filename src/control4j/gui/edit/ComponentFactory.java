@@ -48,11 +48,8 @@ class ComponentFactory
     components.put("Box Filler", "control4j.gui.components.BoxFiller");
     components.put("Graph", "control4j.gui.components.Graph");
     components.put("Pump", "control4j.gui.components.Pump");
-    components.put("Three-way valve", "control4j.gui.components.ThreeWayValve");
     components.put("Valve", "control4j.gui.components.Valve");
     components.put("Line", "control4j.gui.components.Line");
-    components.put("Valve solenoid", "control4j.gui.components.Solenoid");
-    components.put("Valve motor", "control4j.gui.components.ValveMotor");
     components.put("Arrow", "control4j.gui.components.Arrow");
   }
 
