@@ -31,7 +31,7 @@ import static control4j.tools.LogMessages.*;
  *
  *  <p>Duration of one cycle is fixed and may be specified by
  *  configuration item cycle-period. If the processing of the 
- *  cycle is longer than specified the warnig is loged. 
+ *  cycle is longer than specified the warnig is logged. 
  *
  */
 public class ControlLoop
@@ -62,7 +62,7 @@ public class ControlLoop
   /**
    *  It does nothing.
    */
-  public ControlLoop()
+  ControlLoop()
   { }
 
   /**
@@ -77,24 +77,34 @@ public class ControlLoop
   {
     if (period > 0)
       cyclePeriod = period;
-    // else !!!
+    // else !!! TODO
   }
   
   /**
-   *  Runs the infinite control loop.
+   *  Runs the infinite control loop. Following steps are performed:
    *
    *  <ol>
-   *    <li> Write the cycle start time.
+   *    <li> Creates {@link control4j.DataBuffer} instance.
+   *    <li> Runs a {@link control4j.resources.Resource#prepare}
+   *         method for all of the resources.
+   *    <li> Runs a {@link control4j.Module#prepare} method for 
+   *         all of the modules.
+   *    <li> Enters an infinite loop.
+   *    <li> Note the cycle start time.
    *    <li> Clear the data buffer.
-   *    <li> Send notification of cycle start.
+   *    <li> Trigger cycleStartEvent event for all of the registered
+   *         listeners.
    *    <li> Wait for time specified by start-cycle-delay.
-   *    <li> Send notification of processing start.
+   *    <li> Trigger processingStartEvent event for all of the registered
+   *         listeners.
    *    <li> Execute all of the modules.
-   *    <li> Send notification of cycle end.
-   *    <li> Terminate the program if request was sent.
+   *    <li> Trigger cycleEndEvent event for all of the registered listeners.
+   *    <li> Terminate the program if requested, see {@link #exit}.
    *    <li> Wait for new cycle. The duration of the cycle
    *         must be cycle-period.
    *  </ol>
+   *
+   *  @see control4j.ICycleEventListener
    */
   void run()
   {
@@ -235,7 +245,8 @@ public class ControlLoop
   }
 
   /**
-   *  Duration of the last cycle in ms. During the first cycle it returns zero.
+   *  Duration of the last cycle in ms. It returns zero during the first 
+   *  cycle.
    *
    *  @return duration of the last cycle in ms
    */

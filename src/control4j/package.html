@@ -6,38 +6,6 @@
   </head>
   <body>
 
-<!--  CZ
-
-Cílem tohoto programu je poskytnout prostředek pro řízení pomalých 
-technologických systémů pomocí počítače typu PC. Program se skládá z běhového 
-prostředí které interpretuje aplikaci. Aplikace která určije chování logiku, 
-algoritmus se zapisuje v jednoduchém textovém formátu, nebo v xml formátu.
-
-Základními stavebními kameny aplikace jsou moduly a resource. Data se mezi 
-moduly předávají pomocí tzv. signálů. Resources slouží jako zapouzdření zdrojů,
-jeden zdroj může být přístupný více modulům. Moduly jsou tří typů, vstupní 
-moduly, výstupní moduly a procesní moduly. Vstupní moduly mají pouze vstupy a 
-neposkytují žádný výstup zpět. Tyto moduly nejčastěji zapouzdřují výstup do 
-technologie, nebo výstup pro MMI rozhraní. Výstupní moduly naopak poskytují 
-jen výstupy. Používají se hlavně jako zprostředkovatelé vstupu z technologie. 
-Procesní moduly mají jak vstupy tak výstupy. Jsou to moduly, které 
-zpracovávají vstupy podle nějakého algoritmu a výstupy poskytují zpět do 
-systému k dalšímu zpracování.
-
-Tento program je inspirován programovatelnými logickými kontrolery. Stejně 
-jako ony pracuje v cyklech konstantní délky. Stejně jako ony nejprve shromáždí 
-výstupy z technologie tím, že vyhodnotí výstupní moduly. Poté vyhodnotí 
-procesní moduly a to v takovém pořadí, aby moduly, které poskytují vstupy pro 
-daný modul byly vyhodnoceny dříve. Tato podmínka vylučuje přítomnost cyklů v 
-aplikaci. Nakonec jsou vyhodnoceny vstupní moduly, které poskytují výstup zpět 
-do technologie. Pokud je celá aplikace vyhodnocena dříve, než je zadaná 
-perioda cyklu, tak je program po zbývající čas pozastaven.
-
-Vstupním bodem programu je třída Control. Jako commad line argument je potřeba
-zadat jméno souboru s popisem aplikace.
-
--->
-
 <p>The aim of this program is to provide a tool for technology or process 
 control by computer. However there could be different use cases. The program 
 consists of a runtime environment that interprets the application. The 
@@ -74,6 +42,42 @@ expects a name of the file with the application description as the commad line
 argument. So the program may be executed as follows:
 
 <p><code>java control4j.Control app.conf</code>
+
+<h2>After the control4j is run</h2>
+
+<p>The process after the {@link control4j.Control} has been run, may be devided
+into two phases.
+<ol>
+  <li>Project loading: all of the files that are included under the specified
+      project are read; instances of all of the modules, resources, gui objects
+      are created and configured; modules are ordered and the whole project
+      is checked.
+  <li>The control loop is run: output modules are executed, process modules
+      are executed and input modules are excecuted; and again; and again ...
+</ol>
+
+<h3>Project loading</h3>
+
+<p>Even the project loging phase consists of several steps.
+<ol>
+  <li>First of all, the instance of {@link control4j.ControlLoop} class
+      is created, but not run yet. It is becouse during the project loading
+      it is neccessary to configure the control loop object.
+  <li>The project file is loaded. For more information 
+      see {@link control4j.project}.
+  <li>All of the files which are referenced from the project file are loaded.
+      Loaders can be found under the {@link control4j.application} package.
+  <li>Than project is built. It means that instances of modules and resources
+      are created and everything is interconnected and sorted. For details
+      see {@link control4j.ApplicationBuilder}.
+  <li>And finally, the consistency of the whole project is checked. 
+      See {@link control4j.ApplicationCheck}.
+</ol>
+If some error is found out during each of these steps, program is terminated
+and next step is not performed. Error handling is provided by the
+{@link control4j.ErrorManager} class.
+
+<h3>Control loop</h3>
 
 <h2>Units</h2>
 
