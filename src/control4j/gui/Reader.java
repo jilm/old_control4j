@@ -96,11 +96,19 @@ public class Reader extends SaxReader
   @XmlStartElement(parent="*", localName="panel")
   private void panel(Attributes attributes)
   {
-    finest("panel");
-    String className = attributes.getValue("class");
-    VisualContainer panel = (VisualContainer)createInstance(className);
-    ((VisualContainer)gui).add(panel);
-    gui = panel;
+    try
+    {
+      String className = attributes.getValue("class");
+      VisualContainer panel = (VisualContainer)createInstance(className);
+      ((VisualContainer)gui).add(panel);
+      gui = panel;
+    }
+    catch (ClassNotFoundException e)
+    {
+      MissingComponent missingComponent = new MissingComponent();
+      missingComponent.setParent(gui);
+      gui = missingComponent;
+    }
   }
 
   /**
@@ -109,11 +117,19 @@ public class Reader extends SaxReader
   @XmlStartElement(parent="*", localName="component")
   private void component(Attributes attributes)
   {
-    finest("component");
-    String className = attributes.getValue("class");
-    VisualObject component = (VisualObject)createInstance(className);
-    ((VisualContainer)gui).add(component);
-    gui = component;
+    try
+    {
+      String className = attributes.getValue("class");
+      VisualObject component = (VisualObject)createInstance(className);
+      ((VisualContainer)gui).add(component);
+      gui = component;
+    }
+    catch (ClassNotFoundException e)
+    {
+      MissingComponent missingComponent = new MissingComponent();
+      missingComponent.setParent(gui);
+      gui = missingComponent;
+    }
   }
 
   /**
@@ -122,11 +138,19 @@ public class Reader extends SaxReader
   @XmlStartElement(parent="*", localName="changer")
   private void changer(Attributes attributes)
   {
-    finest("changer");
-    String className = attributes.getValue("class");
-    Changer changer = (Changer)createInstance(className);
-    ((VisualObject)gui).add(changer);
-    gui = changer;
+    try
+    {
+      String className = attributes.getValue("class");
+      Changer changer = (Changer)createInstance(className);
+      ((VisualObject)gui).add(changer);
+      gui = changer;
+    }
+    catch (ClassNotFoundException e)
+    {
+      MissingComponent missingComponent = new MissingComponent();
+      missingComponent.setParent(gui);
+      gui = missingComponent;
+    }
   }
 
   /**
@@ -192,9 +216,18 @@ public class Reader extends SaxReader
   }
 
   /**
+   *  Create and instance of class with given name.
    *
+   *  @param className
+   *             a fully qualified neme of the class to be instantiated
+   *
+   *  @return an instance of required class
+   *
+   *  @throws ClassNotFoundException
+   *             if class with given name was not found 
    */
-  private GuiObject createInstance(String className)
+  private GuiObject createInstance(String className) 
+  throws ClassNotFoundException
   {
     try
     {
@@ -203,12 +236,18 @@ public class Reader extends SaxReader
     }
     catch (ClassNotFoundException e)
     {
+      catched(getClass().getName(), "createInstance", e);
+      throw e;
     }
     catch (java.lang.InstantiationException e)
     {
+      // TODO
+      catched(getClass().getName(), "createInstance", e);
     }
     catch (java.lang.IllegalAccessException e)
     {
+      // TODO
+      catched(getClass().getName(), "createInstance", e);
     }
     return null;
   }
@@ -247,6 +286,17 @@ public class Reader extends SaxReader
     }
     catch (java.lang.reflect.InvocationTargetException e)
     {
+    }
+  }
+
+  /**
+   *  An object which is used instead of a component which is missing.
+   */
+  private class MissingComponent extends VisualContainer
+  {
+    protected javax.swing.JComponent createSwingComponent()
+    {
+      throw new UnsupportedOperationException();
     }
   }
 
