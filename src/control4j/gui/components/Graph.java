@@ -439,7 +439,7 @@ implements control4j.ICycleEventListener
   public void cycleEnd()
   {
     // time length per pixel
-    int timePerPixel = duration / width;
+    float timePerPixel = (float)duration / (float)width;
     // time since the last sample plot
     long currentTime = System.currentTimeMillis();
     int lastSampleDuration = (int)(currentTime - latestDataTime);
@@ -448,7 +448,7 @@ implements control4j.ICycleEventListener
     {
       System.out.println("Writing data to buffer");
       // write new data from average calculator to the buffer
-      int pixels = lastSampleDuration / timePerPixel;
+      int pixels = Math.round(lastSampleDuration / timePerPixel);
       // calculate the average
       for (int i=0; i<channels; i++)
       {
