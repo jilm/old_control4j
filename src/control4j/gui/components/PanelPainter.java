@@ -1,4 +1,4 @@
-package control4j.application.gui;
+package control4j.gui.components;
 
 /*
  *  Copyright 2013, 2014 Jiri Lidinsky
@@ -18,37 +18,35 @@ package control4j.application.gui;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import java.util.HashMap;
-import java.util.Collection;
+import java.awt.Color;
+import java.awt.Rectangle;
+import java.awt.Dimension;
+import java.awt.Component;
+import javax.swing.JComponent;
+import javax.swing.JPanel;
+import control4j.scanner.Setter;
+import control4j.scanner.Getter;
+import control4j.gui.VisualContainer;
 
-public class ComponentDeclaration extends Configurable
+public class PanelPainter extends JPanel
 {
-  private String className;
-  private HashMap<String, String> signals = new HashMap<String, String>();
 
-  public String getClassName()
+  public PanelPainter()
   {
-    return className;
+    super(null);
   }
 
-  public void setClassName(String className)
+  @Override
+  public void doLayout()
   {
-    this.className = className;
-  }
-
-  public void setSignal(String key, String name)
-  {
-    signals.put(key, name);
-  }
-
-  public String getSignal(String key)
-  {
-    return signals.get(key);
-  }
-
-  public Collection<String> getSignalNames()
-  {
-    return signals.values();
+    super.doLayout();
+    for (int i=0; i<getComponentCount(); i++)
+    {
+      Component component = getComponent(i);
+      Dimension size = component.getPreferredSize();
+      if (size != null) component.setSize(size);
+    }
   }
 
 }
+

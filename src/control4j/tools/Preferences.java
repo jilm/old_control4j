@@ -116,8 +116,8 @@ public class Preferences
       return get().get(key, "green");
     if (key.equals("off"))
       return get().get(key, "red");
-
-    return "black";
+    
+    return get().get(key, "black");
   }
 
 }

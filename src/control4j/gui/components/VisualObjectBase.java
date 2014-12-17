@@ -19,11 +19,14 @@ package control4j.gui.components;
  */
 
 import java.awt.Color;
+import java.awt.Insets;
 import control4j.gui.VisualObject;
 import control4j.scanner.Setter;
 import control4j.scanner.Getter;
 
 /**
+ *
+ *  Define some properties that are common to most of the visual objects.
  *
  */
 public abstract class VisualObjectBase extends VisualObject
@@ -33,6 +36,7 @@ public abstract class VisualObjectBase extends VisualObject
   private int y;
   private Color foreground = Color.blue;
   private Color background = Color.gray;
+  private boolean isOpaque;
 
   @Getter(key="X")
   public int getX()
@@ -45,7 +49,13 @@ public abstract class VisualObjectBase extends VisualObject
   {
     this.x = x;
     if (component != null)
-      component.setLocation(x, y);
+    {
+      Insets insets 
+	  = ((VisualObject)getParent()).getVisualComponent().getInsets();
+      component.setLocation(x + insets.left, y + insets.top);
+      component.revalidate();
+      component.repaint();
+    }
   }
 
   @Getter(key="Y")
@@ -59,7 +69,13 @@ public abstract class VisualObjectBase extends VisualObject
   {
     this.y = y;
     if (component != null)
-      component.setLocation(x, y);
+    {
+      Insets insets 
+	  = ((VisualObject)getParent()).getVisualComponent().getInsets();
+      component.setLocation(x + insets.left, y + insets.top);
+      component.revalidate();
+      component.repaint();
+    }
   }
 
   @Getter(key="Foreground Color")
@@ -73,7 +89,10 @@ public abstract class VisualObjectBase extends VisualObject
   {
     foreground = color;
     if (component != null)
+    {
       component.setForeground(foreground);
+      component.repaint();
+    }
   }
 
   @Getter(key="Background Color")
@@ -87,13 +106,36 @@ public abstract class VisualObjectBase extends VisualObject
   {
     background = color;
     if (component != null)
+    {
       component.setBackground(background);
+      component.repaint();
+    }
+  }
+
+  @Getter(key="Is Opaque")
+  public boolean isOpaque()
+  {
+    return isOpaque;
+  }
+
+  @Setter(key="Is Opaque")
+  public void setOpaque(boolean isOpaque)
+  {
+    this.isOpaque = isOpaque;
+    if (component != null)
+    {
+      component.setOpaque(isOpaque);
+      component.repaint();
+    }
   }
 
   @Override
   protected void configureVisualComponent()
   {
-    component.setLocation(x, y);
+    Insets insets 
+        = ((VisualObject)getParent()).getVisualComponent().getInsets();
+    component.setLocation(x + insets.left, y + insets.top);
+    component.setOpaque(isOpaque);
     component.setBackground(background);
     component.setForeground(foreground);
   }

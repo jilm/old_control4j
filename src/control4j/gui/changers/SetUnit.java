@@ -1,4 +1,4 @@
-package control4j.gui;
+package control4j.gui.changers;
 
 /*
  *  Copyright 2013, 2014 Jiri Lidinsky
@@ -18,22 +18,28 @@ package control4j.gui;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import control4j.Signal;
+import control4j.gui.Changer;
+
 /**
  *
- *  This interface should be implemented by all of the GUI components
- *  which will be used by the Editor. It is used for navigation purposes.
- *
- *  @see control4j.gui.edit.Editor
+ *  Take a unit form given signal and set the appropriate string property.
  *
  */
-public interface IComponentName
+@control4j.annotations.AGuiObject(name="Set unit", tags={"text", "unit"})
+public class SetUnit extends Changer<String>
 {
 
-  /**
-   *  Returns a name of the component. Returned string is used by the
-   *  editor for navigation purposes. The name should be unique and 
-   *  should not be an empty string. It may not return null.
-   */
-  String getName();
+  @Override
+  protected void update(Signal input)
+  {
+    setPropertyValue(input.getUnit());
+  }
+
+  @Override
+  public Class getPropertyClass()
+  {
+    return String.class;
+  }
 
 }

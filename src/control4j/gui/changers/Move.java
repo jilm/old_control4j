@@ -23,12 +23,14 @@ import control4j.Signal;
 import control4j.scanner.Setter;
 import control4j.scanner.Getter;
 import control4j.scanner.Scanner;
+import control4j.gui.Changer;
 import static control4j.tools.Logger.*;
 
 /**
  *  Changes integer property of its parent. Typicaly it change position or
  *  dimension of some component depends on the value from technology.
  */
+@control4j.annotations.AGuiObject(name="Move", tags={"integer"})
 public class Move extends Changer<Integer>
 {
   

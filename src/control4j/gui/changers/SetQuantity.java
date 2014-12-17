@@ -23,11 +23,13 @@ import control4j.Signal;
 import control4j.scanner.Setter;
 import control4j.scanner.Getter;
 import control4j.scanner.Scanner;
+import control4j.gui.Changer;
 import static control4j.tools.Logger.*;
 
 /**
  *
  */
+@control4j.annotations.AGuiObject(name="Set quantity", tags={"real number"})
 public class SetQuantity extends Changer<Double>
 {
 

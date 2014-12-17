@@ -1,4 +1,4 @@
-package control4j.application.gui;
+package control4j.annotations;
 
 /*
  *  Copyright 2013, 2014 Jiri Lidinsky
@@ -18,22 +18,12 @@ package control4j.application.gui;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import java.util.List;
-import java.util.ArrayList;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
-public class PanelDeclaration extends ComponentDeclaration
+@Retention(RetentionPolicy.SOURCE)
+public @interface AGuiObject
 {
-  private ArrayList<ComponentDeclaration> components 
-    = new ArrayList<ComponentDeclaration>();
-
-  public void add(ComponentDeclaration component)
-  {
-    components.add(component);
-  }
-
-  public List<ComponentDeclaration> getComponents()
-  {
-    return components;
-  }
-
+  String name();
+  String[] tags() default {};
 }

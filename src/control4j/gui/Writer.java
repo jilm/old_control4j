@@ -88,7 +88,10 @@ public class Writer
     writer.writeAttribute("class", screen.getClass().getName());
     writePreferences(screen);
     for (int i=0; i<screen.getVisualObjectCount(); i++)
-      writeChild(screen.getVisualObject(i));
+      if (screen.getVisualObject(i).isVisualContainer())
+	writeChild((VisualContainer)screen.getVisualObject(i));
+      else
+        writeChild(screen.getVisualObject(i));
     for (int i=0; i<screen.getChangerCount(); i++)
       writeChild(screen.getChanger(i));
     writer.writeEndElement();
@@ -130,7 +133,10 @@ public class Writer
     writer.writeAttribute("class", container.getClass().getName());
     writePreferences(container);
     for (int i=0; i<container.getVisualObjectCount(); i++)
-      writeChild(container.getVisualObject(i));
+      if (container.getVisualObject(i).isVisualContainer())
+	writeChild((VisualContainer)container.getVisualObject(i));
+      else
+        writeChild(container.getVisualObject(i));
     for (int i=0; i<container.getChangerCount(); i++)
       writeChild(container.getChanger(i));
     writer.writeEndElement();
@@ -150,6 +156,7 @@ public class Writer
         // get key and value
         String key = preference.getKey();
         Object value = preference.getValue(object);
+	if (value == null) continue;
 	// convert value into string
 	String strValue = null;
 	if (value instanceof control4j.gui.Color)

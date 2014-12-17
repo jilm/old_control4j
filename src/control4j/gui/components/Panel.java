@@ -31,6 +31,7 @@ import control4j.gui.VisualContainer;
 /**
  *
  */
+@control4j.annotations.AGuiObject(name="Panel")
 public class Panel extends VisualContainer
 {
 
@@ -44,6 +45,42 @@ public class Panel extends VisualContainer
     super();
   }
 
+  @Getter(key="X")
+  public int getX()
+  {
+    return x;
+  }
+
+  @Setter(key="X")
+  public void setX(int x)
+  {
+    this.x = x;
+    if (component != null)
+    {
+      component.setLocation(x, y);
+      component.revalidate();
+      component.repaint();
+    }
+  }
+
+  @Getter(key="Y")
+  public int getY()
+  {
+    return y;
+  }
+
+  @Setter(key="Y")
+  public void setY(int y)
+  {
+    this.y = y;
+    if (component != null)
+    {
+      component.setLocation(x, y);
+      component.revalidate();
+      component.repaint();
+    }
+  }
+
   @Getter(key="Width")
   public int getWidth()
   {
@@ -54,6 +91,13 @@ public class Panel extends VisualContainer
   public void setWidth(int width)
   {
     this.width = width;
+    if (component != null)
+    {
+      component.setSize(width, height);
+      component.setPreferredSize(new Dimension(width, height));
+      component.revalidate();
+      component.repaint();
+    }
   }
 
   @Getter(key="Height")
@@ -66,17 +110,31 @@ public class Panel extends VisualContainer
   public void setHeight(int height)
   {
     this.height = height;
+    if (component != null)
+    {
+      component.setSize(width, height);
+      component.setPreferredSize(new Dimension(width, height));
+      component.revalidate();
+      component.repaint();
+    }
   }
 
   @Override
   protected JComponent createSwingComponent()
   {
-    return new JPanel();
+    JPanel panel = new PanelPainter();
+    panel.setLayout(null);
+    return panel;
   }
 
   @Override
   protected void configureVisualComponent()
   {
+    component.setBounds(x, y, width, height);
+    component.setPreferredSize(new Dimension(width, height));
+    super.configureVisualComponent();
+    component.revalidate();
+    component.repaint();
   }
 
 }

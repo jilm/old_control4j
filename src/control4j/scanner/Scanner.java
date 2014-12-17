@@ -165,6 +165,64 @@ public class Scanner
   }
 
   /**
+   *
+   */
+  public static void setValue(Object object, String key, Object value)
+  {
+    Method method = getSetter(object, key);
+    if (method == null) throw new java.util.NoSuchElementException();
+    try
+    {
+      method.invoke(object, value);
+    }
+    catch (IllegalAccessException e)
+    {
+      // TODO
+    }
+    catch (java.lang.reflect.InvocationTargetException e)
+    {
+      // TODO
+    }
+  }
+
+  /**
+   *
+   */
+  public static Method getGetter(Object object, String key)
+  {
+    Method[] methods = object.getClass().getMethods();
+    for (Method method : methods)
+    {
+      Getter annotation = method.getAnnotation(Getter.class);
+      if (annotation != null && annotation.key().equals(key))
+        return method;
+    }
+    return null;
+  }
+
+  /**
+   *
+   */
+  public static Object getValue(Object object, String key)
+  {
+    Method method = getGetter(object, key);
+    if (method == null) throw new java.util.NoSuchElementException();
+    try
+    {
+      return method.invoke(object);
+    }
+    catch (IllegalAccessException e)
+    {
+      // TODO
+    }
+    catch (java.lang.reflect.InvocationTargetException e)
+    {
+      // TODO
+    }
+    return null;
+  }
+
+  /**
    *  If the given method is annotated by Setter or Getter annotations,
    *  it returns the key. Otherwise returns null.
    */

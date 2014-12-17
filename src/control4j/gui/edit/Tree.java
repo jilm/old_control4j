@@ -51,11 +51,11 @@ implements javax.swing.event.TableModelListener
     // First character specifies the type of object
     if (value instanceof control4j.gui.Screens)
       return "Root";
-    else if (value instanceof javax.swing.JPanel)
+    else if (value instanceof control4j.gui.VisualContainer)
       builder.append('P');
-    else if (value instanceof javax.swing.JComponent)
+    else if (value instanceof control4j.gui.VisualObject)
       builder.append('C');
-    else if (value instanceof control4j.gui.changers.Changer)
+    else if (value instanceof control4j.gui.Changer)
       builder.append("Ch");
     else
       // should not happen
@@ -67,8 +67,7 @@ implements javax.swing.event.TableModelListener
     // delimiter
     builder.append(':');
     // name of the component, if supported
-    if (value instanceof control4j.gui.IComponentName)
-      builder.append(((control4j.gui.IComponentName)value).getName());
+    builder.append(((control4j.gui.GuiObject)value).getName());
     return builder.toString();
   }
 

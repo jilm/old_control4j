@@ -298,4 +298,41 @@ public abstract class GuiObject
    */
   public abstract int getIndexOfChild(GuiObject child);
 
+  /**
+   *  Returns a value of the property annotated with Getter annotation
+   *  with key key.
+   *
+   *  @throws java.util.NoSuchElementException
+   */
+  public Object get(String key)
+  {
+    return Scanner.getValue(this, key);
+  }
+
+  /**
+   *  @throws java.util.NoSuchElementException
+   *
+   *  @throws ClassCastException
+   */
+  public int getInt(String key)
+  {
+    return ((Integer)get(key)).intValue();
+  }
+
+  /**
+   *
+   */
+  public void set(String key, Object value)
+  {
+    Scanner.setValue(this, key, value);
+  }
+
+  /**
+   *
+   */
+  public void set(String key, int value)
+  {
+    set(key, Integer.valueOf(value));
+  }
+
 }

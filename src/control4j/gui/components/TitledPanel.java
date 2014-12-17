@@ -31,6 +31,7 @@ import control4j.gui.VisualContainer;
 /**
  *
  */
+@control4j.annotations.AGuiObject(name="Titled panel")
 public class TitledPanel extends Panel
 {
 
@@ -39,13 +40,17 @@ public class TitledPanel extends Panel
   public TitledPanel()
   {
     super();
-    //setBorder(BorderFactory.createTitledBorder("Title"));
   }
 
   @Setter(key="Title")
   public void setTitle(String title)
   {
     this.title = title;
+    if (component != null)
+    {
+      ((TitledBorder)component.getBorder()).setTitle(title);
+      component.repaint();
+    }
   }
 
   @Getter(key="Title")
@@ -54,16 +59,14 @@ public class TitledPanel extends Panel
     return title;
   }
 
-  @Override
-  protected JComponent createSwingComponent()
-  {
-    return new JPanel();
-  }
-
+  /**
+   *
+   */
   @Override
   protected void configureVisualComponent()
   {
-    
+    component.setBorder(BorderFactory.createTitledBorder(title));
+    super.configureVisualComponent();
   }
 
 }

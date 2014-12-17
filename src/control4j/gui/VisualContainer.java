@@ -34,7 +34,14 @@ public abstract class VisualContainer extends VisualObject
   private int firstChangerIndex = 0;
 
   /**
+   *  Adds a given child at the end of visual children list. If this
+   *  object has a visual component, visual component is created even
+   *  for the child. Created component is added at the end of this
+   *  visual component children list. And finally configureVisualComponent
+   *  is called for the child.
    *
+   *  @param child
+   *             object to be added as a child
    */
   public void add(VisualObject child)
   {
@@ -66,10 +73,10 @@ public abstract class VisualContainer extends VisualObject
   {
     insertChild(child, index);
     firstChangerIndex++;
-    if (getVisualComponent() != null)
+    if (component != null)
     {
       JComponent childComponent = child.createVisualComponent();
-      getVisualComponent().add(childComponent);
+      component.add(childComponent, index);
       child.configureVisualComponent();
       component.revalidate();
       component.repaint();
@@ -97,6 +104,9 @@ public abstract class VisualContainer extends VisualObject
     return (VisualObject)removeChild(index);
   }
 
+  /**
+   *
+   */
   @Override 
   public GuiObject removeChild(int index)
   {
@@ -107,9 +117,9 @@ public abstract class VisualContainer extends VisualObject
       if (component != null)
       {
 	component.remove(index);
+	((VisualObject)child).releaseVisualComponent();
 	component.revalidate();
 	component.repaint();
-	((VisualObject)child).releaseVisualComponent();
       }
     }
     return super.removeChild(index);
@@ -154,6 +164,23 @@ public abstract class VisualContainer extends VisualObject
   }
 
   /**
+   *  Creates a visual component for each VisualObject child.
+   *  Child visual component is than added to this visual component
+   *  and finally, configureVisualComponent is called for each
+   *  VisualObject child.
+   */
+  @Override
+  protected void configureVisualComponent()
+  {
+    for (int i=0; i<getVisualObjectCount(); i++)
+    {
+      JComponent childComponent = getVisualObject(i).createVisualComponent();
+      component.add(childComponent);
+      getVisualObject(i).configureVisualComponent();
+    }
+  }
+
+  /**
    *  Calls a releseVisualComponent for all of the visual child objects.
    *  Moreover, it removes child visual components from this visual 
    *  component. 
@@ -174,6 +201,17 @@ public abstract class VisualContainer extends VisualObject
   public boolean isVisualContainer()
   {
     return true;
+  }
+
+  /**
+   *
+   */
+  @Override
+  public GuiObject clone(boolean full)
+  {
+    VisualContainer clone = (VisualContainer)super.clone(full);
+    clone.firstChangerIndex = this.firstChangerIndex;
+    return clone;
   }
 
 }
