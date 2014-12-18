@@ -41,6 +41,7 @@ public class Circle extends VisualObjectBase
 {
 
   private int size = 20;
+  private boolean fill = false;
 
   /**
    *
@@ -67,6 +68,19 @@ public class Circle extends VisualObjectBase
       component.setMaximumSize(new Dimension(size, size));
       component.setMinimumSize(new Dimension(size, size));
     }
+  }
+
+  @Getter(key="Fill")
+  public boolean getFill()
+  {
+    return fill;
+  }
+
+  @Setter(key="Fill")
+  public void setFill(boolean fill)
+  {
+    this.fill = fill;
+    if (component != null) component.repaint();
   }
 
   @Override
@@ -101,7 +115,10 @@ public class Circle extends VisualObjectBase
     {
       super.paintComponent(g);
       // paint an indicator
-      g.fillOval(0, 0, size, size);
+      if (fill)
+        g.fillOval(0, 0, size-1, size-1);
+      else
+	g.drawOval(0, 0, size-1, size-1);
     }
 
   }
