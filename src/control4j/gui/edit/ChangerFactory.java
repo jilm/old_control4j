@@ -40,6 +40,7 @@ class ChangerFactory
     changers.put("Set text", "control4j.gui.changers.SetText");
     changers.put("Set unit", "control4j.gui.changers.SetUnit");
     changers.put("Set boolean", "control4j.gui.changers.SetBoolean");
+    changers.put("Set color", "control4j.gui.changers.SetColor");
   }
 
   /**
