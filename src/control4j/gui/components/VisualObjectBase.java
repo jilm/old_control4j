@@ -37,6 +37,7 @@ public abstract class VisualObjectBase extends VisualObject
   private Color foreground = Color.blue;
   private Color background = Color.gray;
   private boolean isOpaque;
+  private boolean isVisible = true;
 
   @Getter(key="X")
   public int getX()
@@ -129,6 +130,23 @@ public abstract class VisualObjectBase extends VisualObject
     }
   }
 
+  @Getter(key="Is Visible")
+  public boolean isVisible()
+  {
+    return isVisible;
+  }
+
+  @Setter(key="Is Visible")
+  public void setVisibility(boolean isVisible)
+  {
+    this.isVisible = isVisible;
+    if (component != null)
+    {
+      component.setVisible(isVisible);
+      component.repaint();
+    }
+  }
+
   @Override
   protected void configureVisualComponent()
   {
@@ -138,6 +156,7 @@ public abstract class VisualObjectBase extends VisualObject
     component.setOpaque(isOpaque);
     component.setBackground(background);
     component.setForeground(foreground);
+    component.setVisible(isVisible);
   }
 
 }
