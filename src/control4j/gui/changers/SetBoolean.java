@@ -1,4 +1,4 @@
-package control4j.modules;
+package control4j.gui.changers;
 
 /*
  *  Copyright 2013, 2014 Jiri Lidinsky
@@ -18,30 +18,36 @@ package control4j.modules;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import control4j.OutputModule;
-import control4j.Resource;
+import java.lang.reflect.Method;
 import control4j.Signal;
-import control4j.resources.communication.SignalClient;
+import control4j.scanner.Setter;
+import control4j.scanner.Getter;
+import control4j.scanner.Scanner;
+import control4j.gui.Changer;
 import static control4j.tools.Logger.*;
 
-public class OMNetClientReceiver extends OutputModule
+/**
+ *
+ */
+@control4j.annotations.AGuiObject(name="Set boolean", tags={"boolean"})
+public class SetBoolean extends Changer<Boolean>
 {
 
-  @Resource
-  public SignalClient channel;
-
-  public Signal[] get()
+  @Override
+  protected void update(Signal input)
   {
-    Signal[] output = channel.read();
-    if (output != null) 
-      finer("Got array: " + output.length + "; map: " + getNumberOfAssignedOutputs());
-    if (output == null || output.length < getNumberOfAssignedOutputs())
+    boolean value;
+    if (input.isValid())
     {
-      output = new Signal[getNumberOfAssignedOutputs()];
-      for (int i=0; i<output.length; i++)
-        output[i] = Signal.getSignal();
+      value = input.getBoolean();
+      setPropertyValue(new Boolean(value));
     }
-    return output;
   }
-  
+
+  @Override
+  public Class getPropertyClass()
+  {
+    return boolean.class;
+  }
+
 }
