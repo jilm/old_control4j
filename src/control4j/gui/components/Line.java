@@ -191,6 +191,10 @@ public class Line extends VisualObject
       super.paintComponent(g);
       int x = Math.min(x1, x2);
       int y = Math.min(y1, y2);
+      int width = Math.abs(x1 - x2);
+      if (width == 0) x--;
+      int height = Math.abs(y1 - y2);
+      if (height == 0) y--;
       g.drawLine(x1-x, y1-y, x2-x, y2-y);
     }
 
