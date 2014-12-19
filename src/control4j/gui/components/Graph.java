@@ -90,6 +90,9 @@ implements control4j.ICycleEventListener
   /** Horizontal line colors */
   private Color[] horizontalLineColors = new Color[horizontalLinesCount];
 
+  /** Specify half of the area */
+  private float[] horizontalLineArea = new float[horizontalLinesCount];
+
   public Graph()
   {
     super();
@@ -392,6 +395,58 @@ implements control4j.ICycleEventListener
     if (component != null) component.repaint();
   }
 
+  @Getter(key="Horizontal Line 1 Area")
+  public double getHorzontal1Area()
+  {
+    return horizontalLineArea[0];
+  }
+
+  @Setter(key="Horizontal Line 1 Area")
+  public void setHorizontal1Area(double area)
+  {
+    horizontalLineArea[0] = (float)area;
+    if (component != null) component.repaint();
+  }
+
+  @Getter(key="Horizontal Line 2 Area")
+  public double getHorzontal2Area()
+  {
+    return horizontalLineArea[1];
+  }
+
+  @Setter(key="Horizontal Line 2 Area")
+  public void setHorizontal2Area(double area)
+  {
+    horizontalLineArea[1] = (float)area;
+    if (component != null) component.repaint();
+  }
+
+  @Getter(key="Horizontal Line 3 Area")
+  public double getHorzontal3Area()
+  {
+    return horizontalLineArea[2];
+  }
+
+  @Setter(key="Horizontal Line 3 Area")
+  public void setHorizontal3Area(double area)
+  {
+    horizontalLineArea[2] = (float)area;
+    if (component != null) component.repaint();
+  }
+
+  @Getter(key="Horizontal Line 4 Area")
+  public double getHorzontal4Area()
+  {
+    return horizontalLineArea[3];
+  }
+
+  @Setter(key="Horizontal Line 4 Area")
+  public void setHorizontal4Area(double area)
+  {
+    horizontalLineArea[3] = (float)area;
+    if (component != null) component.repaint();
+  }
+
   /**
    *  Add new data into the internal buffer. 
    */
@@ -514,9 +569,26 @@ implements control4j.ICycleEventListener
 	float value = horizontalLineValues[i];
 	if (!Float.isNaN(value))
 	{
-          int y = height 
-	      - Math.round((value - yMin) / (yMax - yMin) * (float)height);
-	  g2.drawLine(0, y, width, y);
+	  if (horizontalLineArea[i] > 0.0f)
+	  {
+            int y1 = height 
+	        - Math.round((value - yMin - horizontalLineArea[i]) 
+		/ (yMax - yMin) * (float)height);
+	    int y2 = height
+	        - Math.round((value - yMin + horizontalLineArea[i]) 
+		/ (yMax - yMin) * (float)height);
+	    g2.setColor(horizontalLineColors[i].darker().darker());
+	    g2.fillRect(0, Math.min(y1, y2), width, Math.abs(y2-y1));
+            g2.setColor(horizontalLineColors[i]);
+	    g2.drawLine(0, y1, width, y1);
+	    g2.drawLine(0, y2, width, y2);
+	  }
+	  else
+	  {
+            int y = height 
+	        - Math.round((value - yMin) / (yMax - yMin) * (float)height);
+	    g2.drawLine(0, y, width, y);
+	  }
 	}
       }
 
