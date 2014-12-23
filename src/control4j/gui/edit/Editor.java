@@ -143,6 +143,11 @@ TreeModelListener, FileListener
     return instance;
   }
 
+  public JFrame getMainFrame()
+  {
+    return frame;
+  }
+
   /**
    *  Create main frame of the editor
    */

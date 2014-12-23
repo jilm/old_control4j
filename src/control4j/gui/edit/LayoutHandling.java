@@ -30,6 +30,7 @@ import java.awt.Container;
 import javax.swing.JTree;
 import javax.swing.JMenu;
 import javax.swing.JComponent;
+import javax.swing.JOptionPane;
 import javax.swing.tree.TreePath;
 import control4j.gui.GuiObject;
 import control4j.gui.VisualObject;
@@ -66,6 +67,8 @@ class LayoutHandling implements ActionListener
     menu.addItem("Full height", "LAYOUT_FULL_HEIGHT", this, 'h');
     menu.addSeparator();
     menu.addItem("Center vertically", "LAYOUT_CENTER_VERTICALLY", this, 'v');
+    menu.addSeparator();
+    menu.addItem("Move vertically", "LAYOUT_MOVE_VERTICALLY", this);
   }
 
   /**
@@ -79,6 +82,8 @@ class LayoutHandling implements ActionListener
       doFullHeight();
     if (e.getActionCommand().equals("LAYOUT_CENTER_VERTICALLY"))
       doCenterVertically();
+    if (e.getActionCommand().equals("LAYOUT_MOVE_VERTICALLY"))
+      doMoveVertically();
   }
 
   /**
@@ -236,6 +241,32 @@ class LayoutHandling implements ActionListener
     }
   }
 
+  /**
+   *
+   */
+  private void doMoveVertically()
+  {
+    // ask a user, how many pixels
+    Object response = JOptionPane.showInputDialog(
+	Editor.getInstance().getMainFrame(), "How many pixels?",
+	"Move Vertically", JOptionPane.QUESTION_MESSAGE, null, null, null);
+    if (response == null) return;
+    int offset = Integer.parseInt((String)response); // TODO
+    // move all of the selected components
+    TreePath[] selectionPaths = tree.getSelectionPaths();
+    for (TreePath selectionPath : selectionPaths)
+      if (((GuiObject)selectionPath.getLastPathComponent()).isVisual())
+      {
+	VisualObject selection 
+	    = (VisualObject)selectionPath.getLastPathComponent();
+        try 
+        { 
+	  int y = ((Integer)Scanner.getValue(selection, "Y")).intValue();
+          selection.set("Y", y + offset); 
+        } catch (Exception e) { }    // TODO
+      }
+  }
+  
   /**
    *  Returns all of the selected visual objects.
    */
