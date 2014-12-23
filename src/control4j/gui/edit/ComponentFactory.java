@@ -19,8 +19,13 @@ package control4j.gui.edit;
  */
 
 import java.util.HashMap;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.IOException;
 import control4j.gui.components.*;
 import control4j.gui.GuiObject;
+import static control4j.tools.Logger.*;
 
 /**
  *
@@ -35,22 +40,20 @@ class ComponentFactory
   private final HashMap<String, String> components
     = new HashMap<String, String>();
 
+  private static final String filename = "guicomponents.csv";
+
+  private static final String delimiter = ",";
+
   private ComponentFactory()
   {
-    components.put("Circle", "control4j.gui.components.Circle");
-    components.put("Quantity", "control4j.gui.components.Quantity");
-    components.put("Label", "control4j.gui.components.Label");
-    components.put("Panel", "control4j.gui.components.Panel");
-    components.put("Titled Panel", "control4j.gui.components.TitledPanel");
-    components.put("Box Panel", "control4j.gui.components.Box");
-    components.put("Rectangle", "control4j.gui.components.Rectangle");
-    components.put("Triangle", "control4j.gui.components.Triangle");
-    components.put("Box Filler", "control4j.gui.components.BoxFiller");
-    components.put("Graph", "control4j.gui.components.Graph");
-    components.put("Pump", "control4j.gui.components.Pump");
-    components.put("Valve", "control4j.gui.components.Valve");
-    components.put("Line", "control4j.gui.components.Line");
-    components.put("Arrow", "control4j.gui.components.Arrow");
+    try
+    {
+      loadComponentList();
+    }
+    catch (IOException e)
+    {
+      catched("ComponentFactory", "init", e);
+    }
   }
 
   /**
@@ -93,6 +96,24 @@ class ComponentFactory
       assert false;
     }
     return null;
+  }
+
+  /**
+   *  Loads component list from a file.
+   */
+  private void loadComponentList() throws IOException
+  {
+    InputStream is = ComponentFactory.class.getResourceAsStream(filename);
+    if (is == null) return;  // TODO
+    BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+    String line = reader.readLine();
+    while (line != null)
+    {
+      String[] items = line.split(delimiter);
+      components.put(items[0], items[1]);
+      line = reader.readLine();
+    }
+    reader.close();
   }
 
 }

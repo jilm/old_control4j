@@ -21,6 +21,7 @@ package control4j.annotations.process;
 import java.util.Set;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.io.FileWriter;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
@@ -47,11 +48,15 @@ import control4j.annotations.AGuiObject;
 public class GuiObjectProcessor extends AbstractProcessor
 {
 
-  /** xml writer */
-  private XMLStreamWriter writer;
+  /** writer */
+  private FileWriter writer;
 
   /** messager */
   private Messager messager;
+
+  private static final String filename = "guicomponents.csv";
+
+  private static final char delimiter = ',';
 
   /**
    *  Open a new xml file and write the root element to it.
@@ -64,15 +69,7 @@ public class GuiObjectProcessor extends AbstractProcessor
     try
     {
       // create xml file
-      OutputStream os = new FileOutputStream("guicomponents.xml");
-      writer = XMLOutputFactory.newFactory().createXMLStreamWriter(os);
-      // write root element
-      writer.writeStartDocument();
-      writer.writeStartElement("gui-components");
-    }
-    catch (javax.xml.stream.XMLStreamException e)
-    {
-      messager.printMessage(Diagnostic.Kind.ERROR, e.getMessage());
+      writer = new FileWriter(filename);
     }
     catch (java.io.IOException e)
     {
@@ -81,7 +78,7 @@ public class GuiObjectProcessor extends AbstractProcessor
   }
 
   /**
-   *  Write given informations into the xml file.
+   *  Write given informations into the file.
    */
   public boolean process (Set<? extends TypeElement> annotations, 
     RoundEnvironment env)
@@ -96,27 +93,24 @@ public class GuiObjectProcessor extends AbstractProcessor
 	  AGuiObject guiAnnotation = element.getAnnotation(AGuiObject.class);
 	  String name = guiAnnotation.name();
 	  String[] tags = guiAnnotation.tags();
-	  // write element to the xml file
-	  writer.writeStartElement("component");
-	  writer.writeAttribute("class", className);
-	  writer.writeAttribute("name", name);
+	  // write element to the file
+          writer.write(name);
+	  writer.write(delimiter);
+	  writer.write(className);
 	  for (String tag : tags)
 	  {
-	    writer.writeStartElement("tag");
-	    writer.writeCharacters(tag);
-	    writer.writeEndElement();
-	  }
-	  writer.writeEndElement();
+            writer.write(delimiter);
+	    writer.write(tag);
+          }
+	  writer.write("\n");
         }
       if (env.processingOver())
       {
-        // close XML file
-        writer.writeEndElement();
-        writer.writeEndDocument();
+        // close file
         writer.close();
       }
     }
-    catch (javax.xml.stream.XMLStreamException e)
+    catch (java.io.IOException e)
     {
       messager.printMessage(Diagnostic.Kind.ERROR, e.getMessage());
     }

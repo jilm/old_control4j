@@ -27,6 +27,7 @@
         <concat destfile="${bindir}/control4j/messages.properties" >
             <fileset dir="${srcdir}" includes="**/messages.properties" />
         </concat>
+	<move file="guicomponents.csv" todir="${bindir}/control4j/gui/edit" />
     </target>
 
     <target name="test" depends="compile" >
