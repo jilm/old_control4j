@@ -22,39 +22,47 @@ import control4j.Signal;
 import control4j.ProcessModule;
 
 /**
- *  Provide boolean OR operation on the input.
+ *
+ *  Provides boolean OR operation.
+ *
  */
 public class PMOr extends ProcessModule
 {
 
   /**
-   *  Perform a logical OR operation on the input and return
+   *  Performs a logical OR operation on the input and returns
    *  result. It expects one or more input signals and provides
-   *  exactly one output signal. Value of output is boolean
-   *  value. Output signal is invalid if and only if at least
-   *  one of the input signals is invalid. Timestamp of the
-   *  output corresponds to the actual system time.
+   *  exactly one output signal. Value of output should be treated
+   *  as a boolean value.
+   *
+   *  <p>There is a valid false value on the output if only if all
+   *  of the input signals are valid false values. There is a valid
+   *  true value on the output if there is at least one valid true
+   *  input signal. Otherwise the output signal is invalid. 
+   *  Timestamp of the output corresponds to the actual system time.
    *
    *  @param input an array of size at least one. It shall not
-   *         contain null value.
-   *  @return an array of size one. It contains Signal whose
-   *         value is logical OR on input signals. Returned
-   *         signal is invalid if at least one of the input
-   *         signals is invalid. Timestamp corresponds to the
-   *         system time in moment of module invocation.
+   *             contain null value.
+   *
+   *  @return an array of size one. It contains Signal whose value 
+   *             is logical OR on input signals. Returned signal is 
+   *             valid as long as it is possible to infer output.
+   *             Timestamp corresponds to the system time in the
+   *             moment of module invocation.
    */
   public Signal[] process(Signal[] input)
   {
     int size = getNumberOfAssignedInputs();
-    if (!input[0].isValid())
-      return new Signal[] {Signal.getSignal()};
-    boolean result = input[0].getBoolean();
-    for (int i=1; i<size; i++)
-    {
-      if (!input[i].isValid())
-        return new Signal[] {Signal.getSignal()};
-      result = result || input[i].getBoolean();
-    }
-    return new Signal[] {Signal.getSignal(result)};
+    boolean valid = true;
+    for (int i=0; i<size; i++)
+      if (input[i].isValid() && input[i].getBoolean())
+        return new Signal[] { Signal.getSignal(true) };
+      else if (!input[i].isValid())
+        valid = false;
+    if (valid)
+      return new Signal[] { Signal.getSignal(false) };
+    else
+      return new Signal[] { Signal.getSignal() };
   }
+
 }
