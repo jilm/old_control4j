@@ -54,7 +54,8 @@ public class TQS3 extends Papouch
   {
     if (message.getInst() == 0)
     {
-      double value = (double)(message.getData(0) * 0x100 + message.getData(1));
+      short rawValue = (short)((message.getData(0) << 8) + message.getData(1));
+      double value = (double)rawValue;
       value = Math.floor(value / 3.2d + 0.5d) * 0.1d;
       return value;
     }
