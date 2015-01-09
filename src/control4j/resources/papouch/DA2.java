@@ -204,14 +204,14 @@ implements IAnalogOutput, ICycleEventListener
    *             index into the data array where the first raw
    *             value will be stored.
    */
-  private void convertValue(double value, int[] data, int index)
+  protected void convertValue(double value, int[] data, int index)
   {
-    value = value > 1.0 ? 1.0 : value;
-    value = value < 0.0 ? 0.0 : value;
-    int rawValue = (int)Math.round(value * 0xFFFF);
-    int rawValueMsb = (rawValue & 0xFF00) >>> 8;
-    int rawValueLsb = rawValue & 0xFF;
+    value = value > 1.0d ? 1.0d : value;
+    value = value < 0.0d ? 0.0d : value;
+    long rawValue = Math.round(value * 65535.0d);
+    int rawValueMsb = (int)((rawValue & 0xFF00l) >> 8);
+    int rawValueLsb = (int)(rawValue & 0xFFl);
     data[index] = rawValueMsb;
-    data[index] = rawValueLsb;
+    data[index+1] = rawValueLsb;
   }
 }
