@@ -46,6 +46,12 @@ public class PMPid extends ProcessModule
   @ConfigItem(optional = true)
   public double kd = 0.0;
 
+  @ConfigItem(key="output-max", optional=true)
+  public double outputMax = Double.POSITIVE_INFINITY;
+
+  @ConfigItem(key="output-min", optional=true)
+  public double outputMin = Double.NEGATIVE_INFINITY;
+
   private double previousError = 0.0;
   private double integral = 0.0;
 
@@ -54,8 +60,10 @@ public class PMPid extends ProcessModule
    *
    *  <p>It expects tree inputs. Error, enable and reset. First one, the
    *  error input is obligatory. It is the diference between reference and
-   *  measured value. The enable and reset inputs are optional and may
-   *  be used to face the windup problem. 
+   *  measured value. The enable and reset inputs are optional.
+   *
+   *  <p>This controller has windup protection according to
+   *  {@link http://www.controlguru.com/2008/021008.html}
    */
   @Override
   public Signal[] process(Signal[] input)
@@ -82,6 +90,19 @@ public class PMPid extends ProcessModule
       if (dt > 0.0) derivative = (error - previousError) / dt;
       previousError = error;
       double result = kp*error + ki*integral + kd*derivative;
+      // windup protection
+      if (result > outputMax)
+      {
+	result = outputMax;
+	if (Math.abs(ki) > 1e-6)
+	  integral = (result - kp*error - kd*derivative) / ki;
+      }
+      else if (result < outputMin)
+      {
+	result = outputMin;
+	if (Math.abs(ki) > 1e-6)
+	  integral = (result - kp*error - kd*derivative) / ki;
+      }
       return new Signal[] { Signal.getSignal(result) };
     }
     else
