@@ -1,7 +1,7 @@
 package control4j.application;
 
 /*
- *  Copyright 2013, 2014 Jiri Lidinsky
+ *  Copyright 2013, 2014, 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -169,7 +169,7 @@ public class ModuleDeclaration extends DeclarationBase
     else
     {
       // find a place where the output should be placed to keep the list sorted
-      int listIndex = findInputIndex(output.getIndex());
+      int listIndex = findOutputIndex(output.getIndex());
       // if it shoud be placed at the end of the list
       if (listIndex == outputs.size())
       {

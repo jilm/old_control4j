@@ -1,7 +1,7 @@
 package control4j.resources.papouch;
 
 /*
- *  Copyright 2013 Jiri Lidinsky
+ *  Copyright 2013 - 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -63,7 +63,7 @@ implements IAnalogInput, ICycleEventListener
   @Override
   public void prepare()
   {
-    request = new SpinelMessage(address, 0x51);
+    request = new SpinelMessage(address, 0x51, new int[] { 0 });
   }
 
   public double getAnalogInput(int index) throws ValueNotAvailableException
@@ -148,7 +148,7 @@ implements IAnalogInput, ICycleEventListener
   {
     if (response.getInst() == 0)
     {
-      for (int i=0; i<response.getDataLength()/4; i++)
+      for (int i=0; i<channels; i++)
       {
         int channel = response.getData(i*4) - 1;
         int status = response.getData(i*4+1);
