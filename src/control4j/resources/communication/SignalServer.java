@@ -133,6 +133,7 @@ implements IClientFactory, ICycleEventListener
         clients.add(client);
       }
       info("New listener added, total number of listeners: " + clients.size());
+      client.initialize();
     }
     catch (IOException e)
     {

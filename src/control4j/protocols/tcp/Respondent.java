@@ -65,6 +65,11 @@ public class Respondent<I, O> implements Runnable
     this.outputStream = outputStream;
   }
 
+  public void initialize()
+  {
+    new Thread(this).start();
+  }
+
   /**
    *  Close the given input and output stream and release all of the 
    *  resources.
