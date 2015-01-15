@@ -1,7 +1,7 @@
 package control4j.protocols.tcp;
 
 /*
- *  Copyright 2013 Jiri Lidinsky
+ *  Copyright 2013, 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -24,7 +24,7 @@ import java.io.IOException;
  *  Auxiliary interface which must be implemented by the protocol in order
  *  to use RobustTcpTemplate class.
  */
-public interface IInputStream<T>
+public interface IInputStream<T> extends java.io.Closeable
 {
   
   /**
@@ -35,13 +35,5 @@ public interface IInputStream<T>
    *  @throws IOException if somethig went wrong
    */
   public T readMessage() throws IOException;
-  
-  /**
-   *  Close the input stream and release all of the resources. It shoud
-   *  close even the underlaying input stream.
-   *
-   *  @throws IOException if something went wrong
-   */
-  public void close() throws IOException;
-  
+
 }

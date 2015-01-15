@@ -21,6 +21,7 @@ package control4j.protocols.tcp;
 import java.io.IOException;
 
 import control4j.tools.InterchangePoint;
+import control4j.tools.Tools;
 import static control4j.tools.LogMessages.*;
 import static control4j.tools.Logger.*;
 
@@ -76,16 +77,10 @@ public class Respondent<I, O> implements Runnable
    */
   public void close()
   {
-    if (inputStream != null)
-    {
-      try { inputStream.close(); } catch (IOException ioex) {}
-      inputStream = null;
-    }
-    if (outputStream != null)
-    {
-      try { outputStream.close(); } catch (IOException ioex) {}
-      outputStream = null;
-    }
+    Tools.close(inputStream, getClass().getName(), "close");
+    inputStream = null;
+    Tools.close(outputStream, getClass().getName(), "close");
+    outputStream = null;
   }
 
   /**
