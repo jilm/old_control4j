@@ -1,7 +1,7 @@
 package control4j.protocols.tcp;
 
 /*
- *  Copyright 2013 Jiri Lidinsky
+ *  Copyright 2013, 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -24,7 +24,7 @@ import java.io.IOException;
  *  Auxiliary interface which must be implemented by the protocol 
  *  in order to use RobustTcpTemplate class.
  */
-public interface IOutputStream<T>
+public interface IOutputStream<T> extends java.io.Closeable
 {
   /**
    *  Send given message via the underlaying output stream.
@@ -36,14 +36,5 @@ public interface IOutputStream<T>
    *             if somethig wend wrong
    */
   public void write(T message) throws IOException;
-  
-  /**
-   *  Close the output stream and release all of the allocated
-   *  resources. It shoud close even the underlaying output
-   *  stream.
-   *
-   *  @throws IOException
-   *             if somethig wend wrong
-   */
-  public void close() throws IOException;
+
 }

@@ -110,7 +110,6 @@ public abstract class SaxReader extends DefaultHandler
 	  } 
 	  catch (Exception e) 
 	  {
-	    System.out.println(e.getMessage());
 	  }
 	}
     }
@@ -143,7 +142,6 @@ public abstract class SaxReader extends DefaultHandler
 	  } 
 	  catch (Exception e) 
 	  {
-	    System.out.println(e.getMessage());
 	  }
 	}
     }

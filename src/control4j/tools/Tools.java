@@ -1,7 +1,7 @@
-package control4j.protocols.tcp;
+package control4j.tools;
 
 /*
- *  Copyright 2013, 2015 Jiri Lidinsky
+ *  Copyright 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -18,22 +18,33 @@ package control4j.protocols.tcp;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import java.io.IOException;
-
-/**
- *  Auxiliary interface which must be implemented by the protocol in order
- *  to use RobustTcpTemplate class.
- */
-public interface IInputStream<T> extends java.io.Closeable
+public class Tools
 {
-  
-  /**
-   *  Reades one message from the underlaying input stream and returns it.
-   *
-   *  @return a received message
-   *
-   *  @throws IOException if somethig went wrong
-   */
-  public T readMessage() throws IOException;
+
+  public static void close(java.io.Closeable object)
+  {
+    if (object != null)
+      try
+      {
+	object.close();
+      }
+      catch (java.io.IOException e)
+      {
+      }
+  }
+
+  public static void close(
+      java.io.Closeable object, String sourceClass, String methodName)
+  {
+    if (object != null)
+      try
+      {
+	object.close();
+      }
+      catch (java.io.IOException e)
+      {
+	Logger.catched(sourceClass, methodName, e);
+      }
+  }
 
 }

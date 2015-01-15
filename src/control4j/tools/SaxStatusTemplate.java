@@ -63,7 +63,6 @@ public class SaxStatusTemplate implements ISaxStatus
   public ISaxStatus characters(char[] ch, int start, int length) throws SAXException
   {
     return this;
-    //System.out.println(new String(ch));
     //for (char c : ch)
     //  if (!Character.isWhitespace(c))
     //    throw new SAXException("Text is not expected here");
