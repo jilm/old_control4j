@@ -119,7 +119,6 @@ class LayoutHandling implements ActionListener
 	return;
     // get the width of the parent
     int parentWidth = parent.getVisualComponent().getWidth();
-    System.out.println("parent width: " + parentWidth); // TODO
     // get the width of the children
     int[] widths = new int[selection.size()];
     int childrenWidth = 0;  // total width of all children

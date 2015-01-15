@@ -228,7 +228,6 @@ public abstract class VisualObject extends GuiObject
    */
   public final JComponent createVisualComponent()
   {
-    System.out.println("Creating VC for: " + this.toString());
     component = createSwingComponent();
     component.putClientProperty(LINK_KEY, this);
     return component;

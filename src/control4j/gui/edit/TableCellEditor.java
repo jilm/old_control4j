@@ -215,13 +215,11 @@ implements javax.swing.table.TableCellEditor, ActionListener, TreeSelectionListe
   @Override
   protected void fireEditingCanceled()
   {
-    System.out.println("fireEditingCanceled");
     super.fireEditingCanceled();
   }
 
   public void focusGained(java.awt.event.FocusEvent e)
   {
-    System.out.println("focusGained");
   }
 
   public void focusLost(java.awt.event.FocusEvent e)
@@ -230,7 +228,6 @@ implements javax.swing.table.TableCellEditor, ActionListener, TreeSelectionListe
     {
       if (!(e.getOppositeComponent() instanceof JTable))
       {
-        System.out.println("focusLost " + e.getOppositeComponent().getClass().getName());
         cancelCellEditing();
       }
     }

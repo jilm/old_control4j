@@ -96,7 +96,6 @@ public class IMGui extends InputModule
 
     public void run()
     {
-      System.out.println("Updater run " + updateListeners.size());
       for (Changer listener : updateListeners)
         listener.update(buffer);
     }

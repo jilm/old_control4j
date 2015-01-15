@@ -139,11 +139,9 @@ public class Scanner
       Object value = map.get(key);
       if (value instanceof Number || value instanceof String)
       {
-        System.out.println(key + ": " + value.toString());
       }
       else
       {
-        System.out.println(key + ":");
         printMap((Map<String, Object>)value);
       }
     }
