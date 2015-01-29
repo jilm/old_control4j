@@ -76,4 +76,10 @@ public class SignalOverTcp extends RobustTcpTemplate<Signal[], Signal[]>
     } // TODO
   }
 
+  @Override
+  protected Signal[] getEmptyRequest()
+  {
+    return new Signal[0];
+  }
+
 }

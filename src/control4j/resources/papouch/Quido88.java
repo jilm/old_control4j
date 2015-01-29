@@ -214,7 +214,11 @@ implements ICycleEventListener, IThermometer, IBinaryInput, IBinaryOutput
 	    output[i] = null;
           }
         SpinelMessage message = new SpinelMessage(address, 0x20, data);
-        outputResponse = spinel.write(message);
+	try
+	{
+          outputResponse = spinel.write(message);
+	}
+	catch (java.io.IOException e) { }
       }
     }
   }
@@ -228,20 +232,32 @@ implements ICycleEventListener, IThermometer, IBinaryInput, IBinaryOutput
     if (temperatureSensorConnected)
     {
       // request for measurement
-      if (temperatureResponse == null)
-        temperatureResponse = spinel.write(temperatureRequest);
+      try
+      {
+        if (temperatureResponse == null)
+          temperatureResponse = spinel.write(temperatureRequest);
+      }
+      catch (java.io.IOException e) { }
       // request for unit. Unit is determined only once
-      if (temperatureUnit == null)
-        if (temperatureUnitResponse == null)
-	{
-	  SpinelMessage message = new SpinelMessage(address, 0x1d);
-	  temperatureUnitResponse = spinel.write(message);
-	}
+      try
+      {
+        if (temperatureUnit == null)
+          if (temperatureUnitResponse == null)
+	  {
+	    SpinelMessage message = new SpinelMessage(address, 0x1d);
+	    temperatureUnitResponse = spinel.write(message);
+	  }
+      }
+      catch (java.io.IOException e) { }
     }
     
     // Request for binary input
-    if (inputResponse == null)
-      inputResponse = spinel.write(inputRequest);
+    try
+    {
+      if (inputResponse == null)
+        inputResponse = spinel.write(inputRequest);
+    }
+    catch (java.io.IOException e) { }
   }
 
   /**

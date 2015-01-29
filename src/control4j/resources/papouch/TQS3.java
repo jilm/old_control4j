@@ -121,8 +121,12 @@ implements ICycleEventListener, IThermometer
   public void cycleStart()
   {
     // Request for temperature
-    if (temperatureResponse == null)
-      temperatureResponse = spinel.write(temperatureRequest);
+    try
+    {
+      if (temperatureResponse == null)
+        temperatureResponse = spinel.write(temperatureRequest);
+    }
+    catch (java.io.IOException e) { }
   }
 
   /**
