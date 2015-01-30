@@ -78,7 +78,6 @@ class TreeTransferHandler extends javax.swing.TransferHandler
   @Override
   public boolean canImport(javax.swing.TransferHandler.TransferSupport support)
   {
-    //System.out.println("canImport");
     if (support == null)
       throw new NullPointerException();
     if (support.isDataFlavorSupported(supportedFlavors[0]))
@@ -94,13 +93,11 @@ class TreeTransferHandler extends javax.swing.TransferHandler
   protected Transferable createTransferable(JComponent c)
   {
     JTree tree = (JTree)c;
-    System.out.println(tree.getClass().getName());
     if (tree.getSelectionCount() == 0)
       return null;
     else
     {
       TreePath selection = tree.getLeadSelectionPath();
-      System.out.println(selection.toString());
       sourceObject = (GuiObject)selection.getLastPathComponent();
       return new TreeTransferable(sourceObject);
     }
@@ -112,7 +109,6 @@ class TreeTransferHandler extends javax.swing.TransferHandler
   @Override
   public void exportAsDrag(JComponent comp, InputEvent e, int action)
   {
-    System.out.println("exportAsDrag");
     super.exportAsDrag(comp, e, action);
   }
 
@@ -122,7 +118,6 @@ class TreeTransferHandler extends javax.swing.TransferHandler
   @Override
   public void exportToClipboard(JComponent comp, Clipboard clip, int action)
   {
-    System.out.println("exportToClipboard");
     super.exportToClipboard(comp, clip, action);
   }
 
@@ -132,7 +127,6 @@ class TreeTransferHandler extends javax.swing.TransferHandler
   @Override
   protected void exportDone(JComponent source, Transferable data, int action)
   {
-    System.out.println("exportDone " + action);
     if (action == MOVE)
     {
       GuiObject parent = sourceObject.getParent();
@@ -190,7 +184,6 @@ class TreeTransferHandler extends javax.swing.TransferHandler
 	  {
 	    Screens root = (Screens)targetObject.getParent();
 	    int index = root.getIndexOfChild(targetObject);
-	    System.out.println("Copy screen at index: " + index);
 	    Screen clone = (Screen)sourceObject.clone(true);
 	    root.insert(clone, index);
             treeModel.fireTreeNodeInserted(clone);
@@ -200,7 +193,6 @@ class TreeTransferHandler extends javax.swing.TransferHandler
 	  else if(targetObject instanceof Screens)
 	  {
 	    Screens root = (Screens)targetObject.getParent();
-	    System.out.println("Copy screen at the end of screens");
 	    Screen clone = (Screen)sourceObject.clone(true);
 	    root.add(clone);
 	    treeModel.fireTreeNodeInserted(clone);
@@ -215,7 +207,6 @@ class TreeTransferHandler extends javax.swing.TransferHandler
 	// component -> panel
 	else if (sourceObject.isVisual() && targetObject.isVisualContainer())
 	{
-	  System.out.println("Component -> Panel");
 	  VisualObject clone = (VisualObject)sourceObject.clone(true);
 	  ((VisualContainer)targetObject).add(clone);
 	  treeModel.fireTreeNodeInserted(clone);
@@ -224,7 +215,6 @@ class TreeTransferHandler extends javax.swing.TransferHandler
 	// Component at the position of another component
 	else if (sourceObject.isVisual() && targetObject.isVisual())
 	{
-	  System.out.println("Component -> Component");
 	  VisualObject clone = (VisualObject)sourceObject.clone(true);
 	  VisualContainer parent = (VisualContainer)targetObject.getParent();
 	  int index = parent.getIndexOfChild(targetObject);
@@ -235,7 +225,6 @@ class TreeTransferHandler extends javax.swing.TransferHandler
 	// Changer -> changeble
 	else if (!sourceObject.isVisual() && targetObject.isVisual())
         {
-	  System.out.println("Changer -> Changeable");
 	  Changer clone = (Changer)sourceObject.clone(true);
 	  ((VisualObject)targetObject).add(clone);
 	  treeModel.fireTreeNodeInserted(clone);
@@ -243,7 +232,6 @@ class TreeTransferHandler extends javax.swing.TransferHandler
 	}
 	else
 	{
-	  System.out.println("???");
 	  return false;
 	}
 

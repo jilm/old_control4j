@@ -74,7 +74,6 @@ public class Writer
     }
     catch(XMLStreamException e)
     {
-      System.out.println(e.getMessage());
     }
   }
 

@@ -1,7 +1,7 @@
 package control4j.resources.communication;
 
 /*
- *  Copyright 2013, 2014 Jiri Lidinsky
+ *  Copyright 2013, 2014, 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -27,6 +27,7 @@ import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.LinkedList;
+
 import control4j.ConfigItem;
 import control4j.ICycleEventListener;
 import control4j.Signal;
@@ -43,6 +44,8 @@ import static control4j.tools.Logger.*;
  *
  *  Encapsulate a communication server which can provide signals as a native
  *  java objects.
+ *
+ *  @see control4j.protocols.tcp.Server
  *
  */
 public class SignalServer extends Resource 
@@ -62,6 +65,8 @@ implements IClientFactory, ICycleEventListener
 
   /**
    *  Create and run a server thread.
+   *
+   *  @see control4j.protocols.tcp.Server
    */
   @Override
   public void prepare()
@@ -85,14 +90,19 @@ implements IClientFactory, ICycleEventListener
     {
       for (Respondent<Signal[], Signal[]> client : clients)
       {
-        if (client.isActive())
-        {
-          Signal[] buffer = new Signal[size];
-          System.arraycopy(signals, 0, buffer, 0, size);
-          client.write(buffer);
+	try
+	{
+          if (client.read() != null)
+          {
+            Signal[] buffer = new Signal[size];
+            System.arraycopy(signals, 0, buffer, 0, size);
+            client.write(buffer);
+          }
         }
-        else
+	catch (IOException e)
+	{
 	  garbage.add(client);
+	}
       }
       for (Respondent<Signal[], Signal[]> client : garbage)
         clients.remove(client);
@@ -123,6 +133,7 @@ implements IClientFactory, ICycleEventListener
         clients.add(client);
       }
       info("New listener added, total number of listeners: " + clients.size());
+      client.initialize();
     }
     catch (IOException e)
     {

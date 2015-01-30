@@ -127,7 +127,6 @@ public class ResourceManager implements Iterable<control4j.resources.Resource>
     if (id == null)
       throw new NullPointerException();
     control4j.resources.Resource resource = resources.get(id);
-    System.out.println(resource);
     if (resource == null)
     {
       throw new java.util.NoSuchElementException(id);

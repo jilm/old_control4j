@@ -1,7 +1,7 @@
 package control4j.protocols.spinel;
 
 /*
- *  Copyright 2013 Jiri Lidinsky
+ *  Copyright 2013, 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -55,6 +55,12 @@ extends RobustTcpTemplate<SpinelMessage, SpinelMessage>
   protected IOutputStream<SpinelMessage> getSpecificOutputStream(OutputStream outputStream)
   {
     return new SpinelOutputStream(outputStream);
+  }
+
+  @Override
+  protected SpinelMessage getEmptyRequest()
+  {
+    return new SpinelMessage(30, 40);
   }
 
 }

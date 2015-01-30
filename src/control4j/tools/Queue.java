@@ -1,7 +1,7 @@
 package control4j.tools;
 
 /*
- *  Copyright 2013 Jiri Lidinsky
+ *  Copyright 2013, 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -21,18 +21,23 @@ package control4j.tools;
 import java.util.LinkedList;
 
 /**
+ *
  *  FIFO data structure. This data structure is dedicated for
  *  exchange information between threads. All of the methods
  *  are synchronized.
+ *
  */
 public class Queue<E>
 {
-  private LinkedList<E> list = new LinkedList<E>();
+
+  /** The queue. */
+  protected LinkedList<E> list = new LinkedList<E>();
 
   /**
-   *  Adds an item to the end of the queue.
+   *  Adds an item at the end of the queue.
    *
-   *  @param item item to be added to the end of the queue
+   *  @param item 
+   *             an item to be added at the end of the queue
    */
   public synchronized void queue(E item)
   {
@@ -43,19 +48,29 @@ public class Queue<E>
   /**
    *  Removes and returns an item from the head (first item) of the queue.
    *
-   *  @return an item from the begin of the queue or null if
-   *    the queue is empty.
+   *  @return an item at the head of the queue or null if
+   *             the queue is empty
    */
   public synchronized E dequeue()
   {
     return list.poll();
   }
   
+  /**
+   *  Removes all of the elements from this queue.
+   */
   public synchronized void clear()
   {
     list.clear();
   }
 
+  /**
+   *  Removes and returns an item from the head (first item) of the 
+   *  queue. If the queue is empty, this method blocks until there
+   *  is an item to return.
+   *  
+   *  @return an item at the head of the queue 
+   */
   public synchronized E blockingDequeue()
   {
     while (list.size() == 0)

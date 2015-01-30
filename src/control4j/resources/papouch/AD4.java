@@ -111,8 +111,12 @@ implements IAnalogInput, ICycleEventListener
 
   public void cycleStart()
   {
-    if (response == null)
-      response = spinel.write(request);
+    try
+    {
+      if (response == null)
+        response = spinel.write(request);
+    }
+    catch (java.io.IOException e) { }
   }
 
   /**

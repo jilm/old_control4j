@@ -44,6 +44,7 @@ public class SignalClient extends Resource implements ICycleEventListener
   public void prepare()
   {
     channel = new SignalOverTcp(host, port);
+    channel.start();
   }
 
   public void write(Signal[] message)
@@ -77,11 +78,15 @@ public class SignalClient extends Resource implements ICycleEventListener
   public void cycleEnd()
   {
     if (response == null || response.isFinished())
-    {
-      if (request == null) request = new Signal[0];
-      finest("Sending request: " + request.toString());
-      response = channel.write(request);
-    }
+      try
+      {
+        if (request == null) request = new Signal[0];
+        finest("Sending request: " + request.toString());
+        response = channel.write(request);
+      }
+      catch (java.io.IOException e)
+      {
+      }
   }
 
 }

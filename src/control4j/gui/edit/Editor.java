@@ -360,12 +360,10 @@ TreeModelListener, FileListener
       VisualObject selected = (VisualObject)selectPath.getLastPathComponent();
       // ask a user which component wants to add
       String name = letSelectChanger();
-      System.out.println(name);
       if (name != null)
       {
         // create an instance of selected component
         Changer changer = ChangerFactory.getInstance().createInstance(name);
-	System.out.println(changer.toString());
         // add the component to the appropriate place
 	selected.add(changer);
         treeModel.fireTreeNodeInserted(changer);
@@ -373,7 +371,6 @@ TreeModelListener, FileListener
     }
     catch (ClassCastException e)
     {
-      System.out.println("Class cast exception: " + e.getMessage());
       return;
     }
   }

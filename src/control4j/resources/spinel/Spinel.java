@@ -39,9 +39,11 @@ public class Spinel extends Resource
   public void prepare()
   {
     channel = new SpinelOverTcp(host, port);
+    channel.start();
   }
 
   public IResponseCrate<SpinelMessage> write(SpinelMessage message)
+  throws java.io.IOException
   {
     finest("Sending request: " + message.toString());
     return channel.write(message);

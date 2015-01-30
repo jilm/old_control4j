@@ -144,8 +144,12 @@ implements IAnalogOutput, ICycleEventListener
     if (response == null)
     {
       SpinelMessage message = getMessage();
-      if (message != null)
-        response = spinel.write(message);
+      try
+      {
+        if (message != null)
+          response = spinel.write(message);
+      }
+      catch (java.io.IOException e) { }
     }
     else
     {

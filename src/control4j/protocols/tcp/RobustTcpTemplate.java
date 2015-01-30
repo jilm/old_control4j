@@ -1,7 +1,7 @@
 package control4j.protocols.tcp;
 
 /*
- *  Copyright 2013 Jiri Lidinsky
+ *  Copyright 2013, 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -27,49 +27,72 @@ import java.io.IOException;
 import java.util.Date;
 import control4j.tools.Queue;
 import control4j.tools.IResponseCrate;
+import control4j.tools.Tools;
 import static control4j.tools.LogMessages.*;
 import static control4j.tools.Logger.*;
 
 /**
- *  An easy to use template for request / response communication over TCP 
- *  protocol. A commutication is performed by the independent thread, 
- *  so the methods read and write doesn't block. If an exception is 
- *  thrown during the communication, or during the communication 
+ *
+ *  An easy to use template for request / response communication client
+ *  over TCP/IP protocol. A commutication is performed by the independent 
+ *  thread, so the methods for read and write doesn't block. If an 
+ *  exception is thrown during the communication, or during the communication 
  *  negotiation, all of the resources which were created so far are closed 
  *  and released, and the new process of communication connection is started.
  *  This process is completly transparent.
  *
- *  <p>The only thing you must do to use this template is override the 
- *  methods getSpecificInputStream and getSpecificOutputStream.
+ *  <p>The only thing you must do to use this template is override 
+ *  methods <code>getSpecificInputStream</code> and 
+ *  <code>getSpecificOutputStream</code>.
+ *
  */
 public abstract class RobustTcpTemplate<I, O>
+implements Runnable, java.io.Closeable
 {
 
-  /**
-   *  Reading response timeout in milliseconds.
-   */
-  public int timeout = 3333;
+  /** Reading response timeout in milliseconds. */
+  protected int timeout = 3333;
 
-  private String host;
-  private int port;
-  protected Queue<TransactionCrate> transactionBuffer = new Queue<TransactionCrate>();
-  private Connection connection;
+  /** Host name of the remote server. */
+  protected String host;
+
+  /** A port on which the remote server listens. */
+  protected int port;
+
+  /** A queue of the requests that waits for sending. */
+  protected final Queue<TransactionCrate> transactionBuffer 
+                               = new Queue<TransactionCrate>();
+
+  /** An instruction to stop the thread that provides request - response loop */
+  private volatile boolean stop = false;
+
+  /** Indicate wheater the request - response loop has ever been started. */
+  private volatile boolean run = false;
+
+  /** Indicates that the connection has been estabilished. */
+  private volatile boolean connected = false;
+
+  /** A time after which the transation expires, if it is not finished. */
+  protected long transactionTimeout = 10000l;
+
+  /** Identification of this client for logging purposes. */
+  protected String identification;
 
   /**
-   *  Starts a thread which performs loop: send request, wait for response.
+   *  Initialize internal fields.
    *
    *  @param host 
-   *             host name
+   *             host name of the remote server
    *
    *  @param port 
-   *             port number
+   *             port number on which the remote server listens
    */
   public RobustTcpTemplate(String host, int port)
   {
     this.host = host;
     this.port = port;
-    connection = new Connection();
-    connection.start();
+    identification = "TCP/IP client; class: " + getClass().getName() 
+	+ "; host: " + host + "; port: " + port;
   }
 
   public RobustTcpTemplate(String host, int port, int timeout)
@@ -77,33 +100,86 @@ public abstract class RobustTcpTemplate<I, O>
     this.host = host;
     this.port = port;
     this.timeout = timeout;
-    connection = new Connection();
-    connection.start();
+    identification = "TCP/IP client; class: " + getClass().getName() 
+	+ "; host: " + host + "; port: " + port;
+  }
+
+  /**
+   *  Starts a request - response loop in a separate thread.
+   *
+   *  <p>If the thread is already running, nothing happens.
+   *
+   *  <p>If the thread has been already closed ???
+   */
+  public void start()
+  {
+    if (!run && !stop)
+    {
+      new Thread(this, identification).start();
+      run = true;
+    }
+    else
+    {
+      assert false;
+    }
   }
 
   /**
    *  Create and return input stream which correspond to the required
-   *  protocol.
+   *  protocol. In other words, this method must return an input stream,
+   *  which can receve the message in appropriate format.
    *
    *  @param inputStream
    *             lower level input stream
+   *
+   *  @return an input stream which is cappable to receive the message
+   *             of the appropriate form
    */
-  abstract protected IInputStream<I> getSpecificInputStream(InputStream inputStream);
+  abstract protected IInputStream<I> getSpecificInputStream(
+      InputStream inputStream);
   
   /**
    *  Create and return output stream which correspond to the required
-   *  protocol.
+   *  protocol. In other words, this method must return an output stream,
+   *  which can send the given massage through the given lower level
+   *  output stream.
    *
    *  @param outputStream
    *             lower level output stream
+   *
+   *  @return an output stream which is cappable to send the message
+   *             through the given lower level output stream
    */
-  abstract protected IOutputStream<O> getSpecificOutputStream(OutputStream outputStream);
+  abstract protected IOutputStream<O> getSpecificOutputStream(
+      OutputStream outputStream);
+
+  /**
+   *  Should return a valid request message. This message is never
+   *  sent, it servers only for internal purposes, so the content
+   *  of the message may be arbitrary. It should not return 
+   *  <code>null</code> value.
+   *
+   *  @return an empty request message
+   */
+  abstract protected O getEmptyRequest();
   
   /**
-   *  Close the connection and release all of the resources.
+   *  Causes the request - response loop to stop. Before the loop stops
+   *  it closes all of the resources. Once the loop is stopped, it cannot
+   *  be started again.
+   *
+   *  <p>If the request - response loop is not running, or if it has
+   *  already been stopped, nothing happens.
    */
   public void close()
   {
+    stop = true;
+    // put an empty essage into the queue to wake up the r/r thread
+    try
+    {
+      write(getEmptyRequest());
+    }
+    catch (IOException e) { }
   }
 
   /**
@@ -111,157 +187,206 @@ public abstract class RobustTcpTemplate<I, O>
    *  connection. The request is placed into the internal buffer and
    *  send after all of the previous requests have been sent.
    *
+   *  <p>This method doesn't block. It returns an object through
+   *  which you can get response, after it was received, or through
+   *  which you can watch the state of this transaction.
+   *
    *  @param request 
    *             request to be send
    *
    *  @return an object through which the response will be passed
+   *
+   *  @throws IOException
+   *             if connection has not been estabilished
    */
-  public IResponseCrate<I> write(O request)
+  public IResponseCrate<I> write(O request) throws IOException
   {
-    TransactionCrate transaction = new TransactionCrate(request);
-    transactionBuffer.queue(transaction);
-    return transaction;
+    if (connected)
+    {
+      TransactionCrate transaction = new TransactionCrate(request);
+      transactionBuffer.queue(transaction);
+      return transaction;
+    }
+    else
+    {
+      throw new IOException("Connection has not been estabished!\n"
+	  + identification);
+    }
   }
 
-  private class Connection extends Thread
+  private Socket socket;
+  private InputStream inputStream;
+  private OutputStream outputStream;
+  private IInputStream<I> specificInputStream;
+  private IOutputStream<O> specificOutputStream;
+  private boolean logFlag = true;
+
+  /**
+   *
+   */
+  public void run()
   {
-    private Socket socket;
-    private InputStream inputStream;
-    private OutputStream outputStream;
-    private IInputStream<I> specificInputStream;
-    private IOutputStream<O> specificOutputStream;
-    private boolean logFlag = true;
-
-    public Connection()
+    while (!stop)
     {
-      super("RobustTcpTemplate:Connection");
-    }
-
-    @Override public void run()
-    {
-      while (true)
+      // estabilish a connection
+      try
       {
-        // estabilish a connection
-	try
-	{
-          InetAddress address = InetAddress.getByName(host);
-          socket = new Socket(address, port);
-	  socket.setSoTimeout(timeout);
-          outputStream = socket.getOutputStream();
-          specificOutputStream = getSpecificOutputStream(outputStream);
-          inputStream = socket.getInputStream();
-          specificInputStream = getSpecificInputStream(inputStream);
-	  logFlag = true;
-          fine("Connection has been estabilished");
+        InetAddress address = InetAddress.getByName(host);
+        socket = new Socket(address, port);
+        socket.setSoTimeout(timeout);
+        outputStream = socket.getOutputStream();
+        specificOutputStream = getSpecificOutputStream(outputStream);
+        inputStream = socket.getInputStream();
+        specificInputStream = getSpecificInputStream(inputStream);
+        logFlag = true;
+	connected = true;
+        fine("Connection has been estabilished\n" + identification);
 
-	  // enter the request / response loop
-	  TransactionCrate transaction = null;
-	  try
-	  {
-	    while (true)
-	    {
-	      transaction = transactionBuffer.blockingDequeue();
-	      // send request
-	      transaction.markRequest();
-	      specificOutputStream.write(transaction.getRequest());
-	      finest("Request has been sent.");
-	      // wait for response
-	      I response = specificInputStream.readMessage();
-	      finest("Response received");
-	      transaction.setResponse(response, null);
-	    }
-	  }
-	  catch (IOException e)
-	  {
-	    transaction.setResponse(null, e);
-	    catched(getClass().getName(), "run", e);
-	    throw e;
-	  }
-	  catch (Exception e)
-	  {
-	    catched(getClass().getName(), "run", e);
-	  }
-	}
-        catch (UnknownHostException e)
+        // enter the request / response loop
+        TransactionCrate transaction = null;
+        try
         {
-          if (logFlag)
-            warning(getMessage("spn04", e.getMessage()));
-          logFlag = false;
+          while (!stop)
+          {
+	    // get request
+            transaction = transactionBuffer.blockingDequeue();
+	    if (transaction.isFinished()) continue; // transaction may expire
+            // send request
+	    if (stop) break;
+            transaction.markRequest();
+            specificOutputStream.write(transaction.getRequest());
+            finest("Request has been sent.\n" + identification);
+            // wait for response
+	    if (stop) break;
+            I response = specificInputStream.readMessage();
+            finest("Response received\n" + identification);
+            transaction.setResponse(response, null);
+          }
         }
         catch (IOException e)
         {
-          if (logFlag)
-            warning(getMessage("spn06", e.getMessage()));
-          logFlag = false;
+          transaction.setResponse(null, e);
+          catched(getClass().getName(), "run", e);
+          //throw e;
         }
-        finally   // close all resources
+        catch (Exception e)
         {
-          fine("Going to close connection ...");
-          close();
-          try { sleep(1000); } catch (InterruptedException ex) {}
+          catched(getClass().getName(), "run", e);
         }
+      }
+      catch (UnknownHostException e)
+      {
+        if (logFlag)
+	  catched(identification, "run", e);
+        logFlag = false;
+      }
+      catch (IOException e)
+      {
+        if (logFlag)
+	  catched(identification, "run", e);
+        logFlag = false;
+      }
+      finally   // close all resources
+      {
+	connected = false;
+        closeConnection();
+	// remove and discard all of the requests
+	IOException exception 
+	    = new IOException("Connection has been closed!\n" + identification);
+	TransactionCrate transaction = transactionBuffer.dequeue();
+	while (transaction != null)
+	{
+	  transaction.setResponse(null, exception);
+	  transaction = transactionBuffer.dequeue();
+	}
+	// wait for a while
+	Tools.sleep(1000l);
+      }
 
-      }
-    }
-
-    private void close()
-    {
-      if (specificInputStream != null)
-      {
-        try { specificInputStream.close(); } catch (IOException ioex) {}
-        specificInputStream = null;
-      }
-      if (specificOutputStream != null)
-      {
-        try { specificOutputStream.close(); } catch (IOException ioex) {}
-        specificOutputStream = null;
-      }
-      if (inputStream != null)
-      {
-        try { inputStream.close(); } catch (IOException ioex) {}
-        inputStream = null;
-      }
-      if (outputStream != null)
-      {
-        try { outputStream.close(); } catch (IOException ioex) {}
-        outputStream = null;
-      }
-      if (socket != null)
-      {
-        try { socket.close(); } catch (IOException ioex) {}
-        socket = null;
-      }
     }
   }
 
+  /**
+   *  Close all of the opened connections.
+   */
+  private void closeConnection()
+  {
+    fine("Going to close connections ...\n" + identification);
+    Tools.close(specificInputStream, getClass().getName(), "closeConnection");
+    specificInputStream = null;
+    Tools.close(specificOutputStream, getClass().getName(), "closeConnection");
+    specificOutputStream = null;
+    Tools.close(inputStream, getClass().getName(), "closeConnection");
+    inputStream = null;
+    Tools.close(outputStream, getClass().getName(), "closeConnection");
+    outputStream = null;
+    if (socket != null)
+    {
+      try { socket.close(); } catch (IOException ioex) {}
+      socket = null;
+    }
+  }
 
+  /**
+   *
+   *  A class that encapsulates one whole transaction. It means, the
+   *  request message, the response message, response timestamp,
+   *  exceptions throughout the communication. The transaction
+   *  expires if the respons is not received during the specified
+   *  timeout.
+   *
+   */
   private class TransactionCrate implements IResponseCrate<I>
   {
+
     private O request;
     private I response = null;
     private IOException exception = null;
     private long requestTimestamp;
     private long responseTimestamp;
+
+    /** A time when this object was created. It is used for expiration
+	purposes. */
+    private long created;
+
     private boolean requested = false;
   
+    /**
+     *  Initialize fields.
+     */
     TransactionCrate(O request)
     {
       this.request = request;
+      created = System.currentTimeMillis(); 
     }
   
+    /**
+     *  Return request message.
+     */
     public O getRequest()
     {
       return request;
     }
   
+    /**
+     *  Return response message. This method blocks until the response
+     *  is received.
+     */
     public synchronized I getResponse() throws IOException
     {
-      while (response == null && exception == null)
+      while (!isFinished())
 	try 
 	{
-          wait();
+          long timeToTimeout 
+	      = transactionTimeout - System.currentTimeMillis() + created;
+          if (timeToTimeout >= 0l)
+            wait(timeToTimeout);
+	  else
+	    setResponse(null, new IOException("Transaction timeout"));
         }
-	catch (InterruptedException e) { }
+	catch (InterruptedException e) 
+	{
+	}
       if (exception != null)
         throw exception;
       else
@@ -270,14 +395,25 @@ public abstract class RobustTcpTemplate<I, O>
   
     synchronized void setResponse(I response, IOException exception)
     {
-      this.responseTimestamp = System.currentTimeMillis();
-      this.response = response;
-      this.exception = exception;
-      notifyAll();
+      if (!isFinished())
+      {
+        this.responseTimestamp = System.currentTimeMillis();
+        this.response = response;
+        this.exception = exception;
+        notifyAll();
+      }
+      else
+      {
+	// TODO
+      }
     }
   
     public synchronized boolean isFinished()
     {
+      long timeToTimeout 
+	  = transactionTimeout - System.currentTimeMillis() + created;
+      if (timeToTimeout < 0l)
+	setResponse(null, new IOException("Transaction timeout"));
       return response != null || exception != null;
     }
   
