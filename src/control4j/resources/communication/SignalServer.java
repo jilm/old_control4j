@@ -157,7 +157,9 @@ implements IClientFactory, ICycleEventListener
   public void dump(java.io.PrintWriter writer)
   {
     super.dump(writer);
+    writer.println("Port: " + port);
     writer.println("Number of clients: " + clients.size());
+    writer.println("Server status: " + server.getStatus());
   }
 
 }

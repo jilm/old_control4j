@@ -92,7 +92,7 @@ public class Server implements Runnable, java.io.Closeable
    */
   public void start()
   {
-    new Thread(this, identification);
+    new Thread(this, identification).start();
   }
 
   /**
