@@ -153,4 +153,11 @@ implements IClientFactory, ICycleEventListener
   {
   }
 
+  @Override
+  public void dump(java.io.PrintWriter writer)
+  {
+    super.dump(writer);
+    writer.println("Number of clients: " + clients.size());
+  }
+
 }
