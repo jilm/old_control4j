@@ -1,7 +1,7 @@
 package control4j;
 
 /*
- *  Copyright 2013, 2014 Jiri Lidinsky
+ *  Copyright 2013, 2014, 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -48,6 +48,7 @@ import java.util.NoSuchElementException;
  */    
 class DataBuffer implements Iterable<Signal>
 {
+
   private Signal[] buffer;
   private Signal[] crate;
   
@@ -152,6 +153,22 @@ class DataBuffer implements Iterable<Signal>
   public Iterator<Signal> iterator()
   {
     return new SignalIterator();
+  }
+
+  /**
+   *  Writes a content of the data buffer to the given print writer.
+   *  serves for debug purposes.
+   *
+   *  @param writer
+   *             a writer where the content of the buffer will be printed
+   */
+  void dump(java.io.PrintWriter writer)
+  {
+    writer.println("DATA BUFFER CONTENT:");
+    for (int i=0; i<buffer.length; i++)
+    {
+      writer.println(" " + i + ": " + buffer[i].toString());
+    }
   }
   
   /*

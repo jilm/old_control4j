@@ -259,7 +259,7 @@ public class ControlLoop
    *  that could be useful to find a problem. This method is called
    *  during the runtime if an exception was thrown.
    *
-   *  <p>To prevent a colaps of the system potentialy caused by dump
+   *  <p>To prevent a colaps of the system, potentialy caused by dump
    *  files flood, the dump file is created only ones.
    *
    *  @param cause
@@ -294,6 +294,8 @@ public class ControlLoop
 	writer.println(cause.getMessage());
         cause.printStackTrace(writer);
       }
+      // write data buffer
+      dataBuffer.dump(writer);
       //
       info("The dump file was created: " + dumpFile.getAbsolutePath());
       dump = false;
