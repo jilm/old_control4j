@@ -1,7 +1,7 @@
 package control4j;
 
 /*
- *  Copyright 2013, 2014 Jiri Lidinsky
+ *  Copyright 2013, 2014, 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -224,6 +224,26 @@ public class ResourceManager implements Iterable<control4j.resources.Resource>
       }
     }
     
+  }
+
+  /**
+   *  Prints a status of resources into the given writer. Serves mainly
+   *  for debug purposes. This method simply calls a <code>dump</code>
+   *  method of each resource instance.
+   *
+   *  @param writer
+   *             a writer where the resource status will be printed
+   *
+   *  @see control4j.resources.Resource#dump
+   */
+  void dump(java.io.PrintWriter writer)
+  {
+    writer.println("=== RESOURCES ===");
+    java.util.Set<String> names = resources.keySet();
+    for (String name : names)
+    {
+      resources.get(name).dump(writer);
+    }
   }
 
   private class CleenUp extends Thread

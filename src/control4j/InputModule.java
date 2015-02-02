@@ -131,4 +131,14 @@ public abstract class InputModule extends Module
     return inputMap;
   }
 
+  @Override
+  public void dump(java.io.PrintWriter writer)
+  {
+    super.dump(writer);
+    writer.print("Input map: ");
+    dumpIO(inputMap, writer);
+    writer.println();
+  }
+
+
 }

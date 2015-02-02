@@ -211,4 +211,15 @@ public abstract class ProcessModule extends Module
     }
   }
 
+  @Override
+  public void dump(java.io.PrintWriter writer)
+  {
+    super.dump(writer);
+    writer.print("Input map: ");
+    dumpIO(inputMap, writer);
+    writer.println();
+    writer.print("Output map: ");
+    dumpIO(outputMap, writer);
+    writer.println();
+  }
 }

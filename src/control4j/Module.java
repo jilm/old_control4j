@@ -1,7 +1,7 @@
 package control4j;
 
 /*
- *  Copyright 2013, 2014 Jiri Lidinsky
+ *  Copyright 2013, 2014, 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -179,6 +179,50 @@ public abstract class Module
 	signals[i].setUnit(unit);
       }
     }
+  }
+
+  /**
+   *  Prints information about the module into the given writer.
+   *  It serves mainly for debug purposes. This method writes only
+   *  the declaration reference, if you thing that it would be useful
+   *  to have more info about a particular module in the case of
+   *  failure to find out what is going on, simply override this
+   *  method.
+   *
+   *  @param writer
+   *             a writer on which the dump will be printed
+   */
+  public void dump(java.io.PrintWriter writer)
+  {
+    writer.println("== MODULE ==");
+    writer.println("Class: " + getClass().getName());
+    writer.println(declarationReference.toString());
+  }
+
+  /**
+   *  Writes information about input or output of the module into
+   *  the given writer. It serves mainly for debug purposes.
+   *
+   *  @param map
+   *             mapping from input or output indexes of this module
+   *             into the data buffer indexes
+   *
+   *  @param writer
+   *             a writer on which the information will be printed
+   */
+  protected void dumpIO(int[] map, java.io.PrintWriter writer)
+  {
+    writer.print("[");
+    if (map.length > 0)
+    {
+      writer.print(map[0]);
+      for (int i=1; i<map.length; i++)
+      {
+	writer.print(", ");
+	writer.print(map[i]);
+      }
+    }
+    writer.print("]");
   }
 
 }

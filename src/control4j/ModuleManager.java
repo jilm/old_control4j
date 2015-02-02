@@ -226,4 +226,21 @@ public class ModuleManager implements Iterable<Module>
     return buffer.get(index);
   }
 
+  /**
+   *  Writes information about modules into the given writer. It is used
+   *  for debug purposes. This method simply calls a <code>dump</code>
+   *  method for all of the modules.
+   *
+   *  @param writer
+   *             a writer on which the status of modules will be printed
+   *
+   *  @see control4j.Module#dump
+   */
+  void dump(java.io.PrintWriter writer)
+  {
+    writer.println("=== MODULES ===");
+    for (Module module : buffer)
+      module.dump(writer);
+  }
+
 }

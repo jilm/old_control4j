@@ -296,6 +296,10 @@ public class ControlLoop
       }
       // write data buffer
       dataBuffer.dump(writer);
+      // write the resources
+      ResourceManager.getInstance().dump(writer);
+      // write the modules
+      ModuleManager.getInstance().dump(writer);
       //
       info("The dump file was created: " + dumpFile.getAbsolutePath());
       dump = false;

@@ -1,7 +1,7 @@
 package control4j.resources;
 
 /*
- *  Copyright 2013, 2014 Jiri Lidinsky
+ *  Copyright 2013, 2014, 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -134,6 +134,23 @@ public abstract class Resource
     {
       throw new SystemException();
     }
+  }
+
+  /**
+   *  Prints information about the resource into the given writer.
+   *  This method serves mainly for debug purposes. It prints only
+   *  the declaration referece of the resource, if you think that
+   *  it would be helpful to know more info about some resource in
+   *  case of crash, just override this method.
+   *
+   *  @param writer
+   *             a writer where the dump will be printed
+   */
+  public void dump(java.io.PrintWriter writer)
+  {
+    writer.println("== RESOURCE ==");
+    writer.println("Class: " + getClass().getName());
+    writer.println(declarationReference.toString());
   }
 
 }

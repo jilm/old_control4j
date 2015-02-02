@@ -215,4 +215,13 @@ public abstract class OutputModule extends Module
     }
   }
 
+  @Override
+  public void dump(java.io.PrintWriter writer)
+  {
+    super.dump(writer);
+    writer.print("Output map: ");
+    dumpIO(outputMap, writer);
+    writer.println();
+  }
+
 }
