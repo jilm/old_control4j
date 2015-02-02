@@ -35,8 +35,22 @@ import static control4j.tools.Logger.*;
  *  @see IClientFactory
  *
  */ 
-public class Server extends Thread
+public class Server implements Runnable, java.io.Closeable
 {
+
+  /** The server has not been started yet, or was already stopped. */
+  public static final int STATUS_STOP = 0;
+
+  /** The server has been started, but the connection has not been
+      estabilished yet. */
+  public static final int STATUS_RUNNING = 1;
+
+  /** The server socket was created and the server accepts incoming
+      requests for connection. */
+  public static final int STATUS_CONNECTED = 2;
+
+  /** Some error occurs, the server is trying to restore the connection */
+  public static final int STATUS_ERROR = 3;
 
   /** Port to listen at for new connection requests. */
   private int port = 51234;
@@ -44,6 +58,15 @@ public class Server extends Thread
   /** A factory object that creates new client which will serve each new 
       request for connection. */
   private IClientFactory clientFactory;
+
+  /** Status of the server. */
+  private volatile int status = STATUS_STOP;
+
+  /** A request to stop the server. */
+  private volatile boolean stop = false;
+
+  /** An identification of the server mainly for debug purposes. */
+  protected String identification;
 
   /**
    *  Initialization.
@@ -57,9 +80,19 @@ public class Server extends Thread
    */
   public Server(int port, IClientFactory clientFactory)
   {
-    super("Server");
+    super();
     this.port = port;
     this.clientFactory = clientFactory;
+    identification = "Server, class: " + getClass().getName() 
+	+ ", port: " + port;
+  }
+
+  /**
+   *  Starts the server.
+   */
+  public void start()
+  {
+    new Thread(this, identification);
   }
 
   /**
@@ -73,17 +106,18 @@ public class Server extends Thread
    *  <p>This method must be run as a separate thread from outside
    *  this object.
    */
-  @Override 
   public void run()
   {
-    while (true)
+    ServerSocket serverSocket = null;
+    while (!stop)
     {
+      status = STATUS_RUNNING;
       try
       {
-        ServerSocket serverSocket = new ServerSocket(port);
-        info("A new ServerSocket was successfuly created");
-	boolean error = false;
-        while (!error)
+        serverSocket = new ServerSocket(port);
+        info("A new ServerSocket was successfuly created\n" + identification);
+	status = STATUS_CONNECTED;
+        while (!stop)
         {
           try
           {
@@ -92,22 +126,48 @@ public class Server extends Thread
           }
           catch (IOException ioe)
           {
+	    status = STATUS_ERROR;
             catched(getClass().getName(), "run", ioe);
 	    warning("An exception while waiting for new connection " +
-		"going to recreate server socket ...");
-	    error = true;
-            try { serverSocket.close(); } catch (IOException ioex) { }
+		"going to recreate server socket ...\n" + identification);
           }
         }
       }
       catch (IOException e)
       {
+	status = STATUS_ERROR;
         catched(getClass().getName(), "run", e);
 	warning("An attempt to create server socket failed!");
-        long waitTime = Math.round(Math.random() * 4000.0 + 1000.0);
-        try { Thread.sleep(waitTime); } catch (InterruptedException ie) {}
+      }
+      finally
+      {
+	if (serverSocket != null)
+          try { serverSocket.close(); } catch (IOException ioex) { }
+	serverSocket = null;
+	if (!stop)
+	{
+          long waitTime = Math.round(Math.random() * 4000.0 + 1000.0);
+          try { Thread.sleep(waitTime); } catch (InterruptedException ie) {}
+	}
       }
     }
+    status = STATUS_STOP;
+  }
+
+  /**
+   *  Returns a stutus of the server.
+   */
+  public int getStatus()
+  {
+    return status;
+  }
+
+  /**
+   *  Will close the server socket and stop the server thread.
+   */
+  public void close()
+  {
+    stop = true;
   }
 
 }
