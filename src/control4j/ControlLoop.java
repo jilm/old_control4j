@@ -1,7 +1,7 @@
 package control4j;
 
 /*
- *  Copyright 2013, 2014 Jiri Lidinsky
+ *  Copyright 2013, 2014, 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -20,6 +20,7 @@ package control4j;
 
 import java.util.LinkedList;
 import control4j.application.SignalManager;
+import control4j.tools.Tools;
 import static control4j.tools.Logger.*;
 import static control4j.tools.LogMessages.*;
 
@@ -118,26 +119,47 @@ public class ControlLoop
     for (Module module : modules)
       module.prepare();
 
+    // The control loop !
     while (true)
-    {
-      cycleStartTime = System.currentTimeMillis();
-      // erase data buffer
-      dataBuffer.clear();
-      notifyOfCycleStartEvent();
-      // start cycle delay
-      try { Thread.sleep(startCycleDelay); } catch (InterruptedException e) {}
-
-      notifyOfProcessingStartEvent();
-      // module execution
       try
       {
+        cycleStartTime = System.currentTimeMillis();
+        // erase data buffer
+        dataBuffer.clear();
+        notifyOfCycleStartEvent();
+        // start cycle delay
+	Tools.sleep(startCycleDelay);
+        notifyOfProcessingStartEvent();
+        // module execution
 	fine("Start of module processing");
 	for (Module module : modules)
 	{
 	  module.execute(dataBuffer);
 	}
-      }
-      catch (RuntimeModuleException e)
+        notifyOfCycleEndEvent();
+        // terminate the program, if requst was received
+        if (exit) System.exit(0);
+        // wait for next turn
+	while (true)
+        {
+	  long cycleDuration = System.currentTimeMillis() - cycleStartTime;
+	  long sleepTime = cyclePeriod - cycleDuration;
+	  if (sleepTime > 0) 
+	    Tools.sleep(sleepTime);
+          else if (sleepTime < -100)
+	  {
+	    // if the current cycle was longer than value
+	    // specified in cycleDuration, print a log message
+	    String message = getMessage("LongCycle");
+	    message = String.format(message, cycleDuration);
+	    warning(message);
+	    break;
+	  }
+	  else break;
+	}
+	lastCycleDuration = System.currentTimeMillis() - cycleStartTime;
+      } 
+      catch (Exception e)
       {
 	// if an exception arise during the processing some
 	// of the module, the cycle is not completed and
@@ -145,34 +167,8 @@ public class ControlLoop
 	String message = getMessage("BrokenCycle");
 	message = String.format(message, e.getMessage());
 	warning(message);
+	dump(e);
       }
-      notifyOfCycleEndEvent();
-      // terminate the program, if requst was received
-      if (exit)
-        System.exit(0);
-      // wait for next turn
-      try
-      {
-	long cycleDuration = System.currentTimeMillis() - cycleStartTime;
-	long sleepTime = cyclePeriod - cycleDuration;
-	if (sleepTime > 0)
-          Thread.sleep(sleepTime);
-        else
-	{
-	  // if the current cycle was longer than value
-	  // specified in cycleDuration, print a log message
-	  String message = getMessage("LongCycle");
-	  message = String.format(message, cycleDuration);
-	  warning(message);
-	}
-	lastCycleDuration = System.currentTimeMillis() - cycleStartTime;
-      } 
-      catch (Exception e) 
-      {
-	String message = getMessage("WaitingException", e.getMessage());
-	warning(message);
-      }
-    }
   }
 
   /**
@@ -253,6 +249,64 @@ public class ControlLoop
   public long getLastCycleDuration()
   {
     return lastCycleDuration;
+  }
+
+  /** True, if the dump file should be created, false otherwise. */
+  protected boolean dump = true;
+
+  /**
+   *  Create a file which contains all of the available information
+   *  that could be useful to find a problem. This method is called
+   *  during the runtime if an exception was thrown.
+   *
+   *  <p>To prevent a colaps of the system potentialy caused by dump
+   *  files flood, the dump file is created only ones.
+   *
+   *  @param cause
+   *             an exception which interrupted control loop, may be
+   *             null
+   */
+  protected void dump(Exception cause)
+  {
+    java.io.PrintWriter writer = null;
+    if (dump)
+    try
+    {
+      // create dump file
+      String tempDir = System.getProperty("java.io.tmpdir");
+      String filename = "control4j_" 
+	  + java.util.UUID.randomUUID().toString() + ".dump";
+      java.io.File dumpFile = new java.io.File(tempDir, filename);
+      writer = new java.io.PrintWriter(dumpFile);
+      // write a timestamp
+      writer.println("This is a control4j dump file.");
+      writer.println(new java.util.Date().toString());
+      // write system information
+      writer.println(System.getProperty("java.version"));
+      writer.println(System.getProperty("java.vendor"));
+      writer.println(System.getProperty("os.name"));
+      writer.println(System.getProperty("os.arch"));
+      writer.println(System.getProperty("os.version"));
+      // write the exception
+      if (cause != null)
+      {
+	writer.println("EXCEPTION: " + cause.getClass().getName());
+	writer.println(cause.getMessage());
+        cause.printStackTrace(writer);
+      }
+      //
+      info("The dump file was created: " + dumpFile.getAbsolutePath());
+      dump = false;
+    }
+    catch (java.io.IOException e)
+    {
+      catched(getClass().getName(), "dump", e);
+      warning("Cannot create dump file");
+    }
+    finally
+    {
+      Tools.close(writer);
+    }
   }
 
 }
