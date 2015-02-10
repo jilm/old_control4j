@@ -1,6 +1,13 @@
 <?xml version="1.0"?>
 <project name="control4j" basedir="." default="compile">
 
+    <description>
+	This build file is used to compile control4j software.
+    </description>
+
+    <!-- Name of the software to build -->
+    <property name="sw.name" value="control4j" />
+
     <property name="srcdir" location="src" />
     <property name="bindir" location="bin" />
     <property name="docdir" location="doc" />
@@ -8,15 +15,22 @@
     <property name="apsrcdir" location="src/control4j/annotations" />
     <property name="testsrcdir" location="test" />
     <property name="reports" location="reports" />
-    <property name="jarname" value="control4j.jar" />
+    <property name="jarname" value="${sw.name}.jar" />
 
-    <target name="clean" description="leaves only source code">
+    <target name="init">
+	<tstamp />
+    </target>
+
+    <target name="clean" depends="init"
+	    description="Removes all except source code directory.">
         <delete dir="${bindir}" />
         <delete dir="${docdir}" />
         <delete dir="${reports}" />
     </target>
 
-    <target name="compile" depends="ap" description="Compiles the Task">
+    <target name="compile" 
+	    depends="init,ap" 
+	    description="Compiles the application">
         <mkdir dir="${bindir}" />
 	<depend srcdir="${srcdir}" destdir="${bindir}" />
         <javac srcdir="${srcdir}" destdir="${bindir}" 
@@ -43,7 +57,7 @@
 	</junit>
     </target>
     
-    <target name="doc">
+    <target name="doc" description="Generates documentation.">
         <javadoc destdir="${docdir}" access="package" >
             <fileset dir="${srcdir}">
                 <include name="**/*.java" />
@@ -65,11 +79,16 @@
         <!--<fixcrlf srcdir="conf" />-->
     </target>
     
-    <target name="jar" depends="compile">
+    <target name="jar" depends="compile, version, init" 
+	    description="Creates JAR file.">
     	<jar destfile="${jarname}">
             <fileset dir="${bindir}" />
 	    <manifest >
 	        <attribute name="Main-Class" value="control4j.Control" />
+		<section name="common">
+		    <attribute name="Implementation-Version" 
+			       value="${sw.version}" />
+		</section>
 	    </manifest>
 	</jar>
     </target>
@@ -86,6 +105,18 @@
         <echo
 	    message="control4j.annotations.process.GuiObjectProcessor"
 	    file="${bindir}/META-INF/services/javax.annotation.processing.Processor" />
+    </target>
+
+    <!-- Takes a hash of the last commit from git repository -->
+    <target name="version" depends="init" >
+	<exec executable="git" 
+	      outputproperty="sw.version" 
+	      resultproperty="git.result"
+	      failifexecutionfails="false" >
+	    <arg line="log --pretty=format:%H -n 1" />
+	</exec>
+        <property name="sw.version" value="?" />
+	<echo>${sw.version}</echo>
     </target>
 
 </project>
