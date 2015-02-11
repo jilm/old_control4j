@@ -1,7 +1,7 @@
 package control4j.protocols.tcp;
 
 /*
- *  Copyright 2013, 2014 Jiri Lidinsky
+ *  Copyright 2013, 2014, 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -46,7 +46,7 @@ implements IInputStream<Signal[]>
   {
     try
     {
-      return (Signal[])readObject();
+      return (Signal[])readUnshared();
     }
     catch (ClassNotFoundException e)
     {

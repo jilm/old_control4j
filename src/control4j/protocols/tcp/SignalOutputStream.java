@@ -1,7 +1,7 @@
 package control4j.protocols.tcp;
 
 /*
- *  Copyright 2013 Jiri Lidinsky
+ *  Copyright 2013, 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -45,7 +45,8 @@ implements IOutputStream<Signal[]>
    */
   public void write(Signal[] message) throws IOException
   {
-    writeObject(message);
+    reset();
+    writeUnshared(message);
   }
 
 }
