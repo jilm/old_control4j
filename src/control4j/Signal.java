@@ -449,6 +449,30 @@ public abstract class Signal implements java.io.Serializable, Cloneable
       clone.setUnit(getUnit());
       return clone;
     }
+
+    /**
+     *  Return a string representation of the object. This method is not aimed
+     *  to abtain human readable form. See overloaded method instead.   
+     *
+     *  @return a string representation of the object.
+     *
+     *  @see #toString(SignalFormat, String, String)
+     *  @see #valueToString(SignalFormat)
+     */
+    public String toString()
+    {
+      char separator = ';';
+      StringBuffer sb = new StringBuffer(50);
+      sb.append(timestamp.toString());
+      sb.append(separator);
+      sb.append(isValid());
+      //sb.append(separator);
+      //sb.append(getValue());
+      //sb.append(separator);
+      //sb.append(getUnit());
+      return sb.toString();
+    }
+
   }
 
   /**
