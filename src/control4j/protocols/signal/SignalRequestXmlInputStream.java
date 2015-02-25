@@ -39,7 +39,8 @@ implements control4j.protocols.tcp.IInputStream<Request>
   public SignalRequestXmlInputStream(InputStream stream) 
   throws XMLStreamException
   {
-    this.stream = new XmlInputStream(stream);
+    //this.stream = new XmlInputStream(stream);
+    this.stream = stream;
   }
 
   public Request readMessage() throws IOException

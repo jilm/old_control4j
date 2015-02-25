@@ -48,6 +48,10 @@
         <javac srcdir="${testsrcdir}" destdir="${bindir}" />
 	<mkdir dir="${reports}" />
         <junit printsummary="yes" haltonfailure="yes">
+	    <classpath>
+	        <pathelement location="${bindir}" />
+                <pathelement path="${java.class.path}" />
+	    </classpath>
 	    <formatter type="plain" />
 	    <batchtest fork="yes" todir="${reports}">
 	        <fileset dir="${testsrcdir}">
