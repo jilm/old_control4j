@@ -34,16 +34,15 @@ implements control4j.protocols.tcp.IOutputStream<Response>
 
   protected XMLStreamWriter writer;
 
-  public SignalResponseXmlOutputStream(OutputStream stream) throws XMLStreamException
+  public SignalResponseXmlOutputStream(OutputStream stream)
+  throws XMLStreamException
   {
     XMLOutputFactory factory = XMLOutputFactory.newFactory();
     writer = factory.createXMLStreamWriter(stream);
   }
 
-  public void write(String id, Signal signal) throws java.io.IOException
+  public void write(String id, Signal signal) throws XMLStreamException
   {
-    try
-    {
       Date timestamp = signal.getTimestamp();
       String strTimestamp = String.format("%1$TFT%1$TT%1$Tz", timestamp);
       if (!signal.isValid())
@@ -64,62 +63,27 @@ implements control4j.protocols.tcp.IOutputStream<Response>
           writer.writeAttribute("unit", unit);
         writer.writeEndElement();
       }
-    }
-    catch (XMLStreamException e)
-    {
-      throw new IOException(e);
-    }
   }
 
-  public void write(DataRequest request) throws java.io.IOException
+  public void write(DataResponse data) throws XMLStreamException
   {
-    try
-    {
       writer.writeStartDocument();
-      if (request.size() > 0)
-      {
-        // build the list of ids
-        StringBuilder idList = new StringBuilder();
-        String delimiter = "";
-        for (String id : request)
-        {
-          idList.append(delimiter)
-	        .append(id);
-	  delimiter = ",";
-        }
-        // write request
-        writer.writeStartElement("request");
-	writer.writeDefaultNamespace(Message.XMLNS);
-        writer.writeCharacters(idList.toString());
-        writer.writeEndElement();
-      }
-      else
-      {
-        writer.writeEmptyElement("request");
-	writer.writeDefaultNamespace(Message.XMLNS);
-      }
+      writer.writeStartElement("set");
+      writer.writeDefaultNamespace(Message.XMLNS);
+      Set<String> ids = data.getIdSet();
+      for (String id : ids)
+	write(id, data.get(id));
+      writer.writeEndElement();
       writer.writeEndDocument();
       writer.flush();
-    }
-    catch (XMLStreamException e)
-    {
-      throw new IOException(e);
-    }
   }
 
   public void write(Response data) throws java.io.IOException
   {
     try
     {
-      writer.writeStartDocument();
-      writer.writeStartElement("set");
-      writer.writeDefaultNamespace(Message.XMLNS);
-      //Set<String> ids = data.getIdSet();
-      //for (String id : ids)
-	//write(id, data.get(id));
-      writer.writeEndElement();
-      writer.writeEndDocument();
-      writer.flush();
+      if (data instanceof DataResponse)
+	write((DataResponse)data);
     }
     catch (XMLStreamException e)
     {
