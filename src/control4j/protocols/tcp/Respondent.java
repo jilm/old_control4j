@@ -20,38 +20,49 @@ package control4j.protocols.tcp;
 
 import java.io.IOException;
 
-import control4j.tools.InterchangePoint;
 import control4j.tools.Tools;
 import static control4j.tools.LogMessages.*;
 import static control4j.tools.Logger.*;
 
 /**
  *
- *  Waits for new data request from a remote host and than send response. 
- *  Typicaly it is used together with server to serve one connection.
+ *  Waits for new request from a remote host and than sends a response. 
+ *  Typicaly, it is used together with server to serve one connection.
  *
  *  <p>First of all you must use the read method to get a request from
  *  remote host. Then you can use the write method to respond to the
  *  request. The pair of opperations, send response, wait for request
- *  is done in a separate thred.
+ *  is done in a separate thread.
  *
  *  @see Server
  *  @see IClientFactory
  *
  */
-public class Respondent<I, O> implements Runnable
+public class Respondent<I, O> implements Runnable, java.io.Closeable
 {
 
   private IInputStream<I> inputStream;
   private IOutputStream<O> outputStream;
-  private InterchangePoint<I> request = new InterchangePoint<I>();
-  private InterchangePoint<O> response = new InterchangePoint<O>();
 
-  /** Signal that the new data request has been received. */
-  private volatile boolean gotRequest = false;
+  /** Received request. */
+  private volatile I request = null;
 
-  /** Contains an exception thrown during proccessing, if there is one */
+  /** Response to be sent. */
+  private volatile O response = null;
+
+  /** Contains an exception thrown during proccessing, if there is one.
+      There is only one place where this field is modified. */
   private volatile IOException exception = null;
+
+  /** Indicate that the input and output stream has been already closed. */
+  private volatile boolean closed = false;
+
+  /** Indicates that the thread for sending and receiving messages 
+      is running. */
+  private volatile boolean processing = false;
+
+  /** Indicates that the initialized method has been called. */
+  private volatile boolean initialized = false;
 
   /**
    *  Initialize
@@ -66,9 +77,13 @@ public class Respondent<I, O> implements Runnable
     this.outputStream = outputStream;
   }
 
+  /**
+   *  Starts a thread that waits for the first request.
+   */
   public void initialize()
   {
     new Thread(this).start();
+    initialized = true;
   }
 
   /**
@@ -77,6 +92,7 @@ public class Respondent<I, O> implements Runnable
    */
   public void close()
   {
+    closed = true;
     Tools.close(inputStream, getClass().getName(), "close");
     inputStream = null;
     Tools.close(outputStream, getClass().getName(), "close");
@@ -84,95 +100,113 @@ public class Respondent<I, O> implements Runnable
   }
 
   /**
-   *  Going to send response message. The response is send in separate
+   *  Going to send a response message. The response is send in separate
    *  thread, so this method returns immediately and doesn't block.
-   *  The response is send only under condition that data request was
-   *  received since the last response was sent and that the data
-   *  request was picked up by the <code>read</code> method.
+   *  The response is send only under condition that data request has been
+   *  received since the last response was sent.
    *
    *  @param response
    *             a message to send
    *
    *  @throws IOException
-   *             if an exception was thrown while waiting for new data
-   *             request or while sending a response
+   *             if an exception was catched during the last IO operation
+   *
+   *  @throws IOException
+   *             if the channel has been closed
    *
    *  @throws IllegalStateException
-   *             if you call this method without a new data request or
-   *             without reading it
+   *             if called without a request
    *
-   *  @see #read
+   *  @throws IllegalStateException
+   *             if previous response has not been sent yet
+   *
    */
-  public void write(O response) throws IOException
+  public synchronized void write(O response) throws IOException
   {
-    if (exception != null) throw exception;
-    if (gotRequest && request.isEmpty())
+    if (closed)
+      throw new IOException("The Responder has already been already closed.");
+    if (exception != null)
+      throw exception;
+    if (processing)
+      throw new IllegalStateException(
+	  "Previous transaction has not been finished yet");
+    if (request != null && response == null)
     {
-      this.response.forcedSet(response);
+      this.response = response;
       new Thread(this).start();
     }
-    else
+    else if (request == null)
     {
       throw new IllegalStateException(
 	  "Trying to send data response without a request");
     }
+    else if (response != null)
+    {
+      throw new IllegalStateException(
+	  "Previous request has not been sent yet");
+    }
+    else
+      assert false; // should not happen
   }
 
   /**
-   *  Returns a new data request that was received or null. Once the 
-   *  request is picked up, it is no longer available. This method
-   *  returns immediately and doesn't block.
+   *  Returns data request that has been received or null.
+   *  The request message is not removed before the response
+   *  is sent. This method returns immediately and doesn't block.
+   *
+   *  @return data request or null
    *
    *  @throws IOException
    *             if the exception was thrown while waiting for request
    *             or sending a response
    *
-   *  @return a new data request or null
+   *  @throws IOException
+   *             if the channel has been closed
    */
-  public I read() throws IOException
+  public synchronized I read() throws IOException
   {
-    if (exception != null) throw exception;
-    return request.tryGet();
+    if (closed)
+      throw new IOException("The Responder has already been closed.");
+    if (exception != null)
+      throw exception;
+    if (processing) return null;
+    return request;
   }
 
   /**
    *  It writes a response, if there is one and then it waits for a new
    *  request. Then it ends. This method is intended to be run as a parallel
-   *  thread, that is run by <code>write</code> method.
+   *  thread; it is run by <code>write</code> method.
    *
    *  <p>If an <code>IOException</code> is catched while waiting for new
-   *  data request or while sending a response, the given input and output
-   *  stream is closed and <code>isActive</code> method starts to return
+   *  data request or while sending a response,
+   *  <code>isActive</code> method starts to return
    *  <code>false</code> value.
-   *
-   *  @throws IllegalStateException
-   *             if this method is invoked without a response to sent
    *
    *  @see #write
    */
   public void run()
   {
-    if (exception != null) return;
+    if (closed) return;
+    synchronized(this)
+    {
+      processing = true;
+    }
     try
     {
       // send response if there is one
-      if (!response.isEmpty())
+      if (response != null)
       {
 	finest("Going to send response");
-        outputStream.write(response.get());
-	gotRequest = false;
+        outputStream.write(response);
+	response = null;
+	request = null;
       }
-      if (!gotRequest)
+      // wait for request
+      while (request == null)
       {
-        // wait for request
-        request.forcedSet(inputStream.readMessage());
+        request = inputStream.readMessage();
         finest("Got new data request");
-        gotRequest = true;
-      }
-      else
-      {
-	throw new IllegalStateException(
-	    "Doesn't have a response for a data request to sent!");
       }
     }
     catch (IOException e)
@@ -180,7 +214,11 @@ public class Respondent<I, O> implements Runnable
       exception = e;
       catched(getClass().getName(), "run", e);
       warning("Catched IOException and closing the connection!");
-      close();
+      //close();
+    }
+    finally
+    {
+      processing = false;
     }
   }
 
@@ -188,9 +226,9 @@ public class Respondent<I, O> implements Runnable
    *  Returns true if the connection is active and no exception was
    *  already catched, false otherwise.
    */
-  public boolean isActive()
+  public synchronized boolean isActive()
   {
-    return exception == null;
+    return exception == null && !closed;
   }
 
 }

@@ -26,18 +26,25 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Collection;
 import java.util.LinkedList;
+import javax.xml.stream.XMLStreamException;
 
 import control4j.ConfigItem;
 import control4j.ICycleEventListener;
 import control4j.Signal;
+import control4j.protocols.IMessage;
 import control4j.protocols.tcp.IClientFactory;
 import control4j.protocols.tcp.Respondent;
 import control4j.protocols.tcp.Server;
-import control4j.protocols.tcp.SignalInputStream;
-import control4j.protocols.tcp.SignalOutputStream;
+import control4j.protocols.signal.Request;
+import control4j.protocols.signal.Response;
+import control4j.protocols.signal.SignalRequestXmlInputStream;
+import control4j.protocols.signal.SignalResponseXmlOutputStream;
+import control4j.resources.IServer;
 import control4j.resources.Resource;
 import control4j.tools.InterchangePoint;
+import control4j.tools.Tools;
 import static control4j.tools.Logger.*;
 
 /**
@@ -48,8 +55,8 @@ import static control4j.tools.Logger.*;
  *  @see control4j.protocols.tcp.Server
  *
  */
-public class SignalServer extends Resource 
-implements IClientFactory, ICycleEventListener
+public class SignalServer extends Resource
+implements IClientFactory, ICycleEventListener, IServer<Request>
 {
 
   /**
@@ -60,8 +67,21 @@ implements IClientFactory, ICycleEventListener
   public int port = 51234;
 
   private Server server;
-  private LinkedList<Respondent> clients = new LinkedList<Respondent>();
-  private LinkedList<Respondent> garbage = new LinkedList<Respondent>();
+
+  /** A list of active clients. */
+  private LinkedList<Respondent<Request, Response>>
+      clients = new LinkedList<Respondent<Request, Response>>();
+
+  /** Temporary list of clients that are no longer active. */
+  private LinkedList<Respondent<Request, Response>> 
+      garbage = new LinkedList<Respondent<Request, Response>>();
+
+  /** A list of clients that have received a new request for data. */
+  private LinkedList<Respondent<Request, Response>> 
+      requests = new LinkedList<Respondent<Request, Response>>();
+
+  /** A buffer of received requests. */
+  private LinkedList<Request> buffer = null;
 
   /**
    *  Create and run a server thread.
@@ -76,43 +96,31 @@ implements IClientFactory, ICycleEventListener
   }
 
   /**
-   *  Give new data to clients to send them.
+   *  Returns all of the requests that were received before the 
+   *  current control loop begins.
    *
-   *  @param signals
-   *             a data to send
-   *
-   *  @param size
-   *             how many elements in the signals array should be sent
+   *  @return a collection of all the received requests
    */
-  public void send(Signal[] signals, int size)
+  public Collection<Request> getRequests()
   {
-    synchronized(clients)
+    if (buffer == null)
     {
-      for (Respondent<Signal[], Signal[]> client : clients)
-      {
+      buffer = new LinkedList<Request>();
+      for (Respondent<Request, Response> client : requests)
 	try
-	{
-          if (client.read() != null)
-          {
-            Signal[] buffer = new Signal[size];
-            System.arraycopy(signals, 0, buffer, 0, size);
-            client.write(buffer);
-          }
+        {
+	  buffer.add(client.read());
         }
-	catch (IOException e)
+	catch (java.io.IOException e)
 	{
-	  garbage.add(client);
+	  assert false; // should not happen
 	}
-      }
-      for (Respondent<Signal[], Signal[]> client : garbage)
-        clients.remove(client);
-      if (garbage.size() > 0)
-      {
-        info("Number of listeners removed: " + garbage.size() 
-            + ", total number of listeners: " + clients.size());
-        garbage.clear();
-      }
+	catch (IllegalStateException e)
+	{
+	  assert false; // should not happen
+	}
     }
+    return buffer;
   }
 
   /**
@@ -122,12 +130,12 @@ implements IClientFactory, ICycleEventListener
   {
     try
     {
-      SignalInputStream inputStream 
-          = new SignalInputStream(socket.getInputStream());
-      SignalOutputStream outputStream
-          = new SignalOutputStream(socket.getOutputStream());
-      Respondent<Signal[], Signal[]> client 
-          = new Respondent<Signal[], Signal[]>(inputStream, outputStream);
+      SignalRequestXmlInputStream inputStream 
+          = new SignalRequestXmlInputStream(socket.getInputStream());
+      SignalResponseXmlOutputStream outputStream
+          = new SignalResponseXmlOutputStream(socket.getOutputStream());
+      Respondent<Request, Response> client 
+          = new Respondent<Request, Response>(inputStream, outputStream);
       synchronized(clients)
       {
         clients.add(client);
@@ -139,18 +147,66 @@ implements IClientFactory, ICycleEventListener
     {
       catched(this.getClass().getName(), "newClient", e);
     }
+    catch (XMLStreamException e)
+    {
+      catched(this.getClass().getName(), "newClient", e);
+    }
   }
 
+  /**
+   *  Not used.
+   */
   public void cycleStart()
   {
   }
 
+  /**
+   *  Collect clients that have received request.
+   */
   public void processingStart()
   {
+    buffer = null;
+    requests.clear();
+    // collect requests from clients
+    synchronized(clients)
+    {
+      for (Respondent<Request, Response> client : clients)
+        try
+        {
+          Request request = client.read();
+          if (request != null)
+            requests.add(client);
+        }
+        catch (java.io.IOException e)
+        {
+	  Tools.close(client);
+	  garbage.add(client);
+        }
+    }
+    gc();
   }
 
+  /**
+   *  Send response to each request.
+   */
   public void cycleEnd()
   {
+    for (Respondent<Request, Response> client : requests)
+      try
+      {
+	Request request = client.read();
+	Response response = request.getResponse();
+	client.write(response);
+      }
+      catch (java.io.IOException e)
+      {
+	Tools.close(client);
+	garbage.add(client);
+      }
+      catch (IllegalStateException e)
+      {
+      }
+    gc();
   }
 
   @Override
@@ -160,6 +216,23 @@ implements IClientFactory, ICycleEventListener
     writer.println("Port: " + port);
     writer.println("Number of clients: " + clients.size());
     writer.println("Server status: " + server.getStatus());
+  }
+
+  private void gc()
+  {
+    if (garbage.size() > 0)
+    {
+      synchronized(clients)
+      {
+        for (Respondent<Request, Response> client : garbage)
+        {
+          clients.remove(client);
+        }
+        info("Clients removed: " + garbage.size() 
+            + "; clients: " + clients.size());
+      }
+      garbage.clear();
+    }
   }
 
 }

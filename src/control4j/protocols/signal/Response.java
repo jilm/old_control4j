@@ -18,20 +18,19 @@ package control4j.protocols.signal;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import control4j.protocols.IRequest;
 import control4j.protocols.IResponse;
 
-public class Request implements IRequest
+public class Response implements IResponse
 {
 
-  public Response getResponse()
+  public boolean isFinished()
   {
-    return null;
+    return false;
   }
 
   public boolean isRequest()
   {
-    return true;
+    return false;
   }
 
 }

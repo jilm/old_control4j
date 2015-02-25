@@ -25,23 +25,22 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
-import control4j.protocols.IMessage;
-
 import control4j.Signal;
+import control4j.protocols.IRequest;
 
-public class SignalXmlInputStream 
-implements control4j.protocols.tcp.IInputStream<IMessage>
+public class SignalRequestXmlInputStream 
+implements control4j.protocols.tcp.IInputStream<Request>
 {
 
   protected InputStream stream;
   protected XMLStreamReader reader;
 
-  public SignalXmlInputStream(InputStream stream) throws XMLStreamException
+  public SignalRequestXmlInputStream(InputStream stream) throws XMLStreamException
   {
     this.stream = new XmlInputStream(stream);
   }
 
-  public IMessage readMessage() throws IOException
+  public Request readMessage() throws IOException
   {
     try
     {
@@ -52,36 +51,20 @@ implements control4j.protocols.tcp.IInputStream<IMessage>
       if (eventType == XMLStreamReader.END_ELEMENT)
 	throw new IOException("Start element expected");
       String root = reader.getLocalName();
-      if (root.equals("set"))
+      if (root.equals("request"))
       {
-	DataResponse message = new DataResponse();
-	readDataMessage(message);
-	reader.close();
-	return message;
-      }
-      else if (root.equals("request"))
-      {
-	DataRequest message = new DataRequest();
-	readRequest(message);
+	Request message = new Request();
+	//readRequest(message);
 	reader.close();
 	return message;
       }
       else
-	throw new IOException("A set or request start element is expected");
+	throw new IOException("A request start element is expected");
     }
     catch (XMLStreamException e)
     {
       throw new IOException(e);
     }
-  }
-
-  protected DataRequest readRequest(DataRequest request)
-  {
-      //String ids = reader.getElementText();
-      //System.out.print(Character.toChars(stream.read()));
-      //System.out.println(Character.toChars(stream.read()));
-      //System.out.println(ids);
-      return request;
   }
 
   protected DataResponse readDataMessage(DataResponse data) 

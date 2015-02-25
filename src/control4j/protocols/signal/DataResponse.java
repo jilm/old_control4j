@@ -18,20 +18,53 @@ package control4j.protocols.signal;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import control4j.protocols.IRequest;
+import java.util.HashMap;
+import java.util.Set;
+
+import control4j.Signal;
 import control4j.protocols.IResponse;
 
-public class Request implements IRequest
+public class DataResponse implements IResponse
 {
 
-  public Response getResponse()
+  protected HashMap<String, Signal> data = new HashMap<String, Signal>();
+
+  public DataResponse()
   {
-    return null;
   }
 
   public boolean isRequest()
   {
-    return true;
+    return false;
+  }
+
+  public void put(String id, Signal signal)
+  {
+    data.put(id, signal);
+  }
+
+  public Signal get(String id)
+  {
+    return data.get(id);
+  }
+
+  public Set<String> getIdSet()
+  {
+    return data.keySet();
+  }
+
+  @Override
+  public String toString()
+  {
+    StringBuilder sb = new StringBuilder();
+    sb.append(getClass().getName());
+    sb.append(data.toString());
+    return sb.toString();
+  }
+
+  public boolean isFinished()
+  {
+    return false;
   }
 
 }

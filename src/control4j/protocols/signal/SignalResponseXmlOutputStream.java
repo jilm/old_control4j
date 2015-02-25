@@ -26,17 +26,15 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
-import control4j.protocols.IMessage;
-
 import control4j.Signal;
 
-public class SignalXmlOutputStream
-implements control4j.protocols.tcp.IOutputStream<IMessage>
+public class SignalResponseXmlOutputStream
+implements control4j.protocols.tcp.IOutputStream<Response>
 {
 
   protected XMLStreamWriter writer;
 
-  public SignalXmlOutputStream(OutputStream stream) throws XMLStreamException
+  public SignalResponseXmlOutputStream(OutputStream stream) throws XMLStreamException
   {
     XMLOutputFactory factory = XMLOutputFactory.newFactory();
     writer = factory.createXMLStreamWriter(stream);
@@ -70,20 +68,6 @@ implements control4j.protocols.tcp.IOutputStream<IMessage>
     catch (XMLStreamException e)
     {
       throw new IOException(e);
-    }
-  }
-
-  public void write(IMessage message) throws java.io.IOException
-  {
-    if (message instanceof DataRequest)
-    {
-    }
-    else if (message instanceof DataResponse)
-    {
-    }
-    else
-    {
-      assert false;
     }
   }
 
@@ -123,16 +107,16 @@ implements control4j.protocols.tcp.IOutputStream<IMessage>
     }
   }
 
-  public void write(DataResponse data) throws java.io.IOException
+  public void write(Response data) throws java.io.IOException
   {
     try
     {
       writer.writeStartDocument();
       writer.writeStartElement("set");
       writer.writeDefaultNamespace(Message.XMLNS);
-      Set<String> ids = data.getIdSet();
-      for (String id : ids)
-	write(id, data.get(id));
+      //Set<String> ids = data.getIdSet();
+      //for (String id : ids)
+	//write(id, data.get(id));
       writer.writeEndElement();
       writer.writeEndDocument();
       writer.flush();

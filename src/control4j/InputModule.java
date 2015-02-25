@@ -40,7 +40,7 @@ public abstract class InputModule extends Module
    */
   private int[] inputMap;
 
-  protected final void initialize(ModuleDeclaration declaration)
+  protected void initialize(ModuleDeclaration declaration)
   {
     // allocate the indexes array
     int size = declaration.getInputsSize();

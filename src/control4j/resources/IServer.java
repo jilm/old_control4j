@@ -1,4 +1,4 @@
-package control4j.protocols.signal;
+package control4j.resources;
 
 /*
  *  Copyright 2015 Jiri Lidinsky
@@ -18,20 +18,14 @@ package control4j.protocols.signal;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import control4j.protocols.IRequest;
-import control4j.protocols.IResponse;
+import java.util.Collection;
 
-public class Request implements IRequest
+import control4j.protocols.IRequest;
+
+/** Q should be a request type */
+public interface IServer<Q>
 {
 
-  public Response getResponse()
-  {
-    return null;
-  }
-
-  public boolean isRequest()
-  {
-    return true;
-  }
+  Collection<Q> getRequests();
 
 }

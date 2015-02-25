@@ -1,4 +1,4 @@
-package control4j.protocols.signal;
+package control4j.protocols;
 
 /*
  *  Copyright 2015 Jiri Lidinsky
@@ -18,42 +18,9 @@ package control4j.protocols.signal;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import java.util.HashMap;
-import java.util.Set;
-
-import control4j.Signal;
-
-public class DataMessage extends Message
+public interface IResponse extends IMessage
 {
 
-  protected HashMap<String, Signal> data = new HashMap<String, Signal>();
-
-  public DataMessage()
-  {
-  }
-
-  public void put(String id, Signal signal)
-  {
-    data.put(id, signal);
-  }
-
-  public Signal get(String id)
-  {
-    return data.get(id);
-  }
-
-  public Set<String> getIdSet()
-  {
-    return data.keySet();
-  }
-
-  @Override
-  public String toString()
-  {
-    StringBuilder sb = new StringBuilder();
-    sb.append(getClass().getName());
-    sb.append(data.toString());
-    return sb.toString();
-  }
+  boolean isFinished();
 
 }

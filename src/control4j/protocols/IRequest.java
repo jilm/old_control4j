@@ -1,4 +1,4 @@
-package control4j.protocols.signal;
+package control4j.protocols;
 
 /*
  *  Copyright 2015 Jiri Lidinsky
@@ -18,20 +18,9 @@ package control4j.protocols.signal;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import control4j.protocols.IRequest;
-import control4j.protocols.IResponse;
-
-public class Request implements IRequest
+public interface IRequest extends IMessage
 {
 
-  public Response getResponse()
-  {
-    return null;
-  }
-
-  public boolean isRequest()
-  {
-    return true;
-  }
+  IResponse getResponse();
 
 }
