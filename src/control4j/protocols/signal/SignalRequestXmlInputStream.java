@@ -27,6 +27,7 @@ import javax.xml.stream.XMLStreamReader;
 
 import control4j.Signal;
 import control4j.protocols.IRequest;
+import static control4j.tools.Logger.*;
 
 public class SignalRequestXmlInputStream 
 implements control4j.protocols.tcp.IInputStream<Request>
@@ -35,7 +36,8 @@ implements control4j.protocols.tcp.IInputStream<Request>
   protected InputStream stream;
   protected XMLStreamReader reader;
 
-  public SignalRequestXmlInputStream(InputStream stream) throws XMLStreamException
+  public SignalRequestXmlInputStream(InputStream stream) 
+  throws XMLStreamException
   {
     this.stream = new XmlInputStream(stream);
   }
@@ -46,16 +48,15 @@ implements control4j.protocols.tcp.IInputStream<Request>
     {
       XMLInputFactory factory = XMLInputFactory.newFactory();
       reader = factory.createXMLStreamReader(stream);
-      // find root element
+      // find the root element
       int eventType = reader.nextTag();
-      if (eventType == XMLStreamReader.END_ELEMENT)
+      if (eventType != XMLStreamReader.START_ELEMENT)
 	throw new IOException("Start element expected");
       String root = reader.getLocalName();
       if (root.equals("request"))
       {
 	DataRequest message = new DataRequest();
 	//readRequest(message);
-	reader.close();
 	return message;
       }
       else
@@ -65,64 +66,22 @@ implements control4j.protocols.tcp.IInputStream<Request>
     {
       throw new IOException(e);
     }
-  }
-
-  protected DataResponse readDataMessage(DataResponse data) 
-  throws XMLStreamException
-  {
-      while (true)
-      {
-	int codeType = reader.nextTag();
-	if (codeType == reader.START_ELEMENT)
-	  readSignal(data);
-	else if (codeType == reader.END_ELEMENT)
-	  return data;
-	else
-	  assert false;
-      }
-  }
-
-  protected void readSignal(DataResponse data)
-  throws XMLStreamException
-  {
-    try
+    finally
     {
-      String signalType = reader.getLocalName();
-      if (signalType.equals("invalid"))
+      try
       {
-        int attributes = reader.getAttributeCount();
-        String id = null;
-        Date timestamp = null;
-        for (int i=0; i<attributes; i++)
-        {
-          String attrName = reader.getAttributeLocalName(i);
-	  String attrValue = reader.getAttributeValue(i);
-	  if (attrName.equals("id"))
-	    id = attrValue;
-	  else if (attrName.equals("timestamp"))
-	    timestamp = (new java.text.SimpleDateFormat(
-		"yyyy-MM-dd'T'HH:mm:ssZ")).parse(attrValue);
-	  else
-	    throw new XMLStreamException("Usupported attribute: " + attrName);
-        }
-        Signal signal = Signal.getSignal(timestamp);
-        data.put(id, signal);
+        if (reader != null) reader.close();
       }
-      else if (signalType.equals("signal"))
+      catch (XMLStreamException ex)
       {
+	catched(getClass().getName(), "readMessage", ex);
       }
-      else
-        throw new XMLStreamException(
-	    "invalid or signal start element is expected");
-    }
-    catch (java.text.ParseException e)
-    {
-      throw new XMLStreamException("Timestamp is not in appropriate format");
     }
   }
 
   public void close() throws IOException
   {
+    stream.close();
   }
 
   private void printCode()
