@@ -24,7 +24,7 @@ import java.util.Set;
 import control4j.Signal;
 import control4j.protocols.IResponse;
 
-public class DataResponse implements IResponse
+public class DataResponse extends Response
 {
 
   protected HashMap<String, Signal> data = new HashMap<String, Signal>();

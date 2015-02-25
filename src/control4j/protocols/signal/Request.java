@@ -21,17 +21,14 @@ package control4j.protocols.signal;
 import control4j.protocols.IRequest;
 import control4j.protocols.IResponse;
 
-public class Request implements IRequest
+public abstract class Request implements IRequest
 {
-
-  public Response getResponse()
-  {
-    return null;
-  }
 
   public boolean isRequest()
   {
     return true;
   }
+
+  public abstract Response getResponse();
 
 }

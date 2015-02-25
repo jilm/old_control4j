@@ -53,7 +53,7 @@ implements control4j.protocols.tcp.IInputStream<Request>
       String root = reader.getLocalName();
       if (root.equals("request"))
       {
-	Request message = new Request();
+	DataRequest message = new DataRequest();
 	//readRequest(message);
 	reader.close();
 	return message;

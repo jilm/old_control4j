@@ -20,7 +20,7 @@ package control4j.protocols.signal;
 
 import control4j.protocols.IResponse;
 
-public class Response implements IResponse
+public abstract class Response implements IResponse
 {
 
   public boolean isFinished()

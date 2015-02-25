@@ -29,7 +29,8 @@ import control4j.protocols.IResponse;
  *  A request for new data.
  *
  */
-public class DataRequest implements Iterable<String>, IRequest
+public class DataRequest extends Request 
+implements Iterable<String>
 {
 
   protected HashSet<String> ids = null;
@@ -44,7 +45,7 @@ public class DataRequest implements Iterable<String>, IRequest
     return true;
   }
 
-  public IResponse getResponse()
+  public Response getResponse()
   {
     if (response == null) response = new DataResponse();
     return response;
