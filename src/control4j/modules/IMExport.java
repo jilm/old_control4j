@@ -18,11 +18,15 @@ package control4j.modules;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import java.util.Collection;
+
 import control4j.InputModule;
 import control4j.Resource;
 import control4j.Signal;
 import control4j.application.ModuleDeclaration;
 import control4j.protocols.IRequest;
+import control4j.protocols.signal.Request;
+import control4j.protocols.signal.Response;
 import control4j.protocols.signal.DataRequest;
 import control4j.protocols.signal.DataResponse;
 import control4j.resources.IServer;
@@ -38,7 +42,7 @@ public class IMExport extends InputModule
 {
 
   @Resource
-  public IServer server;
+  public IServer<Request> server;
 
   /** Names of the input signal that will be used as an identifier */
   protected String ids[];
@@ -62,6 +66,17 @@ public class IMExport extends InputModule
   @Override
   protected void put(Signal[] input)
   {
+    Collection<Request> requests = server.getRequests();
+    for (Request request : requests)
+    {
+      if (request instanceof DataRequest)
+      {
+	DataResponse response 
+	    = (DataResponse)((DataRequest)request).getResponse();
+	for (int i=0; i<ids.length; i++)
+	  response.put(ids[i], input[i]);
+      }
+    }
   }
 
 }
