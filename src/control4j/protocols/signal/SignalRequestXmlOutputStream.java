@@ -30,42 +30,29 @@ import control4j.protocols.IMessage;
 
 import control4j.Signal;
 
-public class SignalXmlOutputStream
-implements control4j.protocols.tcp.IOutputStream<IMessage>
+public class SignalRequestXmlOutputStream
+implements control4j.protocols.tcp.IOutputStream<Request>
 {
 
   protected XMLStreamWriter writer;
 
-  public SignalXmlOutputStream(OutputStream stream) throws XMLStreamException
+  public SignalRequestXmlOutputStream(OutputStream stream) 
+  throws XMLStreamException
   {
     XMLOutputFactory factory = XMLOutputFactory.newFactory();
     writer = factory.createXMLStreamWriter(stream);
   }
 
-  public void write(String id, Signal signal) throws java.io.IOException
+  public void write(Request message) throws java.io.IOException
   {
     try
     {
-      Date timestamp = signal.getTimestamp();
-      String strTimestamp = String.format("%1$TFT%1$TT%1$Tz", timestamp);
-      if (!signal.isValid())
+      if (message instanceof DataRequest)
       {
-        writer.writeEmptyElement("invalid");
-        writer.writeAttribute("id", id);
-        writer.writeAttribute("timestamp", strTimestamp);
+	write((DataRequest) message);
       }
-      else if (signal.getSize() == 1)
-      {
-        writer.writeStartElement("signal");
-        writer.writeAttribute("id", id);
-        writer.writeAttribute("timestamp", strTimestamp);
-        String strValue = String.format("%g", signal.getValue());
-        writer.writeAttribute("value", strValue);
-        String unit = signal.getUnit();
-        if (unit != null && unit.length() > 0)
-          writer.writeAttribute("unit", unit);
-        writer.writeEndElement();
-      }
+      else
+	throw new IOException("Not supported message type");
     }
     catch (XMLStreamException e)
     {
@@ -73,24 +60,8 @@ implements control4j.protocols.tcp.IOutputStream<IMessage>
     }
   }
 
-  public void write(IMessage message) throws java.io.IOException
+  protected void write(DataRequest request) throws XMLStreamException
   {
-    if (message instanceof DataRequest)
-    {
-    }
-    else if (message instanceof DataResponse)
-    {
-    }
-    else
-    {
-      assert false;
-    }
-  }
-
-  public void write(DataRequest request) throws java.io.IOException
-  {
-    try
-    {
       writer.writeStartDocument();
       if (request.size() > 0)
       {
@@ -116,31 +87,6 @@ implements control4j.protocols.tcp.IOutputStream<IMessage>
       }
       writer.writeEndDocument();
       writer.flush();
-    }
-    catch (XMLStreamException e)
-    {
-      throw new IOException(e);
-    }
-  }
-
-  public void write(DataResponse data) throws java.io.IOException
-  {
-    try
-    {
-      writer.writeStartDocument();
-      writer.writeStartElement("set");
-      writer.writeDefaultNamespace(Message.XMLNS);
-      Set<String> ids = data.getIdSet();
-      for (String id : ids)
-	write(id, data.get(id));
-      writer.writeEndElement();
-      writer.writeEndDocument();
-      writer.flush();
-    }
-    catch (XMLStreamException e)
-    {
-      throw new IOException(e);
-    }
   }
 
   public void close() throws java.io.IOException
