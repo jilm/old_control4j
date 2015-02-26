@@ -37,6 +37,7 @@ import control4j.protocols.IMessage;
 import control4j.protocols.tcp.IClientFactory;
 import control4j.protocols.tcp.Respondent;
 import control4j.protocols.tcp.Server;
+import control4j.protocols.signal.DataRequest;
 import control4j.protocols.signal.Request;
 import control4j.protocols.signal.Response;
 import control4j.protocols.signal.SignalRequestXmlInputStream;
@@ -76,12 +77,10 @@ implements IClientFactory, ICycleEventListener, IServer<Request>
   private LinkedList<Respondent<Request, Response>> 
       garbage = new LinkedList<Respondent<Request, Response>>();
 
-  /** A list of clients that have received a new request for data. */
-  private LinkedList<Respondent<Request, Response>> 
-      requests = new LinkedList<Respondent<Request, Response>>();
-
   /** A buffer of received requests. */
-  private LinkedList<Request> buffer = null;
+  private LinkedList<Request> buffer = new LinkedList<Request>();
+
+  private DataRequest defaultRequest;
 
   /**
    *  Create and run a server thread.
@@ -103,23 +102,6 @@ implements IClientFactory, ICycleEventListener, IServer<Request>
    */
   public Collection<Request> getRequests()
   {
-    if (buffer == null)
-    {
-      buffer = new LinkedList<Request>();
-      for (Respondent<Request, Response> client : requests)
-	try
-        {
-	  buffer.add(client.read());
-        }
-	catch (java.io.IOException e)
-	{
-	  assert false; // should not happen
-	}
-	catch (IllegalStateException e)
-	{
-	  assert false; // should not happen
-	}
-    }
     return buffer;
   }
 
@@ -165,25 +147,9 @@ implements IClientFactory, ICycleEventListener, IServer<Request>
    */
   public void processingStart()
   {
-    buffer = null;
-    requests.clear();
-    // collect requests from clients
-    synchronized(clients)
-    {
-      for (Respondent<Request, Response> client : clients)
-        try
-        {
-          Request request = client.read();
-          if (request != null)
-            requests.add(client);
-        }
-        catch (java.io.IOException e)
-        {
-	  Tools.close(client);
-	  garbage.add(client);
-        }
-    }
-    gc();
+    buffer.clear();
+    defaultRequest = new DataRequest();
+    buffer.add(defaultRequest);
   }
 
   /**
@@ -191,12 +157,17 @@ implements IClientFactory, ICycleEventListener, IServer<Request>
    */
   public void cycleEnd()
   {
-    for (Respondent<Request, Response> client : requests)
+    synchronized(clients)
+    {
+    for (Respondent<Request, Response> client : clients)
       try
       {
 	Request request = client.read();
-	Response response = request.getResponse();
-	client.write(response);
+	if (request != null)
+	{
+	  Response response = defaultRequest.getResponse();
+	  client.write(response);
+	}
       }
       catch (java.io.IOException e)
       {
@@ -206,6 +177,7 @@ implements IClientFactory, ICycleEventListener, IServer<Request>
       catch (IllegalStateException e)
       {
       }
+    }
     gc();
   }
 
