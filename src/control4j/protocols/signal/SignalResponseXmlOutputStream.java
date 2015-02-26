@@ -44,7 +44,7 @@ implements control4j.protocols.tcp.IOutputStream<Response>
   public void write(String id, Signal signal) throws XMLStreamException
   {
       Date timestamp = signal.getTimestamp();
-      String strTimestamp = String.format("%1$TFT%1$TT%1$Tz", timestamp);
+      String strTimestamp = XmlTools.formatDate(timestamp);
       if (!signal.isValid())
       {
         writer.writeEmptyElement("invalid");

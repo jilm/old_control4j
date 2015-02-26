@@ -105,8 +105,7 @@ implements control4j.protocols.tcp.IInputStream<Response>
 	  if (attrName.equals("id"))
 	    id = attrValue;
 	  else if (attrName.equals("timestamp"))
-	    timestamp = (new java.text.SimpleDateFormat(
-		"yyyy-MM-dd'T'HH:mm:ssZ")).parse(attrValue);
+	    timestamp = XmlTools.parseDate(attrValue);
 	  else
 	    throw new XMLStreamException("Usupported attribute: " + attrName);
         }
@@ -127,8 +126,7 @@ implements control4j.protocols.tcp.IInputStream<Response>
 	  if (attrName.equals("id"))
 	    id = attrValue;
 	  else if (attrName.equals("timestamp"))
-	    timestamp = (new java.text.SimpleDateFormat(
-		"yyyy-MM-dd'T'HH:mm:ssZ")).parse(attrValue);
+	    timestamp = XmlTools.parseDate(attrValue);
 	  else if (attrName.equals("value"))
 	    value = Double.parseDouble(attrValue);
           else if (attrName.equals("unit"))
