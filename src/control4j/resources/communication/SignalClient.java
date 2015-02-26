@@ -24,7 +24,11 @@ import control4j.ICycleEventListener;
 import control4j.Signal;
 import control4j.resources.Resource;
 import control4j.tools.IResponseCrate;
-import control4j.protocols.tcp.SignalOverTcp;
+import control4j.protocols.signal.Client;
+import control4j.protocols.signal.Request;
+import control4j.protocols.signal.Response;
+import control4j.protocols.signal.DataRequest;
+import control4j.protocols.signal.DataResponse;
 import static control4j.tools.Logger.*;
 
 public class SignalClient extends Resource implements ICycleEventListener
@@ -36,23 +40,22 @@ public class SignalClient extends Resource implements ICycleEventListener
   @ConfigItem
   public int port;
 
-  private SignalOverTcp channel;
-  private IResponseCrate<Signal[]> response;
-  private Signal[] request;
+  private Client client;
+  private IResponseCrate<Response> response;
+  private Request request;
 
   @Override 
   public void prepare()
   {
-    channel = new SignalOverTcp(host, port);
-    channel.start();
+    client = new Client(host, port);
+    client.start();
   }
 
-  public void write(Signal[] message)
+  public void write(Request message)
   {
-    request = message;
   }
 
-  public Signal[] read()
+  public Response read()
   {
     try
     {
@@ -80,9 +83,9 @@ public class SignalClient extends Resource implements ICycleEventListener
     if (response == null || response.isFinished())
       try
       {
-        if (request == null) request = new Signal[0];
+        if (request == null) request = new DataRequest();
         finest("Sending request: " + request.toString());
-        response = channel.write(request);
+        response = client.write(request);
       }
       catch (java.io.IOException e)
       {
