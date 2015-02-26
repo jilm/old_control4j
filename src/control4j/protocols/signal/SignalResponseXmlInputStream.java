@@ -29,19 +29,21 @@ import control4j.protocols.IMessage;
 
 import control4j.Signal;
 
-public class SignalXmlInputStream 
-implements control4j.protocols.tcp.IInputStream<IMessage>
+public class SignalResponseXmlInputStream 
+implements control4j.protocols.tcp.IInputStream<Response>
 {
 
   protected InputStream stream;
   protected XMLStreamReader reader;
 
-  public SignalXmlInputStream(InputStream stream) throws XMLStreamException
+  public SignalResponseXmlInputStream(InputStream stream) 
+  throws XMLStreamException
   {
-    this.stream = new XmlInputStream(stream);
+    // this.stream = new XmlInputStream(stream);
+    this.stream = stream;
   }
 
-  public IMessage readMessage() throws IOException
+  public Response readMessage() throws IOException
   {
     try
     {
@@ -49,7 +51,7 @@ implements control4j.protocols.tcp.IInputStream<IMessage>
       reader = factory.createXMLStreamReader(stream);
       // find root element
       int eventType = reader.nextTag();
-      if (eventType == XMLStreamReader.END_ELEMENT)
+      if (eventType != XMLStreamReader.START_ELEMENT)
 	throw new IOException("Start element expected");
       String root = reader.getLocalName();
       if (root.equals("set"))
@@ -59,15 +61,8 @@ implements control4j.protocols.tcp.IInputStream<IMessage>
 	reader.close();
 	return message;
       }
-      else if (root.equals("request"))
-      {
-	DataRequest message = new DataRequest();
-	readRequest(message);
-	reader.close();
-	return message;
-      }
       else
-	throw new IOException("A set or request start element is expected");
+	throw new IOException("A set start element is expected");
     }
     catch (XMLStreamException e)
     {
@@ -75,28 +70,21 @@ implements control4j.protocols.tcp.IInputStream<IMessage>
     }
   }
 
-  protected DataRequest readRequest(DataRequest request)
-  {
-      //String ids = reader.getElementText();
-      //System.out.print(Character.toChars(stream.read()));
-      //System.out.println(Character.toChars(stream.read()));
-      //System.out.println(ids);
-      return request;
-  }
-
-  protected DataResponse readDataMessage(DataResponse data) 
+  protected void readDataMessage(DataResponse data) 
   throws XMLStreamException
   {
       while (true)
       {
 	int codeType = reader.nextTag();
+	printCode();
 	if (codeType == reader.START_ELEMENT)
 	  readSignal(data);
 	else if (codeType == reader.END_ELEMENT)
-	  return data;
+	  break;
 	else
 	  assert false;
       }
+    System.out.println(data);
   }
 
   protected void readSignal(DataResponse data)
@@ -127,6 +115,29 @@ implements control4j.protocols.tcp.IInputStream<IMessage>
       }
       else if (signalType.equals("signal"))
       {
+        int attributes = reader.getAttributeCount();
+        String id = null;
+        Date timestamp = null;
+	double value = Double.NaN;
+	String unit = null;
+        for (int i=0; i<attributes; i++)
+        {
+          String attrName = reader.getAttributeLocalName(i);
+	  String attrValue = reader.getAttributeValue(i);
+	  if (attrName.equals("id"))
+	    id = attrValue;
+	  else if (attrName.equals("timestamp"))
+	    timestamp = (new java.text.SimpleDateFormat(
+		"yyyy-MM-dd'T'HH:mm:ssZ")).parse(attrValue);
+	  else if (attrName.equals("value"))
+	    value = Double.parseDouble(attrValue);
+          else if (attrName.equals("unit"))
+	    unit = attrValue;
+	  else
+	    throw new XMLStreamException("Usupported attribute: " + attrName);
+        }
+        Signal signal = Signal.getSignal(value, timestamp);
+        data.put(id, signal);
       }
       else
         throw new XMLStreamException(
@@ -136,6 +147,7 @@ implements control4j.protocols.tcp.IInputStream<IMessage>
     {
       throw new XMLStreamException("Timestamp is not in appropriate format");
     }
+    reader.nextTag();
   }
 
   public void close() throws IOException
