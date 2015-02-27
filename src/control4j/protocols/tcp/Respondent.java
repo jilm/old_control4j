@@ -130,7 +130,7 @@ public class Respondent<I, O> implements Runnable, java.io.Closeable
     if (processing)
       throw new IllegalStateException(
 	  "Previous transaction has not been finished yet");
-    if (request != null && response == null)
+    if (request != null && this.response == null)
     {
       this.response = response;
       new Thread(this).start();
@@ -140,7 +140,7 @@ public class Respondent<I, O> implements Runnable, java.io.Closeable
       throw new IllegalStateException(
 	  "Trying to send data response without a request");
     }
-    else if (response != null)
+    else if (this.response != null)
     {
       throw new IllegalStateException(
 	  "Previous request has not been sent yet");

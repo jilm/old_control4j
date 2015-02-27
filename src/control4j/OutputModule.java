@@ -55,7 +55,7 @@ public abstract class OutputModule extends Module
    *  @see #setOutputConfiguration
    *  @see Module#getInstance
    */
-  protected final void initialize(ModuleDeclaration declaration)
+  protected void initialize(ModuleDeclaration declaration)
   {
     // output map initialization
     initializeOutputMap(declaration);

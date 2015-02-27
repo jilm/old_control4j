@@ -165,6 +165,7 @@ implements IClientFactory, ICycleEventListener, IServer<Request>
 	Request request = client.read();
 	if (request != null)
 	{
+	  finest("Going to reply for the request ...");
 	  Response response = defaultRequest.getResponse();
 	  client.write(response);
 	}
