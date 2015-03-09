@@ -30,7 +30,9 @@ import control4j.application.ITranslatable;
 public class Application extends DescriptionBase implements ITranslatable
 {
 
-  /** value definitions */
+  /** definitions */
+  private NameScopeMap<Definition> definitions 
+      = new NameScopeMap<Definition>();
 
   /** resource definitions */
 
@@ -53,6 +55,16 @@ public class Application extends DescriptionBase implements ITranslatable
 
   public void translate(Application application)
   {
+  }
+
+  public void putDefinition(String name, Scope scope, Definition definition)
+  {
+    definitions.put(name, scope, definition);
+  }
+
+  public Definition getDefinition(String name, Scope scope)
+  {
+    return definitions.get(name, scope);
   }
 
 }
