@@ -1,7 +1,7 @@
 package control4j.tools;
 
 /*
- *  Copyright 2013, 2014 Jiri Lidinsky
+ *  Copyright 2013, 2014, 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -33,15 +33,28 @@ public @interface XmlStartElement
 {
 
   /**
-   *  Local name of the parent element of the XML start element for which
-   *  annotated method should be called.
+   *  Local name of the parent XML element for which
+   *  annotated method should be called. If contains
+   *  an empty string, the root element is expected.
+   *  May contain *, in such a case the method is called
+   *  for elements with given local name and arbitrary
+   *  parent. If there is a method where the local name
+   *  and parent are specified together with a method
+   *  where only local name is specified whereas the
+   *  parent may be arbitrary, the more specific method
+   *  is chosen to handle the event.
    */
   String parent() default "";
 
   /**
-   *  Local name of the XML start element for which annotated method should
-   *  be called.
+   *  Local name of the XML element for which this method
+   *  will be called. May contain *; in such a case this
+   *  method will be called for arbitrary strart element.
    */
   String localName();
+
+  String namespace() default "";
+
+  String parentNamespace() default "";
 
 }
