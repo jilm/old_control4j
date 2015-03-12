@@ -26,6 +26,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import org.xml.sax.Attributes;
+import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
@@ -54,6 +55,12 @@ public class XmlReader extends DefaultHandler
 
   /** Contain handlers */
   private HandlerCrate handlerStack;
+
+  /** Locator of the document */
+  private Locator locator;
+
+  private int line;
+  private int column;
 
   /**
    *  Does nothing.
@@ -102,6 +109,7 @@ public class XmlReader extends DefaultHandler
     {
       SAXParserFactory factory = SAXParserFactory.newInstance();
       factory.setNamespaceAware(true);
+      factory.setXIncludeAware(true);
       SAXParser parser = factory.newSAXParser();
       parser.parse(inputStream, this);
     }
@@ -140,6 +148,7 @@ public class XmlReader extends DefaultHandler
       {
         XmlStartElement annotation 
 	    = method.getAnnotation(XmlStartElement.class);
+	if (annotation == null) continue;
 	annoLocalName = annotation.localName();
 	annoNamespace = annotation.namespace();
 	annoParent = annotation.parent();
@@ -149,6 +158,7 @@ public class XmlReader extends DefaultHandler
       {
         XmlEndElement annotation 
 	    = method.getAnnotation(XmlEndElement.class);
+	if (annotation == null) continue;
 	annoLocalName = annotation.localName();
 	annoNamespace = annotation.namespace();
 	annoParent = annotation.parent();
@@ -194,6 +204,13 @@ public class XmlReader extends DefaultHandler
       return result;
   }
 
+  /*
+   *
+   *   Overriden methods of the SAX Default Handler class
+   *   Respond methods to the SAX parser events.
+   *
+   */
+
   /**
    *  Gets a start element event from the SAX parser, finds 
    *  the appropriate method to serve this event and runs it.
@@ -213,16 +230,11 @@ public class XmlReader extends DefaultHandler
       method.setAccessible(true);
       method.invoke(handlerStack.handler, attributes);
       method.setAccessible(false);
-
-      // add an element into the element stack
-      handlerStack.elementStack = new ElementCrate(handlerStack.elementStack);
-      handlerStack.elementStack.localName = localName;
-      handlerStack.elementStack.namespace = uri;
     }
     // there is no appropriate handler method
     catch (NoSuchElementException e)
     {
-      fine("Did not find handler method for element: " + localName);
+      reportMissingHandler(uri, localName);
     }
     catch (IllegalAccessException e)
     {
@@ -231,6 +243,16 @@ public class XmlReader extends DefaultHandler
     catch (java.lang.reflect.InvocationTargetException e)
     {
       throw new SAXException(e);
+    }
+    finally
+    {
+      // add an element into the element stack
+      handlerStack.elementStack = new ElementCrate(handlerStack.elementStack);
+      handlerStack.elementStack.localName = localName;
+      handlerStack.elementStack.namespace = uri;
+      // remember the location
+      line = locator.getLineNumber();
+      column = locator.getColumnNumber();
     }
   }
 
@@ -254,16 +276,11 @@ public class XmlReader extends DefaultHandler
       method.setAccessible(true);
       method.invoke(this);
       method.setAccessible(false);
-
-      // if the element stack is empty, remove the handler from the
-      // top of the handler stack
-      if (handlerStack.isEmpty()) removeHandler();
-
     }
     // there is no appropriate handler method
     catch (NoSuchElementException e)
     {
-      fine("Did not find handler method for element: " + localName);
+      reportMissingHandler(uri, localName);
     }
     catch (IllegalAccessException e)
     {
@@ -273,23 +290,76 @@ public class XmlReader extends DefaultHandler
     {
       throw new SAXException(e);
     }
+    finally
+    {
+      // if the element stack is empty, remove the handler from the
+      // top of the handler stack
+      if (handlerStack.isEmpty()) removeHandler();
+      // remember the location
+      line = locator.getLineNumber();
+      column = locator.getColumnNumber();
+    }
   }
 
   /**
    *  Does nothing.
    */
   @Override
-  public void startDocument()
+  public final void startDocument()
   {
+    line = locator.getLineNumber();
+    column = locator.getColumnNumber();
   }
 
   /**
    *  Does nothing.
    */
   @Override
-  public void endDocument()
+  public final void endDocument()
   {
+    line = locator.getLineNumber();
+    column = locator.getColumnNumber();
   }
+
+  /**
+   *  Stores a locator for future use.
+   */
+  @Override
+  public final void setDocumentLocator(Locator locator)
+  {
+    this.locator = locator;
+  }
+
+  /** A buffer to collect the whole text content of some element */
+  private StringBuilder characterBuffer = new StringBuilder();
+
+  /**
+   *  Stores characters into the character buffer.
+   */
+  @Override
+  public final void characters(char[] ch, int start, int length)
+  {
+    characterBuffer.append(ch, start, length);
+    line = locator.getLineNumber();
+    column = locator.getColumnNumber();
+  }
+
+  /**
+   *  Does nothing, except, it stores a location.
+   */
+  @Override
+  public final void ignorableWhitespace(char[] ch, int start, int length)
+  {
+    line = locator.getLineNumber();
+    column = locator.getColumnNumber();
+  }
+
+  /*
+   *
+   *  Implementation of internal stack of handlers and
+   *  an implemnetation of stack of elements.
+   *
+   */
 
   /**
    *  A crate class which contains a handler object together with
@@ -355,6 +425,23 @@ public class XmlReader extends DefaultHandler
     {
       this.parent = parent;
     }
+  }
+
+  /**
+   *  Log a fact, that it the handler method for some XML event
+   *  has not been found. It could mean, that eather the XML
+   *  document contains something it should not, or it means,
+   *  that the developer doesn't write the handler object
+   *  properly.
+   */
+  protected void reportMissingHandler(String uri, String localName)
+  {
+    fine(java.text.MessageFormat.format(
+	"Didn''t find a handler for the element: '{'{0}'}':{1}\n" +
+	"on line: {2,number,integer}; column: {3,number,integer}; " +
+	"public id: {4}; system id: {5}", 
+	uri, localName, line, column,
+	locator.getPublicId(), locator.getSystemId()));
   }
 
 }
