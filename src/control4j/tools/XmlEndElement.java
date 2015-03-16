@@ -44,8 +44,8 @@ public @interface XmlEndElement
    */
   String localName();
 
-  String namespace() default "";
+  String namespace() default "^";
 
-  String parentNamespace() default "";
+  String parentNamespace() default "*";
 
 }

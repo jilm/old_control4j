@@ -310,7 +310,7 @@ public class XmlReader extends DefaultHandler
 
       // call the method
       method.setAccessible(true);
-      method.invoke(this);
+      method.invoke(handlerStack.handler);
       method.setAccessible(false);
     }
     // there is no appropriate handler method
