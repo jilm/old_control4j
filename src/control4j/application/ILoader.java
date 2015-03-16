@@ -30,9 +30,8 @@ public interface ILoader
 {
 
   /**
-   *  Loads and returns required application description in a particular
-   *  language.
+   *  Returns loaded objects.
    */
-  ITranslatable load() throws IOException;
+  ITranslatable get() throws IOException;
 
 }

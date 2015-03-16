@@ -40,7 +40,7 @@ public class Application extends DescriptionBase implements ITranslatable
 
   /** signal definitions */
 
-  /** nested applications */
+  /** nested applications ??? */
 
   /** modules */
 
@@ -65,6 +65,15 @@ public class Application extends DescriptionBase implements ITranslatable
   public Definition getDefinition(String name, Scope scope)
   {
     return definitions.get(name, scope);
+  }
+
+  public void addProperty(String key, Property property)
+  {
+    // TODO
+  }
+
+  public void addDefine(Define define)
+  {
   }
 
 }

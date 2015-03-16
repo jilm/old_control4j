@@ -19,8 +19,16 @@ package control4j.application;
  */
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.io.IOException;
 import java.util.Collection;
+import org.xml.sax.Attributes;
+
+import control4j.tools.IXmlHandler;
+import control4j.tools.XmlReader;
+import control4j.tools.XmlStartElement;
+import static control4j.tools.Logger.*;
 
 /**
  *
@@ -32,8 +40,12 @@ import java.util.Collection;
  *  read from a ...
  *
  */
-public class Loader
+public class Loader implements IXmlHandler
 {
+
+  private XmlReader reader;
+
+  private LoaderFactory loaderFactory;
 
   /**
    *  Reads a map: loader to namespace form a ...
@@ -44,6 +56,7 @@ public class Loader
    */
   public Loader() throws IOException
   {
+    loaderFactory = LoaderFactory.getInstance();
   }
 
   /**
@@ -58,7 +71,61 @@ public class Loader
   public Collection<? extends ITranslatable> load(File file) 
   throws IOException
   {
+    InputStream inputStream = new FileInputStream(file);
+    return load(inputStream);
+    //inputStream.close();
+  }
+
+  public Collection<? extends ITranslatable> load(InputStream inputStream)
+  throws IOException
+  {
+    reader = new XmlReader();
+    reader.addHandler(this);
+    reader.load(inputStream);
     return null;
+  }
+
+  @XmlStartElement(
+      localName="*", namespace="*", parent="*", parentNamespace="*")
+  private void startElement(Attributes attributes)
+  {
+    try
+    {
+      System.out.println("Start element " + reader.getNamespace());
+      ILoader loader = loaderFactory.getLoader(reader.getNamespace());
+      System.out.println(loader.toString());
+      reader.addHandler((IXmlHandler)loader);
+    }
+    catch (Exception e)
+    {
+      catched(getClass().getName(), "startElement", e);
+    }
+  }
+
+  public static void main(String[] args) throws Exception
+  {
+    File file = new File(args[0]);
+    new Loader().load(file);
+  }
+
+  /*
+   *
+   *  Implementation of IXmlHandler intarface
+   *
+   */
+
+  /**
+   *  Does nothing.
+   */
+  public void startProcessing(XmlReader reader)
+  {
+  }
+
+  /**
+   *  Does nothing.
+   */
+  public void endProcessing()
+  {
   }
 
 }
