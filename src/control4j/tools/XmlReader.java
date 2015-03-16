@@ -268,7 +268,7 @@ public class XmlReader extends DefaultHandler
     // there is no appropriate handler method
     catch (NoSuchElementException e)
     {
-      reportMissingHandler(uri, localName);
+      reportMissingHandler("start element");
     }
     catch (IllegalAccessException e)
     {
@@ -316,7 +316,7 @@ public class XmlReader extends DefaultHandler
     // there is no appropriate handler method
     catch (NoSuchElementException e)
     {
-      reportMissingHandler(uri, localName);
+      reportMissingHandler("end element");
     }
     catch (IllegalAccessException e)
     {
@@ -470,19 +470,24 @@ public class XmlReader extends DefaultHandler
   }
 
   /**
-   *  Log the fact, that it the handler method for some XML event
+   *  Log the fact, that the handler method for some XML event
    *  has not been found. It could mean, that eather the XML
    *  document contains something it should not, or it means,
    *  that the developer doesn't write the handler object
    *  properly.
+   *
+   *  @param event
+   *             a text description of the event. For example:
+   *             "start element", "end element", ...
    */
-  protected void reportMissingHandler(String uri, String localName)
+  protected void reportMissingHandler(String event)
   {
     fine(java.text.MessageFormat.format(
-	"Didn''t find a handler for the element: '{'{0}'}':{1}\n" +
-	"on line: {2,number,integer}; column: {3,number,integer}; " +
-	"public id: {4}; system id: {5}", 
-	uri, localName, line, column,
+	"Didn''t find any handler for the event: {0}.\n" +
+	"Last start element: '{'{1}'}':{2},\n" +
+	"on line: {3,number,integer}; column: {4,number,integer}; " +
+	"public id: {5}; system id: {6}", 
+	event, namespace, localName, line, column,
 	locator.getPublicId(), locator.getSystemId()));
   }
 
