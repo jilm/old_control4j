@@ -59,8 +59,15 @@ public class XmlReader extends DefaultHandler
   /** Locator of the document */
   private Locator locator;
 
+  /** Indicate that new handler object was added and that the
+      last event must be sent again. */
+  private boolean repeat = false;
+
   private int line;
   private int column;
+
+  private String localName;
+  private String namespace;
 
   /**
    *  Does nothing.
@@ -76,11 +83,12 @@ public class XmlReader extends DefaultHandler
    *  XmlEndElement annotations. A handler must be added before
    *  the load method is called.
    */
-  public void addHandler(Object handler)
+  public void addHandler(IXmlHandler handler)
   {
     if (handler == null) throw new NullPointerException();
     handlerStack = new HandlerCrate(handlerStack);
     handlerStack.handler = handler;
+    repeat = true;
   }
 
   /**
@@ -123,6 +131,16 @@ public class XmlReader extends DefaultHandler
     }
   }
 
+  public String getLocalName()
+  {
+    return localName; // TODO
+  }
+
+  public String getNamespace()
+  {
+    return namespace; // TODO
+  }
+
   /**
    *  Goes through methods of the handler object and returns
    *  the method that match the most precisly to the given
@@ -133,7 +151,7 @@ public class XmlReader extends DefaultHandler
       throws NoSuchElementException
   {
     Method result = null;
-    int resultRank = 0;
+    int resultRank = -1;
 
     Method[] methods = handlerStack.handler.getClass().getDeclaredMethods();
     for (Method method : methods)
@@ -173,8 +191,11 @@ public class XmlReader extends DefaultHandler
       else if (!annoLocalName.equals("*"))
 	continue;
 
-      // if it match namespace
+      // if the namespace match
       if (annoNamespace.equals(namespace))
+	rank += 4;
+      else if (annoNamespace.equals("^") 
+	  && handlerStack.elementStack.namespace.equals(namespace))
 	rank += 4;
       else if (!annoNamespace.equals("*"))
 	continue;
@@ -221,15 +242,28 @@ public class XmlReader extends DefaultHandler
       String uri, String localName, String qName, Attributes attributes) 
       throws SAXException
   {
+    this.localName = localName;
+    this.namespace = uri;
     try
     {
-      // find a method that can handle the event
-      Method method = findHandler(uri, localName, true);
+      while (true)
+      {
+        // find a method that can handle the event
+        Method method = findHandler(uri, localName, true);
 
-      // call the method
-      method.setAccessible(true);
-      method.invoke(handlerStack.handler, attributes);
-      method.setAccessible(false);
+        // call the method
+	repeat = false;
+        method.setAccessible(true);
+        method.invoke(handlerStack.handler, attributes);
+        method.setAccessible(false);
+
+        // if the event has not been handled, try again
+	if (!repeat)
+	{
+	  handlerStack.handler.startProcessing(this);
+	  break;
+	}
+      }
     }
     // there is no appropriate handler method
     catch (NoSuchElementException e)
@@ -264,6 +298,8 @@ public class XmlReader extends DefaultHandler
   public final void endElement(String uri, String localName, String qName)
   throws SAXException
   {
+    this.localName = localName;
+    this.namespace = uri;
     // remove the last element from the element stack
     handlerStack.pop();
 
@@ -294,7 +330,11 @@ public class XmlReader extends DefaultHandler
     {
       // if the element stack is empty, remove the handler from the
       // top of the handler stack
-      if (handlerStack.isEmpty()) removeHandler();
+      if (handlerStack.isEmpty()) 
+      {
+	handlerStack.handler.endProcessing();
+        removeHandler();
+      }
       // remember the location
       line = locator.getLineNumber();
       column = locator.getColumnNumber();
@@ -307,6 +347,7 @@ public class XmlReader extends DefaultHandler
   @Override
   public final void startDocument()
   {
+    handlerStack.handler.startProcessing(this);
     line = locator.getLineNumber();
     column = locator.getColumnNumber();
   }
@@ -317,6 +358,7 @@ public class XmlReader extends DefaultHandler
   @Override
   public final void endDocument()
   {
+    handlerStack.handler.endProcessing();
     line = locator.getLineNumber();
     column = locator.getColumnNumber();
   }
@@ -369,7 +411,7 @@ public class XmlReader extends DefaultHandler
   {
 
     /** the handler. */
-    Object handler;
+    IXmlHandler handler;
 
     /** parent handler or null. */
     HandlerCrate parent;
@@ -428,7 +470,7 @@ public class XmlReader extends DefaultHandler
   }
 
   /**
-   *  Log a fact, that it the handler method for some XML event
+   *  Log the fact, that it the handler method for some XML event
    *  has not been found. It could mean, that eather the XML
    *  document contains something it should not, or it means,
    *  that the developer doesn't write the handler object

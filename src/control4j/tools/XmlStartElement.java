@@ -44,7 +44,7 @@ public @interface XmlStartElement
    *  parent may be arbitrary, the more specific method
    *  is chosen to handle the event.
    */
-  String parent() default "";
+  String parent() default "*";
 
   /**
    *  Local name of the XML element for which this method
@@ -53,8 +53,15 @@ public @interface XmlStartElement
    */
   String localName();
 
-  String namespace() default "";
+  /**
+   *  Required namespace of the element. The possible values
+   *  are: a full namespace, '*' which means the namespace
+   *  may be arbitrary, '^' that namespace must be the same
+   *  as the namespace of the parent, and '' which means empty
+   *  namespace.
+   */
+  String namespace() default "^";
 
-  String parentNamespace() default "";
+  String parentNamespace() default "*";
 
 }
