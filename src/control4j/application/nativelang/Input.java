@@ -29,17 +29,19 @@ import control4j.tools.XmlEndElement;
 
 /**
  *
- *  Represents define element
+ *  Represents an input element
  *
  */
-public class Define extends DeclarationBase implements IXmlHandler
+public class Input extends DeclarationBase implements IXmlHandler
 {
 
-  private String name;
+  private String index;
 
-  private String value;
+  private String href;
 
   private int scope;
+
+  private ArrayList<Property> properties = new ArrayList<Property>();
 
   /**
    *  Returns a string which contains fields of this object in
@@ -49,13 +51,13 @@ public class Define extends DeclarationBase implements IXmlHandler
   public String toString()
   {
     return java.text.MessageFormat.format(
-	"Define; name: {0}, value: {1}, scope: {2}", 
-	name, value, Parser.formatScope(scope));
+	"Input; index: {0}, href: {1}, scope: {2}", 
+	index, href, Parser.formatScope(scope));
   }
 
   /*
    *
-   *   Access Methods 
+   *    Getters
    *
    */
 
@@ -71,7 +73,7 @@ public class Define extends DeclarationBase implements IXmlHandler
    *  An empty constructor for objects that will be loaded
    *  from a XML document.
    */
-  Define()
+  Input()
   {
   }
 
@@ -88,19 +90,19 @@ public class Define extends DeclarationBase implements IXmlHandler
   /**
    *  Initialize fields according to the elements attributes.
    */
-  @XmlStartElement(localName="define", parent="", 
+  @XmlStartElement(localName="input", parent="", 
       namespace="http://control4j.lidinsky.cz/application")
-  private void startDefine(Attributes attributes)
+  private void startInput(Attributes attributes)
   {
-    name = Parser.parseToken(attributes.getValue("name"));
-    if (name == null) {} // TODO
+    index = Parser.parseToken(attributes.getValue("index"));
+    if (index == null) {} // TODO
 
-    value = attributes.getValue("value");
-    if (value == null) {} // TODO
+    href = Parser.parseToken(attributes.getValue("href"));
+    if (href == null) {} // TODO
 
     try
     {
-      scope = Parser.parseScope2(attributes.getValue("scope"));
+      scope = Parser.parseScope3(attributes.getValue("scope"));
     }
     catch (ParseException e)
     {
@@ -111,9 +113,17 @@ public class Define extends DeclarationBase implements IXmlHandler
   /**
    *  Does nothing.
    */
-  @XmlEndElement(localName="define", parent="", 
+  @XmlEndElement(localName="input", parent="", 
       namespace="http://control4j.lidinsky.cz/application")
-  private void endDefine()
+  private void endProperty()
   { }
+
+  @XmlStartElement(localName="property", parent="input")
+  private void startInputProperty(Attributes attributes)
+  {
+    Property property = new Property();
+    properties.add(property);
+    reader.addHandler(property);
+  }
 
 }

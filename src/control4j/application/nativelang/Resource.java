@@ -29,17 +29,28 @@ import control4j.tools.XmlEndElement;
 
 /**
  *
- *  Represents define element
+ *  Represents a resource element inside the module.
+ *  This object has two variants.
+ *  <ol>
+ *    <li>Resource fully described inside the module.
+ *    <li>Resource which refers to some resource definition.
+ *  </ol>
  *
  */
-public class Define extends DeclarationBase implements IXmlHandler
+public class Resource extends DeclarationBase implements IXmlHandler
 {
 
-  private String name;
+  private String key;
 
-  private String value;
+  private String className;
+
+  private String href;
 
   private int scope;
+
+  private boolean isReference;
+
+  private ArrayList<Property> properties;
 
   /**
    *  Returns a string which contains fields of this object in
@@ -48,14 +59,18 @@ public class Define extends DeclarationBase implements IXmlHandler
   @Override
   public String toString()
   {
-    return java.text.MessageFormat.format(
-	"Define; name: {0}, value: {1}, scope: {2}", 
-	name, value, Parser.formatScope(scope));
+    if (isReference)
+      return java.text.MessageFormat.format(
+	  "Resource; key: {0}, href: {1}, scope: {2}",
+	  key, href, Parser.formatScope(scope));
+    else
+      return java.text.MessageFormat.format(
+	  "Resource; key: {0}, class: {1}", key, className);
   }
 
   /*
    *
-   *   Access Methods 
+   *    Getters
    *
    */
 
@@ -71,7 +86,7 @@ public class Define extends DeclarationBase implements IXmlHandler
    *  An empty constructor for objects that will be loaded
    *  from a XML document.
    */
-  Define()
+  Resource()
   {
   }
 
@@ -88,32 +103,63 @@ public class Define extends DeclarationBase implements IXmlHandler
   /**
    *  Initialize fields according to the elements attributes.
    */
-  @XmlStartElement(localName="define", parent="", 
+  @XmlStartElement(localName="resource", parent="", 
       namespace="http://control4j.lidinsky.cz/application")
-  private void startDefine(Attributes attributes)
+  private void startProperty(Attributes attributes)
   {
-    name = Parser.parseToken(attributes.getValue("name"));
-    if (name == null) {} // TODO
+    key = Parser.parseToken(attributes.getValue("key"));
+    if (key == null) {} // TODO
 
-    value = attributes.getValue("value");
-    if (value == null) {} // TODO
+    href = Parser.parseToken(attributes.getValue("href"));
+    className = Parser.parseToken(attributes.getValue("class"));
 
     try
     {
-      scope = Parser.parseScope2(attributes.getValue("scope"));
+      scope = Parser.parseScope3(attributes.getValue("scope"));
     }
     catch (ParseException e)
     {
       // TODO
     }
+
+    if (className != null && href == null)
+    {
+      isReference = false;
+      properties = new ArrayList<Property>();
+    }
+    else if (className == null && href != null)
+    {
+      isReference = true;
+    }
+    else if (className == null && href == null)
+    {
+      // TODO
+    }
+    else
+    {
+      // TODO
+    }
   }
+
 
   /**
    *  Does nothing.
    */
-  @XmlEndElement(localName="define", parent="", 
+  @XmlEndElement(localName="resource", parent="", 
       namespace="http://control4j.lidinsky.cz/application")
-  private void endDefine()
+  private void endResource()
   { }
+
+  @XmlStartElement(localName="property", parent="resource")
+  private void startResourceProperty(Attributes attributes)
+  {
+    if (isReference) {} // TODO
+    else
+    {
+      Property property = new Property();
+      properties.add(property);
+      reader.addHandler(property);
+    }
+  }
 
 }

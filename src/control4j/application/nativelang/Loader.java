@@ -37,10 +37,6 @@ import control4j.tools.XmlEndElement;
 public class Loader implements ILoader, IXmlHandler
 {
 
-  private Application application;
-
-  private XmlReader reader;
-
   public Loader()
   {
   }
@@ -56,6 +52,8 @@ public class Loader implements ILoader, IXmlHandler
    *
    */
 
+  private XmlReader reader;
+
   public void startProcessing(XmlReader reader)
   {
     this.reader = reader;
@@ -63,72 +61,17 @@ public class Loader implements ILoader, IXmlHandler
 
   public void endProcessing()
   {
+    this.reader = null;
   }
-
-  /*
-   *
-   *  Root elements
-   *
-   */
 
   @XmlStartElement(localName="application", 
       namespace="http://control4j.lidinsky.cz/application", 
       parent="", parentNamespace="*")
   private void startApplication(Attributes attributes)
   {
-    application = new Application();
-    workingApplication = application;
-  }
-
-  /*
-   *
-   *  Application descendants
-   *
-   */
-
-  protected Application workingApplication;
-
-  @XmlStartElement(localName="property", parent="application")
-  private void startApplicationProperty(Attributes attributes)
-  {
-    // create new property object
-    String key = attributes.getValue("key");
-    String value = attributes.getValue("value");
-    Property property = new Property(value);
-    // set declaration reference informations
-    DeclarationReference reference = new DeclarationReference(
-	MessageFormat.format("Application Property; key: {0}; value: {1}",
-	key, value));
-    appendLocation(reference);
-    property.setDeclarationReference(reference);
-    // stores it
-    workingApplication.addProperty(key, property);
-    System.out.println(property.getDeclarationReferenceText());
-  }
-
-  @XmlStartElement(localName="define", parent="application")
-  private void startApplicationDefine(Attributes attributes)
-  {
-    // create new define object
-    String name = attributes.getValue("name");
-    String value = attributes.getValue("value");
-    String scope = attributes.getValue("scope");
-    Define define = new Define(name, value, scope);
-    // set declaration reference informations
-    // stores it
-    workingApplication.addDefine(define);
-    System.out.println(define.getDeclarationReferenceText());
-  }
-
-  /*
-   *
-   *  Auxiliary methods.
-   *
-   */
-
-  protected void appendLocation(DeclarationReference reference)
-  {
-    //reference.addLineColumn(line, column);
+    Application application = new Application();
+    System.out.println(reader);
+    reader.addHandler(application);
   }
 
 }
