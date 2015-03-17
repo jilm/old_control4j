@@ -18,6 +18,8 @@ package control4j.application.nativelang;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import control4j.tools.ParseException;
+
 class Parser
 {
 
@@ -34,13 +36,26 @@ class Parser
   }
 
   public static int parseScope2(String scope)
+  throws ParseException
   {
     if (scope == null) return LOCAL_SCOPE_CODE;
     String trimed = scope.trim();
     if (trimed.length() == 0) return LOCAL_SCOPE_CODE;
     if (GLOBAL_SCOPE_STRING.equals(trimed)) return GLOBAL_SCOPE_CODE;
     if (LOCAL_SCOPE_STRING.equals(trimed)) return LOCAL_SCOPE_CODE;
-    throw new IllegalArgumentException();
+    throw new ParseException(); // TODO
+  }
+
+  public static int parseScope3(String scope)
+  throws ParseException
+  {
+    if (scope == null) return LOCAL_SCOPE_CODE;
+    String trimed = scope.trim();
+    if (trimed.length() == 0) return LOCAL_SCOPE_CODE;
+    if (GLOBAL_SCOPE_STRING.equals(trimed)) return GLOBAL_SCOPE_CODE;
+    if (LOCAL_SCOPE_STRING.equals(trimed)) return LOCAL_SCOPE_CODE;
+    if (PARENT_SCOPE_STRING.equals(trimed)) return PARENT_SCOPE_CODE;
+    throw new ParseException(); // TODO
   }
 						  
   public static String formatScope(int scope)
@@ -53,6 +68,20 @@ class Parser
       default:
         throw new IllegalArgumentException();
     }
+  }
+
+  /**
+   *  Returns a trimmed argument or null if the argument is null or
+   *  an empty string.
+   */
+  public static String parseToken(String token)
+  {
+    if (token == null) return null;
+    String result = token.trim();
+    if (result.length() == 0)
+      return null;
+    else
+      return result;
   }
 
 }
