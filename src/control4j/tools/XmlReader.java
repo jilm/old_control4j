@@ -258,11 +258,9 @@ public class XmlReader extends DefaultHandler
         method.setAccessible(false);
 
         // if the event has not been handled, try again
-	if (!repeat)
-	{
-	  handlerStack.handler.startProcessing(this);
-	  break;
-	}
+	if (!repeat) break;
+
+	handlerStack.handler.startProcessing(this);
       }
     }
     // there is no appropriate handler method
