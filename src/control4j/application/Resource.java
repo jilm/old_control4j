@@ -18,25 +18,28 @@ package control4j.application;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-public class Output extends Configurable
+/**
+ *
+ *  Contains declaration of a resource.
+ *
+ */
+public class Resource extends Configurable
 {
-  private String href;
-  private Scope scope;
 
-  public Output(Scope scope, String href)
+  private String className;
+
+  public Resource(String className)
   {
-    this.scope = scope;
-    this.href = href;
+    this.className = className;
   }
 
-  public String getHref()
+  /**
+   *  Returns a name of class that implements functionality
+   *  of the resource.
+   */
+  public String getClassName()
   {
-    return href;
-  }
-
-  public Scope getScope()
-  {
-    return scope;
+    return className;
   }
 
 }

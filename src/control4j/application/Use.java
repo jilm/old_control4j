@@ -1,7 +1,7 @@
 package control4j.application;
 
 /*
- *  Copyright 2013, 2014, 2015 Jiri Lidinsky
+ *  Copyright 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -18,15 +18,24 @@ package control4j.application;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-public class Output extends Configurable
+import java.util.HashMap;
+
+/**
+ *
+ *  References and places a block into the processing.
+ *
+ */
+public class Use extends Configurable
 {
+
   private String href;
   private Scope scope;
 
-  public Output(Scope scope, String href)
+  public Use(String href, Scope scope)
   {
-    this.scope = scope;
+    super();
     this.href = href;
+    this.scope = scope;
   }
 
   public String getHref()
@@ -37,6 +46,24 @@ public class Output extends Configurable
   public Scope getScope()
   {
     return scope;
+  }
+
+  private HashMap<String, Input> inputMap;
+
+  public void putInput(String index, Input input)
+  {
+    if (inputMap == null)
+      inputMap = new HashMap<String, Input>();
+    inputMap.put(index, input);
+  }
+
+  private HashMap<String, Input> outputMap;
+
+  public void putOutput(String index, Output output)
+  {
+    if (outputMap == null)
+      outputMap = new HashMap<String, Output>();
+    outputMap.put(index, output);
   }
 
 }

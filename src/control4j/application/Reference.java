@@ -20,26 +20,32 @@ package control4j.application;
 
 /**
  *
- *  An interface which must be implemented by an application crate,
- *  an object that is returned by the application loader, and which
- *  must support a translation into the native application language.
- *
+ *  Represents a reference to some declaration. It consists of a pair:
+ *  href and scope.
  */
-public interface ITranslatable
+class Reference
 {
 
-  /**
-   *  Translates an application into the native application language
-   *  and the result is stored in the given argument.
-   *
-   *  @param application
-   *             an object where the result of tranlastion will be
-   *             placed
-   *
-   *  @throws ...
-   *             if it was impossible to perform the translation because
-   *             of some error in this object data
-   */
-  void translate(control4j.application.Application application);
+  private String href;
+
+  private Scope scope;
+
+  public Reference(String href, Scope scope)
+  {
+    if (href == null || scope == null)
+      throw IllegalArgumentException();
+    this.href = href;
+    this.scope = scope;
+  }
+
+  public String getHref()
+  {
+    return href;
+  }
+
+  public Scope getScope()
+  {
+    return scope;
+  }
 
 }

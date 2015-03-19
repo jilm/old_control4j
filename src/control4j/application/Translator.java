@@ -1,7 +1,7 @@
 package control4j.application;
 
 /*
- *  Copyright 2013, 2014 Jiri Lidinsky
+ *  Copyright 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -18,15 +18,17 @@ package control4j.application;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-public class SuchElementAlreadyExistsException extends RuntimeException
+public class Translator
 {
-  public SuchElementAlreadyExistsException()
+
+  public Translator()
+  { }
+
+  public Application translate(ITranslatable raw)
   {
-    super();
+    Application application = new Application();
+    raw.translate(application);
+    return application;
   }
 
-  public SuchElementAlreadyExistsException(String message)
-  {
-    super(message);
-  }
 }

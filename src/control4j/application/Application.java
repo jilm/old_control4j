@@ -18,6 +18,7 @@ package control4j.application;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Collection;
 import java.util.ArrayList;
@@ -30,98 +31,121 @@ import control4j.gui.Screens;
  *  A crate object for the application. This crate object contains only
  *  declarations of the modules and resources.
  */
-public class Application
+public class Application extends Configurable
 {
-  private LinkedList<ModuleDeclaration> modules;
-  private LinkedList<ResourceDeclaration> resources;
-  private Screens screens;
-  private SignalManager signals;
 
-  /**
-   *  Create and initialize new instance.
-   */
-  public Application()
+  /** Holds actual scope during the translation. */
+  private Scope scopePointer = Scope.getGlobal();
+
+  public Scope getScopePointer()
   {
-    modules = new LinkedList<ModuleDeclaration>();
-    resources = new LinkedList<ResourceDeclaration>();
-    signals = SignalManager.getInstance();
+    return scopePointer;
   }
 
-  /**
-   *  Returns the collection of all module declarations.
-   *
-   *  @return the collection of all module declarations
-   */
-  public Collection<ModuleDeclaration> getModules()
+  public void startScope()
   {
-    return modules;
+    scopePointer = new Scope(scopePointer);
   }
 
-  /**
-   *  Returns the collection of all resource declarations.
-   *
-   *  @return the collection of all resource declarations
-   */
-  public Collection<ResourceDeclaration> getResources()
+  public void endScope()
   {
-    return resources;
+    scopePointer = scopePointer.getParent();
   }
 
-  /**
-   *  Adds a module declaration given as the parameter.
+  /*
    *
-   *  @param module
-   *             a module declaration to be added to the application
+   *     Definitions
+   *
    */
-  public void addModule(ModuleDeclaration module)
+
+  /** Define objects. */
+  private ScopeMap<String> definitions;
+
+  /**
+   *  Adds a definition.
+   */
+  public void putDefinition(String name, Scope scope, String value)
   {
+    if (definitions == null) definitions = new ScopeMap<String>();
+    String result = definitions.put(name, scope, value);
+    if (result != null)
+    {
+      // TODO two or more definitions with the same name and scope
+    }
+  }
+
+  public String getDefinition(String name, Scope scope)
+  {
+    if (definitions == null) {} // TODO there is no such def.
+    return definitions.get(name, scope);
+  }
+
+  /*
+   *
+   *     Resource Definitions
+   *
+   */
+
+  /** Resource definitions. */
+  private ScopeMap<Resource> resources;
+
+  public void putResource(String name, Scope scope, Resource resource)
+  {
+    if (resources == null)
+      resources = new ScopeMap<Resource>();
+    resources.put(name, scope, resource);
+  }
+
+  private ScopeMap<Block> blocks;
+
+  public void putBlock(String name, Scope scope, Block block)
+  {
+    if (blocks == null)
+      blocks = new ScopeMap<Block>();
+    blocks.put(name, scope, block);
+  }
+
+  private ScopeMap<Signal> signals;
+
+  public void putSignal(String name, Scope scope, Signal signal)
+  {
+    if (signals == null)
+      signals = new ScopeMap<ignal>();
+    signals.put(name, scope, signal);
+  }
+
+  private ArrayList<Module> modules;
+
+  public void addModule(Module module)
+  {
+    if (modules == null) modules = new ArrayList<Module>();
     modules.add(module);
   }
 
-  /**
-   *  Adds a resource declaration given as the parameter.
+  private ArrayList<Use> uses;
+
+  public void addUse(Use use)
+  {
+    if (uses == null) uses = new ArrayList<Use>();
+    uses.add(use);
+  }
+
+  /*
    *
-   *  @param resource
-   *             a resource declaration to be added to the application
+   *
+   *
    */
-  public void addResource(ResourceDeclaration resource)
-  {
-    resources.add(resource);
-  }
 
-  public void addSignal(SignalDeclaration signal)
+  protected Scope resolveScope(int scopeCode, Scope localScope)
   {
-    try
-    {
-      signals.add(signal);
-    }
-    catch (SuchElementAlreadyExistsException e)
-    {
-      SignalDeclaration signal2 = signals.get(signal.getScope(), signal.getName());
-      String reference2 = signal2.getDeclarationReferenceText();
-      String reference1 = signal.getDeclarationReferenceText();
-      ErrorManager.getInstance().reportDuplicateSignalDeclaration(reference1, reference2); 
-    }
-  }
-
-  public SignalManager getSignals()
-  {
-    return signals;
-  }
-
-  public void setScreens(Screens screens)
-  {
-    this.screens = screens;
-  }
-
-  public Screens getScreens()
-  {
-    return screens;
-  }
-
-  public boolean hasGui()
-  {
-    return screens != null;
+    if (scopeCode == 0)
+      return Scope.getGlobal();
+    else if (scopeCode == 1)
+      return localScope;
+    else if (scopeCode == 2)
+      return localScope.getParent();
+    else
+      throw new IllegalArgumentException();
   }
 
 }
