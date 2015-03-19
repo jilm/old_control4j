@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import org.xml.sax.Attributes;
 
 import control4j.application.ITranslatable;
+import control4j.application.Scope;
 import control4j.tools.IXmlHandler;
 import control4j.tools.XmlReader;
 import control4j.tools.XmlStartElement;
@@ -37,9 +38,6 @@ import control4j.tools.XmlEndElement;
 public class Application extends DescriptionBase 
 implements ITranslatable, IXmlHandler
 {
-
-  /** properties */
-  private ArrayList<Property> properties;
 
   /** definitions */
   private ArrayList<Define> definitions;
@@ -69,8 +67,45 @@ implements ITranslatable, IXmlHandler
   {
   }
 
-  public void translate(Application application)
+  public void translate(control4j.application.Application application)
   {
+    Scope localScope = application.getScopePointer();
+
+    // copy all of the definitions
+    if (definitions != null)
+      for (Define definition : definitions)
+      {
+        Scope scope = 
+            definition.getScope() == 0 ? Scope.getGlobal() : localScope;
+        application.addDefinition(
+            definition.getName(), scope, definition.getValue());
+      }
+
+    // copy all of the properties
+    super.translate(application, localScope);
+
+    // copy all of the resource definitions
+    if (resources != null)
+      for (ResourceDeclaration resource : resources)
+      {
+	control4j.application.Resource destination =
+	    new control4j.application.Resource(resource.getClassName());
+	resource.translate(destination);
+	application.addResource(
+	    resource.getName(), resource.getScope(), destination);
+      }
+  }
+
+  protected Scope resolveScope(int scopeCode, Scope localScope)
+  {
+    if (scopeCode == 0)
+      return Scope.getGlobal();
+    else if (scopeCode == 1)
+      return localScope;
+    else if (scopeCode == 2)
+      return localScope.getParent();
+    else
+      throw new IllegalArgumentException();
   }
 
   /*
@@ -78,13 +113,6 @@ implements ITranslatable, IXmlHandler
    *    Access Methods
    *
    */
-
-  public void add(Property property)
-  {
-    if (property == null) throw new IllegalArgumentException();
-    if (properties == null) properties = new ArrayList<Property>();
-    properties.add(property);
-  }
 
   public void add(Define define)
   {
@@ -170,7 +198,7 @@ implements ITranslatable, IXmlHandler
   private void startApplicationProperty(Attributes attributes)
   {
     Property property = new Property();
-    add(property);
+    addProperty(property);
     reader.addHandler(property);
   }
 

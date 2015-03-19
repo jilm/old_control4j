@@ -32,12 +32,10 @@ import control4j.tools.XmlEndElement;
  *  Stands for a module element.
  *
  */
-public class Module implements IXmlHandler
+public class Module extends DescriptionBase implements IXmlHandler
 {
 
   private String className;
-
-  private ArrayList<Property> properties = new ArrayList<Property>();
 
   private ArrayList<Resource> resources = new ArrayList<Resource>();
 
@@ -110,7 +108,7 @@ public class Module implements IXmlHandler
   private void startModuleProperty(Attributes attributes)
   {
     Property property = new Property();
-    properties.add(property);
+    addProperty(property);
     reader.addHandler(property);
   }
 

@@ -37,7 +37,7 @@ import control4j.tools.XmlEndElement;
  *  </ol>
  *
  */
-public class Resource extends DeclarationBase implements IXmlHandler
+public class Resource extends Configurable implements IXmlHandler
 {
 
   private String key;
@@ -49,8 +49,6 @@ public class Resource extends DeclarationBase implements IXmlHandler
   private int scope;
 
   private boolean isReference;
-
-  private ArrayList<Property> properties;
 
   /**
    *  Returns a string which contains fields of this object in
@@ -157,7 +155,7 @@ public class Resource extends DeclarationBase implements IXmlHandler
     else
     {
       Property property = new Property();
-      properties.add(property);
+      addProperty(property);
       reader.addHandler(property);
     }
   }

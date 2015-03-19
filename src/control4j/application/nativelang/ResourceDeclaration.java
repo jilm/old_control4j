@@ -29,21 +29,63 @@ import control4j.tools.XmlEndElement;
 
 /**
  *
- *  Stands for a resource element.
+ *  Resource definition.
  *
  */
-public class ResourceDeclaration implements IXmlHandler
+public class ResourceDeclaration extends DescriptionBase
+implements IXmlHandler
 {
 
-  private String name;
+  /** Name of the java class that implements functionality of
+      the resource */
   private String className;
+
+  /** Identification of this resource definition to be referenced. */
+  private String name;
   private int scope;
 
-  /** Property of the resource. */
-  private ArrayList<Property> properties = new ArrayList<Property>();
-
-  public ResourceDeclaration(String name, String className, int scope)
+  /**
+   *  Initialize fields of this object.
+   */
+  public ResourceDeclaration(String className, String name, int scope)
   {
+    this.className = className;
+    this.name = name;
+    this.scope = scope;
+  }
+
+  /**
+   *  Transfer all of the settings into the given object.
+   */
+  public void translate(
+      control4j.application.Resource resource, Scope localScope)
+  {
+    super.translate(resource, localScope);
+  }
+
+  /*
+   *
+   *    Access Methods
+   *
+   */
+
+  /**
+   *  Returns the name of the java class that implements functionality
+   *  of the resource.
+   */
+  public String getClassName()
+  {
+    return className;
+  }
+
+  public String getName()
+  {
+    return name;
+  }
+
+  public Scope getScope()
+  {
+    return scope;
   }
 
   /*
@@ -59,8 +101,7 @@ public class ResourceDeclaration implements IXmlHandler
    *  of the signal will be loaded from XML document.
    */
   ResourceDeclaration()
-  {
-  }
+  { }
 
   public void startProcessing(XmlReader reader)
   {
@@ -96,14 +137,13 @@ public class ResourceDeclaration implements IXmlHandler
   private void startResourceProperty(Attributes attributes)
   {
     Property property = new Property();
-    properties.add(property);
+    addProperty(property);
     reader.addHandler(property);
   }
 
   @XmlEndElement(localName="resource", parent="",
       namespace="http://control4j.lidinsky.cz/application")
   private void endResource()
-  {
-  }
+  { }
 
 }

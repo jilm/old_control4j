@@ -91,9 +91,14 @@ public class Property extends DeclarationBase implements IXmlHandler
 
   /*
    *
-   *    Getters
+   *    Access Methods
    *
    */
+
+  public String getKey()
+  {
+    return key;
+  }
 
   /**
    *  Returns the value of the property.
@@ -101,6 +106,21 @@ public class Property extends DeclarationBase implements IXmlHandler
   public String getValue()
   {
     return value;
+  }
+
+  public String getHref()
+  {
+    return href;
+  }
+
+  public int getScope()
+  {
+    return scope;
+  }
+
+  public boolean isReference()
+  {
+    return isReference();
   }
 
   /*

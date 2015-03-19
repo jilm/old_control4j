@@ -39,11 +39,13 @@ public class Signal extends DescriptionBase implements IXmlHandler
 
   private int scope;
 
-  private ArrayList<Property> properties = new ArrayList<Property>();
+  public void Translate(control4j.application.Signal signal)
+  {
+  }
 
   /*
    *
-   *    Value t-1 specification
+   *    Value for time t-1 specification
    *
    */
 
@@ -51,24 +53,13 @@ public class Signal extends DescriptionBase implements IXmlHandler
   private boolean isValueT_1Valid = false;
   private String valueT_1;
 
-  private ArrayList<Tag> tags = new ArrayList<Tag>();
-
-  /**
-   *  Creates an empty signal object.
+  /*
    *
-   *  @param name
-   *             a name of the signal
+   *     Tags
    *
-   *  @param scope
    */
-  public Signal(String name, int scope)
-  {
-    set(name, scope);
-  }
 
-  protected void set(String name, int scope)
-  {
-  }
+  private ArrayList<Tag> tags = new ArrayList<Tag>();
 
   /*
    *
@@ -83,8 +74,7 @@ public class Signal extends DescriptionBase implements IXmlHandler
    *  of the signal will be loaded from XML document.
    */
   Signal()
-  {
-  }
+  { }
 
   public void startProcessing(XmlReader reader)
   {
@@ -122,7 +112,7 @@ public class Signal extends DescriptionBase implements IXmlHandler
   private void startSignalProperty(Attributes attributes)
   {
     Property property = new Property();
-    properties.add(property);
+    addProperty(property);
     reader.addHandler(property);
   }
 

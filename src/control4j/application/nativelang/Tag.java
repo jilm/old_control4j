@@ -31,12 +31,10 @@ import control4j.tools.XmlEndElement;
  *  Represents a tag of the signal.
  *
  */
-public class Tag extends DeclarationBase implements IXmlHandler
+public class Tag extends Configurable implements IXmlHandler
 {
 
   private String name;
-
-  private ArrayList<Property> properties = new ArrayList<Property>();
 
   /**
    *  Returns a string which contains fields of this object in
@@ -111,7 +109,7 @@ public class Tag extends DeclarationBase implements IXmlHandler
   private void startTagProperty(Attributes attributes)
   {
     Property property = new Property();
-    properties.add(property);
+    addProperty(property);
     reader.addHandler(property);
   }
 

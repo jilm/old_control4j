@@ -18,12 +18,55 @@ package control4j.application.nativelang;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import java.util.ArrayList;
+
 /**
  *
  *  Provides common interface for objects which contain
  *  configuration.
  *
  */
-public class Configurable extends DeclarationBase
+abstract class Configurable extends DeclarationBase
 {
+
+  private ArrayList<Property> properties;
+
+  public void addProperty(Property property)
+  {
+    if (properties == null)
+      properties = new ArrayList<Property>();
+    properties.add(property);
+  }
+
+  public void translate(
+      control4j.application.Configurable destination, Scope localScope)
+  {
+    if (properties != null)
+      for (Property property : properties)
+	if (property.isReference())
+        {
+	  destination.putProperty(property.getKey(), property.getHref(), 
+	      resolveScope(property.getScope(), localScope()));
+        }
+	else
+	{
+	  destination.putProperty(property.getKey(), property.getValue());
+	}
+  }
+
+  protected static Scope resolveScope(int code, Scope localScope)
+  {
+    switch (code)
+    {
+      case 0:
+	return Scope.getGlobal();
+      case 1:
+	return localScope;
+      case 2:
+        return localScope.getParent();
+      default:
+	throw new IllegalArgumentException();
+    }
+  }
+
 }

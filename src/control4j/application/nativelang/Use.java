@@ -32,14 +32,12 @@ import control4j.tools.XmlEndElement;
  *  Represents a use element.
  *
  */
-public class Use extends DeclarationBase implements IXmlHandler
+public class Use extends Configurable implements IXmlHandler
 {
 
   private String href;
 
   private int scope;
-
-  private ArrayList<Property> properties = new ArrayList<Property>();
 
   private ArrayList<Input> input = new ArrayList<Input>();
 
@@ -119,7 +117,7 @@ public class Use extends DeclarationBase implements IXmlHandler
   private void startUseProperty(Attributes attributes)
   {
     Property property = new Property();
-    properties.add(property);
+    addProperty(property);
     reader.addHandler(property);
   }
 

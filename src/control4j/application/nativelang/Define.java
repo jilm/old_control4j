@@ -59,6 +59,21 @@ public class Define extends DeclarationBase implements IXmlHandler
    *
    */
 
+  public String getName()
+  {
+    return name;
+  }
+
+  public int getScope()
+  {
+    return scope;
+  }
+
+  public String getValue()
+  {
+    return value;
+  }
+
   /*
    *
    *    SAX handler implementation.

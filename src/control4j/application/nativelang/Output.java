@@ -32,7 +32,7 @@ import control4j.tools.XmlEndElement;
  *  Represents an output element
  *
  */
-public class Output extends DeclarationBase implements IXmlHandler
+public class Output extends Configurable implements IXmlHandler
 {
 
   private String index;
@@ -40,8 +40,6 @@ public class Output extends DeclarationBase implements IXmlHandler
   private String href;
 
   private int scope;
-
-  private ArrayList<Property> properties = new ArrayList<Property>();
 
   /**
    *  Returns a string which contains fields of this object in
@@ -122,7 +120,7 @@ public class Output extends DeclarationBase implements IXmlHandler
   private void startOutputProperty(Attributes attributes)
   {
     Property property = new Property();
-    properties.add(property);
+    addProperty(property);
     reader.addHandler(property);
   }
 
