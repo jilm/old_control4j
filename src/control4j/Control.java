@@ -120,7 +120,6 @@ public class Control
 
   /**
    *
-   */
   private Application loadApplication(Project project, File parentPath)
   {
     int fatalErrors = 0;
@@ -162,6 +161,7 @@ public class Control
     if (fatalErrors > 0) exit(1);
     return application;
   }
+   */
 
   /**
    *
@@ -173,25 +173,25 @@ public class Control
     // make a file from the filename
     File projectFile = new File(filename);
     // load the project
-    Project project = loadProject(projectFile);
-    DeclarationReference projectReference = new DeclarationReference();
-    projectReference.setProject(projectFile.getAbsolutePath());
+    //Project project = loadProject(projectFile);
+    //DeclarationReference projectReference = new DeclarationReference();
+    //projectReference.setProject(projectFile.getAbsolutePath());
     // configure control loop
-    ConfigurationHelper.assignConfiguration(controlLoop, project.getConfiguration(), projectReference);
+    //ConfigurationHelper.assignConfiguration(controlLoop, project.getConfiguration(), projectReference);
     // load application
-    Application application 
-      = loadApplication(project, projectFile.getParentFile());
+    //Application application 
+     // = loadApplication(project, projectFile.getParentFile());
     // build the application
-    ApplicationBuilder builder = new ApplicationBuilder();
-    builder.build(application);
-    ErrorManager.getInstance().report();
+    //ApplicationBuilder builder = new ApplicationBuilder();
+    //builder.build(application);
+    //ErrorManager.getInstance().report();
     // check the application
-    ApplicationCheck check = new ApplicationCheck();
-    check.check();
-    check = null;
-    ErrorManager.getInstance().report();
+    //ApplicationCheck check = new ApplicationCheck();
+    //check.check();
+    //check = null;
+    //ErrorManager.getInstance().report();
     // run the control loop
-    controlLoop.run();
+    //controlLoop.run();
   }
 
   /**

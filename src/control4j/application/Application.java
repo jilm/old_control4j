@@ -110,7 +110,7 @@ public class Application extends Configurable
   public void putSignal(String name, Scope scope, Signal signal)
   {
     if (signals == null)
-      signals = new ScopeMap<ignal>();
+      signals = new ScopeMap<Signal>();
     signals.put(name, scope, signal);
   }
 

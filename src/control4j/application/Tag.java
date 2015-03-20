@@ -18,34 +18,12 @@ package control4j.application;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- *
- *  Represents a reference to some declaration. It consists of a pair:
- *  href and scope.
- */
-class Reference
+public class Tag extends Configurable
 {
 
-  private String href;
-
-  private Scope scope;
-
-  public Reference(String href, Scope scope)
-  {
-    if (href == null || scope == null)
-      throw new IllegalArgumentException();
-    this.href = href;
-    this.scope = scope;
-  }
-
-  public String getHref()
-  {
-    return href;
-  }
-
-  public Scope getScope()
-  {
-    return scope;
+  public Tag()
+  { 
+    super();
   }
 
 }

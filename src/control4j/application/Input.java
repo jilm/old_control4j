@@ -57,7 +57,7 @@ public class Input extends Configurable
 
   public String getHref()
   {
-    return signal;
+    return href;
   }
 
   public Scope getScope()

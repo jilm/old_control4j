@@ -123,7 +123,6 @@ public class Resource extends Configurable implements IXmlHandler
     if (className != null && href == null)
     {
       isReference = false;
-      properties = new ArrayList<Property>();
     }
     else if (className == null && href != null)
     {

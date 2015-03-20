@@ -20,6 +20,8 @@ package control4j.application.nativelang;
 
 import java.util.ArrayList;
 
+import control4j.application.Scope;
+
 /**
  *
  *  Provides common interface for objects which contain
@@ -46,7 +48,7 @@ abstract class Configurable extends DeclarationBase
 	if (property.isReference())
         {
 	  destination.putProperty(property.getKey(), property.getHref(), 
-	      resolveScope(property.getScope(), localScope()));
+	      resolveScope(property.getScope(), localScope));
         }
 	else
 	{

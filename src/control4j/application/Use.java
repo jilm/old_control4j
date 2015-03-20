@@ -57,7 +57,7 @@ public class Use extends Configurable
     inputMap.put(index, input);
   }
 
-  private HashMap<String, Input> outputMap;
+  private HashMap<String, Output> outputMap;
 
   public void putOutput(String index, Output output)
   {

@@ -18,6 +18,8 @@ package control4j.application;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import java.util.HashMap;
+
 import control4j.tools.DeclarationReference;
 
 /**
@@ -68,7 +70,7 @@ public class Signal extends Configurable
 
   public void putTag(String name, Tag tag)
   {
-    if (tags == null) tags = HashMap<String, Tag>();
+    if (tags == null) tags = new HashMap<String, Tag>();
     tags.put(name, tag);
   }
 

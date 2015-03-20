@@ -77,7 +77,7 @@ implements ITranslatable, IXmlHandler
       {
         Scope scope = 
             definition.getScope() == 0 ? Scope.getGlobal() : localScope;
-        application.addDefinition(
+        application.putDefinition(
             definition.getName(), scope, definition.getValue());
       }
 
@@ -90,22 +90,10 @@ implements ITranslatable, IXmlHandler
       {
 	control4j.application.Resource destination =
 	    new control4j.application.Resource(resource.getClassName());
-	resource.translate(destination);
+	resource.translate(destination, localScope);
 	application.addResource(
 	    resource.getName(), resource.getScope(), destination);
       }
-  }
-
-  protected Scope resolveScope(int scopeCode, Scope localScope)
-  {
-    if (scopeCode == 0)
-      return Scope.getGlobal();
-    else if (scopeCode == 1)
-      return localScope;
-    else if (scopeCode == 2)
-      return localScope.getParent();
-    else
-      throw new IllegalArgumentException();
   }
 
   /*

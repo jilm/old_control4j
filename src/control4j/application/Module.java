@@ -21,6 +21,7 @@ package control4j.application;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 
 import control4j.tools.DeclarationReference;
 
@@ -123,9 +124,6 @@ public class Module extends Configurable
       throw new IllegalArgumentException();
     else
       this.className = className;
-    inputs = new ArrayList<Input>();
-    outputs = new ArrayList<Output>();
-    configuration = new ConfigBuffer();
   }
 
   /** References to the resource definitions. */
@@ -151,7 +149,7 @@ public class Module extends Configurable
   {
     if (resources == null)
       resources = new HashMap<String, Resource>();
-    resource.put(key, resource);
+    resources.put(key, resource);
   }
 
   /** A set of input tags. */

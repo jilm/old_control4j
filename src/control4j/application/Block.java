@@ -18,6 +18,9 @@ package control4j.application;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import java.util.HashSet;
+import java.util.LinkedList;
+
 public class Block extends DeclarationBase
 {
 
@@ -51,17 +54,17 @@ public class Block extends DeclarationBase
 
   private ScopeMap<Signal> signals;
 
-  public void putSignal(String name, scope Scope, Signal signal)
+  public void putSignal(String name, Scope scope, Signal signal)
   {
     if (signals == null) signals = new ScopeMap<Signal>();
-    signals.put(String name, Scope scope, signal);
+    signals.put(name, scope, signal);
   }
 
   private LinkedList<Use> uses;
 
   public void addUse(Use use)
   {
-    if (Uses == null) uses = new LinkedList<Use>();
+    if (uses == null) uses = new LinkedList<Use>();
     uses.add(use);
   }
 
