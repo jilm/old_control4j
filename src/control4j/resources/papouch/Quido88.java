@@ -269,7 +269,7 @@ implements ICycleEventListener, IThermometer, IBinaryInput, IBinaryOutput
     if (temperatureSensorConnected)
     {
       temperatureStatus = 0;
-      if (temperatureResponse.isFinished())
+      if (temperatureResponse != null && temperatureResponse.isFinished())
       {
         try
         {
@@ -301,7 +301,7 @@ implements ICycleEventListener, IThermometer, IBinaryInput, IBinaryOutput
       // processing response for temperature unit
       if (temperatureUnit == null)
       {
-        if (temperatureUnitResponse.isFinished())
+        if (temperatureUnitResponse != null && temperatureUnitResponse.isFinished())
         {
           try
           {
@@ -348,7 +348,7 @@ implements ICycleEventListener, IThermometer, IBinaryInput, IBinaryOutput
     }
 
     // process binary input response
-    if (inputResponse.isFinished())
+    if (inputResponse != null && inputResponse.isFinished())
     {
       try
       {

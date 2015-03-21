@@ -135,7 +135,7 @@ implements ICycleEventListener, IThermometer
   public void processingStart()
   {
     // temperature measurement
-    if (temperatureResponse.isFinished())
+    if (temperatureResponse != null && temperatureResponse.isFinished())
     {
       try
       {

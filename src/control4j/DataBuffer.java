@@ -167,7 +167,10 @@ class DataBuffer implements Iterable<Signal>
     writer.println("DATA BUFFER CONTENT:");
     for (int i=0; i<buffer.length; i++)
     {
-      writer.println(" " + i + ": " + buffer[i].toString());
+      if (buffer[i] != null)
+        writer.println(" " + i + ": " + buffer[i].toString());
+      else
+        writer.println(" " + i + ": null");
     }
   }
   

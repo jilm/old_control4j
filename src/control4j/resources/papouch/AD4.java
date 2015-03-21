@@ -128,7 +128,7 @@ implements IAnalogInput, ICycleEventListener
 
   public void processingStart()
   {
-    if (response.isFinished())
+    if (response != null && response.isFinished())
     {
       try
       {
