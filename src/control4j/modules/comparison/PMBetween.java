@@ -1,7 +1,7 @@
 package control4j.modules.comparison;
 
 /*
- *  Copyright 2013 Jiri Lidinsky
+ *  Copyright 2013, 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -57,31 +57,29 @@ public class PMBetween extends ProcessModule
    *             array minus two
    */
   @Override
-  public Signal[] process(Signal[] input)
+  public void process(
+      Signal[] input, int inputLength, Signal[] output, int outputLength)
   {
-    int size = getNumberOfAssignedOutputs();
     if (input[0].isValid() && input[1].isValid())
     {
       double min = input[0].getValue();
       double max = input[1].getValue();
-      for (int i=0; i<size; i++)
-        if (input[i+2].isValid())
-	{
-	  double valueToBeCompared = input[i+2].getValue();
-	  boolean compResult = valueToBeCompared >= min
+      if (input[2].isValid())
+      {
+        double valueToBeCompared = input[2].getValue();
+	boolean compResult = valueToBeCompared >= min
 	    && valueToBeCompared <= max;
-	  input[i] = Signal.getSignal(compResult, input[i+2].getTimestamp());
-	}
-	else
-	{
-	  input[i] = Signal.getSignal(input[i+2].getTimestamp());
-	}
+	output[0] = Signal.getSignal(compResult, input[2].getTimestamp());
+      }
+      else
+      {
+        output[0] = Signal.getSignal(input[2].getTimestamp());
+      }
     }
     else
     {
-      for (int i=0; i<size; i++)
-        input[i] = Signal.getSignal(input[i+2].getTimestamp());
+      output[0] = Signal.getSignal(input[2].getTimestamp());
     }
-    return input;
   }
+
 }

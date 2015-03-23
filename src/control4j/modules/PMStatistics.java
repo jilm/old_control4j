@@ -1,7 +1,7 @@
 package control4j.modules;
 
 /*
- *  Copyright 2013 Jiri Lidinsky
+ *  Copyright 2013, 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -18,12 +18,16 @@ package control4j.modules;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import control4j.Signal;
+import control4j.AVariableInput;
 import control4j.ProcessModule;
+import control4j.Signal;
 
 /**
+ *
  *  Calculates average and variance from the input signals.
+ *
  */ 
+@AVariableInput(startIndex=0) 
 public class PMStatistics extends ProcessModule
 {
 
@@ -52,16 +56,18 @@ public class PMStatistics extends ProcessModule
    *  @return array of size three. The array contains count, average and 
    *          variance statistic calculated from the input data.   
    */        
-  public Signal[] process(Signal[] input)
+  @Override
+  public void process(
+      Signal[] input, int inputLength, Signal[] output, int outputLength)
   {
+
     double sum = 0.0;
     double c = 0.0;
     int count = 0;
     double mean = 0.0; 
     
     // mean calculation
-    int size = getNumberOfAssignedInputs();
-    for (int i=0; i<size; i++)
+    for (int i=0; i<inputLength; i++)
     {
       if (input[i].isValid())
       {
@@ -79,7 +85,7 @@ public class PMStatistics extends ProcessModule
     if (count > 1)
     {
       c = 0.0;
-      for (int i=0; i<size; i++)
+      for (int i=0; i<inputLength; i++)
       {
         if (input[i].isValid())
         {
@@ -92,18 +98,22 @@ public class PMStatistics extends ProcessModule
       }
     }
     
-    Signal[] result = new Signal[3];
-    result[0] = Signal.getSignal((double)count);
-    if (count > 0)
-      result[1] = Signal.getSignal(mean);
-    else
-      result[1] = Signal.getSignal();
-    if (count > 1)
-      result[2] = Signal.getSignal(var_sum / (double)(count-1));
-    else
-      result[2] = Signal.getSignal();
-    
-    return result;
+    if (outputLength >= 1)
+      output[0] = Signal.getSignal((double)count);
+    if (outputLength >= 2)
+    {
+      if (count > 0)
+        output[1] = Signal.getSignal(mean);
+      else
+        output[1] = Signal.getSignal();
+    }
+    if (outputLength >= 3)
+    {
+      if (count > 1)
+        output[2] = Signal.getSignal(var_sum / (double)(count-1));
+      else
+        output[2] = Signal.getSignal();
+    }
   }
 
 }

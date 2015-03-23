@@ -1,7 +1,7 @@
 package control4j.modules.auxiliary;
 
 /*
- *  Copyright 2013, 2014 Jiri Lidinsky
+ *  Copyright 2013, 2014, 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -36,9 +36,10 @@ public class OMInvalidSignal extends OutputModule
    *  @return an array of size one, there is invalid signal in it
    */
   @Override
-  protected Signal[] get()
+  protected void get(Signal[] output, int outputLength)
   {
-    return new Signal[] { Signal.getSignal() };
+    if (outputLength > 0)
+      output[0] = Signal.getSignal();
   }
 
 }

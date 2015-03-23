@@ -1,7 +1,7 @@
 package control4j.modules.timers;
 
 /*
- *  Copyright 2013 Jiri Lidinsky
+ *  Copyright 2013, 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -56,9 +56,9 @@ public class PMTimerOnDelay extends ProcessModule
    *  @return an array of size one. The only element is boolean signal.
    */
   @Override
-  protected Signal[] process(Signal[] input)
+  public void process(
+      Signal[] input, int inputLength, Signal[] output, int outputLength)
   {
-    Signal[] result = new Signal[1];
     boolean inputValue;
 
     if (input[0].isValid())
@@ -69,21 +69,20 @@ public class PMTimerOnDelay extends ProcessModule
     if (inputValue)
     {
       if (counter >= delay)
-        result[0] = Signal.getSignal(true);
+        output[0] = Signal.getSignal(true);
       else
       {
-        result[0] = Signal.getSignal(false);
+        output[0] = Signal.getSignal(false);
         counter++;
       }
     }
     else
     {
       counter = 0;
-      result[0] = Signal.getSignal(false);
+      output[0] = Signal.getSignal(false);
     }
 
     oldInputValue = inputValue;
-    return result;
   }
 
 }

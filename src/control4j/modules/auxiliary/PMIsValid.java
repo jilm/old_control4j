@@ -46,16 +46,13 @@ public class PMIsValid extends ProcessModule
    *  @return an array of the same size as the input array
    */
   @Override
-  public Signal[] process(Signal[] input)
+  public void process(
+      Signal[] input, int inputLength, Signal[] output, int outputLength)
   {
-    int length = getNumberOfAssignedInputs();
-    Signal[] result = new Signal[length];
-    for (int i=0; i<length; i++)
-      if (input[i].isValid())
-        result[i] = Signal.getSignal(true, input[i].getTimestamp());
-      else
-        result[i] = Signal.getSignal(false, input[i].getTimestamp());
-    return result;
+    if (input[0].isValid())
+      output[0] = Signal.getSignal(true, input[0].getTimestamp());
+    else
+      output[0] = Signal.getSignal(false, input[0].getTimestamp());
   }
 
 }

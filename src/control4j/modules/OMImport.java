@@ -47,6 +47,7 @@ public class OMImport extends OutputModule
    *  The module needs to know the names of the input signals
    *  to use them as ids inside the exprot message.
    */
+  /*               TODO !!!
   @Override
   protected void initialize(ModuleDeclaration declaration)
   {
@@ -55,26 +56,25 @@ public class OMImport extends OutputModule
     for (int i=0; i<ids.length; i++)
       ids[i] = declaration.getOutput(i).getSignal();
   }
+  */
 
   /**
    *  Sends input signals throught the given server resource.
    */
   @Override
-  protected Signal[] get()
+  public void get(Signal[] output, int outputLength)
   {
-    Signal[] result = new Signal[getNumberOfAssignedOutputs()];
     DataResponse response = (DataResponse)client.read();
     if (response != null)
     {
-      for (int i=0; i<ids.length; i++)
+      for (int i=0; i<outputLength; i++)
       {
-	result[i] = response.get(ids[i]);
+	output[i] = response.get(ids[i]);
       }
     }
-    for (int i=0; i<result.length; i++)
-      if (result[i] == null)
-	result[i] = Signal.getSignal();
-    return result;
+    for (int i=0; i<outputLength; i++)
+      if (output[i] == null)
+	output[i] = Signal.getSignal();
   }
 
 }

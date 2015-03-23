@@ -1,7 +1,7 @@
 package control4j.modules.sequentiallogic;
 
 /*
- *  Copyright 2013 Jiri Lidinsky
+ *  Copyright 2013, 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -62,29 +62,36 @@ public class PMCounter extends ProcessModule
    *  the counting is stopped.
    *  
    */
-  public Signal[] process(Signal[] input)
+  public void process(
+      Signal[] input, int inputLength, Signal[] output, int outputLength)
   {
     // count direction: false: up, true: down
     boolean direction = false;
-    if (input.length > 1 && input[1] != null)
+    if (inputLength > 1 && input[1] != null)
     {
       if (input[1].isValid())
         direction = input[1].getBoolean();
       else
-        return new Signal[] { Signal.getSignal(count) };
+      {
+	output[0] = Signal.getSignal(count);
+        return;
+      }
     }
     // reset signal
     boolean reset = false;
-    if (input.length > 2 && input[2] != null && input[2].isValid() && input[2].getBoolean())
+    if (inputLength > 2 && input[2] != null && input[2].isValid() 
+	&& input[2].getBoolean())
     {
       count = direction ? highLimit : lowLimit;
-      return new Signal[] { Signal.getSignal(count) };
+      output[0] = Signal.getSignal(count);
+      return;
     }
     // count input
     if (input[0].isValid() && input[0].getBoolean())
     {
       count = direction ? count - 1 : count + 1;
     }
-    return new Signal[] { Signal.getSignal(count) };
+    output[0] = Signal.getSignal(count);
   }
+
 }

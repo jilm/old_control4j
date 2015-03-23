@@ -55,26 +55,21 @@ public class PMShiftTimestamp extends ProcessModule
    *  @return an array of size that is equal to the size of input array
    *             minus one.
    */
-  public Signal[] process(Signal[] input)
+  @Override
+  public void process(
+      Signal[] input, int inputLength, Signal[] output, int outputLenght)
   {
-    int size = getNumberOfAssignedOutputs();
-    Signal[] result = new Signal[size];
     if (input[0].isValid())
     {
       long interval = Math.round(input[0].getValue());
-      for (int i=0; i<size; i++)
-      {
-        long timestamp = input[i+1].getTimestamp().getTime();
-	timestamp += interval;
-	result[i] = input[i+1].clone(new Date(timestamp));
-      }
+      long timestamp = input[1].getTimestamp().getTime();
+      timestamp += interval;
+      output[0] = input[1].clone(new Date(timestamp));
     }
     else
     {
-      for (int i=0; i<size; i++)
-        result[i] = (Signal)input[i+1].clone();
+      output[0] = (Signal)input[1].clone();
     }
-    return result;
   }
 
 }

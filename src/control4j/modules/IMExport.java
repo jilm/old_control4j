@@ -51,6 +51,7 @@ public class IMExport extends InputModule
    *  The module needs to know the names of the input signals
    *  to use them as ids inside the exprot message.
    */
+  /*                      TODO
   @Override
   protected void initialize(ModuleDeclaration declaration)
   {
@@ -59,12 +60,13 @@ public class IMExport extends InputModule
     for (int i=0; i<ids.length; i++)
       ids[i] = declaration.getInput(i).getSignal();
   }
+  */
 
   /**
    *  Sends input signals throught the given server resource.
    */
   @Override
-  protected void put(Signal[] input)
+  protected void put(Signal[] input, int inputLength)
   {
     Collection<Request> requests = server.getRequests();
     for (Request request : requests)
@@ -73,7 +75,7 @@ public class IMExport extends InputModule
       {
 	DataResponse response 
 	    = (DataResponse)((DataRequest)request).getResponse();
-	for (int i=0; i<ids.length; i++)
+	for (int i=0; i<inputLength; i++)
 	  response.put(ids[i], input[i]);
       }
     }

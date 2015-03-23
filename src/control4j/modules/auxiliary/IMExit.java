@@ -63,10 +63,11 @@ public class IMExit extends InputModule
    *             just ignored.
    */
   @Override
-  public void put(Signal[] input)
+  public void put(Signal[] input, int inputLength)
   {
+
     boolean condition;
-    if (getNumberOfAssignedInputs() == 0 || input[0] == null)
+    if (inputLength == 0 || input[0] == null)
       condition = true;
     else if (input[0].isValid() && input[0].getBoolean())
       condition = true;
@@ -79,4 +80,5 @@ public class IMExit extends InputModule
       Control.exit();
     }
   }
+
 }

@@ -1,7 +1,7 @@
 package control4j.modules.text;
 
 /*
- *  Copyright 2013 Jiri Lidinsky
+ *  Copyright 2013, 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -57,7 +57,7 @@ public class IMPrintMessage extends InputModule
    *             as <code>true</code>.
    */
   @Override
-  public void put(Signal[] input)
+  public void put(Signal[] input, int inputLength)
   {
     if (input[0].isValid() && input[0].getBoolean())
       textDevice.println(message);

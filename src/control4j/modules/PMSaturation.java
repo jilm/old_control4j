@@ -41,9 +41,9 @@ public class PMSaturation extends ProcessModule
    *  output is equal to the input and the second and threed outputs are
    *  false. If the input is invalid than all of the outputs are invalid.
    */
-  protected Signal[] process(Signal[] input)
+  public void process(
+      Signal[] input, int inputLength, Signal[] output, int outputLength)
   {
-    Signal[] output = new Signal[3];
     if (input[0].isValid())
     {
       if (input[0].getValue() > maxLimit)
@@ -71,6 +71,5 @@ public class PMSaturation extends ProcessModule
       for (int i=0; i<3; i++)
         output[i] = Signal.getSignal();
     }
-    return output;
   }
 }

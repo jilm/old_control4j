@@ -1,7 +1,7 @@
 package control4j.modules.math;
 
 /*
- *  Copyright 2013 Jiri Lidinsky
+ *  Copyright 2013, 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -24,20 +24,18 @@ import control4j.ProcessModule;
 public class PMSquareRoot extends ProcessModule
 {
   @Override
-  public Signal[] process(Signal[] input)
+  public void process(
+      Signal[] input, int inputLength, Signal[] output, int outputLength)
   {
-    int size = getNumberOfAssignedOutputs();
-    for (int i=0; i<size; i++)
+    if (input[0].isValid() && input[0].getValue() >= 0.0)
     {
-      if (input[i].isValid() && input[i].getValue() >= 0.0)
-      {
-        input[i] = Signal.getSignal(Math.sqrt(input[i].getValue()), input[i].getTimestamp());
-      }
-      else
-      {
-        input[i] = Signal.getSignal(input[i].getTimestamp());
-      }
+      output[0] = Signal.getSignal(
+          Math.sqrt(input[0].getValue()), input[0].getTimestamp());
     }
-    return input;
+    else
+    {
+      output[0] = Signal.getSignal(input[0].getTimestamp());
+    }
   }
+
 }

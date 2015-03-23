@@ -1,7 +1,7 @@
 package control4j.modules.database;
 
 /*
- *  Copyright 2013, 2014 Jiri Lidinsky
+ *  Copyright 2013, 2014, 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -36,9 +36,9 @@ public class IMDatabaseInsert extends InputModule
   private StringBuilder query = new StringBuilder(); 
 
   @Override 
-  public void put(Signal[] input)
+  public void put(Signal[] input, int inputLength)
   {
-    int size = getNumberOfAssignedInputs() - 1;
+    int size = inputLength - 1;
     if (size <= 0) return;
     boolean enable = false;
     if (input[0] == null || (input[0].isValid() && input[0].getBoolean()))
@@ -64,7 +64,7 @@ public class IMDatabaseInsert extends InputModule
   private void appendSignal(int index, Signal signal, StringBuilder query)
   {
     query.append('(');
-    database.formatString(getSignalDeclaration(index).getName(), query);
+    database.formatString("TODO", query);
     query.append(',');
     database.formatDate(signal.getTimestamp(), query);
     query.append(',');

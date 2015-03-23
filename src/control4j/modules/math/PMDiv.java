@@ -1,7 +1,7 @@
 package control4j.modules.math;
 
 /*
- *  Copyright 2013 Jiri Lidinsky
+ *  Copyright 2013, 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -45,20 +45,20 @@ public class PMDiv extends ProcessModule
    *             of the division. Another elements should be ignored.
    */
   @Override
-  public Signal[] process(Signal[] input)
+  public void process(
+      Signal[] input, int inputLength, Signal[] output, int outputLength)
   {
     if (input[0].isValid() && input[1].isValid())
     {
       double result = input[0].getValue() / input[1].getValue();
       if (Double.isInfinite(result) || Double.isNaN(result))
-        input[0] = Signal.getSignal();
+        output[0] = Signal.getSignal();
       else
-        input[0] = Signal.getSignal(result);
+        output[0] = Signal.getSignal(result);
     }
     else
     {
-      input[0] = Signal.getSignal();
+      output[0] = Signal.getSignal();
     }
-    return(input);
   }
 }

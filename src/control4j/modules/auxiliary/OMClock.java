@@ -1,7 +1,7 @@
 package control4j.modules.auxiliary;
 
 /*
- *  Copyright 2013 Jiri Lidinsky
+ *  Copyright 2013, 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -23,7 +23,9 @@ import control4j.Signal;
 import control4j.OutputModule;
 
 /**
+ *
  *  Returns actual system time.
+ *
  */
 public class OMClock extends OutputModule
 {
@@ -45,16 +47,27 @@ public class OMClock extends OutputModule
    *          with timestamp set to actual system time.
    */
   @Override
-  public Signal[] get()
+  public void get(Signal[] output, int outputLength)
   {
-    Signal[] result = new Signal[6];
     Calendar calendar = Calendar.getInstance();
-    result[0] = Signal.getSignal((double)calendar.get(Calendar.SECOND));
-    result[1] = Signal.getSignal((double)calendar.get(Calendar.MINUTE));
-    result[2] = Signal.getSignal((double)calendar.get(Calendar.HOUR_OF_DAY));
-    result[3] = Signal.getSignal((double)calendar.get(Calendar.DATE));
-    result[4] = Signal.getSignal((double)calendar.get(Calendar.MONTH) + 1);
-    result[5] = Signal.getSignal((double)calendar.get(Calendar.YEAR));
-    return result;
+    out(0, Signal.getSignal((double)calendar.get(Calendar.SECOND)), 
+	output, outputLength);
+    out(1, Signal.getSignal((double)calendar.get(Calendar.MINUTE)),
+	output, outputLength);
+    out(2, Signal.getSignal((double)calendar.get(Calendar.HOUR_OF_DAY)),
+	output, outputLength);
+    out(3, Signal.getSignal((double)calendar.get(Calendar.DATE)),
+	output, outputLength);
+    out(4, Signal.getSignal((double)calendar.get(Calendar.MONTH) + 1),
+	output, outputLength);
+    out(5, Signal.getSignal((double)calendar.get(Calendar.YEAR)),
+	output, outputLength);
   }
+
+  private void out(int index, Signal signal, Signal[] output, int outputLength)
+  {
+    if (index < outputLength)
+      output[index] = signal;
+  }
+
 }

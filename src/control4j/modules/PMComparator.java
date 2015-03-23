@@ -1,7 +1,7 @@
 package control4j.modules;
 
 /*
- *  Copyright 2013 Jiri Lidinsky
+ *  Copyright 2013, 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -50,7 +50,8 @@ public class PMComparator extends ProcessModule
    *             valid. Timestamp of the returned signal is set
    *             to the system time.
    */
-  public Signal[] process(Signal[] input)
+  public void process(
+      Signal[] input, int inputLength, Signal[] output, int outputLength)
   {
     if (input[0].isValid() && input[1].isValid())
     {
@@ -63,13 +64,11 @@ public class PMComparator extends ProcessModule
       else
         value = oldValue;
       oldValue = value;
-      input[0] = Signal.getSignal(value);
-      return input;
+      output[0] = Signal.getSignal(value);
     }
     else
     {
-      input[0] = Signal.getSignal();
-      return input;
+      output[0] = Signal.getSignal();
     }
   }
 }

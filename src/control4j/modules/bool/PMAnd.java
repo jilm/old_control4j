@@ -1,7 +1,7 @@
 package control4j.modules.bool;
 
 /*
- *  Copyright 2013, 2014 Jiri Lidinsky
+ *  Copyright 2013, 2014, 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -18,6 +18,7 @@ package control4j.modules.bool;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import control4j.AVariableInput;
 import control4j.Signal;
 import control4j.ProcessModule;
 
@@ -51,19 +52,24 @@ public class PMAnd extends ProcessModule
    *            output value. Timestamp corresponds to the system 
    *            time in moment of module invocation.
    */
-  public Signal[] process(Signal[] input)
+  @Override @AVariableInput(startIndex=0)
+  public void process(
+      Signal[] input, int inputLength, Signal[] output, int outputLength)
   {
-    int size = getNumberOfAssignedInputs();
     boolean valid = true;
-    for (int i=0; i<size; i++)
+    for (int i=0; i<inputLength; i++)
       if (input[i].isValid() && !input[i].getBoolean())
-        return new Signal[] { Signal.getSignal(false) };
+      {
+	output[0] = Signal.getSignal(false);
+        return;
+      }
       else if (!input[i].isValid())
         valid = false;
+
     if (valid)
-      return new Signal[] { Signal.getSignal(true) };
+      output[0] = Signal.getSignal(true);
     else
-      return new Signal[] { Signal.getSignal() };
+      output[0] = Signal.getSignal();
   }
 
 }

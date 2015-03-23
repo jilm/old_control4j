@@ -1,7 +1,7 @@
 package control4j.modules.auxiliary;
 
 /*
- *  Copyright 2013 Jiri Lidinsky
+ *  Copyright 2013, 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -26,14 +26,12 @@ import java.util.Date;
 public class PMCopyTimestamp extends ProcessModule
 {
 
-  public Signal[] process(Signal[] input)
+  public void process(
+      Signal[] input, int intputLength, Signal[] output, int outputLength)
   {
     Date reference = input[0].getTimestamp();
-    int size = getNumberOfAssignedInputs() - 1;
-    Signal[] result = new Signal[size];
-    for (int i=0; i<size; i++)
-      result[i] = input[i+1].clone(reference);
-    return result;
+    if (outputLength > 0)
+      output[0] = input[1].clone(reference);
   }
 
 }

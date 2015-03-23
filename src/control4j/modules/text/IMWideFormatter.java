@@ -1,7 +1,7 @@
 package control4j.modules.text;
 
 /*
- *  Copyright 2013 Jiri Lidinsky
+ *  Copyright 2013, 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -145,18 +145,17 @@ public class IMWideFormatter extends InputModule
    *             printed on text device. These cannot be null.
    */
   @Override
-  public void put(Signal[] input)
+  public void put(Signal[] input, int inputLength)
   {
     if (input[0] == null || (input[0].isValid() && input[0].getBoolean()))
     {
-      if (header) printHeader();
+      if (header) printHeader(inputLength);
 
       stringBuilder.delete(0, stringBuilder.length());
       stringBuilder.append(signalFormat.dateFormat(input[1].getTimestamp()));
       stringBuilder.append(delimiter);
       stringBuilder.append(signalFormat.timeFormat(input[1].getTimestamp()));
-      int size = getNumberOfAssignedInputs();
-      for (int i=1; i<size; i++)
+      for (int i=1; i<inputLength; i++)
       {
         stringBuilder.append(delimiter);
 	stringBuilder.append(input[i].valueToString(signalFormat));
@@ -165,17 +164,16 @@ public class IMWideFormatter extends InputModule
     }
   }
 
-  private void printHeader()
+  private void printHeader(int size)
   {
     stringBuilder.delete(0, stringBuilder.length());
     stringBuilder.append("date");
     stringBuilder.append(delimiter);
     stringBuilder.append("time");
-    int size = getNumberOfAssignedInputs();
     for (int i=1; i<size; i++)
     {
       stringBuilder.append(delimiter);
-      stringBuilder.append(getSignalDeclaration(i).getName());
+      stringBuilder.append("???"); 
     }
     textDevice.println(stringBuilder.toString());
     header = false;

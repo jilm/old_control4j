@@ -1,7 +1,7 @@
 package control4j.modules.comparison;
 
 /*
- *  Copyright 2013 Jiri Lidinsky
+ *  Copyright 2013, 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -54,28 +54,21 @@ public class PMEqual extends ProcessModule
    *             minus one. Returned signals are boolean signals.
    */
   @Override
-  protected Signal[] process(Signal[] input)
+  public void process(
+      Signal[] input, int inputLength, Signal[] output, int outputLength)
   {
-    int size = getNumberOfAssignedOutputs();
-    //Signal[] result = new Signal[input.length-1];
     if (input[0].isValid())
     {
       double reference = input[0].getValue();
-      for (int i=0; i<size; i++)
-        if (input[i+1].isValid())
-        {
-          input[i] = Signal.getSignal(reference == input[i+1].getValue(), input[i+1].getTimestamp());
-        }
-        else
-        {
-          input[i] = Signal.getSignal(input[i+1].getTimestamp());
-        }
+      if (input[1].isValid())
+        output[0] = Signal.getSignal(
+	    reference == input[1].getValue(), input[1].getTimestamp());
+      else
+        output[0] = Signal.getSignal(input[1].getTimestamp());
     }
     else
     {
-      for (int i=0; i<size; i++)
-        input[i] = Signal.getSignal(input[i+1].getTimestamp());
+      output[0] = Signal.getSignal(input[1].getTimestamp());
     }
-    return input;
   }
 }

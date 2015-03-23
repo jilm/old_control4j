@@ -66,18 +66,19 @@ public class PMPid extends ProcessModule
    *  {@link http://www.controlguru.com/2008/021008.html}
    */
   @Override
-  public Signal[] process(Signal[] input)
+  public void process(
+      Signal[] input, int inputLength, Signal[] output, int outputLength)
   {
     // reset input
     boolean reset = false;
-    if (getNumberOfAssignedInputs() >= 3)
+    if (inputLength >= 3)
       if (input[2] != null && input[2].isValid())
         reset = input[2].getBoolean();
     // reset integral part
     if (reset) integral = 0.0;
     // enable input
     boolean enable = true;
-    if (getNumberOfAssignedInputs() >= 2)
+    if (inputLength >= 2)
       if (input[1] != null && input[1].isValid())
         enable = input[1].getBoolean();
     // PID calculation
@@ -103,11 +104,11 @@ public class PMPid extends ProcessModule
 	if (Math.abs(ki) > 1e-6)
 	  integral = (result - kp*error - kd*derivative) / ki;
       }
-      return new Signal[] { Signal.getSignal(result) };
+      output[0] = Signal.getSignal(result);
     }
     else
     {
-      return new Signal[] { Signal.getSignal() };
+      output[0] = Signal.getSignal();
     }
   }
 }

@@ -1,7 +1,7 @@
 package control4j.modules.vector;
 
 /*
- *  Copyright 2013 Jiri Lidinsky
+ *  Copyright 2013, 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -48,18 +48,12 @@ public class PMSize extends ProcessModule
    *            corresponding input signal.
    */
   @Override
-  public Signal[] process(Signal[] input)
+  public void process(
+      Signal[] input, int inputLength, Signal[] output, int outputLength)
   {
-    int size = getNumberOfAssignedOutputs();
-    //Signal[] result = new Signal[input.length];
-    for (int i=0; i<size; i++)
-    {
-      if (input[i].isValid())
-        input[i] = Signal.getSignal(input[i].getSize(), input[i].getTimestamp());
-      else
-        input[i] = Signal.getSignal(input[i].getTimestamp());
-
-    }
-    return input;
+    if (input[0].isValid())
+      output[0] = Signal.getSignal(input[0].getSize(), input[0].getTimestamp());
+    else
+      output[0] = Signal.getSignal(input[0].getTimestamp());
   }
 }

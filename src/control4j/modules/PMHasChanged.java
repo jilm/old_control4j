@@ -1,7 +1,7 @@
 package control4j.modules;
 
 /*
- *  Copyright 2013, 2014 Jiri Lidinsky
+ *  Copyright 2013, 2014, 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -24,24 +24,15 @@ import control4j.ProcessModule;
 import control4j.IConfigBuffer;
 
 /**
+ *
  *  Indicates whether the input signal has changed since 
  *  the last control loop.
+ *
  */
 public class PMHasChanged extends ProcessModule
 {
-  private int size;
-  private Signal[] old;
 
-  @Override
-  protected void initialize(IConfigBuffer configuration)
-  {
-    super.initialize(configuration);
-    if (getNumberOfAssignedInputs() > getNumberOfAssignedOutputs())
-      size = getNumberOfAssignedOutputs();
-    else
-      size = getNumberOfAssignedInputs();
-    old = new Signal[size];
-  }
+  private Signal old;
 
   /**
    *  Indicates whether the input signal has changed since
@@ -68,14 +59,22 @@ public class PMHasChanged extends ProcessModule
    *  @see control4j.Signal#equals
    */
   @Override
-  public Signal[] process(Signal[] input)
+  public void process(
+      Signal[] input, int inputLength, Signal[] output, int outputLength)
   {
-    for (int i=0; i<size; i++)
+    if (inputLength > 0 && outputLength > 0)
     {
-      boolean result = !input[i].equals(old[i]);
-      old[i] = input[i];
-      input[i] = Signal.getSignal(result);
+      if (old == null)
+      {
+	output[0] = Signal.getSignal();
+      }
+      else
+      {
+        boolean result = !input[0].equals(old);
+        old = input[0];
+        input[0] = Signal.getSignal(result);
+      }
     }
-    return input;
   }
+
 }

@@ -1,7 +1,7 @@
 package control4j.modules.auxiliary;
 
 /*
- *  Copyright 2013, 2014 Jiri Lidinsky
+ *  Copyright 2013, 2014, 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -66,19 +66,18 @@ public class OMTickingClock extends OutputModule
    *          to the current system time.
    */
   @Override
-  public Signal[] get()
+  public void get(Signal[] output, int outputLength)
   {
-    Signal[] result = new Signal[6];
     Calendar calendar = Calendar.getInstance();
     fillTimeValues(calendar, currentTime);
     boolean change = false;
     for (int i=currentTime.length-1; i>=0; i--)
     {
       if (oldTime[i] != currentTime[i]) change = true;
-      result[i] = Signal.getSignal(change);
+      if (outputLength > i)
+        output[i] = Signal.getSignal(change);
       oldTime[i] = currentTime[i];
     }
-    return result;
   }
 
   private void fillTimeValues(Calendar calendar, int[] timeValues)

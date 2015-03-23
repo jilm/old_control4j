@@ -1,7 +1,7 @@
 package control4j.modules;
 
 /*
- *  Copyright 2013 Jiri Lidinsky
+ *  Copyright 2013, 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -34,8 +34,8 @@ public class OMConst extends OutputModule
   @ConfigItem
   public double value;
 
-  public Signal[] get()
+  public void get(Signal[] output, int outputLength)
   {
-    return new Signal[] { Signal.getSignal(value) };
+     output[0] = Signal.getSignal(value);
   }
 }

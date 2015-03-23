@@ -1,7 +1,7 @@
 package control4j.modules.counters;
 
 /*
- *  Copyright 2013 Jiri Lidinsky
+ *  Copyright 2013, 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -58,14 +58,14 @@ public class PMUpCounter extends ProcessModule
    *             of the counter.
    */
   @Override
-  protected Signal[] process(Signal[] input)
+  public void process(
+      Signal[] input, int inputLength, Signal[] output, int outputLength)
   {
-    int inputSize = getNumberOfAssignedInputs();
     // enable input
     boolean enable = input[0].isValid() ? input[0].getBoolean() : false;
     // reset input
     boolean reset;
-    if (inputSize >= 2 && input[1] != null && input[1].isValid())
+    if (inputLength >= 2 && input[1] != null && input[1].isValid())
       reset = input[1].getBoolean();
     else
       reset = false;
@@ -75,8 +75,7 @@ public class PMUpCounter extends ProcessModule
     else
       if (enable)
         counter++;
-    input[0] = Signal.getSignal((double)counter);
-    return input;
+    output[0] = Signal.getSignal((double)counter);
   }
 
 }

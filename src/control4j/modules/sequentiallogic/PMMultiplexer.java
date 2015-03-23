@@ -1,7 +1,7 @@
 package control4j.modules.sequentiallogic;
 
 /*
- *  Copyright 2013 Jiri Lidinsky
+ *  Copyright 2013, 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -18,6 +18,7 @@ package control4j.modules.sequentiallogic;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import control4j.AVariableInput;
 import control4j.Signal;
 import control4j.ProcessModule;
 
@@ -25,6 +26,7 @@ import control4j.ProcessModule;
  *  Selects one of several input signals and forwards the selected input
  *  to the output.
  */
+@AVariableInput(startIndex=1)
 public class PMMultiplexer extends ProcessModule
 {
 
@@ -55,22 +57,22 @@ public class PMMultiplexer extends ProcessModule
    *             data type) or it is an invalid signal.
    */
   @Override
-  protected Signal[] process(Signal[] input)
+  public void process(
+      Signal[] input, int inputLength, Signal[] output, int outputLength)
   {
     //Signal[] result = new Signal[1];
-    int size = getNumberOfAssignedInputs() - 1;
+    int size = inputLength - 1;
     if (input[0].isValid())
     {
       int selector = (int)Math.round(input[0].getValue());
       if (selector < 0 || selector > size-1)
-        input[0] = Signal.getSignal();
+        output[0] = Signal.getSignal();
       else
-        input[0] = (Signal)input[selector+1].clone();
+        output[0] = (Signal)input[selector+1].clone();
     }
     else
     {
-      input[0] = Signal.getSignal();
+      output[0] = Signal.getSignal();
     }
-    return input;
   }
 }

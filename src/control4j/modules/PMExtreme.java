@@ -1,7 +1,7 @@
 package control4j.modules;
 
 /*
- *  Copyright 2013 Jiri Lidinsky
+ *  Copyright 2013, 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -51,7 +51,8 @@ public class PMExtreme extends ProcessModule
    *             with max value, min value, index of input with min value.
    */
   @Override 
-  public Signal[] process(Signal[] input)
+  public void process(
+      Signal[] input, int inputLength, Signal[] output, int outputLength)
   {
     double max = Double.MIN_VALUE;
     double min = Double.MAX_VALUE;
@@ -59,8 +60,7 @@ public class PMExtreme extends ProcessModule
     int minIndex = 0;
     boolean valid = false;
 
-    int size = getNumberOfAssignedInputs();
-    for (int i=0; i<size; i++)
+    for (int i=0; i<inputLength; i++)
       if (input[i].isValid())
       {
         if (valid)
@@ -86,22 +86,20 @@ public class PMExtreme extends ProcessModule
 	}
       }
 
-    Signal[] response = new Signal[4];
     if (valid)
     {
-      response[0] = Signal.getSignal(max);
-      response[1] = Signal.getSignal(maxIndex);
-      response[2] = Signal.getSignal(min);
-      response[3] = Signal.getSignal(minIndex);
+      output[0] = Signal.getSignal(max);
+      output[1] = Signal.getSignal(maxIndex);
+      output[2] = Signal.getSignal(min);
+      output[3] = Signal.getSignal(minIndex);
     }
     else
     {
-      response[0] = Signal.getSignal();
-      response[1] = Signal.getSignal();
-      response[2] = Signal.getSignal();
-      response[3] = Signal.getSignal();
+      output[0] = Signal.getSignal();
+      output[1] = Signal.getSignal();
+      output[2] = Signal.getSignal();
+      output[3] = Signal.getSignal();
     }
-    return response;
   }
 
 }

@@ -1,7 +1,7 @@
 package control4j.modules.history;
 
 /*
- *  Copyright 2013 Jiri Lidinsky
+ *  Copyright 2013, 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -38,14 +38,12 @@ public class PMHistory extends ProcessModule
   @ConfigItem(key="history-size", optional=false)
   public int historySize;
 
-  private HistorySignal[] buffer;
+  private HistorySignal buffer;
 
   @Override
   protected void initialize(IConfigBuffer configuration)
   {
-    buffer = new HistorySignal[getNumberOfAssignedInputs()];
-    for (int i=0; i<buffer.length; i++)
-      buffer[i] = new HistorySignal(historySize);
+    buffer = new HistorySignal(historySize);
   }
 
   /**
@@ -67,11 +65,11 @@ public class PMHistory extends ProcessModule
    *             input signal.
    */
   @Override
-  public Signal[] process(Signal[] input)
+  public void process(
+      Signal[] input, int inputLength, Signal[] output, int outputLength)
   {
-    for (int i=0; i<getNumberOfAssignedInputs(); i++)
-      buffer[i].add(input[i]);
-    return buffer;
+    buffer.add(input[0]);
+    output[0] = buffer;
   }
 
 }

@@ -1,7 +1,7 @@
 package control4j.modules;
 
 /*
- *  Copyright 2013, 2014 Jiri Lidinsky
+ *  Copyright 2013, 2014, 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -18,10 +18,8 @@ package control4j.modules;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import control4j.Module;
 import control4j.Signal;
 import control4j.ProcessModule;
-import control4j.IConfigBuffer;
 import control4j.ConfigItem;
 
 public class PMLinearTransform extends ProcessModule
@@ -32,33 +30,25 @@ public class PMLinearTransform extends ProcessModule
   @ConfigItem(optional = true)
   public double add = 0.0;
 
-  private int size;
-
-  @Override
-  protected void initialize(IConfigBuffer configuration)
-  {
-    super.initialize(configuration);
-    size = Math.min(getNumberOfAssignedInputs(), getNumberOfAssignedOutputs());
-  }
-
   /**
-   *  Calculates linear transformation of its inputs.
+   *  Calculates linear transformation of its input.
    */
   @Override
-  public Signal[] process(Signal[] input)
+  public void process(
+      Signal[] input, int inputLength, Signal[] output, int outputLength)
   {
-    for (int i=0; i<size; i++)
+    if (inputLength > 0 && outputLength > 0)
     {
-      if (input[i].isValid())
+      if (input[0].isValid())
       {
-        double value = input[i].getValue() * mul + add;
-        input[i] = Signal.getSignal(value, input[i].getTimestamp());
+        double value = input[0].getValue() * mul + add;
+        output[0] = Signal.getSignal(value, input[0].getTimestamp());
       }
       else
       {
-        input[i] = Signal.getSignal(input[i].getTimestamp());
+        output[0] = Signal.getSignal(input[0].getTimestamp());
       }
     }
-    return input;
   }
+
 }

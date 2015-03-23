@@ -1,7 +1,7 @@
 package control4j.modules.text;
 
 /*
- *  Copyright 2013, 2014 Jiri Lidinsky
+ *  Copyright 2013, 2014, 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -19,6 +19,8 @@ package control4j.modules.text;
  */
 
 import java.util.Locale;
+
+import control4j.AVariableInput;
 import control4j.Signal;
 import control4j.Resource;
 import control4j.ConfigItem;
@@ -36,6 +38,7 @@ import control4j.resources.ITextWriter;
  *  together with timestamp and signal name.
  *
  */
+@AVariableInput(startIndex=1)
 public class IMNarrowFormatter extends InputModule
 {
 
@@ -132,13 +135,13 @@ public class IMNarrowFormatter extends InputModule
    *             printed on text device. These cannot be null.
    */
   @Override
-  public void put(Signal[] input)
+  public void put(Signal[] input, int inputLength)
   {
-    int size = getNumberOfAssignedInputs();
     if (input[0] == null || (input[0].isValid() && input[0].getBoolean()))
     {
-      for (int i=1; i<size; i++)
-        textDevice.println(input[i].toString(signalFormat, delimiter, getSignalDeclaration(i).getName()));
+      for (int i=1; i<inputLength; i++)
+        textDevice.println(input[i].toString(
+	    signalFormat, delimiter, "???"));
     }
   }
 }

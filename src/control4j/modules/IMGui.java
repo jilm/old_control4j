@@ -1,7 +1,7 @@
 package control4j.modules;
 
 /*
- *  Copyright 2013, 2014 Jiri Lidinsky
+ *  Copyright 2013, 2014, 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -78,10 +78,9 @@ public class IMGui extends InputModule
    *  Actualize gui
    */
   @Override
-  protected void put(Signal[] input)
+  public void put(Signal[] input, int inputLength)
   {
-    int size = getNumberOfAssignedInputs();
-    javax.swing.SwingUtilities.invokeLater(new Updater(input, size));
+    javax.swing.SwingUtilities.invokeLater(new Updater(input, inputLength));
   }
 
   private class Updater implements Runnable

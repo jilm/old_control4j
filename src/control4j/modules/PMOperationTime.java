@@ -1,7 +1,7 @@
 package control4j.modules;
 
 /*
- *  Copyright 2013, 2014 Jiri Lidinsky
+ *  Copyright 2013, 2014, 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -21,81 +21,72 @@ package control4j.modules;
 import java.util.Date;
 import control4j.ProcessModule;
 import control4j.Signal;
-import control4j.IConfigBuffer;
 
 /**
+ *
  *  Measure an operation time of some device.
  *  It expects two scalar input signals which are interpreted as a
  *  boolean signals. First one is for signalization of the operation,
  *  the module in fact measure a duration for which the signal is
  *  in high state. The second one is the reset signal.
+ *
  */
 public class PMOperationTime extends ProcessModule
 {
-  private long[] sum;
-  private Date[] begin;
-  private long[] diff;
+
+  private long sum;
+  private Date begin;
+  private long diff;
 
   @Override
-  protected void initialize(IConfigBuffer configuration)
+  public void prepare()
   {
-    super.initialize(configuration);
-    int size = getNumberOfAssignedOutputs();
-    sum = new long[size];
-    begin = new Date[size];
-    diff = new long[size];
-    for (int i=0; i<size; i++)
-    {
-      sum[i] = 0l;
-      begin[i] = null;
-      diff[i] = 0l;
-    }
+    sum = 0l;
+    begin = null;
+    diff = 0l;
   }
 
   @Override
-  public Signal[] process(Signal[] input)
+  public void process(
+      Signal[] input, int inputLength, Signal[] output, int outputLength)
   {
-    if (input[0].isValid() && input[0].getBoolean())
+    if (inputLength >= 2 && outputLength >= 1)
     {
-      for (int i=0; i<sum.length; i++)
+      // reset signal
+      boolean reset = input[0].isValid() && input[0].getBoolean();
+
+      if (reset)
       {
-        sum[i] = 0l;
-	diff[i] = 0l;
-	if (input[i+1].isValid() && input[i+1].getBoolean())
-          begin[i] = input[0].getTimestamp();
+        sum = 0l;
+	diff = 0l;
+	if (input[1].isValid() && input[1].getBoolean())
+          begin = input[0].getTimestamp();
         else
-	  begin[i] = null;
+	  begin = null;
       }
-    }
-    else
-    {
-      Date now = new Date();
-      for (int i=0; i<sum.length; i++)
+      else
       {
-        if (begin[i] == null && input[i+1].isValid() && input[i+1].getBoolean())
+        Date now = new Date();
+        if (begin == null && input[1].isValid() && input[1].getBoolean())
 	{
-	  begin[i] = input[i+1].getTimestamp();
-	  diff[i] = 0l;
+	  begin = input[1].getTimestamp();
+	  diff = 0l;
 	}
-        else if (begin[i] != null && input[i+1].isValid() && !input[i+1].getBoolean())
+        else if (begin != null && input[1].isValid() && !input[1].getBoolean())
 	{
-	  diff[i] = input[i+1].getTimestamp().getTime() - begin[i].getTime();
-	  sum[i] += diff[i];
-	  begin[i] = null;
-	  diff[i] = 0l;
+	  diff = input[1].getTimestamp().getTime() - begin.getTime();
+	  sum += diff;
+	  begin = null;
+	  diff = 0l;
 	}
-	else if (begin[i] != null)
+	else if (begin != null)
 	{
-	  diff[i] = now.getTime() - begin[i].getTime();
+	  diff = now.getTime() - begin.getTime();
 	}
       }
     }
-    Signal[] result = new Signal[sum.length];
-    for (int i=0; i<result.length; i++)
-    {
-      result[i] = Signal.getSignal((double)((sum[i] + diff[i]) / 1000l));
-      result[i].setUnit("sec");
-    }
-    return result;
+    output[0] = Signal.getSignal((double)((sum + diff) / 1000l));
+    output[0].setUnit("sec");
   }
+
 }
