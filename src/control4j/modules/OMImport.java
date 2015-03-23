@@ -23,7 +23,7 @@ import java.util.Collection;
 import control4j.OutputModule;
 import control4j.Resource;
 import control4j.Signal;
-import control4j.application.ModuleDeclaration;
+//import control4j.application.ModuleDeclaration;
 import control4j.protocols.signal.Request;
 import control4j.protocols.signal.Response;
 import control4j.protocols.signal.DataRequest;

@@ -19,7 +19,7 @@ package control4j;
  */
 
 import java.util.LinkedList;
-import control4j.application.SignalManager;
+//import control4j.application.SignalManager;
 import control4j.tools.Tools;
 import static control4j.tools.Logger.*;
 import static control4j.tools.LogMessages.*;
@@ -110,14 +110,14 @@ public class ControlLoop
   void run()
   {
     info("Runnig control loop...");
-    ModuleManager modules = ModuleManager.getInstance();
-    int signals = SignalManager.getInstance().size();
+    //ModuleManager modules = null; //= ModuleManager.getInstance();
+    int signals = 0; // =  SignalManager.getInstance().size();
     dataBuffer = new DataBuffer(signals);
     // prepare for execution
     for (control4j.resources.Resource resource : ResourceManager.getInstance())
       resource.prepare();
-    for (Module module : modules)
-      module.prepare();
+    //for (Module module : modules)
+      //module.prepare();
 
     // The control loop !
     while (true)
@@ -132,10 +132,10 @@ public class ControlLoop
         notifyOfProcessingStartEvent();
         // module execution
 	fine("Start of module processing");
-	for (Module module : modules)
-	{
-	  module.execute(dataBuffer);
-	}
+	//for (Module module : modules)
+	//{
+	  //module.execute(dataBuffer);
+	//}
         notifyOfCycleEndEvent();
         // terminate the program, if requst was received
         if (exit) System.exit(0);
@@ -299,7 +299,7 @@ public class ControlLoop
       // write the resources
       ResourceManager.getInstance().dump(writer);
       // write the modules
-      ModuleManager.getInstance().dump(writer);
+      //ModuleManager.getInstance().dump(writer);
       //
       info("The dump file was created: " + dumpFile.getAbsolutePath());
       dump = false;

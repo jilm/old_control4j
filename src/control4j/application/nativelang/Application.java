@@ -91,8 +91,8 @@ implements ITranslatable, IXmlHandler
 	control4j.application.Resource destination =
 	    new control4j.application.Resource(resource.getClassName());
 	resource.translate(destination, localScope);
-	application.addResource(
-	    resource.getName(), resource.getScope(), destination);
+	application.putResource(resource.getName(), 
+	    resolveScope(resource.getScope(), localScope), destination);
       }
   }
 

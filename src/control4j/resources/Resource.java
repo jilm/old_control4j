@@ -21,7 +21,7 @@ package control4j.resources;
 import control4j.Control;
 import control4j.IConfigBuffer;
 import control4j.ICycleEventListener;
-import control4j.application.ResourceDeclaration;
+//import control4j.application.ResourceDeclaration;
 import control4j.ConfigurationHelper;
 import control4j.SystemException;
 import control4j.SyntaxErrorException;
@@ -103,6 +103,7 @@ public abstract class Resource
    *  @see #initialize
    *  @see control4j.ICycleEventListener
    */
+  /*
   public static Resource createInstance(ResourceDeclaration declaration)
   throws ClassNotFoundException
   {
@@ -135,6 +136,7 @@ public abstract class Resource
       throw new SystemException();
     }
   }
+  */
 
   /**
    *  Prints information about the resource into the given writer.

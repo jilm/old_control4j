@@ -128,6 +128,7 @@ public class Application extends Configurable
   {
     if (signalIndexes == null) {} // TODO
     int index = signalIndexes.indexOf(signal);
+    return index;
   }
 
   /**

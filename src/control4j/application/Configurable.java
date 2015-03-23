@@ -26,7 +26,7 @@ import control4j.IConfigBuffer;
  *  A common base for all of the objects that are configurable.
  *
  */
-abstract class Configurable extends DeclarationBase
+public abstract class Configurable extends DeclarationBase
 {
 
   /** Contains configuration. */

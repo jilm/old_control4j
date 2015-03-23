@@ -21,6 +21,7 @@ package control4j.application.nativelang;
 import java.util.ArrayList;
 import org.xml.sax.Attributes;
 
+import control4j.application.Scope;
 import control4j.tools.IXmlHandler;
 import control4j.tools.ParseException;
 import control4j.tools.XmlReader;
@@ -83,7 +84,7 @@ implements IXmlHandler
     return name;
   }
 
-  public Scope getScope()
+  public int getScope()
   {
     return scope;
   }

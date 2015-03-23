@@ -21,13 +21,13 @@ package control4j;
 import java.util.*;
 import java.io.*;
 import control4j.application.Application;
-import control4j.application.IApplicationReader;
-import control4j.application.ReaderFactory;
+//import control4j.application.IApplicationReader;
+//import control4j.application.ReaderFactory;
 import control4j.tools.DeclarationReference;
 import control4j.tools.Preferences;
-import control4j.project.Project;
-import control4j.project.Reader;
-import control4j.project.ApplicationFilename;
+//import control4j.project.Project;
+//import control4j.project.Reader;
+//import control4j.project.ApplicationFilename;
 import static control4j.tools.Logger.*;
 import static control4j.tools.LogMessages.*;
 
@@ -197,6 +197,7 @@ public class Control
   /**
    *
    */
+  /*
   private Project loadProject(File projectFile)
   {
     info(getMessage("core02", projectFile.getAbsolutePath()));
@@ -226,6 +227,7 @@ public class Control
       return null;
     }
   }
+  */
 
   /**
    *
