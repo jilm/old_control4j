@@ -49,7 +49,7 @@ public abstract class Module
    *
    *  @see ConfigurationHelper
    */
-  protected void initialize(IConfigBuffer configuration) 
+  public void initialize(IConfigBuffer configuration) 
   { 
     // assign configuration items
     ConfigurationHelper.assignConfiguration(

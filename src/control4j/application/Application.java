@@ -28,8 +28,9 @@ import control4j.ErrorManager;
 import control4j.gui.Screens;
 
 /**
- *  A crate object for the application. This crate object contains only
- *  declarations of the modules and resources.
+ *
+ *  A crate object for the application.
+ *
  */
 public class Application extends Configurable
 {
@@ -107,15 +108,53 @@ public class Application extends Configurable
 
   private ScopeMap<Signal> signals;
 
+  private ArrayList<Signal> signalIndexes;
+
   public void putSignal(String name, Scope scope, Signal signal)
   {
     if (signals == null)
+    {
       signals = new ScopeMap<Signal>();
+      signalIndexes = new ArrayList<Signal>();
+    }
     signals.put(name, scope, signal);
+    signalIndexes.add(signal);
   }
 
+  /**
+   *  Returns the index of the given signal.
+   */
+  public int getSignalIndex(Signal signal)
+  {
+    if (signalIndexes == null) {} // TODO
+    int index = signalIndexes.indexOf(signal);
+  }
+
+  /**
+   *  Returns the signal with the given name that was defined
+   *  under the given scope or some of the parent scope.
+   */
+  public Signal getSignal(String name, Scope scope)
+  {
+    if (signals == null) {} // TODO
+    return signals.get(name, scope);
+  }
+
+  /**
+   *  Returns the signal with the given index.
+   */
+  public Signal getSignal(int index)
+  {
+    if (signalIndexes == null) {} // TODO
+    return signalIndexes.get(index);
+  }
+
+  /** An array of module definitions. */
   private ArrayList<Module> modules;
 
+  /**
+   *  Adds a module definition into the internal buffer.
+   */
   public void addModule(Module module)
   {
     if (modules == null) modules = new ArrayList<Module>();

@@ -103,7 +103,7 @@ public class IMWideFormatter extends InputModule
    *  @see java.util.Locale
    */
   @Override
-  protected void initialize(IConfigBuffer configuration) 
+  public void initialize(IConfigBuffer configuration) 
   {
     super.initialize(configuration);
     Locale locale;

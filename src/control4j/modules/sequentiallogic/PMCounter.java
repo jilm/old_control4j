@@ -42,7 +42,7 @@ public class PMCounter extends ProcessModule
   /**
    */
   @Override 
-  protected void initialize(IConfigBuffer configuration)
+  public void initialize(IConfigBuffer configuration)
   {
     count = lowLimit;
   }

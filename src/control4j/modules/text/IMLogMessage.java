@@ -78,7 +78,7 @@ public class IMLogMessage extends InputModule
    *             not used and may be <code>null</code>
    */
   @Override
-  protected void initialize(IConfigBuffer configuration)
+  public void initialize(IConfigBuffer configuration)
   {
     // initialize log level
     if (level.equals("config"))

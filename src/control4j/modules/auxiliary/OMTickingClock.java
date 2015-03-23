@@ -39,7 +39,7 @@ public class OMTickingClock extends OutputModule
    *             not used, may be null
    */
   @Override
-  protected void initialize(IConfigBuffer configuration)
+  public void initialize(IConfigBuffer configuration)
   {
     super.initialize(configuration);
     Calendar calendar = Calendar.getInstance();

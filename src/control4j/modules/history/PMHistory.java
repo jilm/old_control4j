@@ -41,7 +41,7 @@ public class PMHistory extends ProcessModule
   private HistorySignal buffer;
 
   @Override
-  protected void initialize(IConfigBuffer configuration)
+  public void initialize(IConfigBuffer configuration)
   {
     buffer = new HistorySignal(historySize);
   }

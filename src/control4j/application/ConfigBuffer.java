@@ -1,7 +1,7 @@
 package control4j.application;
 
 /*
- *  Copyright 2013 Jiri Lidinsky
+ *  Copyright 2013, 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -26,17 +26,17 @@ import control4j.ConfigBufferTemplate;
 
 public class ConfigBuffer extends ConfigBufferTemplate implements IConfigBuffer
 {
-  private HashMap<String, Property> buffer = new HashMap<String, Property>();
+  private HashMap<String, String> buffer = new HashMap<String, String>();
 
   public String getString(String key) throws ConfigItemNotFoundException
   {
-    Property property = buffer.get(key);
-    if (property == null)
+    String value = buffer.get(key);
+    if (value == null)
     {
       String message = getItemNotFoundExceptionMessage(key);
       throw new ConfigItemNotFoundException(message);
     }
-    return property.getValue();
+    return value;
   }
   
   /**
@@ -44,12 +44,10 @@ public class ConfigBuffer extends ConfigBufferTemplate implements IConfigBuffer
    *  by key. If there was a config item with the same key,
    *  previously contained value will be replaced by this one.
    *  
-   *  @param property 
-   *             key value paire of the new config item.
    */ 
-  public void put(Property property)
+  public void put(String key, String value)
   {
-    buffer.put(property.getKey(), property);
+    buffer.put(key, value);
   }
   
   public int size()
