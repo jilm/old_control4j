@@ -19,6 +19,7 @@ package control4j.application;
  */
 
 import java.util.HashMap;
+import control4j.IConfigBuffer;
 
 /**
  *
@@ -56,6 +57,11 @@ abstract class Configurable extends DeclarationBase
       references = new HashMap<String, Reference>();
     references.put(key, new Reference(href, scope));
     // TODO duplicite keys
+  }
+
+  public IConfigBuffer getConfiguration()
+  {
+    return configuration;
   }
 
 }

@@ -18,14 +18,20 @@ package control4j;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-public class Application
+class Application
 {
 
   public Application()
   { }
 
-  /** An array of module instances. */
-  private Module[] modules;
+  public InputModule[] inputModules;
 
+  public ProcessModule[] processModules;
+
+  public OutputModule[] outputModule;
+
+  void add(Module module, int[] inputMap, int[] outputMap)
+  {
+  }
 
 }

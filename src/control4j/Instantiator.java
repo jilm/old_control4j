@@ -36,6 +36,8 @@ public class Instantiator
 
   control4j.application.Application definitions;
 
+  Application result;
+
   /**
    *  Takes the collection of the module definitions and create
    *  instances of classes that implements the module functionality.
@@ -44,19 +46,19 @@ public class Instantiator
       control4j.application.Application application)
   {
     definitions = application;
-    Application result;
+    //Application result;
     int modules = application.getModulesSize();
     // TODO Allocates the destination array
     // Create instance of all of the modules
     for (int i=0; i<modules; i++)
     {
       // get module definition
-      controlj4.application.Module definition 
+      control4j.application.Module definition 
           = application.getModule(i);
       // create instance
       Module instance = instantiate(definition);
       // save result
-      result.put(i, instance);
+      //result.put(i, instance);
     }
     return result;
   }
@@ -69,12 +71,8 @@ public class Instantiator
   {
     try
     {
-      // get module definition
-      controlj4.application.Module definition 
-          = application.getModule(i);
-
       // get module class
-      String className = definition.getClassName;
+      String className = definition.getClassName();
       Class<Module> moduleClass
           = (Class<Module>)Class.forName(className);
 
@@ -82,10 +80,9 @@ public class Instantiator
       Module instance = moduleClass.newInstance();
 
       // assign input and output maps
-      int[] map = getInputMap(definition, moduleClass);
-      if (map != null) instance.setInputMap(map);
-      map = getOutputMap(definition, moduleClass);
-      if (map != null) instance.setOutputMap(map);
+      int[] inputMap = getInputMap(definition, moduleClass);
+      int[] outputMap = getOutputMap(definition, moduleClass);
+      result.add(instance, inputMap, outputMap);
 
       // configure new instance
       IConfigBuffer configuration = definition.getConfiguration();

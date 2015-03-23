@@ -161,6 +161,18 @@ public class Application extends Configurable
     modules.add(module);
   }
 
+  public Module getModule(int index)
+  {
+    if (modules == null) {} // TODO
+    return modules.get(index);
+  }
+
+  public int getModulesSize()
+  {
+    if (modules == null) return 0;
+    return modules.size();
+  }
+
   private ArrayList<Use> uses;
 
   public void addUse(Use use)
