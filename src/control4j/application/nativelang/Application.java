@@ -23,6 +23,7 @@ import org.xml.sax.Attributes;
 
 import control4j.application.ITranslatable;
 import control4j.application.Scope;
+import control4j.tools.DuplicateElementException;
 import control4j.tools.IXmlHandler;
 import control4j.tools.XmlReader;
 import control4j.tools.XmlStartElement;
@@ -77,8 +78,15 @@ implements ITranslatable, IXmlHandler
       {
         Scope scope = 
             definition.getScope() == 0 ? Scope.getGlobal() : localScope;
+	try
+	{
         application.putDefinition(
             definition.getName(), scope, definition.getValue());
+	}
+	catch (DuplicateElementException e)
+	{
+	  // TODO
+	}
       }
 
     // copy all of the properties
@@ -91,8 +99,15 @@ implements ITranslatable, IXmlHandler
 	control4j.application.Resource destination =
 	    new control4j.application.Resource(resource.getClassName());
 	resource.translate(destination, localScope);
+	try
+	{
 	application.putResource(resource.getName(), 
 	    resolveScope(resource.getScope(), localScope), destination);
+	}
+	catch (DuplicateElementException e)
+	{
+	  // TODO
+	}
       }
   }
 

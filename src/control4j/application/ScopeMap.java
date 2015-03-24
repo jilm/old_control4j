@@ -19,7 +19,16 @@ package control4j.application;
  */
 
 import java.util.HashMap;
+import java.util.NoSuchElementException;
 
+import control4j.tools.DuplicateElementException;
+
+/**
+ *
+ *  A key, value data storage, where the key is composed of the
+ *  pair: a name and a scope.
+ *
+ */
 public class ScopeMap<E>
 {
 
@@ -38,7 +47,9 @@ public class ScopeMap<E>
   private HashMap<Key, E> buffer;
 
   /**
+   *
    *  A key object which consists of a pair: a name and a scope.
+   *
    */
   protected static class Key
   {
@@ -88,23 +99,47 @@ public class ScopeMap<E>
 
   /**
    *  Associates the given value with the specified key and scope.
-   *  If the map previously contained such mapping the value is
-   *  replaced.
+   *
+   *  @throws IllegalArgumentException
+   *             if eather of the params contain a null value
+   *
+   *  @throws DuplicateElementException
+   *             if there already is a value with given name
+   *             and scope inside the buffer
    */
-  public E put(String name, Scope scope, E value)
+  public void put(String name, Scope scope, E value)
+  throws DuplicateElementException
   {
     if (name == null || scope == null || value == null)
       throw new IllegalArgumentException();
     if (buffer == null) buffer = new HashMap<Key, E>();
     Key key = new Key(name, scope);
-    return buffer.put(key, value);
+    E result = buffer.put(key, value);
+    if (result != null)
+      throw new DuplicateElementException();
   }
 
+  /**
+   *  Returns the value that is associated with given name and scope.
+   *
+   *  @param name
+   *
+   *  @param scope
+   *
+   *  @return value that is associated with given name and scope
+   *
+   *  @throws IllegalArgumentException
+   *             if eather name or scope contain null value
+   *
+   *  @throws NoSuchElementException
+   *             if there is no such value in the internal buffer
+   */
   public E get(String name, Scope scope)
   {
     if (name == null || scope == null)
       throw new IllegalArgumentException();
-    if (buffer == null) return null;
+    if (buffer == null)
+      throw new NoSuchElementException();
     Key tempKey = new Key(name, scope);
     while (tempKey.scope != null)
     {
@@ -112,7 +147,7 @@ public class ScopeMap<E>
       if (result != null) return result;
       tempKey.scope = tempKey.scope.getParent();
     }
-    return null;
+    throw new NoSuchElementException();
   }
 
 }

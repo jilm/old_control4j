@@ -18,14 +18,40 @@ package control4j.application;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import java.util.Set;
+
 public class Preprocessor
 {
 
   public Preprocessor()
   { }
 
+  private Application application;
+
   public void process(Application application)
   {
+    this.application = application;
+
+    // resolve configuration on the application level
+    resolveConfiguration(application);
+  }
+
+  /**
+   *  Goes through the all of the configuration items of the
+   *  given object that were specified in the form of reference,
+   *  finds appropriate referenced object and substitude the
+   *  value for the reference inside the object.
+   */
+  protected void resolveConfiguration(Configurable object)
+  {
+    Set<String> keys = object.getReferenceConfigKeys();
+    for (String key : keys)
+    {
+      Reference reference = object.getReferenceConfigItem(key);
+      String value = application.getDefinition(
+	  reference.getHref(), reference.getScope());
+      object.resolveConfigItem(key, value);
+    }
   }
 
 }

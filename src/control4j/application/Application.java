@@ -1,7 +1,7 @@
 package control4j.application;
 
 /*
- *  Copyright 2013 Jiri Lidinsky
+ *  Copyright 2013, 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -23,19 +23,21 @@ import java.util.LinkedList;
 import java.util.Collection;
 import java.util.ArrayList;
 import java.util.NoSuchElementException;
+
 import control4j.ErrorManager;
 //import control4j.application.gui.ScreenDeclaration;
 import control4j.gui.Screens;
+import control4j.tools.DuplicateElementException;
 
 /**
  *
- *  A crate object for the application.
+ *  A crate object that contains the application definition.
  *
  */
 public class Application extends Configurable
 {
 
-  /** Holds actual scope during the translation. */
+  /** Holds actual scope during the process of translation. */
   private Scope scopePointer = Scope.getGlobal();
 
   public Scope getScopePointer()
@@ -55,7 +57,10 @@ public class Application extends Configurable
 
   /*
    *
-   *     Definitions
+   *     Definitions.
+   *
+   *     Definitions are just named values that may be
+   *     referenced by the property objects.
    *
    */
 
@@ -63,21 +68,31 @@ public class Application extends Configurable
   private ScopeMap<String> definitions;
 
   /**
-   *  Adds a definition.
+   *  Adds a definition into the internal buffer.
+   *
+   *  @throws DuplicateElementException
+   *             if there already is a definition under the same
+   *             name and scope inside the internal buffer.
    */
   public void putDefinition(String name, Scope scope, String value)
+  throws DuplicateElementException
   {
-    if (definitions == null) definitions = new ScopeMap<String>();
-    String result = definitions.put(name, scope, value);
-    if (result != null)
-    {
-      // TODO two or more definitions with the same name and scope
-    }
+    if (definitions == null) 
+      definitions = new ScopeMap<String>();
+    definitions.put(name, scope, value);
   }
 
+  /**
+   *  Returns a value of definition with given name and scope.
+   *
+   *  @throws NoSuchElementException
+   *             if there is no a value associated with given
+   *             name and scope
+   */
   public String getDefinition(String name, Scope scope)
   {
-    if (definitions == null) {} // TODO there is no such def.
+    if (definitions == null)
+      throw new NoSuchElementException();
     return definitions.get(name, scope);
   }
 
@@ -91,6 +106,7 @@ public class Application extends Configurable
   private ScopeMap<Resource> resources;
 
   public void putResource(String name, Scope scope, Resource resource)
+  throws DuplicateElementException
   {
     if (resources == null)
       resources = new ScopeMap<Resource>();
@@ -100,17 +116,25 @@ public class Application extends Configurable
   private ScopeMap<Block> blocks;
 
   public void putBlock(String name, Scope scope, Block block)
+  throws DuplicateElementException
   {
     if (blocks == null)
       blocks = new ScopeMap<Block>();
     blocks.put(name, scope, block);
   }
 
+  /*
+   *
+   *     Signal Definitions.
+   *
+   */
+
   private ScopeMap<Signal> signals;
 
   private ArrayList<Signal> signalIndexes;
 
   public void putSignal(String name, Scope scope, Signal signal)
+  throws DuplicateElementException
   {
     if (signals == null)
     {
@@ -149,6 +173,12 @@ public class Application extends Configurable
     if (signalIndexes == null) {} // TODO
     return signalIndexes.get(index);
   }
+
+  /*
+   *
+   *     Module Definitions.
+   *
+   */
 
   /** An array of module definitions. */
   private ArrayList<Module> modules;

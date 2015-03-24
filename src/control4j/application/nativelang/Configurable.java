@@ -21,6 +21,7 @@ package control4j.application.nativelang;
 import java.util.ArrayList;
 
 import control4j.application.Scope;
+import control4j.tools.DuplicateElementException;
 
 /**
  *
@@ -45,14 +46,20 @@ abstract class Configurable extends DeclarationBase
   {
     if (properties != null)
       for (Property property : properties)
-	if (property.isReference())
-        {
-	  destination.putProperty(property.getKey(), property.getHref(), 
-	      resolveScope(property.getScope(), localScope));
-        }
-	else
+	try
 	{
-	  destination.putProperty(property.getKey(), property.getValue());
+	  if (property.isReference())
+          {
+	    destination.putProperty(property.getKey(), property.getHref(), 
+	        resolveScope(property.getScope(), localScope));
+          }
+	  else
+	  {
+	    destination.putProperty(property.getKey(), property.getValue());
+	  }
+	}
+	catch (DuplicateElementException e)
+	{
 	}
   }
 

@@ -21,6 +21,8 @@ package control4j.application;
 import java.util.HashSet;
 import java.util.LinkedList;
 
+import control4j.tools.DuplicateElementException;
+
 public class Block extends DeclarationBase
 {
 
@@ -55,6 +57,7 @@ public class Block extends DeclarationBase
   private ScopeMap<Signal> signals;
 
   public void putSignal(String name, Scope scope, Signal signal)
+  throws DuplicateElementException
   {
     if (signals == null) signals = new ScopeMap<Signal>();
     signals.put(name, scope, signal);
