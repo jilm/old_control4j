@@ -70,18 +70,19 @@ implements ITranslatable, IXmlHandler
 
   public void translate(control4j.application.Application application)
   {
+
     Scope localScope = application.getScopePointer();
 
     // copy all of the definitions
     if (definitions != null)
       for (Define definition : definitions)
       {
-        Scope scope = 
-            definition.getScope() == 0 ? Scope.getGlobal() : localScope;
 	try
 	{
-        application.putDefinition(
-            definition.getName(), scope, definition.getValue());
+          Scope scope = 
+              definition.getScope() == 0 ? Scope.getGlobal() : localScope;
+          application.putDefinition(
+              definition.getName(), scope, definition.getValue());
 	}
 	catch (DuplicateElementException e)
 	{
@@ -96,13 +97,13 @@ implements ITranslatable, IXmlHandler
     if (resources != null)
       for (ResourceDeclaration resource : resources)
       {
-	control4j.application.Resource destination =
-	    new control4j.application.Resource(resource.getClassName());
-	resource.translate(destination, localScope);
 	try
 	{
-	application.putResource(resource.getName(), 
-	    resolveScope(resource.getScope(), localScope), destination);
+	  control4j.application.Resource destination =
+	      new control4j.application.Resource(resource.getClassName());
+	  resource.translate(destination, localScope);
+	  application.putResource(resource.getName(), 
+	      resolveScope(resource.getScope(), localScope), destination);
 	}
 	catch (DuplicateElementException e)
 	{

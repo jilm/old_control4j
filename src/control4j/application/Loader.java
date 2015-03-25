@@ -45,6 +45,8 @@ public class Loader implements IXmlHandler
 
   private XmlReader reader;
 
+  private ILoader loader;
+
   private LoaderFactory loaderFactory;
 
   /**
@@ -68,7 +70,7 @@ public class Loader implements IXmlHandler
    *  @throws IOException
    *             if something is wrong with the file
    */
-  public Collection<? extends ITranslatable> load(File file) 
+  public ITranslatable load(File file) 
   throws IOException
   {
     InputStream inputStream = new FileInputStream(file);
@@ -76,30 +78,13 @@ public class Loader implements IXmlHandler
     //inputStream.close();
   }
 
-  public Collection<? extends ITranslatable> load(InputStream inputStream)
+  public ITranslatable load(InputStream inputStream)
   throws IOException
   {
     reader = new XmlReader();
     reader.addHandler(this);
     reader.load(inputStream);
-    return null;
-  }
-
-  @XmlStartElement(
-      localName="*", namespace="*", parent="*", parentNamespace="*")
-  private void startElement(Attributes attributes)
-  {
-    try
-    {
-      System.out.println("Start element " + reader.getNamespace());
-      ILoader loader = loaderFactory.getLoader(reader.getNamespace());
-      System.out.println(loader.toString());
-      reader.addHandler((IXmlHandler)loader);
-    }
-    catch (Exception e)
-    {
-      catched(getClass().getName(), "startElement", e);
-    }
+    return loader.get();
   }
 
   public static void main(String[] args) throws Exception
@@ -126,6 +111,23 @@ public class Loader implements IXmlHandler
    */
   public void endProcessing()
   {
+  }
+
+  @XmlStartElement(
+      localName="*", namespace="*", parent="*", parentNamespace="*")
+  private void startElement(Attributes attributes)
+  {
+    try
+    {
+      System.out.println("Start element " + reader.getNamespace());
+      loader = loaderFactory.getLoader(reader.getNamespace());
+      System.out.println(loader.toString());
+      reader.addHandler((IXmlHandler)loader);
+    }
+    catch (Exception e)
+    {
+      catched(getClass().getName(), "startElement", e);
+    }
   }
 
 }

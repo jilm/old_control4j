@@ -120,7 +120,7 @@ public class Property extends DeclarationBase implements IXmlHandler
 
   public boolean isReference()
   {
-    return isReference();
+    return isReference;
   }
 
   /*

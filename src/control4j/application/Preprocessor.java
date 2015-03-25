@@ -19,6 +19,8 @@ package control4j.application;
  */
 
 import java.util.Set;
+import java.util.NoSuchElementException;
+import java.text.MessageFormat;
 
 public class Preprocessor
 {
@@ -48,10 +50,52 @@ public class Preprocessor
     for (String key : keys)
     {
       Reference reference = object.getReferenceConfigItem(key);
-      String value = application.getDefinition(
-	  reference.getHref(), reference.getScope());
-      object.resolveConfigItem(key, value);
+      try
+      {
+        String value = application.getDefinition(
+	    reference.getHref(), reference.getScope());
+        object.resolveConfigItem(key, value);
+      }
+      catch (NoSuchElementException e)
+      {
+	reportMissingDefinition(key, reference, object);
+      }
     }
+  }
+
+  public static void main(String[] args) throws Exception
+  {
+    String filename = args[0];
+    java.io.File file = new java.io.File(filename);
+    Loader loader = new Loader();
+    ITranslatable translatable = loader.load(file);
+    Application app = new Application();
+    translatable.translate(app);
+    Preprocessor preprocessor = new Preprocessor();
+    preprocessor.process(app);
+    System.out.println(app.toString());
+  }
+
+  /*
+   *
+   *     Report Errors
+   *
+   */
+
+  /**
+   *  Reports a message about missing definition.
+   */
+  private void reportMissingDefinition(
+      String key, Reference reference, DeclarationBase object)
+  {
+    StringBuilder sb = new StringBuilder();
+    sb.append("Cannot find appropriate define element for a property.\n")
+      .append("Key: {0}, href: {1}.")
+      .append("The property element is a part of:\n{2}\n");
+    String message = MessageFormat.format(
+	sb.toString(), key, reference.getHref(), 
+	object.getDeclarationReferenceText());
+    ErrorManager.getInstance().addError(message);
   }
 
 }

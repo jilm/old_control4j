@@ -60,6 +60,7 @@ abstract class Configurable extends DeclarationBase
 	}
 	catch (DuplicateElementException e)
 	{
+	  // TODO
 	}
   }
 

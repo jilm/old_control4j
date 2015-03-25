@@ -230,4 +230,19 @@ public class Application extends Configurable
       throw new IllegalArgumentException();
   }
 
+  @Override
+  public String toString()
+  {
+    StringBuilder sb = new StringBuilder();
+
+    sb.append("Definitions:\n");
+
+    if (definitions != null)
+      sb.append(definitions.toString());
+    else
+      sb.append("No definition");
+
+    return sb.toString();
+  }
+
 }

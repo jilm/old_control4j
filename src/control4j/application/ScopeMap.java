@@ -89,6 +89,16 @@ public class ScopeMap<E>
       return name.hashCode() ^ scope.hashCode();
     }
 
+    /**
+     *  Returns name and scope fields in the human readable form.
+     */
+    @Override
+    public String toString()
+    {
+      String pattern = "Key: [ name: {0}, scope: {1} ]";
+      return java.text.MessageFormat.format(pattern, name, scope.toString());
+    }
+
   }
 
   /*
@@ -148,6 +158,12 @@ public class ScopeMap<E>
       tempKey.scope = tempKey.scope.getParent();
     }
     throw new NoSuchElementException();
+  }
+
+  @Override
+  public String toString()
+  {
+    return buffer.toString();
   }
 
 }

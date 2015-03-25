@@ -37,13 +37,15 @@ import control4j.tools.XmlEndElement;
 public class Loader implements ILoader, IXmlHandler
 {
 
+  private Application application;
+
   public Loader()
   {
   }
 
   public Application get() throws IOException
   {
-    return null;
+    return application;
   }
 
   /*
@@ -69,7 +71,7 @@ public class Loader implements ILoader, IXmlHandler
       parent="", parentNamespace="*")
   private void startApplication(Attributes attributes)
   {
-    Application application = new Application();
+    application = new Application();
     System.out.println(reader);
     reader.addHandler(application);
   }
