@@ -273,6 +273,16 @@ public class Application extends Configurable
         .append("Signal Definitions:\n");
       sb.append(signals.toString());
     }
+
+    // print use objects
+    if (uses != null)
+    {
+      sb.append(indent).append("Use Objects {\n");
+      String indent2 = indent + "  ";
+      for (Use use : uses)
+	use.toString(indent2, sb);
+      sb.append(indent).append("}\n");
+    }
   }
 
 }

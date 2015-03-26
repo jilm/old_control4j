@@ -21,6 +21,7 @@ package control4j.application.nativelang;
 import java.util.ArrayList;
 import org.xml.sax.Attributes;
 
+import control4j.application.Scope;
 import control4j.tools.IXmlHandler;
 import control4j.tools.ParseException;
 import control4j.tools.XmlReader;
@@ -37,7 +38,17 @@ public class Use extends Configurable implements IXmlHandler
 
   private String href;
 
+  public String getHref()
+  {
+    return href;
+  }
+
   private int scope;
+
+  public int getScope()
+  {
+    return scope;
+  }
 
   private ArrayList<Input> input = new ArrayList<Input>();
 
@@ -52,6 +63,35 @@ public class Use extends Configurable implements IXmlHandler
   {
     return java.text.MessageFormat.format(
 	"Use; href: {0}, scope: {1}", href, Parser.formatScope(scope));
+  }
+
+  public void translate(
+      control4j.application.Use destination, Scope localScope)
+  {
+    // translate configuration
+    super.translate(destination, localScope);
+
+    // translate input
+    if (input != null)
+      for (Input inp : input)
+      {
+	control4j.application.Input destInput
+	    = new control4j.application.Input(
+	    resolveScope(inp.getScope(), localScope), inp.getHref());
+        inp.translate(destInput, localScope);
+	destination.putInput(inp.getIndex(), destInput);
+      }
+
+    // translate output
+    if (output != null)
+      for (Output out : output)
+      {
+	control4j.application.Output destOutput
+	    = new control4j.application.Output(
+	    resolveScope(out.getScope(), localScope), out.getHref());
+        out.translate(destOutput, localScope);
+	destination.putOutput(out.getIndex(), destOutput);
+      }
   }
 
   /*

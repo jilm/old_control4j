@@ -66,4 +66,24 @@ public class Use extends Configurable
     outputMap.put(index, output);
   }
 
+  void toString(String indent, StringBuilder sb)
+  {
+    sb.append("Use {\n");
+    String indent2 = indent + "  ";
+    sb.append(indent2)
+      .append("href=")
+      .append(href)
+      .append("\n");
+    sb.append(indent2)
+      .append("scope=")
+      .append(scope.toString())
+      .append("\n");
+    super.toString(indent2, sb);
+    if (inputMap != null)
+      sb.append(inputMap.toString()).append("\n");
+    if (outputMap != null)
+      sb.append(outputMap.toString()).append("\n");
+    sb.append(indent).append("}\n");
+  }
+
 }

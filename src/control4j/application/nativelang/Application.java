@@ -161,7 +161,17 @@ implements ITranslatable, IXmlHandler
       }
 
     // translate all of the nested applications
+
     // translate all of the use objects
+    if (uses != null)
+      for (Use use : uses)
+      {
+        control4j.application.Use destination
+            = new control4j.application.Use(use.getHref(), 
+	    resolveScope(use.getScope(), localScope));
+	use.translate(destination, localScope);
+	application.addUse(destination);
+      }
   }
 
   /*
