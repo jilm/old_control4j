@@ -161,6 +161,13 @@ implements ITranslatable, IXmlHandler
       }
 
     // translate all of the nested applications
+    if (applications != null)
+      for (Application nested : applications)
+      {
+	application.startScope();
+	nested.translate(application);
+        application.endScope();
+      }
 
     // translate all of the use objects
     if (uses != null)
