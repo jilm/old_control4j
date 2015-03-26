@@ -21,6 +21,7 @@ package control4j.application.nativelang;
 import java.util.ArrayList;
 import org.xml.sax.Attributes;
 
+import control4j.application.Scope;
 import control4j.tools.IXmlHandler;
 import control4j.tools.ParseException;
 import control4j.tools.XmlReader;
@@ -37,10 +38,45 @@ public class Signal extends DescriptionBase implements IXmlHandler
 
   private String name;
 
+  public String getName()
+  {
+    return name;
+  }
+
   private int scope;
 
-  public void Translate(control4j.application.Signal signal)
+  public int getScope()
   {
+    return scope;
+  }
+
+  /**
+   *
+   */
+  public void translate(
+      control4j.application.Signal destination, Scope localScope)
+  {
+    // translate configuration
+    super.translate(destination, localScope);
+
+    // translate value for the time t-1
+    if (isValueT_1Specified)
+    {
+      if (isValueT_1Valid)
+	destination.setValueT_1(valueT_1);
+      else
+	destination.setValueT_1Invalid();
+    }
+
+    // translate tag objects
+    if (tags != null)
+      for (Tag tag : tags)
+      {
+	control4j.application.Tag destTag = new control4j.application.Tag();
+	tag.translate(destTag, localScope);
+	destination.putTag(tag.getName(), destTag);
+      }
+
   }
 
   /*

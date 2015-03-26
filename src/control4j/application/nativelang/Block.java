@@ -21,6 +21,7 @@ package control4j.application.nativelang;
 import java.util.ArrayList;
 import org.xml.sax.Attributes;
 
+import control4j.application.Scope;
 import control4j.tools.IXmlHandler;
 import control4j.tools.ParseException;
 import control4j.tools.XmlReader;
@@ -37,7 +38,17 @@ public class Block implements IXmlHandler
 
   private String name;
 
+  public String getName()
+  {
+    return name;
+  }
+
   private int scope;
+
+  public int getScope()
+  {
+    return scope;
+  }
 
   private ArrayList<String> input;
 
@@ -71,6 +82,18 @@ public class Block implements IXmlHandler
       throw new IllegalArgumentException(); // TODO
     this.name = name;
     this.scope = scope;
+  }
+
+  /**
+   *
+   */
+  public void translate(
+      control4j.application.Block destination, Scope localScope)
+  {
+    // translate all of the input
+    // translate all of the output
+    // translate all of the signals
+    // translate all of the use elements
   }
 
   /*

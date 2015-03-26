@@ -74,4 +74,30 @@ public class Signal extends Configurable
     tags.put(name, tag);
   }
 
+  void toString(String indent, StringBuilder sb)
+  {
+    sb.append("Signal {\n");
+    String indent2 = indent + "  ";
+    // print configuration
+    super.toString(indent2, sb);
+    // print T-1 value
+    if (isValueT_1)
+    {
+      if (isValueT_1Valid)
+	sb.append(indent2)
+	  .append("Value for time T-1=")
+	  .append(valueT_1)
+	  .append("\n");
+      else
+	sb.append(indent2)
+	  .append("Value for time T-1 is invalid\n");
+    }
+    // print tags
+    if (tags != null)
+    {
+      sb.append(tags.toString());
+    }
+    sb.append(indent).append("}\n");
+  }
+
 }

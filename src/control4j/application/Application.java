@@ -240,6 +240,12 @@ public class Application extends Configurable
   public String toString()
   {
     StringBuilder sb = new StringBuilder();
+    toString("", sb);
+    return sb.toString();
+  }
+
+  void toString(String indent, StringBuilder sb)
+  {
 
     sb.append("Definitions:\n");
     if (definitions != null)
@@ -248,7 +254,7 @@ public class Application extends Configurable
       sb.append("No definition");
 
     sb.append("Configuration:\n");
-    sb.append(super.toString());
+    super.toString(indent, sb);
 
     sb.append("Resource Definitions:\n");
     if (resources != null)
@@ -260,7 +266,13 @@ public class Application extends Configurable
       for (Module module : modules)
 	module.toString("  ", sb);
 
-    return sb.toString();
+    // print signal definitions
+    if (signals != null)
+    {
+      sb.append(indent)
+        .append("Signal Definitions:\n");
+      sb.append(signals.toString());
+    }
   }
 
 }

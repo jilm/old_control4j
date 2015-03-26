@@ -246,7 +246,7 @@ public abstract class Configurable extends DeclarationBase
   public String toString()
   {
     StringBuilder sb = new StringBuilder();
-    toString("", sb);
+    this.toString("", sb);
     return sb.toString();
   }
 

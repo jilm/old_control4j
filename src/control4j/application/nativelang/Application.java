@@ -68,12 +68,15 @@ implements ITranslatable, IXmlHandler
   {
   }
 
+  /**
+   *
+   */
   public void translate(control4j.application.Application application)
   {
 
     Scope localScope = application.getScopePointer();
 
-    // copy all of the definitions
+    // translate all of the definitions
     if (definitions != null)
       for (Define definition : definitions)
       {
@@ -90,10 +93,10 @@ implements ITranslatable, IXmlHandler
 	}
       }
 
-    // copy all of the properties
+    // translate all of the properties
     super.translate(application, localScope);
 
-    // copy all of the resource definitions
+    // translate all of the resource definitions
     if (resources != null)
       for (ResourceDeclaration resource : resources)
       {
@@ -120,6 +123,45 @@ implements ITranslatable, IXmlHandler
 	module.translate(destination, localScope);
 	application.addModule(destination);
       }
+
+    // translate all of the blocks
+    if (blocks != null)
+      for (Block block : blocks)
+      {
+	control4j.application.Block destination =
+	    new control4j.application.Block();
+	block.translate(destination, localScope);
+	try
+	{
+	  application.putBlock(block.getName(), 
+	      resolveScope(block.getScope(), localScope), destination);
+	}
+	catch (DuplicateElementException e)
+	{
+	  // TODO
+	}
+      }
+
+    // translate all of the signals
+    if (signals != null)
+      for (Signal signal : signals)
+      {
+	control4j.application.Signal destination
+	    = new control4j.application.Signal();
+	signal.translate(destination, localScope);
+	try
+	{
+	  application.putSignal(signal.getName(),
+	      resolveScope(signal.getScope(), localScope), destination);
+	}
+	catch (DuplicateElementException e)
+	{
+	  // TODO
+	}
+      }
+
+    // translate all of the nested applications
+    // translate all of the use objects
   }
 
   /*
