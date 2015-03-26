@@ -71,4 +71,10 @@ public class Block extends DeclarationBase
     uses.add(use);
   }
 
+  void toString(String indent, StringBuilder sb)
+  {
+    sb.append("Block {\n");
+    String indent2 = indent + "  ";
+    sb.append(indent).append("}\n");
+  }
 }

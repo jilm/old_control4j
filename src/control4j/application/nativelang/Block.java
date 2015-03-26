@@ -23,6 +23,7 @@ import org.xml.sax.Attributes;
 
 import control4j.application.Scope;
 import control4j.tools.IXmlHandler;
+import control4j.tools.DuplicateElementException;
 import control4j.tools.ParseException;
 import control4j.tools.XmlReader;
 import control4j.tools.XmlStartElement;
@@ -91,9 +92,43 @@ public class Block implements IXmlHandler
       control4j.application.Block destination, Scope localScope)
   {
     // translate all of the input
+    if (input != null)
+      for (String inp : input)
+	destination.addInput(inp);
+
     // translate all of the output
+    if (output != null)
+      for (String out : output)
+	destination.addOutput(out);
+
     // translate all of the signals
+    if (signals != null)
+      for (Signal signal : signals)
+      {
+	control4j.application.Signal translated
+	    = new control4j.application.Signal();
+	signal.translate(translated, localScope);
+	try
+	{
+	  destination.putSignal(signal.getName(), 
+	      resolveScope(signal.getScope(), localScope), translated);
+	}
+	catch (DuplicateElementException e)
+	{
+	  // TODO
+	}
+      }
+
     // translate all of the use elements
+    if (uses != null)
+      for (Use use : uses)
+      {
+	control4j.application.Use translated
+	    = new control4j.application.Use(use.getHref(),
+	    resolveScope(use.getScope(), localScope));
+	use.translate(translated, localScope);
+	destination.addUse(translated);
+      }
   }
 
   /*
@@ -136,6 +171,22 @@ public class Block implements IXmlHandler
     if (uses == null) uses = new ArrayList<Use>();
     uses.add(use);
   }
+
+  protected static Scope resolveScope(int code, Scope localScope)
+  {
+    switch (code)
+    {
+      case 0:
+        return Scope.getGlobal();
+      case 1:
+	return localScope;
+      case 2:
+        return localScope.getParent();
+      default:
+        throw new IllegalArgumentException();
+    }
+  }
+
 
   /*
    *

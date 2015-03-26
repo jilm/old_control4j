@@ -277,12 +277,16 @@ public class Application extends Configurable
     // print use objects
     if (uses != null)
     {
-      sb.append(indent).append("Use Objects {\n");
+      sb.append(indent).append("Use Objects \n");
       String indent2 = indent + "  ";
       for (Use use : uses)
 	use.toString(indent2, sb);
-      sb.append(indent).append("}\n");
+      sb.append(indent).append("\n");
     }
-  }
 
+    // print block objects
+    if (blocks != null)
+      sb.append(blocks.toString()).append("\n");
+
+  }
 }
