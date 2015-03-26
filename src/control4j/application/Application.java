@@ -113,6 +113,12 @@ public class Application extends Configurable
     resources.put(name, scope, resource);
   }
 
+  /*
+   *
+   *     Block Definitions
+   *
+   */
+
   private ScopeMap<Block> blocks;
 
   public void putBlock(String name, Scope scope, Block block)
@@ -236,11 +242,23 @@ public class Application extends Configurable
     StringBuilder sb = new StringBuilder();
 
     sb.append("Definitions:\n");
-
     if (definitions != null)
       sb.append(definitions.toString());
     else
       sb.append("No definition");
+
+    sb.append("Configuration:\n");
+    sb.append(super.toString());
+
+    sb.append("Resource Definitions:\n");
+    if (resources != null)
+      sb.append(resources.toString());
+    else
+      sb.append("No Resource Definition");
+
+    if (modules != null)
+      for (Module module : modules)
+	module.toString("  ", sb);
 
     return sb.toString();
   }

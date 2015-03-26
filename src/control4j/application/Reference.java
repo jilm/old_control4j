@@ -48,4 +48,12 @@ class Reference
     return scope;
   }
 
+  @Override
+  public String toString()
+  {
+    String pattern = "Reference'{'href:{0}, scope:{1}'}'";
+    return java.text.MessageFormat.format(
+	pattern, href, scope.toString());
+  }
+
 }

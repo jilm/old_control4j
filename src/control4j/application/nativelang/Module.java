@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Set;
 import org.xml.sax.Attributes;
 
+import control4j.application.Scope;
 import control4j.tools.IXmlHandler;
 import control4j.tools.XmlReader;
 import control4j.tools.XmlStartElement;
@@ -36,6 +37,11 @@ public class Module extends DescriptionBase implements IXmlHandler
 {
 
   private String className;
+
+  public String getClassName()
+  {
+    return className;
+  }
 
   private ArrayList<Resource> resources = new ArrayList<Resource>();
 
@@ -64,6 +70,94 @@ public class Module extends DescriptionBase implements IXmlHandler
     if (className == null || className.trim().length() == 0)
       throw new IllegalArgumentException(); // TODO
     this.className = className;
+  }
+
+  /**
+   *
+   */
+  public void translate(
+      control4j.application.Module destination, Scope localScope)
+  {
+    // translate resource definitions
+    for (Resource resource : resources)
+    {
+      if (resource.isReference())
+      {
+	destination.putResource(resource.getKey(), resource.getHref(), 
+	    resolveScope(resource.getScope(), localScope));
+      }
+      else
+      {
+        control4j.application.Resource translated 
+	    = new control4j.application.Resource(resource.getClassName());
+        resource.translate(translated, localScope);
+	destination.putResource(resource.getKey(), translated);
+      }
+    }
+
+    // translate input
+    for (Input inp : input)
+    {
+      control4j.application.Input translated = new control4j.application.Input(
+	  resolveScope(inp.getScope(), localScope), inp.getHref());
+      inp.translate(translated, localScope);
+      String strIndex = inp.getIndex();
+      if (strIndex == null)
+      {
+	// an input with variable index
+	destination.putInput(translated);
+      }
+      else
+      {
+	// an input with fixed index
+	try
+	{
+	  int index = Integer.parseInt(strIndex);
+	  destination.putInput(index, translated);
+	}
+	catch (NumberFormatException e)
+	{
+	  // TODO
+	}
+      }
+    }
+
+    // translate output
+    for (Output out : output)
+    {
+      control4j.application.Output translated 
+	  = new control4j.application.Output(
+	  resolveScope(out.getScope(), localScope), out.getHref());
+      out.translate(translated, localScope);
+      String strIndex = out.getIndex();
+      if (strIndex == null)
+      {
+	// an output with variable index
+	destination.putOutput(translated);
+      }
+      else
+      {
+	// an output with fixed index
+	try
+	{
+	  int index = Integer.parseInt(strIndex);
+	  destination.putOutput(index, translated);
+	}
+	catch (NumberFormatException e)
+	{
+	  // TODO
+	}
+      }
+    }
+
+    // translate tagged input
+    for (String tag : inputTags)
+      destination.addInputTag(tag);
+
+    // translate tagged output
+    for (String tag : outputTags)
+      destination.addOutputTag(tag);
+
   }
 
   /*

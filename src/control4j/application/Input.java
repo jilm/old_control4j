@@ -65,4 +65,13 @@ public class Input extends Configurable
     return scope;
   }
 
+  public void toString(StringBuilder sb)
+  {
+    sb.append("Input {href=")
+      .append(href)
+      .append(", scope=")
+      .append(scope.toString())
+      .append("}\n");
+  }
+
 }

@@ -39,4 +39,13 @@ public class Output extends Configurable
     return scope;
   }
 
+  public void toString(StringBuilder sb)
+  {
+    sb.append("Output {href=")
+      .append(href)
+      .append(", scope=")
+      .append(scope.toString())
+      .append("}\n");
+  }
+
 }

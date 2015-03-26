@@ -36,6 +36,8 @@ public class Preprocessor
 
     // resolve configuration on the application level
     resolveConfiguration(application);
+
+
   }
 
   /**

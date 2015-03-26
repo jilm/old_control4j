@@ -37,9 +37,24 @@ public class Input extends Configurable implements IXmlHandler
 
   private String index;
 
+  public String getIndex()
+  {
+    return index;
+  }
+
   private String href;
 
+  public String getHref()
+  {
+    return href;
+  }
+
   private int scope;
+
+  public int getScope()
+  {
+    return scope;
+  }
 
   /**
    *  Returns a string which contains fields of this object in

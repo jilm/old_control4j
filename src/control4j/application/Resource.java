@@ -42,4 +42,16 @@ public class Resource extends Configurable
     return className;
   }
 
+  @Override
+  public String toString()
+  {
+    StringBuilder sb = new StringBuilder();
+    sb.append("Resource Definition{class=");
+    sb.append(className);
+    sb.append(", configuration={");
+    sb.append(super.toString());
+    sb.append("}");
+    return sb.toString();
+  }
+
 }

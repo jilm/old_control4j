@@ -21,6 +21,7 @@ package control4j.application.nativelang;
 import java.util.ArrayList;
 import org.xml.sax.Attributes;
 
+import control4j.application.Scope;
 import control4j.tools.IXmlHandler;
 import control4j.tools.ParseException;
 import control4j.tools.XmlReader;
@@ -66,11 +67,42 @@ public class Resource extends Configurable implements IXmlHandler
 	  "Resource; key: {0}, class: {1}", key, className);
   }
 
+  public void translate(
+      control4j.application.Resource destination, Scope localScope)
+  {
+    super.translate(destination, localScope);
+  }
+
   /*
    *
    *    Getters
    *
    */
+
+  public String getClassName()
+  {
+    return className;
+  }
+
+  public String getKey()
+  {
+    return key;
+  }
+
+  public String getHref()
+  {
+    return href;
+  }
+
+  public int getScope()
+  {
+    return scope;
+  }
+
+  public boolean isReference()
+  {
+    return isReference;
+  }
 
   /*
    *

@@ -28,7 +28,7 @@ import control4j.tools.DeclarationReference;
 /**
  *
  *  Crate class for module definition. Contains all the information needed
- *  to create and configure an instance of a class which implements the 
+ *  to create and configure an instance of the class which implements the 
  *  functionality of the module.
  *
  */
@@ -54,6 +54,7 @@ public class Module extends Configurable
 
   /** 
    *  Array of the input references with fixed index.
+   *  This array may contain null values!
    */
   private ArrayList<Input> inputArray;
 
@@ -64,6 +65,11 @@ public class Module extends Configurable
   {
     if (inputArray == null)
       inputArray = new ArrayList<Input>();
+    // if the array list is not big enough
+    inputArray.ensureCapacity(index+1);
+    while (index >= inputArray.size())
+      inputArray.add(null);
+    // add the input into the list
     inputArray.set(index, input);
     // TODO input with duble indexes
   }
@@ -131,6 +137,11 @@ public class Module extends Configurable
   {
     if (outputArray == null)
       outputArray = new ArrayList<Output>();
+    // if the array list is not big enough
+    outputArray.ensureCapacity(index+1);
+    while (index >= outputArray.size())
+      outputArray.add(null);
+    // add the input into the list
     outputArray.set(index, output);
     // TODO output with duble indexes
   }
@@ -246,6 +257,70 @@ public class Module extends Configurable
     if (outputTags == null)
       outputTags = new HashSet<String>();
     outputTags.add(name);
+  }
+
+  @Override
+  public String toString()
+  {
+    StringBuilder sb = new StringBuilder();
+    toString("", sb);
+    return sb.toString();
+  }
+
+  void toString(String indent, StringBuilder sb)
+  {
+    sb.append("Module {\n");
+    String indent2 = indent + "  ";
+    sb.append(indent2).append("class=").append(className)
+      .append("\n");
+    // print resources
+    if (resources != null)
+      sb.append(resources.toString()).append("\n");
+    // print input
+    if (inputArray != null)
+      for (int i=0; i<inputArray.size(); i++)
+	if (inputArray.get(i) != null)
+	{
+	  sb.append(indent2)
+	    .append('[').append(i).append(']');
+	  inputArray.get(i).toString(sb);
+	}
+    if (variableInput != null)
+      for (Input input : variableInput)
+      {
+	sb.append(indent2)
+	  .append("[-]");
+	  input.toString(sb);
+      }
+    // print output
+    if (outputArray != null)
+      for (int i=0; i<outputArray.size(); i++)
+	if (outputArray.get(i) != null)
+	{
+	  sb.append(indent2)
+	    .append('[').append(i).append(']');
+	  outputArray.get(i).toString(sb);
+	}
+    if (variableOutput != null)
+      for (Output output : variableOutput)
+      {
+	sb.append(indent2)
+	  .append("[-]");
+	  output.toString(sb);
+      }
+    // print input tags
+    if (inputTags != null)
+      sb.append(indent2)
+	.append("Input Tags")
+	.append(inputTags.toString())
+	.append("\n");
+    // print output tags
+    if (outputTags != null)
+      sb.append(indent2)
+	.append("Output Tags")
+	.append(outputTags.toString())
+	.append("\n");
+    sb.append(indent).append("}\n");
   }
 
 }

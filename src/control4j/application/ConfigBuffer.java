@@ -55,4 +55,21 @@ public class ConfigBuffer extends ConfigBufferTemplate implements IConfigBuffer
     return buffer.size();
   }
 
+  @Override
+  public String toString()
+  {
+    return buffer.toString();
+  }
+
+  void toString(String indent, StringBuilder sb)
+  {
+    java.util.Set<String> keys = buffer.keySet();
+    for (String key : keys)
+      sb.append(indent)
+	.append(key)
+	.append('=')
+	.append(buffer.get(key))
+	.append("\n");
+  }
+
 }

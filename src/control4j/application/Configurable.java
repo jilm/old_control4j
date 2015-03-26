@@ -242,4 +242,21 @@ public abstract class Configurable extends DeclarationBase
 
   }
 
+  @Override
+  public String toString()
+  {
+    StringBuilder sb = new StringBuilder();
+    toString("", sb);
+    return sb.toString();
+  }
+
+  void toString(String indent, StringBuilder sb)
+  {
+    if (configuration != null)
+      configuration.toString(indent, sb);
+    if (references != null)
+      sb.append(references.toString());
+    sb.append("\n");
+  }
+
 }

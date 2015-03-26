@@ -110,6 +110,16 @@ implements ITranslatable, IXmlHandler
 	  // TODO
 	}
       }
+
+    // translate all of the modules
+    if (modules != null)
+      for (Module module : modules)
+      {
+	control4j.application.Module destination =
+	    new control4j.application.Module(module.getClassName());
+	module.translate(destination, localScope);
+	application.addModule(destination);
+      }
   }
 
   /*
