@@ -119,6 +119,16 @@ public class Block implements IXmlHandler
 	}
       }
 
+    // translate all of the modules
+    if (modules != null)
+      for (Module module : modules)
+      {
+	control4j.application.Module translated
+	    = new control4j.application.Module(module.getClassName());
+	module.translate(translated, localScope);
+	destination.addModule(translated);
+      }
+
     // translate all of the use elements
     if (uses != null)
       for (Use use : uses)
