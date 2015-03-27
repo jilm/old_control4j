@@ -65,7 +65,7 @@ public class Application extends Configurable
    */
 
   /** Define objects. */
-  private ScopeMap<String> definitions;
+  private ScopeMap<ValueObject> definitions;
 
   /**
    *  Adds a definition into the internal buffer.
@@ -78,8 +78,8 @@ public class Application extends Configurable
   throws DuplicateElementException
   {
     if (definitions == null) 
-      definitions = new ScopeMap<String>();
-    definitions.put(name, scope, value);
+      definitions = new ScopeMap<ValueObject>();
+    definitions.put(name, scope, new ValueObject(value));
   }
 
   /**
@@ -93,7 +93,7 @@ public class Application extends Configurable
   {
     if (definitions == null)
       throw new NoSuchElementException();
-    return definitions.get(name, scope);
+    return definitions.get(name, scope).getValue();
   }
 
   /*
@@ -236,57 +236,74 @@ public class Application extends Configurable
       throw new IllegalArgumentException();
   }
 
+  /**
+   *  Returns the content of this object in the human readable form.
+   */
   @Override
   public String toString()
   {
     StringBuilder sb = new StringBuilder();
-    toString("", sb);
+    sb.append("Application\n");
+    toString("  ", sb);
+    sb.append("\n");
     return sb.toString();
   }
 
+  /**
+   *  Returns the content of this object in the human readable form.
+   */
+  @Override
   void toString(String indent, StringBuilder sb)
   {
+    String indent2 = indent + "  ";
 
-    sb.append("Definitions:\n");
-    if (definitions != null)
-      sb.append(definitions.toString());
-    else
-      sb.append("No definition");
-
-    sb.append("Configuration:\n");
-    super.toString(indent, sb);
-
-    sb.append("Resource Definitions:\n");
-    if (resources != null)
-      sb.append(resources.toString());
-    else
-      sb.append("No Resource Definition");
-
-    if (modules != null)
-      for (Module module : modules)
-	module.toString("  ", sb);
-
-    // print signal definitions
-    if (signals != null)
+    // print definitions
+    if (definitions != null && !definitions.isEmpty())
     {
       sb.append(indent)
-        .append("Signal Definitions:\n");
-      sb.append(signals.toString());
+        .append("Definitions\n");
+      definitions.toString(indent2, sb);
     }
 
-    // print use objects
-    if (uses != null)
+    // write configuration
+    super.toString(indent, sb);
+
+    // write resource definitions
+    if (resources != null && !resources.isEmpty())
     {
-      sb.append(indent).append("Use Objects \n");
-      String indent2 = indent + "  ";
+      sb.append(indent).append("Resource Definitions\n");
+      resources.toString(indent2, sb);
+    }
+
+    // write modules
+    if (modules != null && modules.size() > 0)
+    {
+      sb.append(indent).append("Modules\n");
+      for (Module module : modules)
+	module.toString(indent2, sb);
+    }
+
+    // write signal definitions
+    if (signals != null && !signals.isEmpty())
+    {
+      sb.append(indent).append("Signal Definitions\n");
+      signals.toString(indent2, sb);
+    }
+
+    // write use objects
+    if (uses != null && uses.size() > 0)
+    {
+      sb.append(indent).append("Use Objects\n");
       for (Use use : uses)
 	use.toString(indent2, sb);
-      sb.append(indent).append("\n");
     }
 
     // print block objects
-    if (blocks != null)
-      sb.append(blocks.toString()).append("\n");
+    if (blocks != null && !blocks.isEmpty())
+    {
+      sb.append(indent).append("Block Definitions\n");
+      blocks.toString(indent2, sb);
+    }
 
   }
 }

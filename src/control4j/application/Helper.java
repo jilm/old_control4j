@@ -18,19 +18,35 @@ package control4j.application;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-public class Tag extends Configurable
+import java.util.Set;
+import java.util.HashMap;
+
+class Helper
 {
 
-  public Tag()
-  { 
-    super();
+  static void toString(
+      HashMap<String, Reference> map, String indent, StringBuilder sb)
+  {
+    Set<String> keys = map.keySet();
+    for (String key : keys)
+      sb.append(indent)
+	.append(key)
+	.append('=')
+	.append(map.get(key).toString())
+	.append("\n");
   }
 
-  @Override
-  void toString(String indent, StringBuilder sb)
+  static void objectToString(HashMap<String, ? extends ObjectBase> map, 
+      String indent, StringBuilder sb)
   {
-    sb.append("\n");
-    super.toString(indent + "  ", sb);
+    Set<String> keys = map.keySet();
+    for (String key : keys)
+    {
+      sb.append(indent)
+	.append(key)
+	.append('=');
+      map.get(key).toString(indent, sb);
+    }
   }
 
 }

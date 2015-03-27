@@ -32,7 +32,7 @@ import control4j.tools.DeclarationReference;
  *  @see control4j.tools.DeclarationReference
  *
  */
-public abstract class DeclarationBase
+public abstract class DeclarationBase extends ObjectBase
 {
 
   /**

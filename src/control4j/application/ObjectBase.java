@@ -18,19 +18,26 @@ package control4j.application;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-public class Tag extends Configurable
+/**
+ *
+ *  It is a common ancestor of all of the application objects.
+ *
+ */
+public abstract class ObjectBase
 {
 
-  public Tag()
-  { 
-    super();
-  }
-
-  @Override
-  void toString(String indent, StringBuilder sb)
-  {
-    sb.append("\n");
-    super.toString(indent + "  ", sb);
-  }
-
+  /**
+   *  Appends the content of this object into the sb in the
+   *  human readable form. Do not write any identifiers, write
+   *  just a content. If the content occupy just one line of
+   *  text, just place it to the sb. If it occupy more than
+   *  just a line, place the indent parameter in front of 
+   *  the second and each subsequent line. Place a new line
+   *  symbol behind the last line.
+   *
+   *  @param sb
+   *             to place the result
+   */
+  abstract void toString(String indent, StringBuilder sb);
+  
 }

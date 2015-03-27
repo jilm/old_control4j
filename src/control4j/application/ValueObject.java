@@ -18,19 +18,24 @@ package control4j.application;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-public class Tag extends Configurable
+public class ValueObject extends DeclarationBase
 {
+  private String value;
 
-  public Tag()
-  { 
-    super();
+  public ValueObject(String value)
+  {
+    this.value = value;
+  }
+
+  public String getValue()
+  {
+    return value;
   }
 
   @Override
   void toString(String indent, StringBuilder sb)
   {
-    sb.append("\n");
-    super.toString(indent + "  ", sb);
+    sb.append(value).append("\n");
   }
 
 }

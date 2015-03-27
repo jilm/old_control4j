@@ -54,4 +54,15 @@ public class Resource extends Configurable
     return sb.toString();
   }
 
+  @Override
+  void toString(String indent, StringBuilder sb)
+  {
+    sb.append("\n")
+      .append(indent)
+      .append("class = ")
+      .append(className)
+      .append("\n");
+    super.toString(indent, sb);
+  }
+
 }

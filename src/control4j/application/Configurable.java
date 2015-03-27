@@ -250,13 +250,21 @@ public abstract class Configurable extends DeclarationBase
     return sb.toString();
   }
 
+  /**
+   *  Write each config item on the separate line.
+   */
+  @Override
   void toString(String indent, StringBuilder sb)
   {
+    if ((configuration == null || configuration.size() == 0)
+	&& (references == null || references.size() == 0))
+      return;
+    sb.append(indent).append("Configuration\n");
+    String indent2 = indent + "  ";
     if (configuration != null)
-      configuration.toString(indent, sb);
+      configuration.toString(indent2, sb);
     if (references != null)
-      sb.append(references.toString());
-    sb.append("\n");
+      Helper.toString(references, indent2, sb);
   }
 
 }

@@ -39,13 +39,15 @@ public class Output extends Configurable
     return scope;
   }
 
-  public void toString(StringBuilder sb)
+  @Override
+  void toString(String indent, StringBuilder sb)
   {
-    sb.append("Output {href=")
+    sb.append("href=")
       .append(href)
       .append(", scope=")
       .append(scope.toString())
-      .append("}\n");
+      .append("\n");
+    super.toString(indent + "  ", sb);
   }
 
 }

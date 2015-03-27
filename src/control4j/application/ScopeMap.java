@@ -29,7 +29,7 @@ import control4j.tools.DuplicateElementException;
  *  pair: a name and a scope.
  *
  */
-public class ScopeMap<E>
+public class ScopeMap<E extends ObjectBase>
 {
 
   /**
@@ -95,7 +95,7 @@ public class ScopeMap<E>
     @Override
     public String toString()
     {
-      String pattern = "Key: [ name: {0}, scope: {1} ]";
+      String pattern = "name: {0}, scope: {1}";
       return java.text.MessageFormat.format(pattern, name, scope.toString());
     }
 
@@ -160,10 +160,35 @@ public class ScopeMap<E>
     throw new NoSuchElementException();
   }
 
+  public boolean isEmpty()
+  {
+    return buffer.isEmpty();
+  }
+
   @Override
   public String toString()
   {
     return buffer.toString();
+  }
+
+  /**
+   *  Writes each record on the separate line which starts
+   *  with indent string.
+   */
+  void toString(String indent, StringBuilder sb)
+  {
+    java.util.Set<Key> keys = buffer.keySet();
+    for (Key key : keys)
+    {
+      sb.append(indent)
+	//.append(buffer.get(key).getClass().getSimpleName())
+	.append('[')
+	.append(key.toString())
+	.append("] = ");
+      String indent2 = indent + "  ";
+      buffer.get(key).toString(indent2, sb);
+    }
+
   }
 
 }

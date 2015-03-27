@@ -66,9 +66,10 @@ public class Use extends Configurable
     outputMap.put(index, output);
   }
 
+  @Override
   void toString(String indent, StringBuilder sb)
   {
-    sb.append("Use {\n");
+    sb.append(indent).append("Use\n");
     String indent2 = indent + "  ";
     sb.append(indent2)
       .append("href=")
@@ -79,11 +80,28 @@ public class Use extends Configurable
       .append(scope.toString())
       .append("\n");
     super.toString(indent2, sb);
-    if (inputMap != null)
-      sb.append(inputMap.toString()).append("\n");
-    if (outputMap != null)
-      sb.append(outputMap.toString()).append("\n");
-    sb.append(indent).append("}\n");
+    if (inputMap != null && inputMap.size() > 0)
+    {
+      java.util.Set<String> keys = inputMap.keySet();
+      for (String key : keys)
+      {
+	Input input = inputMap.get(key);
+	sb.append(indent2).append("Input[").append(key)
+	  .append("]=");
+	input.toString(indent2, sb);
+      }
+    }
+    if (outputMap != null && outputMap.size() > 0)
+    {
+      java.util.Set<String> keys = outputMap.keySet();
+      for (String key : keys)
+      {
+	Output output = outputMap.get(key);
+	sb.append(indent2).append("Output[").append(key)
+	  .append("]=");
+	output.toString(indent2, sb);
+      }
+    }
   }
 
 }

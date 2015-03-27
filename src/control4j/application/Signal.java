@@ -76,28 +76,31 @@ public class Signal extends Configurable
 
   void toString(String indent, StringBuilder sb)
   {
-    sb.append("Signal {\n");
+    sb.append("\n");
     String indent2 = indent + "  ";
-    // print configuration
-    super.toString(indent2, sb);
+
+    // write configuration
+    super.toString(indent, sb);
+
     // print T-1 value
     if (isValueT_1)
     {
       if (isValueT_1Valid)
-	sb.append(indent2)
+	sb.append(indent)
 	  .append("Value for time T-1=")
 	  .append(valueT_1)
 	  .append("\n");
       else
-	sb.append(indent2)
+	sb.append(indent)
 	  .append("Value for time T-1 is invalid\n");
     }
-    // print tags
-    if (tags != null)
+
+    // write tags
+    if (tags != null && tags.size() > 0)
     {
-      sb.append(tags.toString());
+      sb.append(indent).append("Tags\n");
+      Helper.objectToString(tags, indent2, sb);
     }
-    sb.append(indent).append("}\n");
   }
 
 }
