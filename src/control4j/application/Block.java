@@ -18,8 +18,11 @@ package control4j.application;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Set;
 
 import control4j.tools.DuplicateElementException;
 
@@ -31,45 +34,126 @@ public class Block extends DeclarationBase
     super();
   }
 
-  private HashSet<String> inputSet;
+  /*
+   *
+   *     Input of the Block
+   *
+   */
+
+  private HashSet<String> inputSet = new HashSet<String>();
 
   public void addInput(String name)
   {
-    if (inputSet == null) inputSet = new HashSet<String>();
     inputSet.add(name);
   }
 
-  private HashSet<String> outputSet;
+  public boolean containsInput(String name)
+  {
+    return inputSet.contains(name);
+  }
+
+  public Set<String> getInputSet()
+  {
+    return inputSet;
+  }
+
+  /*
+   *
+   *     Output of the Block
+   *
+   */
+
+  private HashSet<String> outputSet = new HashSet<String>();
 
   public void addOutput(String name)
   {
-    if (outputSet == null) outputSet = new HashSet<String>();
     outputSet.add(name);
   }
 
-  private LinkedList<Module> modules = new LinkedList<Module>();
+  public boolean containsOutput(String name)
+  {
+    return outputSet.contains(name);
+  }
 
-  public void addModule(Module module)
+  public Set<String> getOutputSet()
+  {
+    return outputSet;
+  }
+
+  /*
+   *
+   *     Modules.
+   *
+   */
+
+  /** Internal buffer for modules. */
+  private LinkedList<control4j.application.nativelang.Module> modules 
+      = new LinkedList<control4j.application.nativelang.Module>();
+
+  /**
+   *  Add given module into the internal buffer.
+   */
+  public void addModule(control4j.application.nativelang.Module module)
   {
     modules.add(module);
   }
 
-  private ScopeMap<Signal> signals;
-
-  public void putSignal(String name, Scope scope, Signal signal)
-  throws DuplicateElementException
+  /**
+   *  Return collection that contains all of the modules that
+   *  are under this block.
+   */
+  public Collection<control4j.application.nativelang.Module> getModules()
   {
-    if (signals == null) signals = new ScopeMap<Signal>();
-    signals.put(name, scope, signal);
+    return modules;
   }
 
-  private LinkedList<Use> uses;
+  /*
+   *
+   *     Signal Definitions.
+   *
+   *     Because it is not possible to resolve the scope of the
+   *     signal definition by the time of translation, the signal
+   *     definitions must be here in their raw object.
+   *
+   */
 
-  public void addUse(Use use)
+  private ArrayList<control4j.application.nativelang.Signal> signals
+      = new ArrayList<control4j.application.nativelang.Signal>();
+
+  public void addSignal(control4j.application.nativelang.Signal signal)
   {
-    if (uses == null) uses = new LinkedList<Use>();
+    signals.add(signal);
+  }
+
+  Collection<control4j.application.nativelang.Signal> getSignals()
+  {
+    return signals;
+  }
+
+  /*
+   *
+   *     Use Objects
+   *
+   */
+
+  private LinkedList<control4j.application.nativelang.Use> uses
+      = new LinkedList<control4j.application.nativelang.Use>();
+
+  public void addUse(control4j.application.nativelang.Use use)
+  {
     uses.add(use);
   }
+
+  Collection<control4j.application.nativelang.Use> getUseObjects()
+  {
+    return uses;
+  }
+
+  /*
+   *
+   *     Other Methods
+   *
+   */
 
   void toString(String indent, StringBuilder sb)
   {
@@ -96,25 +180,27 @@ public class Block extends DeclarationBase
     if (modules != null && modules.size() > 0)
     {
       sb.append(indent).append("Modules\n");
-      for (Module module : modules)
-	module.toString(indent2, sb);
+      //for (Module module : modules)
+      //  module.toString(indent2, sb);
     }
 
     // write signals
     if (signals != null && !signals.isEmpty())
     {
       sb.append(indent).append("Signal Definitions\n");
-      signals.toString(indent2, sb);
+      //signals.toString(indent2, sb); // TODO
     }
 
     // write use objects
     if (uses != null && uses.size() > 0)
     {
       sb.append(indent).append("Use Objects\n");
+      /* TODO
       for (Use use : uses)
       {
 	use.toString(indent2, sb);
       }
+      */
     }
   }
 }

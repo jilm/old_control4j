@@ -43,6 +43,17 @@ import control4j.tools.DuplicateElementException;
 public abstract class Configurable extends DeclarationBase
 {
 
+  public Configurable()
+  { }
+
+  /**
+   *  Copy constructor.
+   */
+  public Configurable(Configurable model)
+  {
+    
+  }
+
   /** A set that contains all of the keys. It is used for
       duplicate elements detection. */ 
   private HashSet<String> configKeys;

@@ -177,7 +177,7 @@ implements ITranslatable, IXmlHandler
             = new control4j.application.Use(use.getHref(), 
 	    resolveScope(use.getScope(), localScope));
 	use.translate(destination, localScope);
-	application.addUse(destination);
+	application.add(destination, localScope);
       }
   }
 

@@ -24,6 +24,10 @@ import java.util.Collection;
 import java.util.ArrayList;
 import java.util.NoSuchElementException;
 
+import static org.apache.commons.lang3.Validate.notNull;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+
 import control4j.ErrorManager;
 //import control4j.application.gui.ScreenDeclaration;
 import control4j.gui.Screens;
@@ -129,6 +133,21 @@ public class Application extends Configurable
     blocks.put(name, scope, block);
   }
 
+  /**
+   *  Returns a block definition with given name which is under
+   *  the given scope.
+   *
+   *  @throws NoSuchElementException
+   *             if such a blok is not present in the internal
+   *             buffer
+   */
+  public Block getBlock(String name, Scope scope)
+  {
+    if (blocks == null)
+      throw new NoSuchElementException();
+    return blocks.get(name, scope);
+  }
+
   /*
    *
    *     Signal Definitions.
@@ -210,12 +229,63 @@ public class Application extends Configurable
     return modules.size();
   }
 
-  private ArrayList<Use> uses;
+  /*
+   *
+   *     Use Objects
+   *
+   */
 
-  public void addUse(Use use)
+  private ArrayList<Pair<Use, Scope>> uses 
+      = new ArrayList<Pair<Use, Scope>>();
+
+  /**
+   *  Adds a given use object into the internal buffer.
+   *
+   *  @param use
+   *             an object to add
+   *
+   *  @param scope
+   *             a scope under which the use object was defined
+   */
+  public void add(Use use, Scope scope)
   {
-    if (uses == null) uses = new ArrayList<Use>();
-    uses.add(use);
+    notNull(use);
+    notNull(scope);
+    uses.add(new ImmutablePair<Use, Scope>(use, scope));
+  }
+
+  public int getUseObjectsSize()
+  {
+    return uses.size();
+  }
+
+  public Pair<Use, Scope> getUse(int index)
+  {
+    return uses.get(index);
+  }
+
+  public void removeUse(int index)
+  {
+    uses.remove(index);
+  }
+
+  public int indexOf(Use use, Scope scope)
+  {
+    for (int i=0; i<uses.size(); i++)
+    {
+      Pair<Use, Scope> u = uses.get(i);
+      if (u.getKey().equals(use) && u.getValue().equals(scope))
+	return i;
+    }
+    throw new NoSuchElementException();
+  }
+
+  public int indexOf(Use use, int startIndex)
+  {
+    for (int i=startIndex; i<uses.size(); i++)
+      if (uses.get(i).getKey().equals(use))
+	return i;
+    throw new NoSuchElementException();
   }
 
   /*
@@ -294,8 +364,8 @@ public class Application extends Configurable
     if (uses != null && uses.size() > 0)
     {
       sb.append(indent).append("Use Objects\n");
-      for (Use use : uses)
-	use.toString(indent2, sb);
+      //for (Use use : uses)
+	//use.toString(indent2, sb);
     }
 
     // print block objects

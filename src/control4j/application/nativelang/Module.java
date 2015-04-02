@@ -20,6 +20,7 @@ package control4j.application.nativelang;
 
 import java.util.ArrayList;
 import java.util.Set;
+import java.util.Map;
 import org.xml.sax.Attributes;
 
 import control4j.application.Scope;
@@ -73,11 +74,30 @@ public class Module extends DescriptionBase implements IXmlHandler
   }
 
   /**
+   *  Translate this module object to the given one.
    *
+   *  @param destination
+   *             an object where translated information will be stored
+   *
+   *  @param localScope
+   *             a scope under which the module object was defined.
+   *
+   *  @param inputSubstitution
+   *             a map alias - Input which is used for block expansion.
+   *             Null value is accepted.
+   *
+   *  @param outputSubstitution
+   *             a map alias - Ouput that is used for block expansion.
+   *             Null value is accepted.
    */
   public void translate(
-      control4j.application.Module destination, Scope localScope)
+      control4j.application.Module destination, Scope localScope,
+      Map<String, control4j.application.Input> inputSubstitution,
+      Map<String, control4j.application.Output> outputSubstitution)
   {
+    // translate configuration
+    super.translate(destination, localScope);
+
     // translate resource definitions
     for (Resource resource : resources)
     {
@@ -98,9 +118,23 @@ public class Module extends DescriptionBase implements IXmlHandler
     // translate input
     for (Input inp : input)
     {
-      control4j.application.Input translated = new control4j.application.Input(
-	  resolveScope(inp.getScope(), localScope), inp.getHref());
-      inp.translate(translated, localScope);
+      control4j.application.Input translated;
+      // if the scope is local and the name is present in the
+      // input substitution map, use the input from that map
+      if (inp.getScope() == Parser.LOCAL_SCOPE_CODE 
+	  && inputSubstitution != null 
+	  && inputSubstitution.containsKey(inp.getHref()))
+      {
+	translated = inputSubstitution.get(inp.getHref());
+      }
+      // if this input is not a block input
+      else
+      {
+	translated = new control4j.application.Input(
+	    resolveScope(inp.getScope(), localScope), inp.getHref());
+	inp.translate(translated, localScope);
+      }
+      // store translated input into the module object
       String strIndex = inp.getIndex();
       if (strIndex == null)
       {
@@ -125,10 +159,23 @@ public class Module extends DescriptionBase implements IXmlHandler
     // translate output
     for (Output out : output)
     {
-      control4j.application.Output translated 
-	  = new control4j.application.Output(
-	  resolveScope(out.getScope(), localScope), out.getHref());
-      out.translate(translated, localScope);
+      control4j.application.Output translated;
+      // if the scope is local and the name is present in the
+      // output substitution map, use the output from that map
+      if (out.getScope() == Parser.LOCAL_SCOPE_CODE 
+	  && outputSubstitution != null 
+	  && outputSubstitution.containsKey(out.getHref()))
+      {
+	translated = outputSubstitution.get(out.getHref());
+      }
+      // if this output is not a block output
+      else
+      {
+	translated = new control4j.application.Output(
+	    resolveScope(out.getScope(), localScope), out.getHref());
+	out.translate(translated, localScope);
+      }
+      // store translated output into the module object
       String strIndex = out.getIndex();
       if (strIndex == null)
       {

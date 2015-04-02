@@ -35,6 +35,38 @@ import control4j.tools.DeclarationReference;
 public class Module extends Configurable
 {
 
+  /**
+   *  @param className
+   *             name of the class that implements the functionality
+   *             of the module. May not be null or empty string
+   *
+   *  @throws IllegalArgumentException
+   *             if className is null or an empty string
+   */
+  public Module(String className)
+  {
+    if (className == null || className.length() == 0)
+      throw new IllegalArgumentException();
+    else
+      this.className = className;
+  }
+
+  /**
+   *  A copy constructor.
+   */
+  public Module(Module module)
+  {
+    // copy properties
+    super(module);
+    // class name
+    this.className = module.getClassName();
+    // input
+    // variable input
+    // output
+    // variable output
+    // resources
+  }
+
   /** 
    *  Name of the class which implements functionality of that module.
    *  It may not contain empty string or null value. 
@@ -195,22 +227,6 @@ public class Module extends Configurable
   {
     if (variableOutput == null) {} // TODO
     return variableOutput.get(index);
-  }
-
-  /**
-   *  @param className
-   *             name of the class that implements the functionality
-   *             of the module. May not be null or empty string
-   *
-   *  @throws IllegalArgumentException
-   *             if className is null or an empty string
-   */
-  public Module(String className)
-  {
-    if (className == null || className.length() == 0)
-      throw new IllegalArgumentException();
-    else
-      this.className = className;
   }
 
   /** References to the resource definitions. */

@@ -31,4 +31,19 @@ public class Translator
     return application;
   }
 
+  public static Scope resolveScope(int code, Scope localScope)
+  {
+    switch (code)
+    {
+      case 0:
+	return Scope.getGlobal();
+      case 1:
+	return localScope;
+      case 2:
+        return localScope.getParent();
+      default:
+	throw new IllegalArgumentException();
+    }
+  }
+
 }

@@ -19,6 +19,9 @@ package control4j.application;
  */
 
 import java.util.HashMap;
+import java.util.NoSuchElementException;
+
+import org.apache.commons.lang3.builder.EqualsBuilder;
 
 /**
  *
@@ -48,6 +51,12 @@ public class Use extends Configurable
     return scope;
   }
 
+  /*
+   *
+   *     Input
+   *
+   */
+
   private HashMap<String, Input> inputMap;
 
   public void putInput(String index, Input input)
@@ -57,6 +66,22 @@ public class Use extends Configurable
     inputMap.put(index, input);
   }
 
+  public Input getInput(String index)
+  {
+    if (inputMap == null)
+      throw new NoSuchElementException();
+    Input input = inputMap.get(index);
+    if (input == null)
+      throw new NoSuchElementException();
+    return input;
+  }
+
+  /*
+   *
+   *     Output
+   *
+   */
+
   private HashMap<String, Output> outputMap;
 
   public void putOutput(String index, Output output)
@@ -64,6 +89,49 @@ public class Use extends Configurable
     if (outputMap == null)
       outputMap = new HashMap<String, Output>();
     outputMap.put(index, output);
+  }
+
+  public Output getOutput(String index)
+  {
+    if (outputMap == null)
+      throw new NoSuchElementException();
+    Output output = outputMap.get(index);
+    if (output == null)
+      throw new NoSuchElementException();
+    return output;
+  }
+
+  /*
+   *
+   *     Other
+   *
+   */
+
+  @Override
+  public boolean equals(Object object)
+  {
+    if (object == null) return false;
+    if (object == this) return true;
+    if (object.getClass() != getClass()) return false;
+    Use compared = (Use)object;
+    return new EqualsBuilder()
+	.append(href, compared.href)
+	.append(scope, compared.scope)
+	.append(inputMap, compared.inputMap)
+	.append(outputMap, compared.outputMap)
+	.isEquals();
+  }
+
+  @Override
+  public int hashCode()
+  {
+    int hash = href.hashCode();
+    hash = hash ^ scope.hashCode();
+    if (inputMap != null)
+      hash = hash ^ inputMap.hashCode();
+    if (outputMap != null)
+      hash = hash ^ outputMap.hashCode();
+    return hash;
   }
 
   @Override

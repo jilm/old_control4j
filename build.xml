@@ -36,7 +36,7 @@
         <javac srcdir="${srcdir}" destdir="${bindir}" 
 	    excludes="${srcdir}/annotations/process/*"
 	    deprecation="no"
-	    classpath="ap.jar"
+	    classpath="ap.jar:depend/lidinsky-tools.jar:depend/commons-lang3.jar"
 	/>
         <concat destfile="${bindir}/control4j/messages.properties" >
             <fileset dir="${srcdir}" includes="**/messages.properties" />

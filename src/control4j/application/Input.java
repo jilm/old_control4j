@@ -55,18 +55,34 @@ public class Input extends Configurable
     this.href = href;
   }
 
+  /**
+   *  Copy constructor.
+   */
+  public Input(Input input)
+  {
+    super(input);
+    this.href = input.href;
+    this.scope = input.scope;
+  }
+
+  /**
+   *  Returns the name of the signal it refers to.
+   */
   public String getHref()
   {
     return href;
   }
 
+  /**
+   *  Returns the scope where the referenced signal will be searched.
+   */
   public Scope getScope()
   {
     return scope;
   }
 
   @Override
-  public void toString(String indent, StringBuilder sb)
+  void toString(String indent, StringBuilder sb)
   {
     sb.append("href=")
       .append(href)

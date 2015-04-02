@@ -104,41 +104,17 @@ public class Block implements IXmlHandler
     // translate all of the signals
     if (signals != null)
       for (Signal signal : signals)
-      {
-	control4j.application.Signal translated
-	    = new control4j.application.Signal();
-	signal.translate(translated, localScope);
-	try
-	{
-	  destination.putSignal(signal.getName(), 
-	      resolveScope(signal.getScope(), localScope), translated);
-	}
-	catch (DuplicateElementException e)
-	{
-	  // TODO
-	}
-      }
+	destination.addSignal(signal);
 
     // translate all of the modules
     if (modules != null)
       for (Module module : modules)
-      {
-	control4j.application.Module translated
-	    = new control4j.application.Module(module.getClassName());
-	module.translate(translated, localScope);
-	destination.addModule(translated);
-      }
+	destination.addModule(module);
 
     // translate all of the use elements
     if (uses != null)
       for (Use use : uses)
-      {
-	control4j.application.Use translated
-	    = new control4j.application.Use(use.getHref(),
-	    resolveScope(use.getScope(), localScope));
-	use.translate(translated, localScope);
-	destination.addUse(translated);
-      }
+	destination.addUse(use);
   }
 
   /*
