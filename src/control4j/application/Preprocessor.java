@@ -149,9 +149,15 @@ public class Preprocessor implements IGraph<Use>
   {
     // Expand all of the signal definitions
     for (control4j.application.nativelang.Signal signal : block.getSignals())
-      expand(signal, scope);
+      translate(signal, scope);
     // Expand all of the modules
-    expandModules(block, scope, inputSubstitution, outputSubstitution);
+    for (control4j.application.nativelang.Module rawModule 
+	: block.getModules())
+    {
+      Module module = translate(
+	  rawModule, scope, inputSubstitution, outputSubstitution);
+      application.addModule(module);
+    }
     // Expand all of the nested use objects
     for (control4j.application.nativelang.Use rawUse : block.getUseObjects())
     {
@@ -174,7 +180,7 @@ public class Preprocessor implements IGraph<Use>
    *             an inner scope of the use element into which the
    *             block is expanded
    */
-  protected void expand(
+  protected void translate(
       control4j.application.nativelang.Signal rawSignal, Scope localScope)
   {
     Signal signal = new Signal();
@@ -199,18 +205,17 @@ public class Preprocessor implements IGraph<Use>
    *             an inner scope of the use element into which the
    *             block is expanded
    */
-  protected void expandModules(
-      Block block, Scope localScope, Map<String, Input> inputSubstitution,
+  protected Module translate(
+      control4j.application.nativelang.Module rawModule, 
+      Scope localScope, 
+      Map<String, Input> inputSubstitution, 
       Map<String, Output> outputSubstitution)
   {
-    for (control4j.application.nativelang.Module module : block.getModules())
-    {
-      Module translated = new Module(module.getClassName());
-      module.translate(translated, localScope, inputSubstitution,
+      Module module = new Module(rawModule.getClassName());
+      rawModule.translate(module, localScope, inputSubstitution,
 	  outputSubstitution);
-      application.addModule(translated);
+      return module;
       // TODO
-    }
   }
 
   protected Map<String, Input> pairInput(Use use, Set<String> inputSet)
