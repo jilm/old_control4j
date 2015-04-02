@@ -147,19 +147,20 @@ public class Preprocessor implements IGraph<Use>
       Block block, Scope scope, Map<String, Input> inputSubstitution,
       Map<String, Output> outputSubstitution)
   {
-      // Expand all of the signal definitions
-      expandSignalDefinitions(block, scope);
-      // Expand all of the modules
-      expandModules(block, scope, inputSubstitution, outputSubstitution);
-      // Expand all of the nested use objects
-      for (control4j.application.nativelang.Use rawUse : block.getUseObjects())
-      {
-	Use use = new Use(
-	    rawUse.getHref(), 
-	    Translator.resolveScope(rawUse.getScope(), scope));
-	rawUse.translate(use, scope);
-	application.add(use, scope);
-      }
+    // Expand all of the signal definitions
+    for (control4j.application.nativelang.Signal signal : block.getSignals())
+      expand(signal, scope);
+    // Expand all of the modules
+    expandModules(block, scope, inputSubstitution, outputSubstitution);
+    // Expand all of the nested use objects
+    for (control4j.application.nativelang.Use rawUse : block.getUseObjects())
+    {
+      Use use = new Use(
+          rawUse.getHref(), 
+          Translator.resolveScope(rawUse.getScope(), scope));
+      rawUse.translate(use, scope);
+      application.add(use, scope);
+    }
   }
 
   /**
@@ -173,20 +174,18 @@ public class Preprocessor implements IGraph<Use>
    *             an inner scope of the use element into which the
    *             block is expanded
    */
-  protected void expandSignalDefinitions(Block block, Scope localScope)
+  protected void expand(
+      control4j.application.nativelang.Signal rawSignal, Scope localScope)
   {
-    for (control4j.application.nativelang.Signal signal : block.getSignals())
+    Signal signal = new Signal();
+    rawSignal.translate(signal, localScope);
+    String name = rawSignal.getName();
+    Scope scope = Translator.resolveScope(rawSignal.getScope(), localScope);
+    try
     {
-      Signal translatedSignal = new Signal();
-      signal.translate(translatedSignal, localScope);
-      String name = signal.getName();
-      Scope scope = Translator.resolveScope(signal.getScope(), localScope);
-      try
-      {
-      application.putSignal(name, scope, translatedSignal);
-      }
-      catch (DuplicateElementException e) {}
+      application.putSignal(name, scope, signal);
     }
+    catch (DuplicateElementException e) {}
   }
 
   /**
