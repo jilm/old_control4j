@@ -23,7 +23,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 
+import org.apache.commons.lang3.tuple.Triple;
+import org.apache.commons.lang3.tuple.ImmutableTriple;
+
 import control4j.tools.DeclarationReference;
+import static control4j.tools.Logger.*;
 
 /**
  *
@@ -49,22 +53,6 @@ public class Module extends Configurable
       throw new IllegalArgumentException();
     else
       this.className = className;
-  }
-
-  /**
-   *  A copy constructor.
-   */
-  public Module(Module module)
-  {
-    // copy properties
-    super(module);
-    // class name
-    this.className = module.getClassName();
-    // input
-    // variable input
-    // output
-    // variable output
-    // resources
   }
 
   /** 
@@ -229,18 +217,45 @@ public class Module extends Configurable
     return variableOutput.get(index);
   }
 
+  /*
+   *
+   *     Resource References.
+   *
+   */
+
   /** References to the resource definitions. */
-  private HashMap<String, Reference> resourceRefs;
+  private ArrayList<Triple<String, String, Scope>> resourceRefs
+      = new ArrayList<Triple<String, String, Scope>>();
 
   /**
    *  Puts a reference to some resource definition.
    */
   public void putResource(String key, String href, Scope scope)
   {
-    if (resourceRefs == null)
-      resourceRefs = new HashMap<String, Reference>();
-    resourceRefs.put(key, new Reference(href, scope));
+    resourceRefs.add(new ImmutableTriple(key, href, scope));
+    fine("New resource reference added");
   }
+
+  public int getResourceRefsSize()
+  {
+    return resourceRefs.size();
+  }
+
+  public Triple<String, String, Scope> getResourceRef(int index)
+  {
+    return resourceRefs.get(index);
+  }
+
+  public void removeResourceRef(int index)
+  {
+    resourceRefs.remove(index);
+  }
+
+  /*
+   *
+   *     Resource Definitions.
+   *
+   */
 
   /** Resource definitions. */
   private HashMap<String, Resource> resources;
@@ -305,7 +320,8 @@ public class Module extends Configurable
       if (resources != null)
 	Helper.objectToString(resources, indent3, sb);
       if (resourceRefs != null)
-        Helper.toString(resourceRefs, indent3, sb);
+	sb.append(resourceRefs.toString());
+        {}//Helper.toString(resourceRefs, indent3, sb); // TODO
     }
 
     // write input

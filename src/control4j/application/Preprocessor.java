@@ -28,9 +28,13 @@ import java.text.MessageFormat;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Triple;
+import org.apache.commons.lang3.tuple.ImmutableTriple;
 
 import cz.lidinsky.tools.graph.Graph;
 import cz.lidinsky.tools.graph.IGraph;
+
+import static control4j.tools.Logger.*;
 
 import control4j.tools.DuplicateElementException;
 
@@ -59,6 +63,7 @@ public class Preprocessor implements IGraph<Use>
 
     this.application = application;
 
+    // blocks expansion
     // cycle test
     Graph<Use> graph = new Graph<Use>();
     boolean cycle = false;
@@ -82,9 +87,35 @@ public class Preprocessor implements IGraph<Use>
       application.removeUse(0);
     }
 
+    // resource substitution
+    // for all of the modules, if there is a resource reference
+    // find it and substitude in place of the reference
+    for (int i=0; i<application.getModulesSize(); i++)
+    {
+      Module module = application.getModule(i);
+      System.out.println(module.getClassName());
+      while(module.getResourceRefsSize() > 0)
+      {
+	Triple<String, String, Scope> resourceRef = module.getResourceRef(0);
+	System.out.println(resourceRef.toString());
+	try
+	{
+	  Resource resource = application.getResource(
+	      resourceRef.getMiddle(), resourceRef.getRight());
+	  module.putResource(resourceRef.getLeft(), resource);
+	  module.removeResourceRef(0);
+	}
+	catch (NoSuchElementException e) 
+	{
+	  catched(getClass().getName(), "process", e); // TODO
+	}
+      }
+    }
+
     // resolve configuration on the application level
     resolveConfiguration(application);
 
+    // cleen-up
     this.application = null;
 
   }
@@ -291,7 +322,10 @@ public class Preprocessor implements IGraph<Use>
     Application app = new Application();
     translatable.translate(app);
     Preprocessor preprocessor = new Preprocessor();
+    System.out.println("----- Before -----");
+    System.out.println(app.toString());
     preprocessor.process(app);
+    System.out.println("----- After -----");
     System.out.println(app.toString());
   }
 

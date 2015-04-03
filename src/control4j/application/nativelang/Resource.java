@@ -28,6 +28,8 @@ import control4j.tools.XmlReader;
 import control4j.tools.XmlStartElement;
 import control4j.tools.XmlEndElement;
 
+import static control4j.tools.Logger.*;
+
 /**
  *
  *  Represents a resource element inside the module.
@@ -150,6 +152,7 @@ public class Resource extends Configurable implements IXmlHandler
     catch (ParseException e)
     {
       // TODO
+      warning("Bad scope");
     }
 
     if (className != null && href == null)
@@ -159,14 +162,17 @@ public class Resource extends Configurable implements IXmlHandler
     else if (className == null && href != null)
     {
       isReference = true;
+      fine("resource reference" + key + href); // TODO
     }
     else if (className == null && href == null)
     {
       // TODO
+      warning("class name == null && href == null");
     }
     else
     {
       // TODO
+      warning("class name != null && href != null");
     }
   }
 

@@ -117,6 +117,13 @@ public class Application extends Configurable
     resources.put(name, scope, resource);
   }
 
+  public Resource getResource(String name, Scope scope)
+  {
+    if (resources == null)
+      throw new NoSuchElementException();
+    return resources.get(name, scope);
+  }
+
   /*
    *
    *     Block Definitions

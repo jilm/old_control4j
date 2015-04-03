@@ -29,6 +29,8 @@ import control4j.tools.XmlReader;
 import control4j.tools.XmlStartElement;
 import control4j.tools.XmlEndElement;
 
+import static control4j.tools.Logger.*;
+
 /**
  *
  *  Stands for a module element.
@@ -95,16 +97,19 @@ public class Module extends DescriptionBase implements IXmlHandler
       Map<String, control4j.application.Input> inputSubstitution,
       Map<String, control4j.application.Output> outputSubstitution)
   {
+    fine("Resources: " + resources.size());
     // translate configuration
     super.translate(destination, localScope);
 
     // translate resource definitions
     for (Resource resource : resources)
     {
+      fine("going to translate resources of the module"); // TODO
       if (resource.isReference())
       {
 	destination.putResource(resource.getKey(), resource.getHref(), 
 	    resolveScope(resource.getScope(), localScope));
+	fine("translating resource reference");
       }
       else
       {

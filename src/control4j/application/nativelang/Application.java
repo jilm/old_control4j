@@ -120,7 +120,7 @@ implements ITranslatable, IXmlHandler
       {
 	control4j.application.Module destination =
 	    new control4j.application.Module(module.getClassName());
-	module.translate(destination, localScope);
+	module.translate(destination, localScope, null, null);
 	application.addModule(destination);
       }
 
