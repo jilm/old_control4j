@@ -182,7 +182,8 @@ public class Application extends Configurable
    */
   public int getSignalIndex(Signal signal)
   {
-    if (signalIndexes == null) {} // TODO
+    if (signalIndexes == null) // TODO
+      throw new NoSuchElementException();
     int index = signalIndexes.indexOf(signal);
     return index;
   }
@@ -193,7 +194,8 @@ public class Application extends Configurable
    */
   public Signal getSignal(String name, Scope scope)
   {
-    if (signals == null) {} // TODO
+    if (signals == null)  // TODO
+      throw new NoSuchElementException();
     return signals.get(name, scope);
   }
 
@@ -202,7 +204,8 @@ public class Application extends Configurable
    */
   public Signal getSignal(int index)
   {
-    if (signalIndexes == null) {} // TODO
+    if (signalIndexes == null)  // TODO
+      throw new IndexOutOfBoundsException();
     return signalIndexes.get(index);
   }
 

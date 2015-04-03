@@ -148,6 +148,78 @@ public class Preprocessor implements IGraph<Use>
 	resolveConfiguration(signal.getTag(name));
     }
 
+    for (int i=0; i<application.getModulesSize(); i++)
+    {
+      Module module = application.getModule(i);
+
+      // create module input map
+      // input with fixed index
+      for (int j=0; j<module.getInputSize(); j++)
+	if (module.getInput(j) != null)
+	  try
+	  {
+	    Input input = module.getInput(j);
+	    Signal signal 
+		= application.getSignal(input.getHref(), input.getScope());
+	    int signalIndex = application.getSignalIndex(signal);
+	    module.putInputSignalIndex(j, signalIndex);
+	  }
+	  catch (NoSuchElementException e) { } // TODO
+
+      // input with variable index
+      for (int j=0; j<module.getVariableInputSize(); j++)
+	try
+	{
+	  Input input = module.getVariableInput(j);
+	  Signal signal 
+	      = application.getSignal(input.getHref(), input.getScope());
+	  int signalIndex = application.getSignalIndex(signal);
+	  module.addInputSignalIndex(signalIndex);
+	}
+	catch (NoSuchElementException e) { } // TODO
+
+      // create module output map
+      // output with fixed index
+      for (int j=0; j<module.getOutputSize(); j++)
+	if (module.getOutput(j) != null)
+	  try
+	  {
+	    Output output = module.getOutput(j);
+	    Signal signal 
+		= application.getSignal(output.getHref(), output.getScope());
+	    int signalIndex = application.getSignalIndex(signal);
+	    module.putOutputSignalIndex(j, signalIndex);
+	  }
+	  catch (NoSuchElementException e) { } // TODO
+
+      // output with variable index
+      for (int j=0; j<module.getVariableOutputSize(); j++)
+	try
+	{
+	  Output output = module.getVariableOutput(j);
+	  Signal signal 
+	      = application.getSignal(output.getHref(), output.getScope());
+	  int signalIndex = application.getSignalIndex(signal);
+	  module.addOutputSignalIndex(signalIndex);
+	}
+	catch (NoSuchElementException e) { } // TODO
+
+      // tagged signals
+      if (module.getInputTagsSize() > 0 || module.getOutputTagsSize() > 0)
+        for (int j=0; j<application.getSignalsSize(); j++)
+	{
+	  Signal signal = application.getSignal(j);
+	  Set<String> tags = signal.getTagNames();
+	  for (String tag : tags)
+	  {
+	    if (module.containsInputTag(tag))
+	      module.addInputSignalIndex(j);
+	    if (module.containsOutputTag(tag))
+	      module.addOutputSignalIndex(j);
+	  }
+	}
+    }
+
     // cleen-up
     this.application = null;
 

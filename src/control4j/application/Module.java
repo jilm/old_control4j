@@ -301,6 +301,18 @@ public class Module extends Configurable
     inputTags.add(name);
   }
 
+  public int getInputTagsSize()
+  {
+    if (inputTags == null) return 0;
+    return inputTags.size();
+  }
+
+  public boolean containsInputTag(String name)
+  {
+    if (inputTags == null) return false;
+    return inputTags.contains(name);
+  }
+
   /** A set of output tags. */
   private HashSet<String> outputTags;
 
@@ -310,6 +322,68 @@ public class Module extends Configurable
       outputTags = new HashSet<String>();
     outputTags.add(name);
   }
+
+  public int getOutputTagsSize()
+  {
+    if (outputTags == null) return 0;
+    return outputTags.size();
+  }
+
+  public boolean containsOutputTag(String name)
+  {
+    if (outputTags == null) return false;
+    return outputTags.contains(name);
+  }
+
+  /*
+   *
+   *     Input Map.
+   *
+   *     There are two kinds of input. Input with explicitly given
+   *     index, and input without it.
+   *
+   */
+
+  private ArrayList<Integer> fixedInputMap = new ArrayList<Integer>();
+  private ArrayList<Integer> variableInputMap = new ArrayList<Integer>();
+
+  public void putInputSignalIndex(int index, int signalIndex)
+  {
+    // TODO
+  }
+
+  public void addInputSignalIndex(int signalIndex)
+  {
+    // TODO
+  }
+
+  /*
+   *
+   *     Output Map.
+   *
+   *     There are two kinds of output. Output with explicitly given
+   *     index, and output without it.
+   *
+   */
+
+  private ArrayList<Integer> fixedOutputMap = new ArrayList<Integer>();
+  private ArrayList<Integer> variableOutputMap = new ArrayList<Integer>();
+
+  public void putOutputSignalIndex(int index, int signalIndex)
+  {
+    // TODO
+  }
+
+  public void addOutputSignalIndex(int signalIndex)
+  {
+    // TODO
+  }
+
+  /*
+   *
+   *     To String.
+   *
+   */
 
   @Override
   public String toString()
