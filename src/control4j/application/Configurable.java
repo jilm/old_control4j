@@ -18,10 +18,14 @@ package control4j.application;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.NoSuchElementException;
+
+import org.apache.commons.lang3.tuple.Triple;
+import org.apache.commons.lang3.tuple.ImmutableTriple;
 
 import control4j.ConfigBufferTemplate;
 import control4j.ConfigItemNotFoundException;
@@ -144,39 +148,25 @@ public abstract class Configurable extends DeclarationBase
     return getConfigurationBuffer();
   }
 
+  /*
+   *
+   *     Configuration in the form of references.
+   *
+   */
+
   /** Configuration in the form of references to some definition. */
-  private HashMap<String, Reference> references;
+  private ArrayList<Triple<String, String, Scope>> references
+      = new ArrayList<Triple<String, String, Scope>>();
 
   private static Set<String> emptySet;
-
-  /**
-   *  Puts configuration in the form of reference into the
-   *  internal buffer.
-   */
-  private void putReference(String key, Reference value)
-  {
-    if (key == null || value == null)
-      throw new IllegalArgumentException();
-    // lazy data storage creation
-    if (references == null)
-      references = new HashMap<String, Reference>();
-    // store the configuration
-    references.put(key, value);
-  }
 
   /**
    *  Remove reference config item with given key from the internal
    *  buffer.
    */
-  private void removeReference(String key)
+  public void removeConfigItemReference(int index)
   {
-    if (key == null)
-      throw new IllegalArgumentException();
-    if (references == null)
-      throw new NoSuchElementException();
-    if (!references.containsKey(key))
-      throw new NoSuchElementException();
-    references.remove(key);
+    references.remove(index);
   }
 
   /**
@@ -195,41 +185,19 @@ public abstract class Configurable extends DeclarationBase
     if (containsKey(key))
       throw new DuplicateElementException();
     // store the configuration
-    addKey(key);
-    putReference(key, new Reference(href, scope));
+    //addKey(key);
+    references.add(new ImmutableTriple<String, String, Scope>(
+	key, href, scope));
   }
 
-  /**
-   *  Returns a set of all the configuration items which were
-   *  inserted in the form of reference.
-   */
-  public Set<String> getReferenceConfigKeys()
+  public int getConfigItemRefsSize()
   {
-    if (references == null)
-    {
-      if (emptySet == null)
-	emptySet = new HashSet<String>();
-      return emptySet;
-    }
-    else
-    {
-      return references.keySet();
-    }
+    return references.size();
   }
 
-  public Reference getReferenceConfigItem(String key)
+  public Triple<String, String, Scope> getConfigItemReference(int index)
   {
-    if (references == null)
-      throw new NoSuchElementException();
-    if (!references.containsKey(key))
-      throw new NoSuchElementException();
-    return references.get(key);
-  }
-
-  public void resolveConfigItem(String key, String value)
-  {
-    removeReference(key);
-    putConfigItem(key, value);
+    return references.get(index);
   }
 
   /**
@@ -275,7 +243,8 @@ public abstract class Configurable extends DeclarationBase
     if (configuration != null)
       configuration.toString(indent2, sb);
     if (references != null)
-      Helper.toString(references, indent2, sb);
+      sb.append(references.toString()); // TODO
+      //Helper.toString(references, indent2, sb);
   }
 
 }

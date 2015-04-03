@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Triple;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
@@ -255,20 +256,40 @@ public class Module extends Configurable
    *
    *     Resource Definitions.
    *
+   *     Each resource of the module is identified by a unique key.
+   *
    */
 
   /** Resource definitions. */
-  private HashMap<String, Resource> resources;
+  private HashMap<String, Resource> resources 
+      = new HashMap<String, Resource>();
 
   /**
    *  Puts a resource definition.
    */
   public void putResource(String key, Resource resource)
   {
-    if (resources == null)
-      resources = new HashMap<String, Resource>();
     resources.put(key, resource);
   }
+
+  /**
+   *  Returns all of the resouce keys.
+   */
+  public Set<String> getResourceKeys()
+  {
+    return resources.keySet();
+  }
+
+  public Resource getResource(String key)
+  {
+    return resources.get(key); // TODO
+  }
+
+  /*
+   *
+   *     Input Tags
+   *
+   */
 
   /** A set of input tags. */
   private HashSet<String> inputTags;

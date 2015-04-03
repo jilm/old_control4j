@@ -19,6 +19,7 @@ package control4j.application;
  */
 
 import java.util.HashMap;
+import java.util.Set;
 
 import control4j.tools.DeclarationReference;
 
@@ -66,13 +67,23 @@ public class Signal extends Configurable
    *
    */
 
-  private HashMap<String, Tag> tags;
+  private HashMap<String, Tag> tags = new HashMap<String, Tag>();
 
   public void putTag(String name, Tag tag)
   {
-    if (tags == null) tags = new HashMap<String, Tag>();
     tags.put(name, tag);
   }
+
+  public Set<String> getTagNames()
+  {
+    return tags.keySet();
+  }
+
+  public Tag getTag(String name)
+  {
+    return tags.get(name);
+  }
+
 
   void toString(String indent, StringBuilder sb)
   {

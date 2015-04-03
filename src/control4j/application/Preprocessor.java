@@ -112,8 +112,41 @@ public class Preprocessor implements IGraph<Use>
       }
     }
 
-    // resolve configuration on the application level
+    // property substitution
+    // global properties
     resolveConfiguration(application);
+    // module properties
+    for (int i=0; i<application.getModulesSize(); i++)
+    {
+      Module module = application.getModule(i);
+      resolveConfiguration(module);
+      // substitute properties of the resources of the module
+      Set<String> keys = module.getResourceKeys();
+      for (String key : keys)
+	resolveConfiguration(module.getResource(key));
+      // substitute properties of the input elements
+      for (int j=0; j<module.getInputSize(); j++)
+	if (module.getInput(j) != null)
+	  resolveConfiguration(module.getInput(j));
+      for (int j=0; j<module.getVariableInputSize(); j++)
+	resolveConfiguration(module.getVariableInput(j));
+      // substitute properties of the output elements
+      for (int j=0; j<module.getOutputSize(); j++)
+	if (module.getOutput(j) != null)
+	  resolveConfiguration(module.getOutput(j));
+      for (int j=0; j<module.getVariableOutputSize(); j++)
+	resolveConfiguration(module.getVariableOutput(j));
+    }
+    // signal definitions properties
+    for (int i=0; i<application.getSignalsSize(); i++)
+    {
+      Signal signal = application.getSignal(i);
+      resolveConfiguration(signal);
+      // tag properties
+      Set<String> tagNames = signal.getTagNames();
+      for (String name : tagNames)
+	resolveConfiguration(signal.getTag(name));
+    }
 
     // cleen-up
     this.application = null;
@@ -293,20 +326,26 @@ public class Preprocessor implements IGraph<Use>
    */
   protected void resolveConfiguration(Configurable object)
   {
-    Set<String> keys = object.getReferenceConfigKeys();
-    for (String key : keys)
+    while(object.getConfigItemRefsSize() > 0)
     {
-      Reference reference = object.getReferenceConfigItem(key);
+      Triple<String, String, Scope> reference 
+	  = object.getConfigItemReference(0);
       try
       {
         String value = application.getDefinition(
-	    reference.getHref(), reference.getScope());
-        object.resolveConfigItem(key, value);
+	    reference.getMiddle(), reference.getRight());
+        object.removeConfigItemReference(0);
+	object.putProperty(reference.getLeft(), value);
       }
       catch (NoSuchElementException e)
       {
-	reportMissingDefinition(key, reference, object);
+	//reportMissingDefinition(reference.getLeft(), reference, object); // TODO
+	warning("Missing definition");
       }
+      catch (DuplicateElementException e)
+      {  
+        warning("Duplicate element");
+      } // TODO
     }
   }
 

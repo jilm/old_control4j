@@ -206,6 +206,12 @@ public class Application extends Configurable
     return signalIndexes.get(index);
   }
 
+  public int getSignalsSize()
+  {
+    if (signalIndexes == null) return 0;
+    return signalIndexes.size();
+  }
+
   /*
    *
    *     Module Definitions.
