@@ -65,6 +65,7 @@ public class Preprocessor implements IGraph<Use>
 
     // blocks expansion
     // cycle test
+    /*
     Graph<Use> graph = new Graph<Use>();
     boolean cycle = false;
     for (int i=0; i<application.getUseObjectsSize(); i++)
@@ -77,9 +78,10 @@ public class Preprocessor implements IGraph<Use>
       else
 	System.out.println("Acyclic: " 
 	    + application.getUse(i).getKey().getHref());
+    */
 
     // expand all of the use objects
-    if (!cycle)
+    //if (!cycle)
     while (application.getUseObjectsSize() > 0)
     {
       Pair<Use, Scope> use = application.getUse(0);

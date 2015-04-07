@@ -61,6 +61,11 @@ public class Signal extends Configurable
     valueT_1 = value;
   }
 
+  public boolean isValueT_1Specified()
+  {
+    return isValueT_1;
+  }
+
   /*
    *
    *    Tags

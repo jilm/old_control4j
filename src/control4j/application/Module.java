@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Triple;
@@ -349,12 +350,24 @@ public class Module extends Configurable
 
   public void putInputSignalIndex(int index, int signalIndex)
   {
-    // TODO
+    while (index >= fixedInputMap.size())
+      fixedInputMap.add(-1);
+    fixedInputMap.set(index, signalIndex);
   }
 
   public void addInputSignalIndex(int signalIndex)
   {
-    // TODO
+    variableInputMap.add(signalIndex);
+  }
+
+  public List<Integer> getFixedInputMap()
+  {
+    return fixedInputMap;
+  }
+
+  public List<Integer> getVariableInputMap()
+  {
+    return variableInputMap;
   }
 
   /*
@@ -371,12 +384,24 @@ public class Module extends Configurable
 
   public void putOutputSignalIndex(int index, int signalIndex)
   {
-    // TODO
+    while (index >= fixedOutputMap.size())
+      fixedOutputMap.add(-1);
+    fixedOutputMap.set(index, signalIndex);
   }
 
   public void addOutputSignalIndex(int signalIndex)
   {
-    // TODO
+    variableOutputMap.add(signalIndex);
+  }
+
+  public List<Integer> getFixedOutputMap()
+  {
+    return fixedOutputMap;
+  }
+
+  public List<Integer> getVariableOutputMap()
+  {
+    return variableOutputMap;
   }
 
   /*
