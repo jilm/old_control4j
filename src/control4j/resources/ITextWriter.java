@@ -1,7 +1,7 @@
 package control4j.resources;
 
 /*
- *  Copyright 2013 Jiri Lidinsky
+ *  Copyright 2013, 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -24,7 +24,5 @@ public interface ITextWriter
   public void print(String text);
 
   public void println(String text);
-
-  public boolean wasInitialized();
 
 }

@@ -1,7 +1,7 @@
 package control4j.resources;
 
 /*
- *  Copyright 2013 Jiri Lidinsky
+ *  Copyright 2013, 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -18,14 +18,14 @@ package control4j.resources;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import control4j.Control;
-import control4j.ICycleEventListener;
 import control4j.IConfigBuffer;
+import control4j.Resource;
 
 public class Console extends Resource 
 implements ITextWriter
 {
-  private boolean initializeFlag = true;
+
+  private Console() { }
 
   public void print(String text)
   {
@@ -37,9 +37,12 @@ implements ITextWriter
     System.out.println(text);
   }
 
-  public boolean wasInitialized()
+  private static Console instance;
+
+  protected static Console getInstance(IConfigBuffer configuration)
   {
-    return initializeFlag;
+    if (instance == null) instance = new Console();
+    return instance;
   }
 
 }
