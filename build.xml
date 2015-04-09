@@ -2,7 +2,7 @@
 <project name="control4j" basedir="." default="compile">
 
     <description>
-	This build file is used to compile control4j software.
+        This build file is used to compile control4j software.
     </description>
 
     <!-- Name of the software to build -->
@@ -18,49 +18,49 @@
     <property name="jarname" value="${sw.name}.jar" />
 
     <target name="init">
-	<tstamp />
+        <tstamp />
     </target>
 
     <target name="clean" depends="init"
-	    description="Removes all except source code directory.">
+            description="Removes all except source code directory.">
         <delete dir="${bindir}" />
         <delete dir="${docdir}" />
         <delete dir="${reports}" />
     </target>
 
     <target name="compile" 
-	    depends="init,ap" 
-	    description="Compiles the application">
+            depends="init,ap" 
+            description="Compiles the application">
         <mkdir dir="${bindir}" />
-	<depend srcdir="${srcdir}" destdir="${bindir}" />
+        <depend srcdir="${srcdir}" destdir="${bindir}" />
         <javac srcdir="${srcdir}" destdir="${bindir}" 
-	    excludes="${srcdir}/annotations/process/*"
-	    deprecation="no"
-	    classpath="ap.jar:depend/lidinsky-tools.jar:depend/commons-lang3.jar:depend/jgrapht.jar"
-	/>
+            excludes="${srcdir}/annotations/process/*"
+            deprecation="no"
+            classpath="ap.jar:depend/lidinsky-tools.jar:depend/commons-lang3.jar:depend/jgrapht.jar:depend/commons-collections.jar"
+        />
         <concat destfile="${bindir}/control4j/messages.properties" >
             <fileset dir="${srcdir}" includes="**/messages.properties" />
         </concat>
-	<move file="guicomponents.csv" todir="${bindir}/control4j/gui/edit" />
-	<copy file="${srcdir}/control4j/application/namespaceloadermap.conf"
-	      todir="${bindir}/control4j/application" />
+        <move file="guicomponents.csv" todir="${bindir}/control4j/gui/edit" />
+        <copy file="${srcdir}/control4j/application/namespaceloadermap.conf"
+              todir="${bindir}/control4j/application" />
     </target>
 
     <target name="test" depends="compile" >
         <javac srcdir="${testsrcdir}" destdir="${bindir}" />
-	<mkdir dir="${reports}" />
+        <mkdir dir="${reports}" />
         <junit printsummary="yes" haltonfailure="yes">
-	    <classpath>
-	        <pathelement location="${bindir}" />
+            <classpath>
+                <pathelement location="${bindir}" />
                 <pathelement path="${java.class.path}" />
-	    </classpath>
-	    <formatter type="plain" />
-	    <batchtest fork="yes" todir="${reports}">
-	        <fileset dir="${testsrcdir}">
-		    <include name="**/*Test.java" />
-		</fileset>
-	    </batchtest>
-	</junit>
+            </classpath>
+            <formatter type="plain" />
+            <batchtest fork="yes" todir="${reports}">
+                <fileset dir="${testsrcdir}">
+                    <include name="**/*Test.java" />
+                </fileset>
+            </batchtest>
+        </junit>
     </target>
     
     <target name="doc" description="Generates documentation.">
@@ -86,43 +86,43 @@
     </target>
     
     <target name="jar" depends="compile, version, init" 
-	    description="Creates JAR file.">
-    	<jar destfile="${jarname}">
+            description="Creates JAR file.">
+        <jar destfile="${jarname}">
             <fileset dir="${bindir}" />
-	    <manifest >
-	        <attribute name="Main-Class" value="control4j.Control" />
-		<section name="common">
-		    <attribute name="Implementation-Version" 
-			       value="${sw.version}" />
-		</section>
-	    </manifest>
-	</jar>
+            <manifest >
+                <attribute name="Main-Class" value="control4j.Control" />
+                <section name="common">
+                    <attribute name="Implementation-Version" 
+                               value="${sw.version}" />
+                </section>
+            </manifest>
+        </jar>
     </target>
 
     <target name="ap" depends="clean" >
         <mkdir dir="${bindir}" />
-	<depend srcdir="${srcdir}" destdir="${bindir}" />
+        <depend srcdir="${srcdir}" destdir="${bindir}" />
         <javac srcdir="${srcdir}/control4j/annotations" destdir="${bindir}" 
             excludes=""
-	    deprecation="no"
-	/>
+            deprecation="no"
+        />
         <mkdir dir="${bindir}/META-INF" />
         <mkdir dir="${bindir}/META-INF/services" />
         <echo
-	    message="control4j.annotations.process.GuiObjectProcessor"
-	    file="${bindir}/META-INF/services/javax.annotation.processing.Processor" />
+            message="control4j.annotations.process.GuiObjectProcessor"
+            file="${bindir}/META-INF/services/javax.annotation.processing.Processor" />
     </target>
 
     <!-- Takes a hash of the last commit from git repository -->
     <target name="version" depends="init" >
-	<exec executable="git" 
-	      outputproperty="sw.version" 
-	      resultproperty="git.result"
-	      failifexecutionfails="false" >
-	    <arg line="log --pretty=format:%H -n 1" />
-	</exec>
+        <exec executable="git" 
+              outputproperty="sw.version" 
+              resultproperty="git.result"
+              failifexecutionfails="false" >
+            <arg line="log --pretty=format:%H -n 1" />
+        </exec>
         <property name="sw.version" value="?" />
-	<echo>${sw.version}</echo>
+        <echo>${sw.version}</echo>
     </target>
 
 </project>

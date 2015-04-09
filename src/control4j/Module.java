@@ -18,14 +18,19 @@ package control4j;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import java.util.Iterator;
+import java.util.List;
 import java.lang.reflect.Field;
+
+import org.apache.commons.lang3.reflect.FieldUtils;
+import org.apache.commons.collections4.Predicate;
+import org.apache.commons.collections4.iterators.FilterIterator;
 
 import control4j.tools.DeclarationReference;
 import static control4j.tools.LogMessages.*;
 
 /**
- *  Module is one of the building blocks of the application.
- *
+ *  Module is one of the main building blocks of the application.
  */
 public abstract class Module
 {
@@ -94,8 +99,34 @@ public abstract class Module
     writer.println(declarationReference.toString());
   }
 
-  public void putResource(String key, Resource resource)
+  public void putResource(final String key, Resource resource)
   {
+    List<Field> resourceFields 
+        = FieldUtils.getFieldsListWithAnnotation(
+        Module.class, AResource.class);
+    Iterator<Field> resourceFieldsIter 
+        = new FilterIterator(resourceFields.iterator(), 
+        new Predicate<Field>()
+        {
+          public boolean evaluate(Field field)
+          {
+            return field.getAnnotation(AResource.class).key().equals(key);
+          }
+        }
+    );
+    while (resourceFieldsIter.hasNext())
+    {
+      try
+      {
+        Field resourceField = resourceFieldsIter.next();
+        FieldUtils.writeField(resourceField, this, resource, true);
+      }
+      catch (IllegalAccessException e)
+      {
+        // TODO:
+      }
+    }
+    // TODO: Non existent key field
   }
 
 }
