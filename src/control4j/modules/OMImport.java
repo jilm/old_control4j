@@ -21,7 +21,7 @@ package control4j.modules;
 import java.util.Collection;
 
 import control4j.OutputModule;
-import control4j.Resource;
+import control4j.AResource;
 import control4j.Signal;
 //import control4j.application.ModuleDeclaration;
 import control4j.protocols.signal.Request;
@@ -37,7 +37,7 @@ import control4j.resources.communication.SignalClient;
 public class OMImport extends OutputModule
 {
 
-  @Resource
+  @AResource
   public SignalClient client;
 
   /** Names of the input signal that will be used as an identifier */
@@ -69,12 +69,12 @@ public class OMImport extends OutputModule
     {
       for (int i=0; i<outputLength; i++)
       {
-	output[i] = response.get(ids[i]);
+        output[i] = response.get(ids[i]);
       }
     }
     for (int i=0; i<outputLength; i++)
       if (output[i] == null)
-	output[i] = Signal.getSignal();
+        output[i] = Signal.getSignal();
   }
 
 }

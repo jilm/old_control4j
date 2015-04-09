@@ -186,41 +186,41 @@ public class ResourceManager implements Iterable<control4j.resources.Resource>
     Field[] fields = object.getClass().getDeclaredFields();
     for (Field field : fields)
     {
-      Resource annotation = field.getAnnotation(Resource.class);
+      AResource annotation = field.getAnnotation(AResource.class);
       if (annotation != null)
       {
         String key = annotation.key();
-	if (key.length() == 0) key = field.getName();
-	try
-	{
-	  String resourceName = configuration.getString(key);
-	  control4j.resources.Resource resource = manager.get(resourceName);
-	  boolean accessibility = field.isAccessible();
-	  field.setAccessible(true);
+        if (key.length() == 0) key = field.getName();
+        try
+        {
+          String resourceName = configuration.getString(key);
+          control4j.resources.Resource resource = manager.get(resourceName);
+          boolean accessibility = field.isAccessible();
+          field.setAccessible(true);
           field.set(object, resource);
-	  field.setAccessible(accessibility);
-	}
-	catch (ConfigItemNotFoundException e)
-	{
-	  // there is not a value in configuration for the resource field
-	  throw new SyntaxErrorException("not found");
-	}
-	catch (java.util.NoSuchElementException e)
-	{
-	  // there is not a resource with given name 
-	  throw new SyntaxErrorException("no such element");
-	}
-	catch (IllegalAccessException e)
-	{
-	  // a field in the object is not accessible
-	  throw new SystemException();
-	}
-	catch (IllegalArgumentException e)
-	{
-	  // the specified object doesn't implement the field. Should not
-	  // happen. Or if casting fails
+          field.setAccessible(accessibility);
+        }
+        catch (ConfigItemNotFoundException e)
+        {
+          // there is not a value in configuration for the resource field
+          throw new SyntaxErrorException("not found");
+        }
+        catch (java.util.NoSuchElementException e)
+        {
+          // there is not a resource with given name 
+          throw new SyntaxErrorException("no such element");
+        }
+        catch (IllegalAccessException e)
+        {
+          // a field in the object is not accessible
+          throw new SystemException();
+        }
+        catch (IllegalArgumentException e)
+        {
+          // the specified object doesn't implement the field. Should not
+          // happen. Or if casting fails
           throw new SyntaxErrorException();
-	}
+        }
       }
     }
     

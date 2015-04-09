@@ -18,91 +18,210 @@ package control4j;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import java.util.Arrays;
-
 import control4j.application.Input;
 import control4j.application.Output;
+
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.ImmutableTriple;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Set;
 
 /**
  *
  *  A class which is responsible for modules instantiation.
  *
  */
-public class Instantiator
+public class Instantiator 
 {
 
-  public Instantiator()
-  { }
+  /**
+   *  An empty constructor.
+   */
+  public Instantiator() {}
 
-  control4j.application.Application definitions;
+  control4j.application.Application applicationDef;
 
   Application result;
 
   /**
-   *  Takes the collection of the module definitions and create
-   *  instances of classes that implements the module functionality.
+   *  Creates instances of all of the modules. The sequence is as 
+   *  follows:
+   *  <ol>
+   *    <li>Creates instance of the module.
+   *    <li>Creates input and output map.
+   *    <li>Calls initialization method of the Module.
+   *    <li>Calls initialization input and output methods of the Module.
+   *    <li>Assignes the resources.
+   *    <li>Register as a ICycleListener.
+   *  </ol>
    */
   public Application instantiate(
-      control4j.application.Application application)
+      control4j.application.Application application) 
   {
-    definitions = application;
-    //Application result;
-    int modules = application.getModulesSize();
-    // TODO Allocates the destination array
+
+    applicationDef = application;
+    ArrayList<Pair<InputModule, int[]>> inputModules 
+        = new ArrayList<Pair<InputModule, int[]>>();
+    ArrayList<Triple<ProcessModule, int[], int[]>> processModules
+        = new ArrayList<Triple<ProcessModule, int[], int[]>>();
+    ArrayList<Pair<OutputModule, int[]>> outputModules
+        = new ArrayList<Pair<OutputModule, int[]>>();
+
     // Create instance of all of the modules
-    for (int i=0; i<modules; i++)
+    int modules = application.getModulesSize();
+    for (int i = 0; i < modules; i++) 
     {
-      // get module definition
-      control4j.application.Module definition 
-          = application.getModule(i);
-      // create instance
-      Module instance = instantiate(definition);
-      // save result
-      //result.put(i, instance);
+      try 
+      {
+        // get module definition
+        control4j.application.Module moduleDef = application.getModule(i);
+        // get module class
+        String className = moduleDef.getClassName();
+        Class<Module> moduleClass
+            = (Class<Module>)Class.forName(className);
+        // create instance
+        Module moduleInstance = instantiate(moduleDef);
+        // create input map
+        int[] inputMap = getInputMap(moduleDef, moduleClass);
+        // create output map
+        int[] outputMap = getOutputMap(moduleDef, moduleClass);
+        // method initialization
+        moduleInstance.initialize(moduleDef.getConfiguration());
+        // resource assignment
+        Set<String> resourceKeys = moduleDef.getResourceKeys();
+        for (String key : resourceKeys)
+        {
+          control4j.application.Resource resourceDef 
+              = moduleDef.getResource(key);
+          Resource resource = Resource.getResource(
+              resourceDef.getClassName(), resourceDef.getConfiguration());
+          moduleInstance.putResource(key, resource);
+        }
+        // TODO: check that all of the resources are assigned
+        if (moduleInstance instanceof InputModule)
+        {
+          if (outputMap != null) {} // TODO: outputs for input module !
+          InputModule inputModule = (InputModule)moduleInstance;
+          initializeInputModule(moduleDef, inputModule, inputMap);
+          inputModules.add(
+              new ImmutablePair<InputModule, int[]>(inputModule, inputMap));
+        }
+        else if (moduleInstance instanceof ProcessModule)
+        {
+          ProcessModule processModule = (ProcessModule)moduleInstance;
+          initializeProcessModule(
+              moduleDef, processModule, inputMap, outputMap);
+          processModules.add(
+              new ImmutableTriple<ProcessModule, int[], int[]>(
+              processModule, inputMap, outputMap));
+        }
+        else if (moduleInstance instanceof OutputModule)
+        {
+          if (inputMap != null) {} // TODO: inputs for output module !
+          OutputModule outputModule = (OutputModule)moduleInstance;
+          initializeOutputModule(
+              moduleDef, outputModule, outputMap);
+          outputModules.add(
+              new ImmutablePair<OutputModule, int[]>(outputModule, outputMap));
+        }
+        else
+        {
+          // TODO: Not a module
+        }
+      }
+      catch (Exception e)
+      {
+        // TODO:
+      }
     }
+
+    Application result = new Application();
     return result;
+  }
+
+  /**
+   *  Provides configuration of the given module that is specific
+   *  for input modules.
+   */
+  protected void initializeInputModule(
+      control4j.application.Module moduleDef, InputModule module, int[] map)
+  {
+    for (int j = 0; j < map.length; j++)
+      if (map[j] >= 0)
+      {
+        module.setInputConfiguration(
+            j, moduleDef.getInput(map[j]).getConfiguration());
+      }
+  }
+
+  /**
+   *  Provides configuration of the given module that is specific
+   *  for process modules.
+   */
+  protected void initializeProcessModule(
+      control4j.application.Module moduleDef, ProcessModule module,
+      int[] inputMap, int[] outputMap)
+  {
+    for (int j = 0; j < inputMap.length; j++)
+      if (inputMap[j] >= 0)
+      {
+        module.setInputConfiguration(
+            j, moduleDef.getInput(inputMap[j]).getConfiguration());
+      }
+    for (int j = 0; j < outputMap.length; j++)
+      if (outputMap[j] >= 0)
+      {
+        module.setOutputConfiguration(
+            j, moduleDef.getOutput(outputMap[j]).getConfiguration());
+      }
+  }
+
+  /**
+   *  Provides configuration of the given module that is specific
+   *  for output modules.
+   */
+  protected void initializeOutputModule(
+      control4j.application.Module moduleDef, OutputModule module, int[] map)
+  {
+    for (int j = 0; j < map.length; j++)
+      if (map[j] >= 0)
+      {
+        module.setOutputConfiguration(
+            j, moduleDef.getOutput(map[j]).getConfiguration());
+      }
   }
 
   /**
    *  Create and return an instance of the module which correspond
    *  to the given module definition.
    */
-  protected Module instantiate(control4j.application.Module definition)
+  protected Module instantiate(control4j.application.Module moduleDef)
   {
     try
     {
       // get module class
-      String className = definition.getClassName();
+      String className = moduleDef.getClassName();
       Class<Module> moduleClass
           = (Class<Module>)Class.forName(className);
 
       // create the instance
       Module instance = moduleClass.newInstance();
-
-      // assign input and output maps
-      int[] inputMap = getInputMap(definition, moduleClass);
-      int[] outputMap = getOutputMap(definition, moduleClass);
-      result.add(instance, inputMap, outputMap);
-
-      // configure new instance
-      IConfigBuffer configuration = definition.getConfiguration();
-      instance.initialize(configuration);
-
-      // assign resources
-
-      // set configuration of input and output
     }
     catch (ClassNotFoundException e)
     {
-      // TODO
+      // TODO:
     }
     catch (InstantiationException e)
     {
-      // TODO
+      // TODO:
     }
     catch (IllegalAccessException e)
     {
-      // TODO
+      // TODO:
     }
     return null;
   }
@@ -111,34 +230,26 @@ public class Instantiator
    *  Creates and returns the input map for a given module definition.
    */
   protected int[] getInputMap(
-      control4j.application.Module definition, Class<Module> moduleClass)
+      control4j.application.Module moduleDef, Class<Module> moduleClass) 
   {
+
     // get AVariableInput annotation, if any
     AVariableInput varInput 
-	= moduleClass.getAnnotation(AVariableInput.class);
+        = moduleClass.getAnnotation(AVariableInput.class);
 
     // calculate required size of the map array
-    int mapSize = 0;
-    int fixedInputSize = definition.getInputSize();
-    int varInputIndex = 0;
-    int varInputSize = definition.getVariableInputSize();
-    if (varInputSize == 0)
+    int varInputSize = moduleDef.getVariableInputSize();
+    if (varInputSize > 0 && varInput == null) 
     {
-      mapSize = fixedInputSize;
-    }
-    else if (varInput == null)
+      // TODO: variable input is not supported!
+    } 
+    else if (varInput != null)
     {
-      // TODO variable input is not supported!
+      int varInputIndex = varInput.startIndex();
+      moduleDef.setVariableInputStartIndex(varInputIndex);
+      // TODO: index collision
     }
-    else if (fixedInputSize >= varInput.startIndex())
-    {
-      // TODO index collision
-    }
-    else
-    {
-      varInputIndex = varInput.startIndex();
-      mapSize = varInputIndex + varInputSize - 1;
-    }
+    int mapSize = moduleDef.getInputSize();
     if (mapSize == 0) return null;
 
     // allocate the map array
@@ -146,66 +257,37 @@ public class Instantiator
     Arrays.fill(map, -1);
 
     // fixed index input
-    for (int i=0; i<fixedInputSize; i++)
+    for (int i=0; i<mapSize; i++)
     {
-      // get input definition
-      Input input = definition.getInput(i);
-      // get the index of the appropriate signal definition
-      control4j.application.Signal signal = definitions.getSignal(
-	  input.getHref(), input.getScope());
-      int index = definitions.getSignalIndex(signal);
-      // put the index into the map
-      map[i] = index;
-    }
-
-    // input with variable index
-    for (int i=0; i<varInputSize; i++)
-    {
-      // get input definition
-      Input input = definition.getVariableInput(i);
-      // get the index of the appropriate signal definition
-      control4j.application.Signal signal = definitions.getSignal(
-	  input.getHref(), input.getScope());
-      int index = definitions.getSignalIndex(signal);
-      // put the index into the map
-      map[i+varInputIndex] = index;
+      map[i] = moduleDef.getFixedInputMap().get(i);
     }
 
     return map;
   }
 
   /**
-   *  Creates and returns the input map for a given module definition.
+   *  Creates and returns the output map for a given module definition.
    */
   protected int[] getOutputMap(
-      control4j.application.Module definition, Class<Module> moduleClass)
+      control4j.application.Module moduleDef, Class<Module> moduleClass)
   {
     // get AVariableOutput annotation, if any
     AVariableOutput varOutput 
-	= moduleClass.getAnnotation(AVariableOutput.class);
+        = moduleClass.getAnnotation(AVariableOutput.class);
 
     // calculate required size of the map array
-    int mapSize = 0;
-    int fixedOutputSize = definition.getOutputSize();
-    int varOutputIndex = 0;
-    int varOutputSize = definition.getVariableOutputSize();
-    if (varOutputSize == 0)
+    int varOutputSize = moduleDef.getVariableOutputSize();
+    if (varOutputSize > 0 && varOutput == null)
     {
-      mapSize = fixedOutputSize;
+      // TODO: variable output is not supported!
     }
-    else if (varOutput == null)
+    else if (varOutput != null)
     {
-      // TODO variable output is not supported!
+      int varOutputIndex = varOutput.startIndex();
+      moduleDef.setVariableOutputStartIndex(varOutputIndex);
+      // TODO: index collision
     }
-    else if (fixedOutputSize >= varOutput.startIndex())
-    {
-      // TODO index collision
-    }
-    else
-    {
-      varOutputIndex = varOutput.startIndex();
-      mapSize = varOutputIndex + varOutputSize - 1;
-    }
+    int mapSize = moduleDef.getOutputSize();
     if (mapSize == 0) return null;
 
     // allocate the map array
@@ -213,29 +295,9 @@ public class Instantiator
     Arrays.fill(map, -1);
 
     // fixed index output
-    for (int i=0; i<fixedOutputSize; i++)
+    for (int i = 0; i < mapSize; i++)
     {
-      // get output definition
-      Output output = definition.getOutput(i);
-      // get the index of the appropriate signal definition
-      control4j.application.Signal signal = definitions.getSignal(
-	  output.getHref(), output.getScope());
-      int index = definitions.getSignalIndex(signal);
-      // put the index into the map
-      map[i] = index;
-    }
-
-    // output with variable index
-    for (int i=0; i<varOutputSize; i++)
-    {
-      // get output definition
-      Output output = definition.getVariableOutput(i);
-      // get the index of the appropriate signal definition
-      control4j.application.Signal signal = definitions.getSignal(
-	  output.getHref(), output.getScope());
-      int index = definitions.getSignalIndex(signal);
-      // put the index into the map
-      map[i+varOutputIndex] = index;
+      map[i] = moduleDef.getFixedOutputMap().get(i);
     }
 
     return map;

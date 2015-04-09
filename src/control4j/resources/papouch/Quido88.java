@@ -21,7 +21,7 @@ package control4j.resources.papouch;
 import java.io.IOException;
 import java.util.Date;
 import control4j.Control;
-import control4j.Resource;
+import control4j.AResource;
 import control4j.ConfigItem;
 import control4j.IConfigBuffer;
 import control4j.ICycleEventListener;
@@ -60,7 +60,7 @@ implements ICycleEventListener, IThermometer, IBinaryInput, IBinaryOutput
   /**
    *  Name of the spinel resource.
    */
-  @Resource 
+  @AResource 
   public Spinel spinel;
 
   /* binary output */
@@ -211,14 +211,14 @@ implements ICycleEventListener, IThermometer, IBinaryInput, IBinaryOutput
             data[j] = output[i] ? 0x80 : 0x00;
             data[j] += i + 1;
             j++;
-	    output[i] = null;
+            output[i] = null;
           }
         SpinelMessage message = new SpinelMessage(address, 0x20, data);
-	try
-	{
+        try
+        {
           outputResponse = spinel.write(message);
-	}
-	catch (java.io.IOException e) { }
+        }
+        catch (java.io.IOException e) { }
       }
     }
   }
@@ -243,10 +243,10 @@ implements ICycleEventListener, IThermometer, IBinaryInput, IBinaryOutput
       {
         if (temperatureUnit == null)
           if (temperatureUnitResponse == null)
-	  {
-	    SpinelMessage message = new SpinelMessage(address, 0x1d);
-	    temperatureUnitResponse = spinel.write(message);
-	  }
+          {
+            SpinelMessage message = new SpinelMessage(address, 0x1d);
+            temperatureUnitResponse = spinel.write(message);
+          }
       }
       catch (java.io.IOException e) { }
     }
@@ -274,28 +274,28 @@ implements ICycleEventListener, IThermometer, IBinaryInput, IBinaryOutput
         try
         {
           SpinelMessage response = temperatureResponse.getResponse();
-	  if (response.getInst() == 0)
-	  {
+          if (response.getInst() == 0)
+          {
             temperatureTimestamp = temperatureResponse.getTimestamp();
             temperature = decodeTemperatureResponse(response);
           }
-	  else
-	  {
-	    // something is wrong with the module Quido
-	    temperatureStatus = 1;
-	  }
+          else
+          {
+            // something is wrong with the module Quido
+            temperatureStatus = 1;
+          }
         }
-	catch (IOException e)
-	{
-	  // something is wrong with the communication channal
-	  temperatureStatus = 2;
-	}
+        catch (IOException e)
+        {
+          // something is wrong with the communication channal
+          temperatureStatus = 2;
+        }
         temperatureResponse = null;
       }
       else
       {
         // data have not been recived yet
-	temperatureStatus = 3;
+        temperatureStatus = 3;
       }
 
       // processing response for temperature unit
@@ -306,43 +306,43 @@ implements ICycleEventListener, IThermometer, IBinaryInput, IBinaryOutput
           try
           {
             SpinelMessage response = temperatureUnitResponse.getResponse();
-	    if (response.getInst() == 0)
-	    {
+            if (response.getInst() == 0)
+            {
               int data = response.getData(1);
-	      switch (data)
-	      {
-	        case 0:
-		  temperatureUnit = "°C";
-		  break;
+              switch (data)
+              {
+                case 0:
+                  temperatureUnit = "°C";
+                  break;
                 case 1:
-		  temperatureUnit = "F";
-		  break;
-	        case 2:
-		  temperatureUnit = "K";
-		  break;
-	        default:
-		  // unknown temperature unit
-		  temperatureStatus = 4;
-	          break;
-	      }
+                  temperatureUnit = "F";
+                  break;
+                case 2:
+                  temperatureUnit = "K";
+                  break;
+                default:
+                  // unknown temperature unit
+                  temperatureStatus = 4;
+                  break;
+              }
             }
-	    else
-	    {
-	      // something is wrong with the module Quido
-	      temperatureStatus = 5;
-	    }
+            else
+            {
+              // something is wrong with the module Quido
+              temperatureStatus = 5;
+            }
           }
-	  catch (IOException e)
-	  {
-	    // something is wrong with the communication channal
-	    temperatureStatus = 6;
-	  }
+          catch (IOException e)
+          {
+            // something is wrong with the communication channal
+            temperatureStatus = 6;
+          }
           temperatureUnitResponse = null;
         }
         else
         {
           // data have not been recived yet
-	  temperatureStatus = 7;
+          temperatureStatus = 7;
         }
       }
     }
@@ -354,12 +354,12 @@ implements ICycleEventListener, IThermometer, IBinaryInput, IBinaryOutput
       {
         binaryInputTimestamp = inputResponse.getTimestamp();
         SpinelMessage response = inputResponse.getResponse();
-	decodeBinaryInputResponse(response);
+        decodeBinaryInputResponse(response);
       }
       catch (IOException e)
       {
         // something is wrong with the communication line
-	binaryInputStatus = -1;
+        binaryInputStatus = -1;
       }
       inputResponse = null;
     }

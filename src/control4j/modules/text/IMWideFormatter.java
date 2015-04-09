@@ -20,7 +20,7 @@ package control4j.modules.text;
 
 import java.util.Locale;
 import control4j.Signal;
-import control4j.Resource;
+import control4j.AResource;
 import control4j.ConfigItem;
 import control4j.InputModule;
 import control4j.SignalFormat;
@@ -37,7 +37,7 @@ public class IMWideFormatter extends InputModule
   /**
    *  Text device on which it will be printed.
    */
-  @Resource(key="text-device")
+  @AResource(key="text-device")
   public ITextWriter textDevice;
 
   /**
@@ -158,7 +158,7 @@ public class IMWideFormatter extends InputModule
       for (int i=1; i<inputLength; i++)
       {
         stringBuilder.append(delimiter);
-	stringBuilder.append(input[i].valueToString(signalFormat));
+        stringBuilder.append(input[i].valueToString(signalFormat));
       }
       textDevice.println(stringBuilder.toString());
     }
@@ -178,5 +178,5 @@ public class IMWideFormatter extends InputModule
     textDevice.println(stringBuilder.toString());
     header = false;
   }
-						    
+                                                    
 }

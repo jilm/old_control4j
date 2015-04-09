@@ -370,6 +370,30 @@ public class Module extends Configurable
     return variableInputMap;
   }
 
+  public void setVariableInputStartIndex(int index)
+  {
+    if (variableInputMap.size() == 0)
+    {
+      return;
+    }
+    else if (fixedInputMap.size() > index)
+    {
+      // TODO indexes colision
+    }
+    while (fixedInputMap.size() < index)
+    {
+      fixedInputMap.add(-1);
+      inputArray.add(null);
+    }
+    for (int i = 0; i < variableInputMap.size(); i++)
+    {
+      fixedInputMap.add(variableInputMap.get(i));
+      inputArray.add(variableInput.get(i));
+    }
+    variableInputMap.clear();
+    variableInput.clear();
+  }
+
   /*
    *
    *     Output Map.
@@ -404,6 +428,30 @@ public class Module extends Configurable
     return variableOutputMap;
   }
 
+  public void setVariableOutputStartIndex(int index)
+  {
+    if (variableOutputMap.size() == 0)
+    {
+      return;
+    }
+    else if (fixedOutputMap.size() > index)
+    {
+      // TODO indexes colision
+    }
+    while (fixedOutputMap.size() < index)
+    {
+      fixedOutputMap.add(-1);
+      outputArray.add(null);
+    }
+    for (int i = 0; i < variableOutputMap.size(); i++)
+    {
+      fixedOutputMap.add(variableOutputMap.get(i));
+      outputArray.add(variableOutput.get(i));
+    }
+    variableOutputMap.clear();
+    variableOutput.clear();
+  }
+
   /*
    *
    *     To String.
@@ -434,66 +482,66 @@ public class Module extends Configurable
 
     // write resources
     if ((resources != null && resources.size() > 0)
-	|| (resourceRefs != null && resourceRefs.size() > 0))
+        || (resourceRefs != null && resourceRefs.size() > 0))
     {
       sb.append(indent2).append("Resources\n");
       if (resources != null)
-	Helper.objectToString(resources, indent3, sb);
+        Helper.objectToString(resources, indent3, sb);
       if (resourceRefs != null)
-	sb.append(resourceRefs.toString());
+        sb.append(resourceRefs.toString());
         {}//Helper.toString(resourceRefs, indent3, sb); // TODO
     }
 
     // write input
     if ((inputArray != null && inputArray.size() > 0)
-	|| (variableInput != null && variableInput.size() > 0)
-	|| (inputTags != null && inputTags.size() > 0))
+        || (variableInput != null && variableInput.size() > 0)
+        || (inputTags != null && inputTags.size() > 0))
     {
       sb.append(indent2).append("Module Input\n");
       if (inputArray != null)
         for (int i=0; i<inputArray.size(); i++)
-	  if (inputArray.get(i) != null)
-	  {
-	    sb.append(indent3).append("Input[").append(i).append("]=");
-	    inputArray.get(i).toString(indent3, sb);
-	  }
+          if (inputArray.get(i) != null)
+          {
+            sb.append(indent3).append("Input[").append(i).append("]=");
+            inputArray.get(i).toString(indent3, sb);
+          }
       if (variableInput != null)
         for (Input input : variableInput)
         {
-	  sb.append(indent3).append("Input[-]=");
-	  input.toString(indent3, sb);
+          sb.append(indent3).append("Input[-]=");
+          input.toString(indent3, sb);
         }
       if (inputTags != null)
         sb.append(indent3)
-	  .append("Input Tags")
-	  .append(inputTags.toString())
-	  .append("\n");
+          .append("Input Tags")
+          .append(inputTags.toString())
+          .append("\n");
     }
 
     // write output
     if ((outputArray != null && outputArray.size() > 0)
-	|| (variableOutput != null && variableOutput.size() > 0)
-	|| (outputTags != null && outputTags.size() > 0))
+        || (variableOutput != null && variableOutput.size() > 0)
+        || (outputTags != null && outputTags.size() > 0))
     {
       sb.append(indent2).append("Module Output\n");
       if (outputArray != null)
         for (int i=0; i<outputArray.size(); i++)
-	  if (outputArray.get(i) != null)
-	  {
-	    sb.append(indent3).append("Output[").append(i).append("]=");
-	    outputArray.get(i).toString(indent3, sb);
-	  }
+          if (outputArray.get(i) != null)
+          {
+            sb.append(indent3).append("Output[").append(i).append("]=");
+            outputArray.get(i).toString(indent3, sb);
+          }
       if (variableOutput != null)
         for (Output output : variableOutput)
         {
-	  sb.append(indent3).append("Output[-]=");
-	  output.toString(indent3, sb);
+          sb.append(indent3).append("Output[-]=");
+          output.toString(indent3, sb);
         }
       if (outputTags != null)
         sb.append(indent3)
-	  .append("Output Tags")
-	  .append(outputTags.toString())
-	  .append("\n");
+          .append("Output Tags")
+          .append(outputTags.toString())
+          .append("\n");
     }
   }
 

@@ -21,7 +21,7 @@ package control4j.modules;
 import java.util.Collection;
 
 import control4j.InputModule;
-import control4j.Resource;
+import control4j.AResource;
 import control4j.Signal;
 //import control4j.application.ModuleDeclaration;
 import control4j.protocols.IRequest;
@@ -41,7 +41,7 @@ import control4j.resources.IServer;
 public class IMExport extends InputModule
 {
 
-  @Resource
+  @AResource
   public IServer<Request> server;
 
   /** Names of the input signal that will be used as an identifier */
@@ -73,10 +73,10 @@ public class IMExport extends InputModule
     {
       if (request instanceof DataRequest)
       {
-	DataResponse response 
-	    = (DataResponse)((DataRequest)request).getResponse();
-	for (int i=0; i<inputLength; i++)
-	  response.put(ids[i], input[i]);
+        DataResponse response 
+            = (DataResponse)((DataRequest)request).getResponse();
+        for (int i=0; i<inputLength; i++)
+          response.put(ids[i], input[i]);
       }
     }
   }

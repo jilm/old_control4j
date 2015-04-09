@@ -53,7 +53,7 @@ public abstract class Module
   { 
     // assign configuration items
     ConfigurationHelper.assignConfiguration(
-	this, configuration, declarationReference);
+        this, configuration, declarationReference);
   }
 
   public void prepare()
@@ -92,6 +92,10 @@ public abstract class Module
     writer.println("== MODULE ==");
     writer.println("Class: " + getClass().getName());
     writer.println(declarationReference.toString());
+  }
+
+  public void putResource(String key, Resource resource)
+  {
   }
 
 }

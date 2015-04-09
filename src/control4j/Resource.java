@@ -1,7 +1,7 @@
 package control4j;
 
 /*
- *  Copyright 2013 Jiri Lidinsky
+ *  Copyright 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -18,13 +18,19 @@ package control4j;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Documented;
-
-@Documented
-@Retention(RetentionPolicy.RUNTIME)
-public @interface Resource
+public class Resource
 {
-  String key() default "";
+
+  public static Resource getResource(
+      String className, IConfigBuffer configuration)
+  {
+    return null;
+  }
+
+  public static Resource getResource(
+      Class resourceClass, IConfigBuffer configuration)
+  {
+    return null;
+  }
+
 }

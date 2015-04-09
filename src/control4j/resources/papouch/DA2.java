@@ -19,7 +19,7 @@ package control4j.resources.papouch;
  */
 
 import java.io.IOException;
-import control4j.Resource;
+import control4j.AResource;
 import control4j.ConfigItem;
 import control4j.ICycleEventListener;
 import control4j.tools.IResponseCrate;
@@ -44,7 +44,7 @@ implements IAnalogOutput, ICycleEventListener
   /**
    *  Name of the spinel resource class.
    */
-  @Resource
+  @AResource
   public Spinel spinel;
 
   private int status = -1;
@@ -119,10 +119,10 @@ implements IAnalogOutput, ICycleEventListener
       try
       {
         SpinelMessage message = response.getResponse();
-	if (message.getInst() == 0)
-	  status = 0;
+        if (message.getInst() == 0)
+          status = 0;
         else
-	  status = -1;
+          status = -1;
       }
       catch (IOException e)
       {

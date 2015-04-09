@@ -19,7 +19,7 @@ package control4j.modules.text;
  */
 
 import control4j.Signal;
-import control4j.Resource;
+import control4j.AResource;
 import control4j.ConfigItem;
 import control4j.InputModule;
 import control4j.IConfigBuffer;
@@ -34,7 +34,7 @@ public class IMPrintMessage extends InputModule
   /**
    *  Text device, the message will be printed on.
    */
-  @Resource(key="text-device")
+  @AResource(key="text-device")
   public ITextWriter textDevice;
 
   /**

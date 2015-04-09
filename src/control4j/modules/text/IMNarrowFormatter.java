@@ -22,7 +22,7 @@ import java.util.Locale;
 
 import control4j.AVariableInput;
 import control4j.Signal;
-import control4j.Resource;
+import control4j.AResource;
 import control4j.ConfigItem;
 import control4j.InputModule;
 import control4j.SignalFormat;
@@ -45,7 +45,7 @@ public class IMNarrowFormatter extends InputModule
   /**
    *  Text device on which it will be printed.
    */
-  @Resource(key="text-device")
+  @AResource(key="text-device")
   public ITextWriter textDevice;
 
   /**
@@ -141,7 +141,7 @@ public class IMNarrowFormatter extends InputModule
     {
       for (int i=1; i<inputLength; i++)
         textDevice.println(input[i].toString(
-	    signalFormat, delimiter, "???"));
+            signalFormat, delimiter, "???"));
     }
   }
 }

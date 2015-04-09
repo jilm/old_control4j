@@ -22,12 +22,12 @@ import control4j.Module;
 import control4j.Signal;
 import control4j.InputModule;
 import control4j.ConfigItem;
-import control4j.Resource;
+import control4j.AResource;
 import control4j.resources.database.MySql;
 
 public class IMDatabaseInsert extends InputModule
 {
-  @Resource 
+  @AResource 
   public MySql database;
   
   @ConfigItem(key="table-name")

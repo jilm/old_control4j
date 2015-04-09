@@ -21,7 +21,7 @@ package control4j.resources.papouch;
 import java.io.IOException;
 import java.util.Date;
 import control4j.Control;
-import control4j.Resource;
+import control4j.AResource;
 import control4j.ConfigItem;
 import control4j.IConfigBuffer;
 import control4j.ICycleEventListener;
@@ -49,7 +49,7 @@ implements ICycleEventListener, IThermometer
   /**
    *  Name of the spinel resource.
    */
-  @Resource 
+  @AResource 
   public Spinel spinel;
 
   /* temperature measurement */

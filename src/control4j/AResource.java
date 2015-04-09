@@ -1,5 +1,7 @@
+package control4j;
+
 /*
- *  Copyright 2015 Jiri Lidinsky
+ *  Copyright 2013, 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -16,21 +18,13 @@
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package control4j;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Documented;
 
-class Application
+@Documented
+@Retention(RetentionPolicy.RUNTIME)
+public @interface AResource
 {
-
-  public Application() { }
-
-  public InputModule[] inputModules;
-
-  public ProcessModule[] processModules;
-
-  public OutputModule[] outputModule;
-
-  void add(Module module, int[] inputMap, int[] outputMap)
-  {
-  }
-
+  String key() default "";
 }

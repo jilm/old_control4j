@@ -20,7 +20,7 @@ package control4j.resources.papouch;
 
 import java.util.Date;
 import java.io.IOException;
-import control4j.Resource;
+import control4j.AResource;
 import control4j.ConfigItem;
 import control4j.IConfigBuffer;
 import control4j.ICycleEventListener;
@@ -49,7 +49,7 @@ implements IAnalogInput, ICycleEventListener
    *  Resource that encapsulates communication line, the hw module is
    *  attached to.
    */
-  @Resource
+  @AResource
   public Spinel spinel;
 
   private final int channels = 4; // number of input channels
@@ -132,9 +132,9 @@ implements IAnalogInput, ICycleEventListener
     {
       try
       {
-	this.timestamp = response.getTimestamp();
+        this.timestamp = response.getTimestamp();
         SpinelMessage message = response.getResponse();
-	processResponse(message);
+        processResponse(message);
       }
       catch (IOException e)
       {
@@ -158,12 +158,12 @@ implements IAnalogInput, ICycleEventListener
         int status = response.getData(i*4+1);
         int value = (response.getData(i*4+2) << 8) + response.getData(i*4+3);
         if (status == 0x80)
-	{
-	  values[channel] = (double)(value)/10000.0;
-	  measurementStatus[channel] = 0;
+        {
+          values[channel] = (double)(value)/10000.0;
+          measurementStatus[channel] = 0;
         }
-	else
-	  measurementStatus[channel] = -1;
+        else
+          measurementStatus[channel] = -1;
       }
       this.status = 0;
     }
