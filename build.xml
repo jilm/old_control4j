@@ -53,6 +53,7 @@
             <classpath>
                 <pathelement location="${bindir}" />
                 <pathelement path="${java.class.path}" />
+                <pathelement path="depend/lidinsky-tools.jar:depend/commons-lang3.jar:depend/jgrapht.jar:depend/commons-collections.jar" />
             </classpath>
             <formatter type="plain" />
             <batchtest fork="yes" todir="${reports}">

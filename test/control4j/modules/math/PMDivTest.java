@@ -13,7 +13,8 @@ public class PMDivTest
   private Signal signal2;
   private Signal invalidSignal;
   private Signal zeroSignal;
-  private Signal[] buffer = new Signal[5];
+  private Signal[] inBuffer = new Signal[5];
+  private Signal[] outBuffer = new Signal[5];
 
   @Before
   public void initialize()
@@ -27,37 +28,37 @@ public class PMDivTest
   @Test
   public void test1()
   {
-    buffer[0] = signal1;
-    buffer[1] = signal2;
-    Signal[]  result = div.process(buffer);
-    assertEquals(4.0, result[0].getValue(), 1e-6);
+    inBuffer[0] = signal1;
+    inBuffer[1] = signal2;
+    div.process(inBuffer, 2, outBuffer, 1);
+    assertEquals(4.0, outBuffer[0].getValue(), 1e-6);
   }
 
   @Test
   public void test2()
   {
-    buffer[0] = signal1;
-    buffer[1] = invalidSignal;
-    Signal[]  result = div.process(buffer);
-    assertFalse(result[0].isValid());
+    inBuffer[0] = signal1;
+    inBuffer[1] = invalidSignal;
+    div.process(inBuffer, 2, outBuffer, 1);
+    assertFalse(outBuffer[0].isValid());
   }
 
   @Test
   public void test3()
   {
-    buffer[0] = invalidSignal;
-    buffer[1] = signal1;
-    Signal[]  result = div.process(buffer);
-    assertFalse(result[0].isValid());
+    inBuffer[0] = invalidSignal;
+    inBuffer[1] = signal1;
+    div.process(inBuffer, 2, outBuffer, 1);
+    assertFalse(outBuffer[0].isValid());
   }
 
   @Test
   public void test4()
   {
-    buffer[0] = signal1;
-    buffer[1] = zeroSignal;
-    Signal[]  result = div.process(buffer);
-    assertFalse(result[0].isValid());
+    inBuffer[0] = signal1;
+    inBuffer[1] = zeroSignal;
+    div.process(inBuffer, 2, outBuffer, 1);
+    assertFalse(outBuffer[0].isValid());
   }
 }
 

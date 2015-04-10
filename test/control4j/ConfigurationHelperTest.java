@@ -3,7 +3,6 @@ package control4j;
 import org.junit.*;
 import static org.junit.Assert.*;
 import static org.junit.Assume.*;
-import control4j.application.Property;
 import control4j.application.ConfigBuffer;
 
 public class ConfigurationHelperTest
@@ -63,13 +62,13 @@ public class ConfigurationHelperTest
   public void initialize()
   {
     configuration = new ConfigBuffer();
-    configuration.put(new Property("stringItem1", "value1"));
-    configuration.put(new Property("stringItem2", "value2"));
-    configuration.put(new Property("intItem1", "123"));
-    configuration.put(new Property("doubleItem1", "1.23"));
-    configuration.put(new Property("booleanItem1", "true"));
-    configuration.put(new Property("setDoubleItem2", "2.34"));
-    configuration.put(new Property("double-item3", "3.45"));
+    configuration.put("stringItem1", "value1");
+    configuration.put("stringItem2", "value2");
+    configuration.put("intItem1", "123");
+    configuration.put("doubleItem1", "1.23");
+    configuration.put("booleanItem1", "true");
+    configuration.put("setDoubleItem2", "2.34");
+    configuration.put("double-item3", "3.45");
   }
 
   @Test
@@ -112,7 +111,7 @@ public class ConfigurationHelperTest
   {
     try
     {
-    configuration.put(new Property("intItem2", "abc"));
+    configuration.put("intItem2", "abc");
     ConfigurationHelper.assignConfiguration(testClass1, configuration, null);
     }
     catch(IllegalArgumentException e)
@@ -139,14 +138,14 @@ public class ConfigurationHelperTest
   @Test(expected=SyntaxErrorException.class)
   public void test9()
   {
-    configuration.put(new Property("double-item4", "3.45"));
+    configuration.put("double-item4", "3.45");
     ConfigurationHelper.assignConfiguration(testClass1, configuration, null);
   }
 
   @Test(expected=SyntaxErrorException.class)
   public void test10()
   {
-    configuration.put(new Property("double-item5", "abcd"));
+    configuration.put("double-item5", "abcd");
     ConfigurationHelper.assignConfiguration(testClass1, configuration, null);
   }
 

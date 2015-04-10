@@ -4,10 +4,12 @@ import org.junit.*;
 import static org.junit.Assert.*;
 import static org.junit.Assume.*;
 
+import control4j.tools.DuplicateElementException;
+
 public class ScopeMapTest
 {
 
-  ScopeMap<String> map;
+  ScopeMap<Tag> map;
   Scope scope1 = new Scope(Scope.getGlobal());
   Scope scope2 = new Scope(Scope.getGlobal());
   Scope scope3 = new Scope(scope1);
@@ -16,44 +18,49 @@ public class ScopeMapTest
   String name2 = "nameb";
   String name3 = "namec";
   String name4 = "namec";
-  String value1 = "valuex";
-  String value2 = "valuey";
-  String value3 = "valuez";
+  Tag value1 = new Tag();
+  Tag value2 = new Tag();
+  Tag value3 = new Tag();
 
   @Before
   public void initialize()
   {
-    map = new ScopeMap<String>();
+    map = new ScopeMap<Tag>();
+    try
+    {
     map.put(name4, Scope.getGlobal(), value2);
     map.put(name3, scope3, value1);
+    }
+    catch (DuplicateElementException e)
+    {
+    }
   }
 
   @Test
   public void test1()
   {
-    String result = map.get("namec", Scope.getGlobal());
-    assertTrue("valuey".equals(result));
+    Tag result = map.get("namec", Scope.getGlobal());
+    assertTrue(value2 == result);
   }
 
   @Test
   public void test2()
   {
-    String result = map.get("namec", scope1);
-    assertTrue("valuey".equals(result));
+    Tag result = map.get("namec", scope1);
+    assertTrue(value2 == result);
   }
 
   @Test
   public void test3()
   {
-    String result = map.get("namec", scope3);
-    assertTrue("valuex".equals(result));
+    Tag result = map.get("namec", scope3);
+    assertTrue(value1 == result);
   }
 
-  @Test
+  @Test(expected=java.util.NoSuchElementException.class)
   public void test4()
   {
-    String result = map.get("namex", scope3);
-    assertNull(result);
+    Tag result = map.get("namex", scope3);
   }
 
 /*
