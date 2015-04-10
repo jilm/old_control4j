@@ -18,19 +18,30 @@ package control4j;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import org.apache.commons.lang3.reflect.MethodUtils;
+
+import java.lang.reflect.InvocationTargetException;
+
 public class Resource
 {
 
   public static Resource getResource(
       String className, IConfigBuffer configuration)
+      throws ClassNotFoundException, NoSuchMethodException,
+             IllegalAccessException, InvocationTargetException
   {
-    return null;
+    Class resourceClass = Class.forName(className);
+    return getResource(resourceClass, configuration);
   }
 
   public static Resource getResource(
       Class resourceClass, IConfigBuffer configuration)
+      throws NoSuchMethodException, IllegalAccessException,
+             InvocationTargetException
   {
-    return null;
+    Resource resource = (Resource)MethodUtils.invokeStaticMethod(
+        resourceClass, "getInstance", configuration);
+    return resource;
   }
 
 }

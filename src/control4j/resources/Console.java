@@ -39,7 +39,7 @@ implements ITextWriter
 
   private static Console instance;
 
-  protected static Console getInstance(IConfigBuffer configuration)
+  public static Console getInstance(IConfigBuffer configuration)
   {
     if (instance == null) instance = new Console();
     return instance;
