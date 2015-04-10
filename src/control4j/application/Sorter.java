@@ -163,7 +163,7 @@ public class Sorter {
 
           Module module1 = application.getModule(signalModuleMap[in]);
 
-          if (application.getSignal(in).isValueT_1Specified()) {
+          if (application.getSignal(in).getRight().isValueT_1Specified()) {
             // if the signal has default value specified
             // postphone the edge
             delayedEdges.add(new ImmutableTriple<Module, Module, Integer>( 

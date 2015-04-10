@@ -71,13 +71,13 @@ public class Preprocessor implements IGraph<Use>
     for (int i=0; i<application.getUseObjectsSize(); i++)
       if (!graph.isAcyclicDFS(this, application.getUse(i).getKey()))
       {
-	System.out.println("Cyclic: " 
-	    + application.getUse(i).getKey().getHref());
-	cycle = true;
+        System.out.println("Cyclic: "
+            + application.getUse(i).getKey().getHref());
+        cycle = true;
       }
       else
-	System.out.println("Acyclic: " 
-	    + application.getUse(i).getKey().getHref());
+        System.out.println("Acyclic: "
+            + application.getUse(i).getKey().getHref());
     */
 
     // expand all of the use objects
@@ -98,19 +98,19 @@ public class Preprocessor implements IGraph<Use>
       System.out.println(module.getClassName());
       while(module.getResourceRefsSize() > 0)
       {
-	Triple<String, String, Scope> resourceRef = module.getResourceRef(0);
-	System.out.println(resourceRef.toString());
-	try
-	{
-	  Resource resource = application.getResource(
-	      resourceRef.getMiddle(), resourceRef.getRight());
-	  module.putResource(resourceRef.getLeft(), resource);
-	  module.removeResourceRef(0);
-	}
-	catch (NoSuchElementException e) 
-	{
-	  catched(getClass().getName(), "process", e); // TODO
-	}
+        Triple<String, String, Scope> resourceRef = module.getResourceRef(0);
+        System.out.println(resourceRef.toString());
+        try
+        {
+          Resource resource = application.getResource(
+              resourceRef.getMiddle(), resourceRef.getRight());
+          module.putResource(resourceRef.getLeft(), resource);
+          module.removeResourceRef(0);
+        }
+        catch (NoSuchElementException e)
+        {
+          catched(getClass().getName(), "process", e); // TODO
+        }
       }
     }
 
@@ -125,29 +125,29 @@ public class Preprocessor implements IGraph<Use>
       // substitute properties of the resources of the module
       Set<String> keys = module.getResourceKeys();
       for (String key : keys)
-	resolveConfiguration(module.getResource(key));
+        resolveConfiguration(module.getResource(key));
       // substitute properties of the input elements
       for (int j=0; j<module.getInputSize(); j++)
-	if (module.getInput(j) != null)
-	  resolveConfiguration(module.getInput(j));
+        if (module.getInput(j) != null)
+          resolveConfiguration(module.getInput(j));
       for (int j=0; j<module.getVariableInputSize(); j++)
-	resolveConfiguration(module.getVariableInput(j));
+        resolveConfiguration(module.getVariableInput(j));
       // substitute properties of the output elements
       for (int j=0; j<module.getOutputSize(); j++)
-	if (module.getOutput(j) != null)
-	  resolveConfiguration(module.getOutput(j));
+        if (module.getOutput(j) != null)
+          resolveConfiguration(module.getOutput(j));
       for (int j=0; j<module.getVariableOutputSize(); j++)
-	resolveConfiguration(module.getVariableOutput(j));
+        resolveConfiguration(module.getVariableOutput(j));
     }
     // signal definitions properties
     for (int i=0; i<application.getSignalsSize(); i++)
     {
-      Signal signal = application.getSignal(i);
+      Signal signal = application.getSignal(i).getRight();
       resolveConfiguration(signal);
       // tag properties
       Set<String> tagNames = signal.getTagNames();
       for (String name : tagNames)
-	resolveConfiguration(signal.getTag(name));
+        resolveConfiguration(signal.getTag(name));
     }
 
     for (int i=0; i<application.getModulesSize(); i++)
@@ -157,69 +157,69 @@ public class Preprocessor implements IGraph<Use>
       // create module input map
       // input with fixed index
       for (int j=0; j<module.getInputSize(); j++)
-	if (module.getInput(j) != null)
-	  try
-	  {
-	    Input input = module.getInput(j);
-	    Signal signal 
-		= application.getSignal(input.getHref(), input.getScope());
-	    int signalIndex = application.getSignalIndex(signal);
-	    module.putInputSignalIndex(j, signalIndex);
-	  }
-	  catch (NoSuchElementException e) { } // TODO
+        if (module.getInput(j) != null)
+          try
+          {
+            Input input = module.getInput(j);
+            Signal signal
+                = application.getSignal(input.getHref(), input.getScope());
+            int signalIndex = application.getSignalIndex(signal);
+            module.putInputSignalIndex(j, signalIndex);
+          }
+          catch (NoSuchElementException e) { } // TODO
 
       // input with variable index
       for (int j=0; j<module.getVariableInputSize(); j++)
-	try
-	{
-	  Input input = module.getVariableInput(j);
-	  Signal signal 
-	      = application.getSignal(input.getHref(), input.getScope());
-	  int signalIndex = application.getSignalIndex(signal);
-	  module.addInputSignalIndex(signalIndex);
-	}
-	catch (NoSuchElementException e) { } // TODO
+        try
+        {
+          Input input = module.getVariableInput(j);
+          Signal signal
+              = application.getSignal(input.getHref(), input.getScope());
+          int signalIndex = application.getSignalIndex(signal);
+          module.addInputSignalIndex(signalIndex);
+        }
+        catch (NoSuchElementException e) { } // TODO
 
       // create module output map
       // output with fixed index
       for (int j=0; j<module.getOutputSize(); j++)
-	if (module.getOutput(j) != null)
-	  try
-	  {
-	    Output output = module.getOutput(j);
-	    Signal signal 
-		= application.getSignal(output.getHref(), output.getScope());
-	    int signalIndex = application.getSignalIndex(signal);
-	    module.putOutputSignalIndex(j, signalIndex);
-	  }
-	  catch (NoSuchElementException e) { } // TODO
+        if (module.getOutput(j) != null)
+          try
+          {
+            Output output = module.getOutput(j);
+            Signal signal
+                = application.getSignal(output.getHref(), output.getScope());
+            int signalIndex = application.getSignalIndex(signal);
+            module.putOutputSignalIndex(j, signalIndex);
+          }
+          catch (NoSuchElementException e) { } // TODO
 
       // output with variable index
       for (int j=0; j<module.getVariableOutputSize(); j++)
-	try
-	{
-	  Output output = module.getVariableOutput(j);
-	  Signal signal 
-	      = application.getSignal(output.getHref(), output.getScope());
-	  int signalIndex = application.getSignalIndex(signal);
-	  module.addOutputSignalIndex(signalIndex);
-	}
-	catch (NoSuchElementException e) { } // TODO
+        try
+        {
+          Output output = module.getVariableOutput(j);
+          Signal signal
+              = application.getSignal(output.getHref(), output.getScope());
+          int signalIndex = application.getSignalIndex(signal);
+          module.addOutputSignalIndex(signalIndex);
+        }
+        catch (NoSuchElementException e) { } // TODO
 
       // tagged signals
       if (module.getInputTagsSize() > 0 || module.getOutputTagsSize() > 0)
         for (int j=0; j<application.getSignalsSize(); j++)
-	{
-	  Signal signal = application.getSignal(j);
-	  Set<String> tags = signal.getTagNames();
-	  for (String tag : tags)
-	  {
-	    if (module.containsInputTag(tag))
-	      module.addInputSignalIndex(j);
-	    if (module.containsOutputTag(tag))
-	      module.addOutputSignalIndex(j);
-	  }
-	}
+        {
+          Signal signal = application.getSignal(j).getRight();
+          Set<String> tags = signal.getTagNames();
+          for (String tag : tags)
+          {
+            if (module.containsInputTag(tag))
+              module.addInputSignalIndex(j);
+            if (module.containsOutputTag(tag))
+              module.addOutputSignalIndex(j);
+          }
+        }
     }
 
     // cleen-up
@@ -247,9 +247,9 @@ public class Preprocessor implements IGraph<Use>
       Block block = application.getBlock(use.getHref(), use.getScope());
       // Pair a block input and output with the use's input and output
       Map<String, Input> inputSubstitution 
-	  = pairInput(use, block.getInputSet());
+          = pairInput(use, block.getInputSet());
       Map<String, Output> outputSubstitution 
-	  = pairOutput(use, block.getOutputSet());
+          = pairOutput(use, block.getOutputSet());
       // expand 
       expand(block, innerScope, inputSubstitution, outputSubstitution);
     }
@@ -290,10 +290,10 @@ public class Preprocessor implements IGraph<Use>
       translate(signal, scope);
     // Expand all of the modules
     for (control4j.application.nativelang.Module rawModule 
-	: block.getModules())
+        : block.getModules())
     {
       Module module = translate(
-	  rawModule, scope, inputSubstitution, outputSubstitution);
+          rawModule, scope, inputSubstitution, outputSubstitution);
       application.addModule(module);
     }
     // Expand all of the nested use objects
@@ -351,7 +351,7 @@ public class Preprocessor implements IGraph<Use>
   {
       Module module = new Module(rawModule.getClassName());
       rawModule.translate(module, localScope, inputSubstitution,
-	  outputSubstitution);
+          outputSubstitution);
       return module;
       // TODO
   }
@@ -403,18 +403,18 @@ public class Preprocessor implements IGraph<Use>
     while(object.getConfigItemRefsSize() > 0)
     {
       Triple<String, String, Scope> reference 
-	  = object.getConfigItemReference(0);
+          = object.getConfigItemReference(0);
       try
       {
         String value = application.getDefinition(
-	    reference.getMiddle(), reference.getRight());
+            reference.getMiddle(), reference.getRight());
         object.removeConfigItemReference(0);
-	object.putProperty(reference.getLeft(), value);
+        object.putProperty(reference.getLeft(), value);
       }
       catch (NoSuchElementException e)
       {
-	//reportMissingDefinition(reference.getLeft(), reference, object); // TODO
-	warning("Missing definition");
+        //reportMissingDefinition(reference.getLeft(), reference, object); // TODO
+        warning("Missing definition");
       }
       catch (DuplicateElementException e)
       {  
@@ -460,10 +460,10 @@ public class Preprocessor implements IGraph<Use>
       ArrayList<Use> nestedUseObjects = new ArrayList<Use>(size);
       for (control4j.application.nativelang.Use rawUse : block.getUseObjects())
       {
-	Use nestedUse = new Use(
-	    rawUse.getHref(), 
-	    Translator.resolveScope(rawUse.getScope(), scope));
-	rawUse.translate(nestedUse, scope);
+        Use nestedUse = new Use(
+            rawUse.getHref(),
+            Translator.resolveScope(rawUse.getScope(), scope));
+        rawUse.translate(nestedUse, scope);
         nestedUseObjects.add(nestedUse);
       }
       return nestedUseObjects;
@@ -489,8 +489,8 @@ public class Preprocessor implements IGraph<Use>
       .append("Key: {0}, href: {1}.")
       .append("The property element is a part of:\n{2}\n");
     String message = MessageFormat.format(
-	sb.toString(), key, reference.getHref(), 
-	object.getDeclarationReferenceText());
+        sb.toString(), key, reference.getHref(),
+        object.getDeclarationReferenceText());
     ErrorManager.getInstance().addError(message);
   }
 

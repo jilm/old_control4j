@@ -25,8 +25,11 @@ import java.util.ArrayList;
 import java.util.NoSuchElementException;
 
 import static org.apache.commons.lang3.Validate.notNull;
+import static org.apache.commons.lang3.Validate.notBlank;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Triple;
+import org.apache.commons.lang3.tuple.ImmutableTriple;
 
 import control4j.ErrorManager;
 //import control4j.application.gui.ScreenDeclaration;
@@ -161,54 +164,114 @@ public class Application extends Configurable
    *
    */
 
+  /** A data structure for name and scope look up. */
   private ScopeMap<Signal> signals;
 
-  private ArrayList<Signal> signalIndexes;
+  /** A data structure for indexed look up. */
+  private ArrayList<Triple<String, Scope, Signal>> signalIndexes;
 
+  /**
+   *  Puts given signal into the internal data structure.
+   *  A unique order number is assigned to the signal (index).
+   *
+   *  @param name
+   *             an identifier of the signal which serves
+   *             for referencing it
+   *
+   *  @param scope
+   *             a scope under which the signal was defined
+   *
+   *  @param signal
+   *             a signal object to store
+   *
+   *  @throws IllegalArgumentException
+   *             if the name is empty string or a blank string
+   *
+   *  @throws NullPointerException
+   *             if either of the parameters is <code>null</code>
+   *             value
+   *
+   *  @throws DuplicateElementException
+   *             the pair name and scope must be unique across
+   *             the whole application. If it isn't, this exception
+   *             is thrown
+   */
   public void putSignal(String name, Scope scope, Signal signal)
   throws DuplicateElementException
   {
+    String trimmedName = notBlank(name).trim();
+    notNull(scope);
+    notNull(signal);
     if (signals == null)
     {
       signals = new ScopeMap<Signal>();
-      signalIndexes = new ArrayList<Signal>();
+      signalIndexes = new ArrayList<Triple<String, Scope, Signal>>();
     }
     signals.put(name, scope, signal);
-    signalIndexes.add(signal);
+    signalIndexes.add(
+        new ImmutableTriple<String, Scope, Signal>(name, scope, signal));
   }
 
   /**
    *  Returns the index of the given signal.
+   *
+   *  @param signal
+   *
+   *  @return an order number of the given signal
+   *
+   *  @throws NullPointerException
+   *             if the parameter is <code>null</code> value
+   *
+   *  @throws NoSuchElementException
+   *             if the given signal is not present in the internal
+   *             buffer
    */
   public int getSignalIndex(Signal signal)
   {
-    if (signalIndexes == null) // TODO
+    notNull(signal);
+    if (signalIndexes == null) // TODO:
       throw new NoSuchElementException();
-    int index = signalIndexes.indexOf(signal);
-    return index;
+    for (int i = 0; i < signalIndexes.size(); i++)
+    {
+      if (signalIndexes.get(i).getRight() == signal)
+        return i;
+    }
+    throw new NoSuchElementException(); // TODO:
   }
 
   /**
    *  Returns the signal with the given name that was defined
    *  under the given scope or some of the parent scope.
+   *
+   *  @throws NullPointerException
+   *
+   *  @throws NoSuchElementException
    */
   public Signal getSignal(String name, Scope scope)
   {
-    if (signals == null)  // TODO
+    notNull(name);
+    notNull(scope);
+    if (signals == null)  // TODO:
       throw new NoSuchElementException();
     return signals.get(name, scope);
   }
 
   /**
-   *  Returns the signal with the given index.
+   *  Returns the signal with the given order number (index).
+   *
+   *  @throws IndexOutOfBoundsException
+   *             if the index if out of range
    */
-  public Signal getSignal(int index)
+  public Triple<String, Scope, Signal> getSignal(int index)
   {
-    if (signalIndexes == null)  // TODO
+    if (signalIndexes == null)  // TODO:
       throw new IndexOutOfBoundsException();
     return signalIndexes.get(index);
   }
 
+  /**
+   *  Returns number of signal objects inside the internal buffer.
+   */
   public int getSignalsSize()
   {
     if (signalIndexes == null) return 0;
@@ -291,7 +354,7 @@ public class Application extends Configurable
     {
       Pair<Use, Scope> u = uses.get(i);
       if (u.getKey().equals(use) && u.getValue().equals(scope))
-	return i;
+        return i;
     }
     throw new NoSuchElementException();
   }
@@ -300,7 +363,7 @@ public class Application extends Configurable
   {
     for (int i=startIndex; i<uses.size(); i++)
       if (uses.get(i).getKey().equals(use))
-	return i;
+        return i;
     throw new NoSuchElementException();
   }
 
@@ -366,7 +429,7 @@ public class Application extends Configurable
     {
       sb.append(indent).append("Modules\n");
       for (Module module : modules)
-	module.toString(indent2, sb);
+        module.toString(indent2, sb);
     }
 
     // write signal definitions
@@ -381,7 +444,7 @@ public class Application extends Configurable
     {
       sb.append(indent).append("Use Objects\n");
       //for (Use use : uses)
-	//use.toString(indent2, sb);
+        //use.toString(indent2, sb);
     }
 
     // print block objects
