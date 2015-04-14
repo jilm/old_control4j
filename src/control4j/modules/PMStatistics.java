@@ -27,7 +27,7 @@ import control4j.Signal;
  *  Calculates average and variance from the input signals.
  *
  */ 
-@AVariableInput(startIndex=0) 
+@AVariableInput
 public class PMStatistics extends ProcessModule
 {
 

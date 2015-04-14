@@ -1,7 +1,7 @@
 package control4j.modules.auxiliary;
 
 /*
- *  Copyright 2013 Jiri Lidinsky
+ *  Copyright 2013, 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -18,6 +18,8 @@ package control4j.modules.auxiliary;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import control4j.AMinInput;
+import control4j.AMaxInput;
 import control4j.Signal;
 import control4j.ProcessModule;
 
@@ -25,6 +27,8 @@ import control4j.ProcessModule;
  *  Tests wheather the input signal is valid; if so, it returns true,
  *  and false otherwise.
  */
+@AMinInput(1)
+@AMaxInput(1)
 public class PMIsValid extends ProcessModule
 {
 

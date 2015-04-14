@@ -18,11 +18,15 @@ package control4j.modules.auxiliary;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import control4j.AMinInput;
+import control4j.AMaxInput;
 import control4j.Module;
 import control4j.Signal;
 import control4j.ProcessModule;
 import java.util.Date;
 
+@AMinInput(2)
+@AMaxInput(2)
 public class PMCopyTimestamp extends ProcessModule
 {
 

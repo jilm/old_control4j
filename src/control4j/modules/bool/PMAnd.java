@@ -27,6 +27,7 @@ import control4j.ProcessModule;
  *  Provides boolean AND operation.
  *
  */
+@AVariableInput
 public class PMAnd extends ProcessModule
 {
 
@@ -52,7 +53,7 @@ public class PMAnd extends ProcessModule
    *            output value. Timestamp corresponds to the system 
    *            time in moment of module invocation.
    */
-  @Override @AVariableInput(startIndex=0)
+  @Override
   public void process(
       Signal[] input, int inputLength, Signal[] output, int outputLength)
   {
@@ -60,7 +61,7 @@ public class PMAnd extends ProcessModule
     for (int i=0; i<inputLength; i++)
       if (input[i].isValid() && !input[i].getBoolean())
       {
-	output[0] = Signal.getSignal(false);
+        output[0] = Signal.getSignal(false);
         return;
       }
       else if (!input[i].isValid())

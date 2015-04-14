@@ -19,6 +19,8 @@ package control4j.modules;
  */
 
 import java.util.Date;
+import control4j.AMinInput;
+import control4j.AMaxInput;
 import control4j.ProcessModule;
 import control4j.Signal;
 
@@ -31,6 +33,8 @@ import control4j.Signal;
  *  in high state. The second one is the reset signal.
  *
  */
+@AMinInput(1)
+@AMaxInput(2)
 public class PMOperationTime extends ProcessModule
 {
 
@@ -58,31 +62,31 @@ public class PMOperationTime extends ProcessModule
       if (reset)
       {
         sum = 0l;
-	diff = 0l;
-	if (input[1].isValid() && input[1].getBoolean())
+        diff = 0l;
+        if (input[1].isValid() && input[1].getBoolean())
           begin = input[0].getTimestamp();
         else
-	  begin = null;
+          begin = null;
       }
       else
       {
         Date now = new Date();
         if (begin == null && input[1].isValid() && input[1].getBoolean())
-	{
-	  begin = input[1].getTimestamp();
-	  diff = 0l;
-	}
+        {
+          begin = input[1].getTimestamp();
+          diff = 0l;
+        }
         else if (begin != null && input[1].isValid() && !input[1].getBoolean())
-	{
-	  diff = input[1].getTimestamp().getTime() - begin.getTime();
-	  sum += diff;
-	  begin = null;
-	  diff = 0l;
-	}
-	else if (begin != null)
-	{
-	  diff = now.getTime() - begin.getTime();
-	}
+        {
+          diff = input[1].getTimestamp().getTime() - begin.getTime();
+          sum += diff;
+          begin = null;
+          diff = 0l;
+        }
+        else if (begin != null)
+        {
+          diff = now.getTime() - begin.getTime();
+        }
       }
     }
     output[0] = Signal.getSignal((double)((sum + diff) / 1000l));

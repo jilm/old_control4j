@@ -18,6 +18,8 @@ package control4j.modules;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import control4j.AMinInput;
+import control4j.AMaxInput;
 import control4j.Signal;
 import control4j.ConfigItem;
 import control4j.ProcessModule;
@@ -27,6 +29,8 @@ import control4j.ProcessModule;
  *  It compares two input values and returns a boolean value that
  *  indicates relationship between them.
  */
+@AMinInput(2)
+@AMaxInput(2)
 public class PMComparator extends ProcessModule
 {
   @ConfigItem(optional=true)

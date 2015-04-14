@@ -18,6 +18,7 @@ package control4j.modules;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import control4j.AVariableInput;
 import control4j.Signal;
 import control4j.ConfigItem;
 import control4j.ProcessModule;
@@ -27,6 +28,7 @@ import control4j.ProcessModule;
  *  
  *  @see PMStatistics  
  */ 
+@AVariableInput
 public class PMSignalStatistics extends ProcessModule
 {
 

@@ -18,10 +18,14 @@ package control4j.modules;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import control4j.AMinInput;
+import control4j.AMaxInput;
 import control4j.Signal;
 import control4j.ProcessModule;
 import control4j.ConfigItem;
 
+@AMinInput(1)
+@AMaxInput(1)
 public class PMLinearTransform extends ProcessModule
 {
   @ConfigItem(optional = true)

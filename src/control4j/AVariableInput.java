@@ -26,5 +26,5 @@ import java.lang.annotation.Documented;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface AVariableInput
 {
-  int startIndex();
+  int startIndex() default 0;
 }

@@ -22,6 +22,7 @@ import java.util.Collection;
 
 import control4j.InputModule;
 import control4j.AResource;
+import control4j.AVariableInput;
 import control4j.Signal;
 //import control4j.application.ModuleDeclaration;
 import control4j.protocols.IRequest;
@@ -38,6 +39,7 @@ import control4j.resources.IServer;
  *  to some external program or application.
  *
  */
+@AVariableInput
 public class IMExport extends InputModule
 {
 

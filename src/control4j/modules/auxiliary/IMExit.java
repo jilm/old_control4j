@@ -18,6 +18,7 @@ package control4j.modules.auxiliary;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import control4j.AMaxInput;
 import control4j.Signal;
 import control4j.Control;
 import control4j.ConfigItem;
@@ -27,6 +28,7 @@ import static control4j.tools.Logger.info;
 /**
  *  Terminates the application as soon as the input signal is true.
  */
+@AMaxInput(1)
 public class IMExit extends InputModule
 {
   /**

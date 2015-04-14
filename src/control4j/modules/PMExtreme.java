@@ -18,6 +18,7 @@ package control4j.modules;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import control4j.AMinInput;
 import control4j.Signal;
 import control4j.ProcessModule;
 
@@ -25,6 +26,7 @@ import control4j.ProcessModule;
  *  Returns a minimal and a maximal value of all the input signals. 
  *  Moreover it returns index of input with minimal and maximal value.
  */
+@AMinInput(2)
 public class PMExtreme extends ProcessModule
 {
 
@@ -64,26 +66,26 @@ public class PMExtreme extends ProcessModule
       if (input[i].isValid())
       {
         if (valid)
-	{
-	  if (input[i].getValue() > max)
-	  {
-	    max = input[i].getValue();
+        {
+          if (input[i].getValue() > max)
+          {
+            max = input[i].getValue();
             maxIndex = i;
-	  }
-	  if (input[i].getValue() < min)
-	  {
-	    min = input[i].getValue();
-	    minIndex = i;
-	  }
-	}
+          }
+          if (input[i].getValue() < min)
+          {
+            min = input[i].getValue();
+            minIndex = i;
+          }
+        }
         else
-	{
-	  max = input[i].getValue();
-	  min = input[i].getValue();
-	  maxIndex = i;
-	  minIndex = i;
-	  valid = true;
-	}
+        {
+          max = input[i].getValue();
+          min = input[i].getValue();
+          maxIndex = i;
+          minIndex = i;
+          valid = true;
+        }
       }
 
     if (valid)

@@ -61,6 +61,13 @@ public abstract class Module
         this, configuration, declarationReference);
   }
 
+  /**
+   *
+   */
+  protected void checkConnectedInput(int index, int inputSize)
+  {
+  }
+
   public void prepare()
   { }
 
