@@ -25,7 +25,7 @@ public class Console extends Resource
 implements ITextWriter
 {
 
-  private Console() { }
+  public Console() { }
 
   public void print(String text)
   {
@@ -37,12 +37,15 @@ implements ITextWriter
     System.out.println(text);
   }
 
-  private static Console instance;
-
-  public static Console getInstance(IConfigBuffer configuration)
+  @Override
+  public boolean satisfies(IConfigBuffer configuration)
   {
-    if (instance == null) instance = new Console();
-    return instance;
+    return true;
+  }
+
+  @Override
+  public void initialize(IConfigBuffer configuration)
+  {
   }
 
 }

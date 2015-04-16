@@ -22,7 +22,7 @@ import org.apache.commons.lang3.reflect.MethodUtils;
 
 import java.lang.reflect.InvocationTargetException;
 
-public class Resource
+public abstract class Resource
 {
 
   public static Resource getResource(
@@ -43,5 +43,13 @@ public class Resource
         resourceClass, "getInstance", configuration);
     return resource;
   }
+
+  public Resource() {}
+
+  public abstract boolean satisfies(IConfigBuffer configuration);
+
+  public abstract void initialize(IConfigBuffer configuration);
+
+  public void prepare() {}
 
 }

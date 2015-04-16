@@ -20,8 +20,8 @@ package control4j;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import static control4j.tools.LogMessages.*;
 import static control4j.tools.Logger.*;
 
@@ -46,27 +46,13 @@ import static control4j.tools.Logger.*;
  *  @see control4j.ApplicationBuilder
  *
  */
-public class ResourceManager implements Iterable<control4j.resources.Resource>
+public class ResourceManager
 {
   
   /**
    *  A reference to the only instance of the resource manager.
    */
-  private final static ResourceManager manager = new ResourceManager();
-
-  /**
-   *  Internal buffer for all of the resources.
-   */
-  private HashMap<String, control4j.resources.Resource> resources 
-    = new HashMap<String, control4j.resources.Resource>();
-
-  /**
-   *
-   */
-  private ResourceManager()
-  {
-    java.lang.Runtime.getRuntime().addShutdownHook(new CleenUp());
-  }
+  private static ResourceManager manager;
 
   /**
    *  Returns an instance of the ResourceManager class.
@@ -75,155 +61,56 @@ public class ResourceManager implements Iterable<control4j.resources.Resource>
    */
   public static ResourceManager getInstance()
   {
+    if (manager == null)
+      manager = new ResourceManager();
     return manager;
   }
 
   /**
-   *  Adds a resource into the internal buffer. Each resource is identified
-   *  by a unique id.
-   *
-   *  @param id
-   *             a unique idenfier of the resource
-   *
-   *  @param resource
-   *             an object to add into the internal buffer
-   *
-   *  @throws SyntaxErrorException
-   *             if there already is a resource with the same id
-   *
-   *  @throws NullPointerException
-   *             if either of the parameters is null
+   *  Register the manager to receive a shutdown notification.
    */
-  void add(String id, control4j.resources.Resource resource)
+  private ResourceManager()
   {
-    if (id == null || resource == null)
-      throw new NullPointerException();
-    if (resources.containsKey(id))
-    {
-      throw new SyntaxErrorException();
-    }
-    else
-    {
-      resources.put(id, resource);
-    }
+    java.lang.Runtime.getRuntime().addShutdownHook(new CleenUp());
   }
 
   /**
-   *  Returns a resource with given id.
-   *
-   *  @param id
-   *             id of the resource, you want to get
-   *
-   *  @return resource with given id
-   *
-   *  @throws NoSuchElementException
-   *             if there is no such resource with given id in the buffer
-   *
-   *  @throws NullPointerException
-   *             if id is null
+   *  Internal buffer for all of the resources.
    */
-  public control4j.resources.Resource get(String id)
-  {
-    if (id == null)
-      throw new NullPointerException();
-    control4j.resources.Resource resource = resources.get(id);
-    if (resource == null)
-    {
-      throw new java.util.NoSuchElementException(id);
-    }
-    else
-    {
-      return resource;
-    }
-  }
+  private ArrayList<Resource> resources = new ArrayList<Resource>();
 
   /**
-   *  Allows to iterate over all of the resources.
+   *  Returns a resource that satisfies given criteria. If such
+   *  a resource already exists (it was requested earlier) this
+   *  method returns it. If doesn't it creates and returns new
+   *  instance.
    */
-  public Iterator<control4j.resources.Resource> iterator()
+  public Resource getResource(
+      Class<Resource> resourceClass, IConfigBuffer configuration)
+      throws InstantiationException, IllegalAccessException
   {
-    return resources.values().iterator();
-  }
-
-  /**
-   *  Helper method which assignes an appropriate resource object
-   *  to all of the fieds of a given object that are annotated
-   *  by a Resource annotation.
-   *
-   *  <p>For example if the given object contains such a field declaration:
-   *  <br><code>@Resource private Console console;</code>
-   *  <br>this method will find a value for key "console" in the
-   *  configuration, and uses it to get resource with such an id
-   *  and finally appends obtained resource into the field in the
-   *  object.
-   *
-   *  <p>The key field of Resource annotation will be used as a key
-   *  into the configuration buffer. If it is not used the name of
-   *  the object field is used instead.
-   *
-   *  @param object
-   *             the object which will be scanned for fields annotated
-   *             by Resource annotation. The appropriate resources will
-   *             be assigned to such fields.
-   *
-   *  @param configuration
-   *             have to contain mapping resource key to resource id
-   *
-   *  @throws SyntaxErrorException
-   *             <ul>
-   *               <li>if configuration argument doesn't contains a value
-   *             </ul>
-   *
-   *  @throws SystemException
-   *
-   *  @throws NullPointerException
-   *             if eather of the arguments contains null 
-   *
-   *  @see control4j.Resource
-   */
-  public static void assignResources(Object object, IConfigBuffer configuration)
-  {
-    Field[] fields = object.getClass().getDeclaredFields();
-    for (Field field : fields)
+    // if the instance of requested resource already exists, return it
+    for (Resource resource : resources)
     {
-      AResource annotation = field.getAnnotation(AResource.class);
-      if (annotation != null)
+      if (resourceClass.isAssignableFrom(resource.getClass()))
       {
-        String key = annotation.key();
-        if (key.length() == 0) key = field.getName();
-        try
-        {
-          String resourceName = configuration.getString(key);
-          control4j.resources.Resource resource = manager.get(resourceName);
-          boolean accessibility = field.isAccessible();
-          field.setAccessible(true);
-          field.set(object, resource);
-          field.setAccessible(accessibility);
-        }
-        catch (ConfigItemNotFoundException e)
-        {
-          // there is not a value in configuration for the resource field
-          throw new SyntaxErrorException("not found");
-        }
-        catch (java.util.NoSuchElementException e)
-        {
-          // there is not a resource with given name 
-          throw new SyntaxErrorException("no such element");
-        }
-        catch (IllegalAccessException e)
-        {
-          // a field in the object is not accessible
-          throw new SystemException();
-        }
-        catch (IllegalArgumentException e)
-        {
-          // the specified object doesn't implement the field. Should not
-          // happen. Or if casting fails
-          throw new SyntaxErrorException();
-        }
+        if (resource.satisfies(configuration))
+          return resource;
       }
     }
-    
+    // if not, create new instance
+    Resource resource = resourceClass.newInstance();
+    resource.initialize(configuration);
+    resources.add(resource);
+    return resource;
+  }
+
+  void prepare()
+  {
+    for (Resource resource : resources)
+    {
+      resource.prepare();
+    }
   }
 
   /**
@@ -238,12 +125,7 @@ public class ResourceManager implements Iterable<control4j.resources.Resource>
    */
   void dump(java.io.PrintWriter writer)
   {
-    writer.println("=== RESOURCES ===");
-    java.util.Set<String> names = resources.keySet();
-    for (String name : names)
-    {
-      resources.get(name).dump(writer);
-    }
+    // TODO:
   }
 
   private class CleenUp extends Thread
