@@ -18,6 +18,13 @@ package control4j.modules;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+//import org.apache.commons.lang3.builder.ToStringBuilder;
+//import org.apache.commons.lang3.builder.ToStringStyle;
+
+import cz.lidinsky.tools.IToStringBuildable;
+import cz.lidinsky.tools.ToStringBuilder;
+import cz.lidinsky.tools.ToStringStyle;
+
 import control4j.Signal;
 import control4j.OutputModule;
 import control4j.ConfigItem;
@@ -29,7 +36,7 @@ import control4j.ConfigItem;
  *  module. Returned signal is always valid and with
  *  timestamp set to the system time.
  */
-public class OMConst extends OutputModule
+public class OMConst extends OutputModule implements IToStringBuildable
 {
   @ConfigItem
   public double value;
@@ -38,4 +45,17 @@ public class OMConst extends OutputModule
   {
      output[0] = Signal.getSignal(value);
   }
+
+  @Override
+  public String toString()
+  {
+    return toString(new ToStringBuilder(new ToStringStyle()));
+  }
+
+  public String toString(ToStringBuilder builder)
+  {
+    return builder.append("value", value)
+        .toString();
+  }
+
 }

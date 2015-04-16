@@ -1,3 +1,5 @@
+package control4j;
+
 /*
  *  Copyright 2015 Jiri Lidinsky
  *
@@ -16,21 +18,42 @@
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package control4j;
+import cz.lidinsky.tools.ToStringBuilder;
+import cz.lidinsky.tools.ToStringStyle;
+import cz.lidinsky.tools.IToStringBuildable;
 
-class Application
+//import org.apache.commons.lang3.builder.ToStringBuilder;
+//import org.apache.commons.lang3.builder.ToStringStyle;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
+
+class Application implements IToStringBuildable
 {
 
-  public Application() { }
+  Application() { }
 
-  public InputModule[] inputModules;
+  Pair<InputModule, int[]>[] inputModules;
 
-  public ProcessModule[] processModules;
+  Triple<ProcessModule, int[], int[]>[] processModules;
 
-  public OutputModule[] outputModule;
+  Pair<OutputModule, int[]>[] outputModules;
 
   void add(Module module, int[] inputMap, int[] outputMap)
   {
+  }
+
+  @Override
+  public String toString()
+  {
+    return new ToStringBuilder(new ToStringStyle()).append(this).toString();
+  }
+
+  public String toString(ToStringBuilder builder)
+  {
+    return builder.append("inputModules", inputModules)
+        .append("processModules", processModules)
+        .append("outputModules", outputModules)
+        .toString();
   }
 
 }
