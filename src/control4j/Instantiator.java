@@ -18,6 +18,7 @@ package control4j;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import static control4j.tools.Logger.catched;
 import control4j.application.Input;
 import control4j.application.Output;
 
@@ -51,11 +52,12 @@ public class Instantiator
    *  Creates instances of all of the modules. The sequence is as 
    *  follows:
    *  <ol>
-   *    <li>Creates instance of the module.
-   *    <li>Creates input and output map.
-   *    <li>Calls initialization method of the Module.
+   *    <li>Creates instance of the module. The constructor of the
+   *        module is called.
+   *    <li>Calls {@link Module#initialize} method.
+   *    <li>Assignes the resources. For each resource calls
+   *        {@link Module#putResource} method.
    *    <li>Calls initialization input and output methods of the Module.
-   *    <li>Assignes the resources.
    *    <li>Register as a ICycleListener.
    *  </ol>
    */
@@ -84,7 +86,8 @@ public class Instantiator
         Class<Module> moduleClass
             = (Class<Module>)Class.forName(className);
         // create instance
-        Module moduleInstance = instantiate(moduleDef);
+        Module moduleInstance = instantiate(moduleClass);
+        System.out.println(moduleClass);
         // create input map
         int[] inputMap = getInputMap(moduleDef, moduleClass);
         // create output map
@@ -132,6 +135,7 @@ public class Instantiator
         {
           // TODO: Not a module
         }
+        // TODO: Register as an ICycleListener
       }
       catch (Exception e)
       {
@@ -139,7 +143,23 @@ public class Instantiator
       }
     }
 
+    System.out.println(inputModules.size());
+    System.out.println(outputModules.size());
+    System.out.println(processModules.size());
+
+    // return result
     Application result = new Application();
+    result.inputModules
+        = (Pair<InputModule, int[]>[])java.lang.reflect.Array.newInstance(
+        Pair.class, inputModules.size());
+    inputModules.toArray(result.inputModules);
+    result.processModules
+        = (Triple<ProcessModule, int[], int[]>[])java.lang.reflect.Array.newInstance(Triple.class, processModules.size());
+    processModules.toArray(result.processModules);
+    result.outputModules
+        = (Pair<OutputModule, int[]>[])java.lang.reflect.Array.newInstance(
+        Pair.class, outputModules.size());
+    outputModules.toArray(result.outputModules);
     return result;
   }
 
@@ -199,29 +219,22 @@ public class Instantiator
    *  Create and return an instance of the module which correspond
    *  to the given module definition.
    */
-  protected Module instantiate(control4j.application.Module moduleDef)
+  protected Module instantiate(Class<Module> moduleClass)
   {
     try
     {
-      // get module class
-      String className = moduleDef.getClassName();
-      Class<Module> moduleClass
-          = (Class<Module>)Class.forName(className);
-
       // create the instance
-      Module instance = moduleClass.newInstance();
-    }
-    catch (ClassNotFoundException e)
-    {
-      // TODO:
+      return moduleClass.newInstance();
     }
     catch (InstantiationException e)
     {
       // TODO:
+      catched(getClass().getName(), "instantiate", e);
     }
     catch (IllegalAccessException e)
     {
       // TODO:
+      catched(getClass().getName(), "instantiate", e);
     }
     return null;
   }
@@ -302,4 +315,35 @@ public class Instantiator
 
     return map;
   }
+
+  /**
+   *  For debug purposes
+   */
+  public static void main(String[] args) throws Exception
+  {
+    String filename = args[0];
+    java.io.File file = new java.io.File(filename);
+    control4j.application.Loader loader
+        = new control4j.application.Loader();
+    control4j.application.ITranslatable translatable = loader.load(file);
+    control4j.application.Application app
+        = new control4j.application.Application();
+    translatable.translate(app);
+    control4j.application.Preprocessor preprocessor
+        = new control4j.application.Preprocessor();
+    System.out.println("----- Before -----");
+    System.out.println(app.toString());
+    preprocessor.process(app);
+    System.out.println("----- After -----");
+    System.out.println(app.toString());
+    // Sort application
+    control4j.application.Sorter sorter
+        = new control4j.application.Sorter();
+    sorter.process(app);
+    // Make instances
+    Instantiator inst = new Instantiator();
+    Application application = inst.instantiate(app);
+    System.out.println(application.toString());
+  }
+
 }

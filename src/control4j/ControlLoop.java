@@ -19,8 +19,12 @@ package control4j;
  */
 
 import java.util.LinkedList;
-//import control4j.application.SignalManager;
+
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
+
 import control4j.tools.Tools;
+
 import static control4j.tools.Logger.*;
 import static control4j.tools.LogMessages.*;
 
@@ -42,12 +46,7 @@ public class ControlLoop
       outputs and inputs of the modules. */
   private DataBuffer dataBuffer;
 
-  /** Duration of the whole cycle in ms */
-  private int cyclePeriod = 1000;
-  private int startCycleDelay = 200;
   private long cycleStartTime;
-  private LinkedList<ICycleEventListener> eventListeners 
-    = new LinkedList<ICycleEventListener>();
 
   /**
    *  A flag that indicates that the request was received to terminate
@@ -66,21 +65,8 @@ public class ControlLoop
   ControlLoop()
   { }
 
-  /**
-   *  Specify duration of the one cycle loop in ms.
-   *
-   *  @param period
-   *             period of one cycle loop in ms. Must be
-   *             greater than zero
-   */
-  @ConfigItem(key="cycle-period", optional=true)
-  public void setCyclePeriod(int period)
-  {
-    if (period > 0)
-      cyclePeriod = period;
-    // else !!! TODO
-  }
-  
+  private Application application;
+
   /**
    *  Runs the infinite control loop. Following steps are performed:
    *
@@ -107,17 +93,15 @@ public class ControlLoop
    *
    *  @see control4j.ICycleEventListener
    */
-  void run()
+  void run(Application application)
   {
+
+    this.application = application;
     info("Runnig control loop...");
-    //ModuleManager modules = null; //= ModuleManager.getInstance();
-    int signals = 0; // =  SignalManager.getInstance().size();
-    dataBuffer = new DataBuffer(signals);
+    dataBuffer = new DataBuffer(application.dataBufferSize);
     // prepare for execution
-    for (control4j.resources.Resource resource : ResourceManager.getInstance())
-      resource.prepare();
-    //for (Module module : modules)
-      //module.prepare();
+    ResourceManager.getInstance().prepare();
+    application.prepare();
 
     // The control loop !
     while (true)
@@ -126,60 +110,106 @@ public class ControlLoop
         cycleStartTime = System.currentTimeMillis();
         // erase data buffer
         dataBuffer.clear();
-        notifyOfCycleStartEvent();
+        application.fireCycleStartEvent();
         // start cycle delay
-	Tools.sleep(startCycleDelay);
-        notifyOfProcessingStartEvent();
+        Tools.sleep(application.getStartCycleDelay());
+        application.fireProcessingStartEvent();
         // module execution
-	fine("Start of module processing");
-	//for (Module module : modules)
-	//{
-	  //module.execute(dataBuffer);
-	//}
-        notifyOfCycleEndEvent();
+        fine("Start of module processing");
+        for (Pair<OutputModule, int[]> module : application.outputModules)
+          execute(module.getLeft(), module.getRight());
+        for (Triple<ProcessModule, int[], int[]> module
+            : application.processModules)
+          execute(module.getLeft(), module.getMiddle(), module.getRight());
+        for (Pair<InputModule, int[]> module : application.inputModules)
+          execute(module.getLeft(), module.getRight());
+        application.fireCycleEndEvent();
         // terminate the program, if requst was received
         if (exit) System.exit(0);
         // wait for next turn
-	while (true)
+        while (true)
         {
-	  long cycleDuration = System.currentTimeMillis() - cycleStartTime;
-	  long sleepTime = cyclePeriod - cycleDuration;
-	  if (sleepTime > 0) 
-	    Tools.sleep(sleepTime);
+          long cycleDuration = System.currentTimeMillis() - cycleStartTime;
+          long sleepTime = application.getCyclePeriod() - cycleDuration;
+          if (sleepTime > 0)
+            Tools.sleep(sleepTime);
           else if (sleepTime < -100)
-	  {
-	    // if the current cycle was longer than value
-	    // specified in cycleDuration, print a log message
-	    String message = getMessage("LongCycle");
-	    message = String.format(message, cycleDuration);
-	    warning(message);
-	    break;
-	  }
-	  else break;
-	}
-	lastCycleDuration = System.currentTimeMillis() - cycleStartTime;
+          {
+            // if the current cycle was longer than value
+            // specified in cycleDuration, print a log message
+            String message = getMessage("LongCycle");
+            message = String.format(message, cycleDuration);
+            warning(message);
+            break;
+          }
+          else break;
+        }
+        lastCycleDuration = System.currentTimeMillis() - cycleStartTime;
       } 
       catch (Exception e)
       {
-	// if an exception arise during the processing some
-	// of the module, the cycle is not completed and
-	// problem is logged.
-	String message = getMessage("BrokenCycle");
-	message = String.format(message, e.getMessage());
-	warning(message);
-	dump(e);
+        // if an exception arise during the processing some
+        // of the module, the cycle is not completed and
+        // problem is logged.
+        String message = getMessage("BrokenCycle");
+        message = String.format(message, e.getMessage());
+        warning(message);
+        dump(e);
       }
   }
 
+  protected void execute(OutputModule module, int[] map)
+  {
+    Signal[] output = getOutputArray(map.length);
+    module.get(output, map.length);
+    dataBuffer.put(output, map);
+  }
+
+  protected void execute(ProcessModule module, int[] inputMap, int[] outputMap)
+  {
+    Signal[] input = dataBuffer.get(inputMap);
+    Signal[] output = getOutputArray(outputMap.length);
+    module.process(input, inputMap.length, output, outputMap.length);
+    dataBuffer.put(output, outputMap);
+  }
+
+  protected void execute(InputModule module, int[] map)
+  {
+    Signal[] input = dataBuffer.get(map);
+    module.put(input, map.length);
+  }
+
+  private Signal[] inputArray;
+
+  protected Signal[] getInputArray(int size)
+  {
+    if (inputArray == null)
+      inputArray = new Signal[size];
+    else if (inputArray.length < size)
+      inputArray = new Signal[size];
+    return inputArray;
+  }
+
+  private Signal[] outputArray;
+
+  protected Signal[] getOutputArray(int size)
+  {
+    if (outputArray == null)
+      outputArray = new Signal[size];
+    else if (outputArray.length < size)
+      outputArray = new Signal[size];
+    return outputArray;
+  }
+
   /**
-   *  Returns required cycle period in ms. This value is taken 
+   *  Returns required cycle period in ms. This value is taken
    *  from global configuration, item "cycle-period".
    *
    *  @return required cycle period in ms
    */
   int getCyclePeriod()
   {
-    return cyclePeriod;
+    return application.getCyclePeriod();
   }
 
   /**
@@ -190,44 +220,6 @@ public class ControlLoop
   long getCycleBeginningTime()
   {
     return cycleStartTime;
-  }
-
-  /**
-   *  Register an object listener to subscribe to cycle end
-   *  and start events.
-   *
-   *  @param listener an object that will be notified of cycle
-   *                  start and end events
-   */
-  void registerCycleEventListener(ICycleEventListener listener)
-  {
-    eventListeners.add(listener);
-  }
-
-  /**
-   *  Calls cycleStart method of all objects that are registered
-   *  to be notified of cycle events.
-   */
-  private void notifyOfCycleStartEvent()
-  {
-    for (ICycleEventListener listener : eventListeners)
-      listener.cycleStart();
-  }
-
-  private void notifyOfProcessingStartEvent()
-  {
-    for (ICycleEventListener listener : eventListeners)
-      listener.processingStart();
-  }
-
-  /**
-   *  Calls cycleEnd method of all the objects which are registered
-   *  to be notified of cycle events.
-   */
-  private void notifyOfCycleEndEvent()
-  {
-    for (ICycleEventListener listener : eventListeners)
-      listener.cycleEnd();
   }
 
   /**
@@ -275,7 +267,7 @@ public class ControlLoop
       // create dump file
       String tempDir = System.getProperty("java.io.tmpdir");
       String filename = "control4j_" 
-	  + java.util.UUID.randomUUID().toString() + ".dump";
+          + java.util.UUID.randomUUID().toString() + ".dump";
       java.io.File dumpFile = new java.io.File(tempDir, filename);
       writer = new java.io.PrintWriter(dumpFile);
       // write a timestamp
@@ -290,8 +282,8 @@ public class ControlLoop
       // write the exception
       if (cause != null)
       {
-	writer.println("EXCEPTION: " + cause.getClass().getName());
-	writer.println(cause.getMessage());
+        writer.println("EXCEPTION: " + cause.getClass().getName());
+        writer.println(cause.getMessage());
         cause.printStackTrace(writer);
       }
       // write data buffer

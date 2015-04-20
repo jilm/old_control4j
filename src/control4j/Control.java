@@ -1,7 +1,7 @@
 package control4j;
 
 /*
- *  Copyright 2013, 2014 Jiri Lidinsky
+ *  Copyright 2013, 2014, 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -20,14 +20,8 @@ package control4j;
 
 import java.util.*;
 import java.io.*;
-import control4j.application.Application;
-//import control4j.application.IApplicationReader;
-//import control4j.application.ReaderFactory;
 import control4j.tools.DeclarationReference;
 import control4j.tools.Preferences;
-//import control4j.project.Project;
-//import control4j.project.Reader;
-//import control4j.project.ApplicationFilename;
 import static control4j.tools.Logger.*;
 import static control4j.tools.LogMessages.*;
 
@@ -77,18 +71,6 @@ public class Control
   }
 
   /**
-   *  Register a listener to subscribe to cycle start and
-   *  end events.
-   *
-   *  @param listener an object that will be notified of
-   *                  cycle start and end events.
-   */
-  public static void registerCycleEventListener(ICycleEventListener listener)
-  {
-    controlLoop.registerCycleEventListener(listener);
-  }
-
-  /**
    *  Schedules termination of the application at the end of the current
    *  loop. This method is only a facade for method 
    *  {@link control4j.ControlLoop#exit}
@@ -134,28 +116,28 @@ public class Control
         applicationFile = new File(parentPath, file.getFilename());
       try
       {
-	// get an appropriate reader for the application file
+        // get an appropriate reader for the application file
         IApplicationReader reader = factory.getReader(file.getType());
         // create an input stream
-	InputStream inputStream = new FileInputStream(applicationFile);
-	DeclarationReference fileReference = new DeclarationReference();
-	fileReference.setFile(applicationFile.getAbsolutePath());
-	reader.load(inputStream, application, fileReference);
+        InputStream inputStream = new FileInputStream(applicationFile);
+        DeclarationReference fileReference = new DeclarationReference();
+        fileReference.setFile(applicationFile.getAbsolutePath());
+        reader.load(inputStream, application, fileReference);
         inputStream.close();
       }
       catch (FileNotFoundException e)
       {
         severe(getMessage("core07", applicationFile.getAbsolutePath()));
-	fatalErrors ++;
+        fatalErrors ++;
       }
       catch (IOException e)
       {
         StringBuilder message = new StringBuilder();
-	message.append(getMessage("core08"))
-	       .append('n')
-	       .append(e.getMessage());
+        message.append(getMessage("core08"))
+               .append('n')
+               .append(e.getMessage());
         severe(message.toString());
-	fatalErrors ++;
+        fatalErrors ++;
       }
     }
     if (fatalErrors > 0) exit(1);
@@ -166,32 +148,25 @@ public class Control
   /**
    *
    */
-  private void run()
+  private void run() throws Exception
   {
-    // get the filename of the project
     String filename = preferences.getProject();
-    // make a file from the filename
-    File projectFile = new File(filename);
-    // load the project
-    //Project project = loadProject(projectFile);
-    //DeclarationReference projectReference = new DeclarationReference();
-    //projectReference.setProject(projectFile.getAbsolutePath());
-    // configure control loop
-    //ConfigurationHelper.assignConfiguration(controlLoop, project.getConfiguration(), projectReference);
-    // load application
-    //Application application 
-     // = loadApplication(project, projectFile.getParentFile());
-    // build the application
-    //ApplicationBuilder builder = new ApplicationBuilder();
-    //builder.build(application);
-    //ErrorManager.getInstance().report();
-    // check the application
-    //ApplicationCheck check = new ApplicationCheck();
-    //check.check();
-    //check = null;
-    //ErrorManager.getInstance().report();
-    // run the control loop
-    //controlLoop.run();
+    java.io.File file = new java.io.File(filename);
+    control4j.application.Loader loader
+        = new control4j.application.Loader();
+    control4j.application.ITranslatable translatable = loader.load(file);
+    control4j.application.Application app
+        = new control4j.application.Application();
+    translatable.translate(app);
+    control4j.application.Preprocessor preprocessor
+        = new control4j.application.Preprocessor();
+    preprocessor.process(app);
+    control4j.application.Sorter sorter
+        = new control4j.application.Sorter();
+    sorter.process(app);
+    Instantiator inst = new Instantiator();
+    Application application = inst.instantiate(app);
+    controlLoop.run(application);
   }
 
   /**

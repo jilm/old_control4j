@@ -56,6 +56,16 @@ class Application implements IToStringBuildable
     // else !!! TODO:
   }
 
+  public int getCyclePeriod()
+  {
+    return cyclePeriod;
+  }
+
+  public int getStartCycleDelay()
+  {
+    return startCycleDelay;
+  }
+
   @ConfigItem(key="start-delay", optional=true)
   public void setStartCycleDeley(int delay)
   {
@@ -76,21 +86,37 @@ class Application implements IToStringBuildable
   {
   }
 
+  void fireCycleEndEvent()
+  {
+  }
+
+  void fireCycleStartEvent()
+  {
+  }
+
+  void fireProcessingStartEvent()
+  {
+  }
+
+  void prepare()
+  {
+  }
+
   @Override
   public String toString()
   {
     return new ToStringBuilder(new ToStringStyle())
-	.append(this)
-	.toString();
+        .append(this)
+        .toString();
   }
 
   public String toString(ToStringBuilder builder)
   {
     return builder.append("cyclePeriod", cyclePeriod)
         .append("startCycleDelay", startCycleDelay)
-	.append("dataBufferSize", dataBufferSize)
+        .append("dataBufferSize", dataBufferSize)
         .append("inputModules", inputModules)
-	.append("processModules", processModules)
+        .append("processModules", processModules)
         .append("outputModules", outputModules)
         .toString();
   }
