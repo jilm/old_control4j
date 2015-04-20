@@ -20,6 +20,7 @@ package control4j.modules.text;
 
 import java.util.Locale;
 
+import control4j.AMaxInput;
 import control4j.AVariableInput;
 import control4j.Signal;
 import control4j.AResource;
@@ -30,6 +31,9 @@ import control4j.IConfigBuffer;
 import control4j.ConfigItemNotFoundException;
 import control4j.resources.ITextWriter;
 
+import cz.lidinsky.tools.IToStringBuildable;
+import cz.lidinsky.tools.ToStringBuilder;
+
 /**
  *
  *  Prints values of input signals in a human readable form on 
@@ -38,8 +42,10 @@ import control4j.resources.ITextWriter;
  *  together with timestamp and signal name.
  *
  */
-@AVariableInput(startIndex=1)
+@AMaxInput(1)
+@AVariableInput
 public class IMNarrowFormatter extends InputModule
+implements IToStringBuildable
 {
 
   /**
@@ -143,5 +149,16 @@ public class IMNarrowFormatter extends InputModule
         textDevice.println(input[i].toString(
             signalFormat, delimiter, "???"));
     }
+  }
+
+  public String toString(ToStringBuilder builder)
+  {
+    return builder.append("textDevice", textDevice)
+           .append("delimiter", delimiter)
+           .append("language", language)
+           .append("country", country)
+           .append("maxFractionDigits", maxFractionDigits)
+           .append("signalFormat", signalFormat)
+           .toString();
   }
 }

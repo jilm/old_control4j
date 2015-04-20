@@ -25,25 +25,6 @@ import java.lang.reflect.InvocationTargetException;
 public abstract class Resource
 {
 
-  public static Resource getResource(
-      String className, IConfigBuffer configuration)
-      throws ClassNotFoundException, NoSuchMethodException,
-             IllegalAccessException, InvocationTargetException
-  {
-    Class resourceClass = Class.forName(className);
-    return getResource(resourceClass, configuration);
-  }
-
-  public static Resource getResource(
-      Class resourceClass, IConfigBuffer configuration)
-      throws NoSuchMethodException, IllegalAccessException,
-             InvocationTargetException
-  {
-    Resource resource = (Resource)MethodUtils.invokeStaticMethod(
-        resourceClass, "getInstance", configuration);
-    return resource;
-  }
-
   public Resource() {}
 
   public abstract boolean satisfies(IConfigBuffer configuration);

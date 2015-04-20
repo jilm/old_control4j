@@ -28,6 +28,7 @@ import org.apache.commons.collections4.iterators.FilterIterator;
 
 import control4j.tools.DeclarationReference;
 import static control4j.tools.LogMessages.*;
+import static control4j.tools.Logger.*;
 
 /**
  *  Module is one of the main building blocks of the application.
@@ -258,7 +259,7 @@ public abstract class Module
   {
     List<Field> resourceFields 
         = FieldUtils.getFieldsListWithAnnotation(
-        Module.class, AResource.class);
+        getClass(), AResource.class);
     Iterator<Field> resourceFieldsIter 
         = new FilterIterator(resourceFields.iterator(), 
         new Predicate<Field>()
@@ -269,19 +270,24 @@ public abstract class Module
           }
         }
     );
+    boolean assigned = false;
     while (resourceFieldsIter.hasNext())
     {
       try
       {
         Field resourceField = resourceFieldsIter.next();
         FieldUtils.writeField(resourceField, this, resource, true);
+        assigned = true;
       }
       catch (IllegalAccessException e)
       {
         // TODO:
+        catched(getClass().getName(), "putResource", e);
       }
     }
     // TODO: Non existent key field
+    if (!assigned)
+      warning("The resource was not assigned, key: " + key);
   }
 
 }

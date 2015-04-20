@@ -95,13 +95,16 @@ public class Instantiator
         // method initialization
         moduleInstance.initialize(moduleDef.getConfiguration());
         // resource assignment
+        ResourceManager resourceManager = ResourceManager.getInstance();
         Set<String> resourceKeys = moduleDef.getResourceKeys();
         for (String key : resourceKeys)
         {
           control4j.application.Resource resourceDef 
               = moduleDef.getResource(key);
-          Resource resource = Resource.getResource(
-              resourceDef.getClassName(), resourceDef.getConfiguration());
+          Class<Resource> resourceClass
+              = (Class<Resource>)Class.forName(resourceDef.getClassName());
+          Resource resource = resourceManager.getResource(
+              resourceClass, resourceDef.getConfiguration());
           moduleInstance.putResource(key, resource);
         }
         // TODO: check that all of the resources are assigned
@@ -140,26 +143,28 @@ public class Instantiator
       catch (Exception e)
       {
         // TODO:
+        catched(getClass().getName(), "instantiate", e);
       }
     }
 
-    System.out.println(inputModules.size());
-    System.out.println(outputModules.size());
-    System.out.println(processModules.size());
-
     // return result
     Application result = new Application();
+    // store modules
     result.inputModules
         = (Pair<InputModule, int[]>[])java.lang.reflect.Array.newInstance(
         Pair.class, inputModules.size());
     inputModules.toArray(result.inputModules);
     result.processModules
-        = (Triple<ProcessModule, int[], int[]>[])java.lang.reflect.Array.newInstance(Triple.class, processModules.size());
+        = (Triple<ProcessModule, int[], int[]>[])
+        java.lang.reflect.Array.newInstance(
+        Triple.class, processModules.size());
     processModules.toArray(result.processModules);
     result.outputModules
         = (Pair<OutputModule, int[]>[])java.lang.reflect.Array.newInstance(
         Pair.class, outputModules.size());
     outputModules.toArray(result.outputModules);
+    // data buffer size
+    result.dataBufferSize = applicationDef.getSignalsSize();
     return result;
   }
 
