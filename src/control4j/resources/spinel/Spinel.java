@@ -1,7 +1,7 @@
 package control4j.resources.spinel;
 
 /*
- *  Copyright 2013 Jiri Lidinsky
+ *  Copyright 2013, 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -19,21 +19,23 @@ package control4j.resources.spinel;
  */
 
 import control4j.ConfigItem;
-import control4j.resources.Resource;
+import control4j.IConfigBuffer;
+import control4j.resources.AbstractSocket;
 import control4j.tools.IResponseCrate;
 import control4j.protocols.spinel.SpinelOverTcp;
 import control4j.protocols.spinel.SpinelMessage;
 import static control4j.tools.Logger.*;
 
-public class Spinel extends Resource 
+public class Spinel extends AbstractSocket
 {
-  @ConfigItem
-  public String host;
-
-  @ConfigItem
-  public int port;
 
   private SpinelOverTcp channel;
+
+  @Override
+  public void initialize(IConfigBuffer configuration)
+  {
+    // TODO:
+  }
 
   @Override 
   public void prepare()
