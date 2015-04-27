@@ -196,10 +196,4 @@ public class Resource extends Configurable implements IXmlHandler, IAdapter
     }
   }
 
-  @Override
-  public void put(Property property)
-  {
-    addProperty(property);
-  }
-
 }

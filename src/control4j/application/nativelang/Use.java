@@ -165,12 +165,6 @@ public class Use extends Configurable implements IXmlHandler, IAdapter
     reader.addHandler(property);
   }
 
-  @Override
-  public void put(Property property)
-  {
-    addProperty(property);
-  }
-
   @XmlStartElement(localName="input", parent="use")
   private void startUseInput(Attributes attributes)
   {

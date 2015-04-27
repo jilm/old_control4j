@@ -112,10 +112,4 @@ public class Tag extends Configurable implements IXmlHandler, IAdapter
     reader.addHandler(property);
   }
 
-  @Override
-  public void put(Property property)
-  {
-    addProperty(property);
-  }
-
 }

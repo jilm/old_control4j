@@ -34,7 +34,7 @@ import control4j.tools.XmlEndElement;
  *  Stands for a block element.
  *
  */
-public class Block implements IXmlHandler, IAdapter
+public class Block extends DescriptionBase implements IXmlHandler, IAdapter
 {
 
   private String name;
@@ -274,31 +274,15 @@ public class Block implements IXmlHandler, IAdapter
    *
    */
 
-  public void setDestination(Object destination)
-  {
-  }
-
-  public void startLevel() {}
-
-  public void endLevel() {}
-
   public void put(Module module)
   {
     add(module);
   }
 
-  public void put(Block block) {}
-
   public void put(Signal signal)
   {
     add(signal);
   }
-
-  public void put(ResourceDeclaration resource) {}
-
-  public void put(Define define) {}
-
-  public void put(Property property) {}
 
   public void put(Use use)
   {

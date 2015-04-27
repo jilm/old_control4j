@@ -151,10 +151,4 @@ implements IXmlHandler, IAdapter
     adapter.put(this);
   }
 
-  @Override
-  public void put(Property property)
-  {
-    addProperty(property);
-  }
-
 }
