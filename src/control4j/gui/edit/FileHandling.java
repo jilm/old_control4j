@@ -157,7 +157,7 @@ implements ActionListener, FileEvent, DataListener, TreeModelListener
           load(is);
         }
         catch (java.io.FileNotFoundException ex) { }
-	catch (IOException e) { }
+        catch (IOException e) { }
     }
   }
 
@@ -169,8 +169,8 @@ implements ActionListener, FileEvent, DataListener, TreeModelListener
     try
     {
       control4j.gui.Reader reader = new control4j.gui.Reader();
-      reader.load(inputStream);
-      screens = reader.get();
+      //reader.load(inputStream); // TODO:
+      //screens = reader.get();
       inputStream.close();
       hasChanged = false;
       actualizeMenu();
@@ -214,9 +214,9 @@ implements ActionListener, FileEvent, DataListener, TreeModelListener
     else
       try
       {
-	java.io.OutputStream os = new java.io.FileOutputStream(file);
-	Writer writer = new Writer();
-	writer.write(screens, os);
+        java.io.OutputStream os = new java.io.FileOutputStream(file);
+        Writer writer = new Writer();
+        writer.write(screens, os);
         hasChanged = false;
       }
       catch (java.io.FileNotFoundException ex) 

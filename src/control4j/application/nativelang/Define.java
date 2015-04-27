@@ -49,8 +49,8 @@ public class Define extends DeclarationBase implements IXmlHandler
   public String toString()
   {
     return java.text.MessageFormat.format(
-	"Define; name: {0}, value: {1}, scope: {2}", 
-	name, value, Parser.formatScope(scope));
+        "Define; name: {0}, value: {1}, scope: {2}",
+        name, value, Parser.formatScope(scope));
   }
 
   /*
@@ -82,12 +82,15 @@ public class Define extends DeclarationBase implements IXmlHandler
 
   private XmlReader reader;
 
+  protected IAdapter adapter;
+
   /**
    *  An empty constructor for objects that will be loaded
    *  from a XML document.
    */
-  Define()
+  Define(IAdapter adapter)
   {
+    this.adapter = adapter;
   }
 
   public void startProcessing(XmlReader reader)
@@ -124,11 +127,12 @@ public class Define extends DeclarationBase implements IXmlHandler
   }
 
   /**
-   *  Does nothing.
    */
   @XmlEndElement(localName="define", parent="", 
       namespace="http://control4j.lidinsky.cz/application")
   private void endDefine()
-  { }
+  {
+    adapter.put(this);
+  }
 
 }

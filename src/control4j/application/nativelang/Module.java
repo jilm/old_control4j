@@ -36,7 +36,7 @@ import static control4j.tools.Logger.*;
  *  Stands for a module element.
  *
  */
-public class Module extends DescriptionBase implements IXmlHandler
+public class Module extends DescriptionBase implements IXmlHandler, IAdapter
 {
 
   private String className;
@@ -107,16 +107,16 @@ public class Module extends DescriptionBase implements IXmlHandler
       fine("going to translate resources of the module"); // TODO
       if (resource.isReference())
       {
-	destination.putResource(resource.getKey(), resource.getHref(), 
-	    resolveScope(resource.getScope(), localScope));
-	fine("translating resource reference");
+        destination.putResource(resource.getKey(), resource.getHref(),
+            resolveScope(resource.getScope(), localScope));
+        fine("translating resource reference");
       }
       else
       {
         control4j.application.Resource translated 
-	    = new control4j.application.Resource(resource.getClassName());
+            = new control4j.application.Resource(resource.getClassName());
         resource.translate(translated, localScope);
-	destination.putResource(resource.getKey(), translated);
+        destination.putResource(resource.getKey(), translated);
       }
     }
 
@@ -127,37 +127,37 @@ public class Module extends DescriptionBase implements IXmlHandler
       // if the scope is local and the name is present in the
       // input substitution map, use the input from that map
       if (inp.getScope() == Parser.LOCAL_SCOPE_CODE 
-	  && inputSubstitution != null 
-	  && inputSubstitution.containsKey(inp.getHref()))
+          && inputSubstitution != null
+          && inputSubstitution.containsKey(inp.getHref()))
       {
-	translated = inputSubstitution.get(inp.getHref());
+        translated = inputSubstitution.get(inp.getHref());
       }
       // if this input is not a block input
       else
       {
-	translated = new control4j.application.Input(
-	    resolveScope(inp.getScope(), localScope), inp.getHref());
-	inp.translate(translated, localScope);
+        translated = new control4j.application.Input(
+            resolveScope(inp.getScope(), localScope), inp.getHref());
+        inp.translate(translated, localScope);
       }
       // store translated input into the module object
       String strIndex = inp.getIndex();
       if (strIndex == null)
       {
-	// an input with variable index
-	destination.putInput(translated);
+        // an input with variable index
+        destination.putInput(translated);
       }
       else
       {
-	// an input with fixed index
-	try
-	{
-	  int index = Integer.parseInt(strIndex);
-	  destination.putInput(index, translated);
-	}
-	catch (NumberFormatException e)
-	{
-	  // TODO
-	}
+        // an input with fixed index
+        try
+        {
+          int index = Integer.parseInt(strIndex);
+          destination.putInput(index, translated);
+        }
+        catch (NumberFormatException e)
+        {
+          // TODO
+        }
       }
     }
 
@@ -168,37 +168,37 @@ public class Module extends DescriptionBase implements IXmlHandler
       // if the scope is local and the name is present in the
       // output substitution map, use the output from that map
       if (out.getScope() == Parser.LOCAL_SCOPE_CODE 
-	  && outputSubstitution != null 
-	  && outputSubstitution.containsKey(out.getHref()))
+          && outputSubstitution != null
+          && outputSubstitution.containsKey(out.getHref()))
       {
-	translated = outputSubstitution.get(out.getHref());
+        translated = outputSubstitution.get(out.getHref());
       }
       // if this output is not a block output
       else
       {
-	translated = new control4j.application.Output(
-	    resolveScope(out.getScope(), localScope), out.getHref());
-	out.translate(translated, localScope);
+        translated = new control4j.application.Output(
+            resolveScope(out.getScope(), localScope), out.getHref());
+        out.translate(translated, localScope);
       }
       // store translated output into the module object
       String strIndex = out.getIndex();
       if (strIndex == null)
       {
-	// an output with variable index
-	destination.putOutput(translated);
+        // an output with variable index
+        destination.putOutput(translated);
       }
       else
       {
-	// an output with fixed index
-	try
-	{
-	  int index = Integer.parseInt(strIndex);
-	  destination.putOutput(index, translated);
-	}
-	catch (NumberFormatException e)
-	{
-	  // TODO
-	}
+        // an output with fixed index
+        try
+        {
+          int index = Integer.parseInt(strIndex);
+          destination.putOutput(index, translated);
+        }
+        catch (NumberFormatException e)
+        {
+          // TODO
+        }
       }
     }
 
@@ -220,12 +220,16 @@ public class Module extends DescriptionBase implements IXmlHandler
 
   private XmlReader reader;
 
+  protected IAdapter adapter;
+
   /**
    *  An empty constructor which may be used if the content
    *  of the module will be loaded from XML document.
    */
-  Module()
-  { }
+  Module(IAdapter adapter)
+  {
+    this.adapter = adapter;
+  }
 
   public void startProcessing(XmlReader reader)
   {
@@ -248,13 +252,14 @@ public class Module extends DescriptionBase implements IXmlHandler
   @XmlEndElement(localName="module", parent="",
       namespace="http://control4j.lidinsky.cz/application")
   private void endModule()
-  { }
+  {
+    adapter.put(this);
+  }
 
   @XmlStartElement(localName="property", parent="module")
   private void startModuleProperty(Attributes attributes)
   {
-    Property property = new Property();
-    addProperty(property);
+    Property property = new Property(this);
     reader.addHandler(property);
   }
 

@@ -10,8 +10,9 @@ public class ScopeMapTest
 {
 
   ScopeMap<Tag> map;
-  Scope scope1 = new Scope(Scope.getGlobal());
-  Scope scope2 = new Scope(Scope.getGlobal());
+  Scope root = new Scope();
+  Scope scope1 = new Scope(root);
+  Scope scope2 = new Scope(root);
   Scope scope3 = new Scope(scope1);
   Scope scope4 = new Scope(scope1);
   String name1 = "namea";
@@ -28,7 +29,7 @@ public class ScopeMapTest
     map = new ScopeMap<Tag>();
     try
     {
-    map.put(name4, Scope.getGlobal(), value2);
+    map.put(name4, root, value2);
     map.put(name3, scope3, value1);
     }
     catch (DuplicateElementException e)
@@ -39,7 +40,7 @@ public class ScopeMapTest
   @Test
   public void test1()
   {
-    Tag result = map.get("namec", Scope.getGlobal());
+    Tag result = map.get("namec", root);
     assertTrue(value2 == result);
   }
 

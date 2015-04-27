@@ -32,7 +32,7 @@ import control4j.tools.XmlEndElement;
  *  Represents an output element
  *
  */
-public class Output extends Configurable implements IXmlHandler
+public class Output extends Configurable implements IXmlHandler, IAdapter
 {
 
   private String index;
@@ -64,8 +64,8 @@ public class Output extends Configurable implements IXmlHandler
   public String toString()
   {
     return java.text.MessageFormat.format(
-	"Output; index: {0}, href: {1}, scope: {2}", 
-	index, href, Parser.formatScope(scope));
+        "Output; index: {0}, href: {1}, scope: {2}",
+        index, href, Parser.formatScope(scope));
   }
 
   /*
@@ -134,9 +134,14 @@ public class Output extends Configurable implements IXmlHandler
   @XmlStartElement(localName="property", parent="output")
   private void startOutputProperty(Attributes attributes)
   {
-    Property property = new Property();
-    addProperty(property);
+    Property property = new Property(this);
     reader.addHandler(property);
+  }
+
+  @Override
+  public void put(Property property)
+  {
+    addProperty(property);
   }
 
 }

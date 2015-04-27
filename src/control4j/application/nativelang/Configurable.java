@@ -29,7 +29,7 @@ import control4j.tools.DuplicateElementException;
  *  configuration.
  *
  */
-abstract class Configurable extends DeclarationBase
+abstract class Configurable extends AdapterBase
 {
 
   private ArrayList<Property> properties;
@@ -46,22 +46,22 @@ abstract class Configurable extends DeclarationBase
   {
     if (properties != null)
       for (Property property : properties)
-	try
-	{
-	  if (property.isReference())
+        try
+        {
+          if (property.isReference())
           {
-	    destination.putProperty(property.getKey(), property.getHref(), 
-	        resolveScope(property.getScope(), localScope));
+            destination.putProperty(property.getKey(), property.getHref(),
+                resolveScope(property.getScope(), localScope));
           }
-	  else
-	  {
-	    destination.putProperty(property.getKey(), property.getValue());
-	  }
-	}
-	catch (DuplicateElementException e)
-	{
-	  // TODO
-	}
+          else
+          {
+            destination.putProperty(property.getKey(), property.getValue());
+          }
+        }
+        catch (DuplicateElementException e)
+        {
+          // TODO
+        }
   }
 
   protected static Scope resolveScope(int code, Scope localScope)
@@ -69,14 +69,20 @@ abstract class Configurable extends DeclarationBase
     switch (code)
     {
       case 0:
-	return Scope.getGlobal();
+        return Scope.getGlobal();
       case 1:
-	return localScope;
+        return localScope;
       case 2:
         return localScope.getParent();
       default:
-	throw new IllegalArgumentException();
+        throw new IllegalArgumentException();
     }
+  }
+
+  @Override
+  public void put(Property property)
+  {
+    addProperty(property);
   }
 
 }

@@ -34,7 +34,7 @@ import control4j.tools.XmlEndElement;
  *
  */
 public class ResourceDeclaration extends DescriptionBase
-implements IXmlHandler
+implements IXmlHandler, IAdapter
 {
 
   /** Name of the java class that implements functionality of
@@ -48,7 +48,8 @@ implements IXmlHandler
   /**
    *  Initialize fields of this object.
    */
-  public ResourceDeclaration(String className, String name, int scope)
+  public ResourceDeclaration(
+       String className, String name, int scope)
   {
     this.className = className;
     this.name = name;
@@ -101,8 +102,10 @@ implements IXmlHandler
    *  An empty constructor which may be used if the content
    *  of the signal will be loaded from XML document.
    */
-  ResourceDeclaration()
-  { }
+  ResourceDeclaration(IAdapter adapter)
+  {
+    this.adapter = adapter;
+  }
 
   public void startProcessing(XmlReader reader)
   {
@@ -137,14 +140,21 @@ implements IXmlHandler
   @XmlStartElement(localName="property", parent="resource") 
   private void startResourceProperty(Attributes attributes)
   {
-    Property property = new Property();
-    addProperty(property);
+    Property property = new Property(this);
     reader.addHandler(property);
   }
 
   @XmlEndElement(localName="resource", parent="",
       namespace="http://control4j.lidinsky.cz/application")
   private void endResource()
-  { }
+  {
+    adapter.put(this);
+  }
+
+  @Override
+  public void put(Property property)
+  {
+    addProperty(property);
+  }
 
 }

@@ -33,10 +33,12 @@ import control4j.tools.XmlEndElement;
  *  Stands for a signal element.
  *
  */
-public class Signal extends DescriptionBase implements IXmlHandler
+public class Signal extends DescriptionBase implements IXmlHandler, IAdapter
 {
 
   private String name;
+
+  protected IAdapter adapter;
 
   public String getName()
   {
@@ -63,18 +65,18 @@ public class Signal extends DescriptionBase implements IXmlHandler
     if (isValueT_1Specified)
     {
       if (isValueT_1Valid)
-	destination.setValueT_1(valueT_1);
+        destination.setValueT_1(valueT_1);
       else
-	destination.setValueT_1Invalid();
+        destination.setValueT_1Invalid();
     }
 
     // translate tag objects
     if (tags != null)
       for (Tag tag : tags)
       {
-	control4j.application.Tag destTag = new control4j.application.Tag();
-	tag.translate(destTag, localScope);
-	destination.putTag(tag.getName(), destTag);
+        control4j.application.Tag destTag = new control4j.application.Tag();
+        tag.translate(destTag, localScope);
+        destination.putTag(tag.getName(), destTag);
       }
 
   }
@@ -109,8 +111,10 @@ public class Signal extends DescriptionBase implements IXmlHandler
    *  An empty constructor which may be used if the content
    *  of the signal will be loaded from XML document.
    */
-  Signal()
-  { }
+  Signal(IAdapter adapter)
+  {
+    this.adapter = adapter;
+  }
 
   public void startProcessing(XmlReader reader)
   {
@@ -142,13 +146,14 @@ public class Signal extends DescriptionBase implements IXmlHandler
   @XmlEndElement(localName="signal", parent="",
       namespace="http://control4j.lidinsky.cz/application")
   private void endSignal()
-  { }
+  {
+    adapter.put(this);
+  }
 
   @XmlStartElement(localName="property", parent="signal")
   private void startSignalProperty(Attributes attributes)
   {
-    Property property = new Property();
-    addProperty(property);
+    Property property = new Property(this);
     reader.addHandler(property);
   }
 

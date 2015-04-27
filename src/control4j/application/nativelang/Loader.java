@@ -39,6 +39,8 @@ public class Loader implements ILoader, IXmlHandler
 
   private Application application;
 
+  protected IAdapter adapter;
+
   public Loader()
   {
   }
@@ -46,6 +48,10 @@ public class Loader implements ILoader, IXmlHandler
   public Application get() throws IOException
   {
     return application;
+  }
+
+  public void setDestination(Object destination)
+  {
   }
 
   /*
@@ -71,8 +77,7 @@ public class Loader implements ILoader, IXmlHandler
       parent="", parentNamespace="*")
   private void startApplication(Attributes attributes)
   {
-    application = new Application();
-    System.out.println(reader);
+    application = new Application(adapter);
     reader.addHandler(application);
   }
 

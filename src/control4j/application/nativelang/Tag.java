@@ -31,7 +31,7 @@ import control4j.tools.XmlEndElement;
  *  Represents a tag of the signal.
  *
  */
-public class Tag extends Configurable implements IXmlHandler
+public class Tag extends Configurable implements IXmlHandler, IAdapter
 {
 
   private String name;
@@ -94,7 +94,7 @@ public class Tag extends Configurable implements IXmlHandler
   private void startTag(Attributes attributes)
   {
     name = Parser.parseToken(attributes.getValue("name"));
-    if (name == null) {} // TODO
+    if (name == null) {} // TODO:
   }
 
   /**
@@ -108,9 +108,14 @@ public class Tag extends Configurable implements IXmlHandler
   @XmlStartElement(localName="property", parent="tag")
   private void startTagProperty(Attributes attributes)
   {
-    Property property = new Property();
-    addProperty(property);
+    Property property = new Property(this);
     reader.addHandler(property);
+  }
+
+  @Override
+  public void put(Property property)
+  {
+    addProperty(property);
   }
 
 }

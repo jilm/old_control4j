@@ -84,7 +84,8 @@ public class Loader implements IXmlHandler
     reader = new XmlReader();
     reader.addHandler(this);
     reader.load(inputStream);
-    return loader.get();
+    //return loader.get();
+    return null; // TODO:
   }
 
   public static void main(String[] args) throws Exception

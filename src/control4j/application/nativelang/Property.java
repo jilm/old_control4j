@@ -82,11 +82,11 @@ public class Property extends DeclarationBase implements IXmlHandler
   {
     if (isReference)
       return java.text.MessageFormat.format(
-	  "Property; key: {0}, href: {1}, scope: {2}",
-	  key, href, Parser.formatScope(scope));
+          "Property; key: {0}, href: {1}, scope: {2}",
+          key, href, Parser.formatScope(scope));
     else
       return java.text.MessageFormat.format(
-	  "Property; key: {0}, value: {1}", key, value);
+          "Property; key: {0}, value: {1}", key, value);
   }
 
   /*
@@ -131,12 +131,15 @@ public class Property extends DeclarationBase implements IXmlHandler
 
   private XmlReader reader;
 
+  protected IAdapter adapter;
+
   /**
    *  An empty constructor for objects that will be loaded
    *  from a XML document.
    */
-  Property()
+  Property(IAdapter adapter)
   {
+    this.adapter = adapter;
   }
 
   public void startProcessing(XmlReader reader)
@@ -180,7 +183,7 @@ public class Property extends DeclarationBase implements IXmlHandler
       }
       catch (ParseException e)
       {
-	// TODO
+        // TODO
       }
     }
     else if (value == null && href == null)
@@ -209,6 +212,7 @@ public class Property extends DeclarationBase implements IXmlHandler
       namespace="http://control4j.lidinsky.cz/application")
   private void endProperty()
   {
+    adapter.put(this);
   }
 
 }

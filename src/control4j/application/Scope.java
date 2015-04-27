@@ -18,27 +18,28 @@ package control4j.application;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import cz.lidinsky.tools.tree.AbstractNode;
+import cz.lidinsky.tools.tree.INode;
+
 /**
  *
  *  A class which serves as a scope marker for signal definitions.
  *
- *  There is one global scope which allows to share signals between 
+ *  <p>There is one global scope which allows to share signals between
  *  different parts of the project. Each part of the project may 
  *  create arbitrary number of local scopes.
  *
- *  Scopes may be ordered hierarchicaly. Each scope (except the global
+ *  <p>Scopes may be ordered hierarchicaly. Each scope (except the global
  *  one) may have one parent scope attached. In that case, if there
  *  is not a signal in a particular scope, even parent scope will be
  *  scaned.
  *  
  */
-public class Scope
+public class Scope extends AbstractNode<Scope> implements INode<Scope>
 {
+
   /** The global scope */
   private static final Scope global = new Scope();
-
-  /** Parent scope */
-  private Scope parent;
 
   /**
    *  Returns the global scope.
@@ -55,7 +56,6 @@ public class Scope
    */
   public Scope()
   {
-    parent = null;
   }
 
   /**
@@ -68,51 +68,7 @@ public class Scope
    */
   public Scope(Scope parent)
   {
-    this.parent = parent;
+    parent.addChild(this);
   }
 
-  /**
-   *  Returns parent scope or null if the parent scope has not
-   *  been attached.
-   *
-   *  @return parent scope or null
-   */
-  public Scope getParent()
-  {
-    return parent;
-  }
-
-  /**
-   *  Tests wheather the given scope belongs under this scope and returns
-   *  the result. It means, it searches the whole chain of the parent scopes 
-   *  of this scope and returns the number that corresponds to the order
-   *  of the given scope in the parents chain. It returns zero if the 
-   *  requested scope is directly equal to this scope, one if it is
-   *  equal to the parent, two if it is equal to the parent of the parent,
-   *  etc. If the requested scope has not been found, it returns -1.
-   *
-   *  @param request
-   *             requested scope 
-   *
-   *  @return number which reflect order of requested scope in the parent
-   *             chain of this scope or minus one if the requested scope
-   *             doesn't belong to this scope at all
-   *
-   *  @throws IllegalArgumentException
-   *             if the argument is null
-   */
-  public int belongs(Scope request)
-  {
-    if (request == null) 
-      throw new IllegalArgumentException();
-    int order = 0;
-    Scope scope = this;
-    while (scope != null)
-    {
-      if (scope == request) return order;
-      scope = scope.getParent();
-      order ++;
-    }
-    return -1;
-  }
 }

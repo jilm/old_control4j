@@ -40,7 +40,7 @@ import static control4j.tools.Logger.*;
  *  </ol>
  *
  */
-public class Resource extends Configurable implements IXmlHandler
+public class Resource extends Configurable implements IXmlHandler, IAdapter
 {
 
   private String key;
@@ -62,11 +62,11 @@ public class Resource extends Configurable implements IXmlHandler
   {
     if (isReference)
       return java.text.MessageFormat.format(
-	  "Resource; key: {0}, href: {1}, scope: {2}",
-	  key, href, Parser.formatScope(scope));
+          "Resource; key: {0}, href: {1}, scope: {2}",
+          key, href, Parser.formatScope(scope));
     else
       return java.text.MessageFormat.format(
-	  "Resource; key: {0}, class: {1}", key, className);
+          "Resource; key: {0}, class: {1}", key, className);
   }
 
   public void translate(
@@ -191,10 +191,15 @@ public class Resource extends Configurable implements IXmlHandler
     if (isReference) {} // TODO
     else
     {
-      Property property = new Property();
-      addProperty(property);
+      Property property = new Property(this);
       reader.addHandler(property);
     }
+  }
+
+  @Override
+  public void put(Property property)
+  {
+    addProperty(property);
   }
 
 }

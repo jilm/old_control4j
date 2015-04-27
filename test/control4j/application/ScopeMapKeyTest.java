@@ -7,8 +7,9 @@ import static org.junit.Assume.*;
 public class ScopeMapKeyTest extends ScopeMap
 {
 
-  Scope scope1 = new Scope(Scope.getGlobal());
-  Scope scope2 = new Scope(Scope.getGlobal());
+  Scope root = new Scope();
+  Scope scope1 = new Scope(root);
+  Scope scope2 = new Scope(root);
   Scope scope3 = new Scope(scope1);
   Key key1 = new Key("name1", scope1);
   Key key2 = new Key("name1", scope1);

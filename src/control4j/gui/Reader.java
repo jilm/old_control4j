@@ -1,7 +1,7 @@
 package control4j.gui;
 
 /*
- *  Copyright 2013, 2014 Jiri Lidinsky
+ *  Copyright 2013, 2014, 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -26,9 +26,11 @@ import java.lang.reflect.Method;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
-import control4j.tools.SaxReader;
+//import control4j.tools.SaxReader;
 import control4j.tools.XmlStartElement;
 import control4j.tools.XmlEndElement;
+import control4j.tools.IXmlHandler;
+import control4j.tools.XmlReader;
 import control4j.scanner.Scanner;
 import control4j.gui.components.Screen;
 
@@ -39,8 +41,19 @@ import static control4j.tools.Logger.*;
  *  Reads the gui object tree from the XML file.
  *
  */
-public class Reader extends SaxReader
+public class Reader implements IXmlHandler
 {
+
+  public Reader() {}
+
+  public void endProcessing() {}
+
+  protected XmlReader reader;
+
+  public void startProcessing(XmlReader reader)
+  {
+    this.reader = reader;
+  }
 
   /**
    *  The pointer to the last process object of the gui tree structure.
@@ -51,19 +64,11 @@ public class Reader extends SaxReader
   private GuiObject gui = null;
 
   /**
-   *  Loads the whole XML from given intput stream.
-   */
-  public void load(InputStream inputStream) throws IOException
-  {
-    super.load(inputStream);
-  }
-
-  /**
    *  Returns object structure which was reconstructed from the given
    *  XML document. The output is available, after the load method
    *  was successfuly called (no exception was thrown).
    */
-  public Screens get()
+  public Screens getScreens()
   {
     return (Screens)gui;
   }
@@ -71,7 +76,8 @@ public class Reader extends SaxReader
   /**
    *
    */
-  @XmlStartElement(parent="", localName="gui")
+  @XmlStartElement(parent="", localName="gui",
+      namespace="http://control4j.lidinsky.cz/gui")
   private void gui(Attributes attributes)
   {
     finest("gui");
@@ -81,7 +87,8 @@ public class Reader extends SaxReader
   /**
    *
    */
-  @XmlStartElement(parent="gui", localName="screen")
+  @XmlStartElement(parent="gui", localName="screen",
+      namespace="http://control4j.lidinsky.cz/gui")
   private void screen(Attributes attributes)
   {
     finest("screen");
@@ -93,7 +100,8 @@ public class Reader extends SaxReader
   /**
    *
    */
-  @XmlStartElement(parent="*", localName="panel")
+  @XmlStartElement(parent="*", localName="panel",
+      namespace="http://control4j.lidinsky.cz/gui")
   private void panel(Attributes attributes)
   {
     try
@@ -114,7 +122,8 @@ public class Reader extends SaxReader
   /**
    *
    */
-  @XmlStartElement(parent="*", localName="component")
+  @XmlStartElement(parent="*", localName="component",
+      namespace="http://control4j.lidinsky.cz/gui")
   private void component(Attributes attributes)
   {
     try
@@ -135,7 +144,8 @@ public class Reader extends SaxReader
   /**
    *
    */
-  @XmlStartElement(parent="*", localName="changer")
+  @XmlStartElement(parent="*", localName="changer",
+      namespace="http://control4j.lidinsky.cz/gui")
   private void changer(Attributes attributes)
   {
     try
@@ -156,7 +166,8 @@ public class Reader extends SaxReader
   /**
    *
    */
-  @XmlStartElement(parent="*", localName="preference")
+  @XmlStartElement(parent="*", localName="preference",
+      namespace="http://control4j.lidinsky.cz/gui")
   private void preference(Attributes attributes)
   {
     String key = attributes.getValue("key");
@@ -168,7 +179,8 @@ public class Reader extends SaxReader
   /**
    *
    */
-  @XmlEndElement(parent="", localName="gui")
+  @XmlEndElement(parent="", localName="gui",
+      namespace="http://control4j.lidinsky.cz/gui")
   private void endGui()
   {
     finest("/gui");
@@ -178,7 +190,8 @@ public class Reader extends SaxReader
   /**
    *
    */
-  @XmlEndElement(parent="*", localName="screen")
+  @XmlEndElement(parent="*", localName="screen",
+      namespace="http://control4j.lidinsky.cz/gui")
   private void endScreen()
   {
     finest("/screen");
@@ -188,7 +201,8 @@ public class Reader extends SaxReader
   /**
    *
    */
-  @XmlEndElement(parent="*", localName="panel")
+  @XmlEndElement(parent="*", localName="panel",
+      namespace="http://control4j.lidinsky.cz/gui")
   private void endPanel()
   {
     finest("/panel");
@@ -198,7 +212,8 @@ public class Reader extends SaxReader
   /**
    *
    */
-  @XmlEndElement(parent="*", localName="component")
+  @XmlEndElement(parent="*", localName="component",
+      namespace="http://control4j.lidinsky.cz/gui")
   private void endComponent()
   {
     finest("/component");
@@ -208,7 +223,8 @@ public class Reader extends SaxReader
   /**
    *
    */
-  @XmlEndElement(parent="*", localName="changer")
+  @XmlEndElement(parent="*", localName="changer",
+      namespace="http://control4j.lidinsky.cz/gui")
   private void endChanger()
   {
     finest("/changer");
@@ -241,12 +257,12 @@ public class Reader extends SaxReader
     }
     catch (java.lang.InstantiationException e)
     {
-      // TODO
+      // TODO:
       catched(getClass().getName(), "createInstance", e);
     }
     catch (java.lang.IllegalAccessException e)
     {
-      // TODO
+      // TODO:
       catched(getClass().getName(), "createInstance", e);
     }
     return null;
@@ -273,7 +289,7 @@ public class Reader extends SaxReader
           setter.invoke(gui, control4j.gui.Color.getColor(value));
         }
       else if (parameters[0] == int.class)
-	setter.invoke(gui, Integer.parseInt(value));
+        setter.invoke(gui, Integer.parseInt(value));
       else if (parameters[0] == double.class)
         setter.invoke(gui, Double.parseDouble(value));
       else if (parameters[0] == boolean.class)

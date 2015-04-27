@@ -34,7 +34,7 @@ import control4j.tools.XmlEndElement;
  *  Stands for a block element.
  *
  */
-public class Block implements IXmlHandler
+public class Block implements IXmlHandler, IAdapter
 {
 
   private String name;
@@ -94,27 +94,27 @@ public class Block implements IXmlHandler
     // translate all of the input
     if (input != null)
       for (String inp : input)
-	destination.addInput(inp);
+        destination.addInput(inp);
 
     // translate all of the output
     if (output != null)
       for (String out : output)
-	destination.addOutput(out);
+        destination.addOutput(out);
 
     // translate all of the signals
     if (signals != null)
       for (Signal signal : signals)
-	destination.addSignal(signal);
+        destination.addSignal(signal);
 
     // translate all of the modules
     if (modules != null)
       for (Module module : modules)
-	destination.addModule(module);
+        destination.addModule(module);
 
     // translate all of the use elements
     if (uses != null)
       for (Use use : uses)
-	destination.addUse(use);
+        destination.addUse(use);
   }
 
   /*
@@ -165,7 +165,7 @@ public class Block implements IXmlHandler
       case 0:
         return Scope.getGlobal();
       case 1:
-	return localScope;
+        return localScope;
       case 2:
         return localScope.getParent();
       default:
@@ -182,12 +182,15 @@ public class Block implements IXmlHandler
 
   private XmlReader reader;
 
+  protected IAdapter adapter;
+
   /**
    *  An empty constructor which may be used if the content
    *  of the block will be loaded from XML document.
    */
-  Block()
+  Block(IAdapter adapter)
   {
+    this.adapter = adapter;
   }
 
   public void startProcessing(XmlReader reader)
@@ -205,7 +208,7 @@ public class Block implements IXmlHandler
   private void startBlock(Attributes attributes)
   {
     name = Parser.parseToken(attributes.getValue("name"));
-    if (name == null) {} // TODO
+    if (name == null) {} // TODO:
 
     try
     {
@@ -220,7 +223,9 @@ public class Block implements IXmlHandler
   @XmlEndElement(localName="block", parent="",
       namespace="http://control4j.lidinsky.cz/application")
   private void endBlock()
-  { }
+  {
+    adapter.put(this);
+  }
 
   @XmlStartElement(localName="input", parent="block")
   private void startBlockInput(Attributes attributes)
@@ -245,25 +250,59 @@ public class Block implements IXmlHandler
   @XmlStartElement(localName="module", parent="block")
   private void startBlockModule(Attributes attributes)
   {
-    Module module = new Module();
-    add(module);
+    Module module = new Module(this);
     reader.addHandler(module);
   }
 
   @XmlStartElement(localName="signal", parent="block")
   private void startBlockSignal(Attributes attributes)
   {
-    Signal signal = new Signal();
-    add(signal);
+    Signal signal = new Signal(this);
     reader.addHandler(signal);
   }
 
   @XmlStartElement(localName="use", parent="block")
   private void startBlockUse(Attributes attributes)
   {
-    Use use = new Use();
-    add(use);
+    Use use = new Use(this);
     reader.addHandler(use);
+  }
+
+  /*
+   *
+   *     IAdapter implementation
+   *
+   */
+
+  public void setDestination(Object destination)
+  {
+  }
+
+  public void startLevel() {}
+
+  public void endLevel() {}
+
+  public void put(Module module)
+  {
+    add(module);
+  }
+
+  public void put(Block block) {}
+
+  public void put(Signal signal)
+  {
+    add(signal);
+  }
+
+  public void put(ResourceDeclaration resource) {}
+
+  public void put(Define define) {}
+
+  public void put(Property property) {}
+
+  public void put(Use use)
+  {
+    add(use);
   }
 
 }

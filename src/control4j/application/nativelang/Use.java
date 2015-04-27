@@ -33,7 +33,7 @@ import control4j.tools.XmlEndElement;
  *  Represents a use element.
  *
  */
-public class Use extends Configurable implements IXmlHandler
+public class Use extends Configurable implements IXmlHandler, IAdapter
 {
 
   private String href;
@@ -62,7 +62,7 @@ public class Use extends Configurable implements IXmlHandler
   public String toString()
   {
     return java.text.MessageFormat.format(
-	"Use; href: {0}, scope: {1}", href, Parser.formatScope(scope));
+        "Use; href: {0}, scope: {1}", href, Parser.formatScope(scope));
   }
 
   public void translate(
@@ -75,22 +75,22 @@ public class Use extends Configurable implements IXmlHandler
     if (input != null)
       for (Input inp : input)
       {
-	control4j.application.Input destInput
-	    = new control4j.application.Input(
-	    resolveScope(inp.getScope(), localScope), inp.getHref());
+        control4j.application.Input destInput
+            = new control4j.application.Input(
+            resolveScope(inp.getScope(), localScope), inp.getHref());
         inp.translate(destInput, localScope);
-	destination.putInput(inp.getIndex(), destInput);
+        destination.putInput(inp.getIndex(), destInput);
       }
 
     // translate output
     if (output != null)
       for (Output out : output)
       {
-	control4j.application.Output destOutput
-	    = new control4j.application.Output(
-	    resolveScope(out.getScope(), localScope), out.getHref());
+        control4j.application.Output destOutput
+            = new control4j.application.Output(
+            resolveScope(out.getScope(), localScope), out.getHref());
         out.translate(destOutput, localScope);
-	destination.putOutput(out.getIndex(), destOutput);
+        destination.putOutput(out.getIndex(), destOutput);
       }
   }
 
@@ -108,12 +108,16 @@ public class Use extends Configurable implements IXmlHandler
 
   private XmlReader reader;
 
+  protected IAdapter adapter;
+
   /**
    *  An empty constructor for objects that will be loaded
    *  from a XML document.
    */
-  Use()
-  { }
+  Use(IAdapter adapter)
+  {
+    this.adapter = adapter;
+  }
 
   public void startProcessing(XmlReader reader)
   {
@@ -146,19 +150,25 @@ public class Use extends Configurable implements IXmlHandler
   }
 
   /**
-   *  Does nothing.
    */
   @XmlEndElement(localName="use", parent="", 
       namespace="http://control4j.lidinsky.cz/application")
   private void endUse()
-  { }
+  {
+    adapter.put(this);
+  }
 
   @XmlStartElement(localName="property", parent="use")
   private void startUseProperty(Attributes attributes)
   {
-    Property property = new Property();
-    addProperty(property);
+    Property property = new Property(this);
     reader.addHandler(property);
+  }
+
+  @Override
+  public void put(Property property)
+  {
+    addProperty(property);
   }
 
   @XmlStartElement(localName="input", parent="use")

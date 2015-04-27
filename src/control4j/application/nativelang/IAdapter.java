@@ -1,4 +1,4 @@
-package control4j.application;
+package control4j.application.nativelang;
 
 /*
  *  Copyright 2015 Jiri Lidinsky
@@ -18,16 +18,27 @@ package control4j.application;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import java.io.IOException;
-
-/**
- *
- *  An interface which must be implemented by each particular language
- *  loader.
- *
- */
-public interface ILoader
+public interface IAdapter
 {
 
+  //public void setDestination(Object destination);
+
+  public void startLevel();
+
+  public void endLevel();
+
+  public void put(Module module);
+
+  public void put(Block block);
+
+  public void put(Signal signal);
+
+  public void put(ResourceDeclaration resource);
+
+  public void put(Define define);
+
+  public void put(Property property);
+
+  public void put(Use use);
 
 }
