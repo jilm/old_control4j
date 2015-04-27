@@ -356,7 +356,7 @@ public class XmlReader extends DefaultHandler
   @Override
   public final void endDocument()
   {
-    handlerStack.handler.endProcessing();
+    //handlerStack.handler.endProcessing();
     line = locator.getLineNumber();
     column = locator.getColumnNumber();
   }

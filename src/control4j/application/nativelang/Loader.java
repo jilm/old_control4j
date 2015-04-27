@@ -77,7 +77,7 @@ public class Loader implements ILoader, IXmlHandler
       parent="", parentNamespace="*")
   private void startApplication(Attributes attributes)
   {
-    application = new Application(adapter);
+    application = new Application();
     reader.addHandler(application);
   }
 

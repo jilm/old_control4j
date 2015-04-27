@@ -45,8 +45,14 @@ implements IXmlHandler
   /**
    *
    */
-  public Application(IAdapter adapter)
+  public Application()
   {
+  }
+
+  public void setDestination(Object destination)
+  {
+    C4jToControlAdapter adapter = new C4jToControlAdapter();
+    adapter.setDestination(destination);
     this.adapter = adapter;
   }
 
@@ -132,6 +138,20 @@ implements IXmlHandler
   {
     Define define = new Define(adapter);
     reader.addHandler(define);
+  }
+
+  /**
+   *  For debug purposes.
+   */
+  public static void main(String[] args) throws Exception
+  {
+    java.io.File file = new java.io.File(args[0]);
+    java.io.InputStream inputStream = new java.io.FileInputStream(file);
+    XmlReader reader = new XmlReader();
+    Application application = new Application();
+    application.adapter = new PrintAdapter();
+    reader.addHandler(application);
+    reader.load(inputStream);
   }
 
 }
