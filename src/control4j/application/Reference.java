@@ -18,12 +18,16 @@ package control4j.application;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import cz.lidinsky.tools.IToStringBuildable;
+import cz.lidinsky.tools.ToStringBuilder;
+import cz.lidinsky.tools.ToStringStyle;
+
 /**
  *
  *  Represents a reference to some declaration. It consists of a pair:
  *  href and scope.
  */
-class Reference
+class Reference implements IToStringBuildable
 {
 
   private String href;
@@ -51,9 +55,15 @@ class Reference
   @Override
   public String toString()
   {
-    String pattern = "Reference'{'href:{0}, scope:{1}'}'";
-    return java.text.MessageFormat.format(
-	pattern, href, scope.toString());
+    return new ToStringBuilder(new ToStringStyle())
+        .append(this)
+        .toString();
+  }
+
+  public void toString(ToStringBuilder builder)
+  {
+    builder.append("href", href)
+        .append("scope", scope);
   }
 
 }

@@ -23,13 +23,17 @@ import java.util.NoSuchElementException;
 
 import control4j.tools.DuplicateElementException;
 
+import cz.lidinsky.tools.IToStringBuildable;
+import cz.lidinsky.tools.ToStringBuilder;
+import cz.lidinsky.tools.ToStringStyle;
+
 /**
  *
  *  A key, value data storage, where the key is composed of the
  *  pair: a name and a scope.
  *
  */
-public class ScopeMap<E extends ObjectBase>
+public class ScopeMap<E extends ObjectBase> implements IToStringBuildable
 {
 
   /**
@@ -168,7 +172,14 @@ public class ScopeMap<E extends ObjectBase>
   @Override
   public String toString()
   {
-    return buffer.toString();
+    return new ToStringBuilder(new ToStringStyle())
+        .append(this)
+        .toString();
+  }
+
+  public void toString(ToStringBuilder builder)
+  {
+    builder.append("buffer", buffer);
   }
 
 }

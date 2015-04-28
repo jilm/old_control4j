@@ -424,13 +424,6 @@ public class Preprocessor implements IGraph<Use>
   }
 
   /**
-   *  For debug purposes
-   */
-  public static void main(String[] args) throws Exception
-  {
-  }
-
-  /**
    *  Returns the direct successors of the use element.
    *  This method is used by the algorithm for test of
    *  acyclic property.
@@ -480,6 +473,16 @@ public class Preprocessor implements IGraph<Use>
         sb.toString(), key, reference.getHref(),
         object.getDeclarationReferenceText());
     ErrorManager.getInstance().addError(message);
+  }
+
+  public static void main(String[] args) throws Exception
+  {
+    java.io.File file = new java.io.File(args[0]);
+    Loader loader = new Loader();
+    Application application = loader.load(file);
+    Preprocessor preprocessor = new Preprocessor();
+    preprocessor.process(application);
+    System.out.println(application.toString());
   }
 
 }
