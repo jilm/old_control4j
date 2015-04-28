@@ -326,29 +326,6 @@ public class Instantiator
    */
   public static void main(String[] args) throws Exception
   {
-    String filename = args[0];
-    java.io.File file = new java.io.File(filename);
-    control4j.application.Loader loader
-        = new control4j.application.Loader();
-    control4j.application.ITranslatable translatable = loader.load(file);
-    control4j.application.Application app
-        = new control4j.application.Application();
-    translatable.translate(app);
-    control4j.application.Preprocessor preprocessor
-        = new control4j.application.Preprocessor();
-    System.out.println("----- Before -----");
-    System.out.println(app.toString());
-    preprocessor.process(app);
-    System.out.println("----- After -----");
-    System.out.println(app.toString());
-    // Sort application
-    control4j.application.Sorter sorter
-        = new control4j.application.Sorter();
-    sorter.process(app);
-    // Make instances
-    Instantiator inst = new Instantiator();
-    Application application = inst.instantiate(app);
-    System.out.println(application.toString());
   }
 
 }

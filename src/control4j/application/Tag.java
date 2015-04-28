@@ -18,19 +18,14 @@ package control4j.application;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import cz.lidinsky.tools.ToStringBuilder;
+
 public class Tag extends Configurable
 {
 
   public Tag()
   { 
     super();
-  }
-
-  @Override
-  void toString(String indent, StringBuilder sb)
-  {
-    sb.append("\n");
-    super.toString(indent + "  ", sb);
   }
 
 }

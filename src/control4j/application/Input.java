@@ -20,6 +20,8 @@ package control4j.application;
 
 import control4j.tools.DeclarationReference;
 
+import cz.lidinsky.tools.ToStringBuilder;
+
 /**
  *
  *  This is a crate object for the module input definition.
@@ -82,14 +84,11 @@ public class Input extends Configurable
   }
 
   @Override
-  void toString(String indent, StringBuilder sb)
+  public void toString(ToStringBuilder builder)
   {
-    sb.append("href=")
-      .append(href)
-      .append(", scope=")
-      .append(scope.toString())
-      .append("\n");
-    super.toString(indent + "  ", sb);
+    super.toString(builder);
+    builder.append("href", href)
+        .append("scope", scope);
   }
 
 }

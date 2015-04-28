@@ -23,6 +23,8 @@ import java.util.NoSuchElementException;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
+import cz.lidinsky.tools.ToStringBuilder;
+
 /**
  *
  *  References and places a block into the processing.
@@ -115,11 +117,11 @@ public class Use extends Configurable
     if (object.getClass() != getClass()) return false;
     Use compared = (Use)object;
     return new EqualsBuilder()
-	.append(href, compared.href)
-	.append(scope, compared.scope)
-	.append(inputMap, compared.inputMap)
-	.append(outputMap, compared.outputMap)
-	.isEquals();
+        .append(href, compared.href)
+        .append(scope, compared.scope)
+        .append(inputMap, compared.inputMap)
+        .append(outputMap, compared.outputMap)
+        .isEquals();
   }
 
   @Override
@@ -135,41 +137,13 @@ public class Use extends Configurable
   }
 
   @Override
-  void toString(String indent, StringBuilder sb)
+  public void toString(ToStringBuilder builder)
   {
-    sb.append(indent).append("Use\n");
-    String indent2 = indent + "  ";
-    sb.append(indent2)
-      .append("href=")
-      .append(href)
-      .append("\n");
-    sb.append(indent2)
-      .append("scope=")
-      .append(scope.toString())
-      .append("\n");
-    super.toString(indent2, sb);
-    if (inputMap != null && inputMap.size() > 0)
-    {
-      java.util.Set<String> keys = inputMap.keySet();
-      for (String key : keys)
-      {
-	Input input = inputMap.get(key);
-	sb.append(indent2).append("Input[").append(key)
-	  .append("]=");
-	input.toString(indent2, sb);
-      }
-    }
-    if (outputMap != null && outputMap.size() > 0)
-    {
-      java.util.Set<String> keys = outputMap.keySet();
-      for (String key : keys)
-      {
-	Output output = outputMap.get(key);
-	sb.append(indent2).append("Output[").append(key)
-	  .append("]=");
-	output.toString(indent2, sb);
-      }
-    }
+    super.toString(builder);
+    builder.append("href", href)
+        .append("scope", scope)
+        .append("inputMap", inputMap)
+        .append("outputMap", outputMap);
   }
 
 }

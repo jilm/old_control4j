@@ -18,6 +18,8 @@ package control4j.application;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import cz.lidinsky.tools.ToStringBuilder;
+
 public class Output extends Configurable
 {
   private String href;
@@ -40,14 +42,11 @@ public class Output extends Configurable
   }
 
   @Override
-  void toString(String indent, StringBuilder sb)
+  public void toString(ToStringBuilder builder)
   {
-    sb.append("href=")
-      .append(href)
-      .append(", scope=")
-      .append(scope.toString())
-      .append("\n");
-    super.toString(indent + "  ", sb);
+    super.toString(builder);
+    builder.append("href", href)
+        .append("scope", scope);
   }
 
 }

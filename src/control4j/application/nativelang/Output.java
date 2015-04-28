@@ -119,7 +119,7 @@ public class Output extends Configurable implements IXmlHandler, IAdapter
    */
   @XmlEndElement(localName="output", parent="", 
       namespace="http://control4j.lidinsky.cz/application")
-  private void endProperty()
+  private void endOutput()
   { }
 
   @XmlStartElement(localName="property", parent="output")

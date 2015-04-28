@@ -23,6 +23,7 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.NoSuchElementException;
 import org.xml.sax.Attributes;
 
 import control4j.tools.IXmlHandler;
@@ -49,6 +50,8 @@ public class Loader implements IXmlHandler
 
   private LoaderFactory loaderFactory;
 
+  private Application application = new Application();
+
   /**
    *  Reads a map: loader to namespace form a ...
    *
@@ -70,28 +73,28 @@ public class Loader implements IXmlHandler
    *  @throws IOException
    *             if something is wrong with the file
    */
-  public ITranslatable load(File file) 
+  public Application load(File file)
   throws IOException
   {
     InputStream inputStream = new FileInputStream(file);
     return load(inputStream);
-    //inputStream.close();
   }
 
-  public ITranslatable load(InputStream inputStream)
+  public Application load(InputStream inputStream)
   throws IOException
   {
     reader = new XmlReader();
     reader.addHandler(this);
     reader.load(inputStream);
-    //return loader.get();
-    return null; // TODO:
+    return application;
   }
 
   public static void main(String[] args) throws Exception
   {
     File file = new File(args[0]);
-    new Loader().load(file);
+    Loader loader = new Loader();
+    Application application = loader.load(file);
+    System.out.println(application.toString());
   }
 
   /*
@@ -120,10 +123,17 @@ public class Loader implements IXmlHandler
   {
     try
     {
-      System.out.println("Start element " + reader.getNamespace());
-      loader = loaderFactory.getLoader(reader.getNamespace());
-      System.out.println(loader.toString());
-      reader.addHandler((IXmlHandler)loader);
+      reader.findHandlerMethod(
+          control4j.application.nativelang.Application.class);
+      control4j.application.nativelang.Application handler
+          = new control4j.application.nativelang.Application();
+      handler.setDestination(application);
+      reader.addHandler(handler);
+    }
+    catch (NoSuchElementException e)
+    {
+      System.out.println("Didn't find appropriate handler");
+      System.exit(1);
     }
     catch (Exception e)
     {

@@ -184,16 +184,6 @@ public class Sorter {
    */
   public static void main(String[] args) throws Exception {
 
-    String filename = args[0];
-    java.io.File file = new java.io.File(filename);
-    Loader loader = new Loader();
-    ITranslatable translatable = loader.load(file);
-    Application app = new Application();
-    translatable.translate(app);
-    Preprocessor preprocessor = new Preprocessor();
-    preprocessor.process(app);
-    Sorter sorter = new Sorter();
-    sorter.process(app);
 
   }
 

@@ -32,6 +32,8 @@ import control4j.ConfigItemNotFoundException;
 import control4j.IConfigBuffer;
 import control4j.tools.DuplicateElementException;
 
+import cz.lidinsky.tools.ToStringBuilder;
+
 /**
  *
  *  A common base for all of the objects that are configurable.
@@ -117,7 +119,7 @@ public abstract class Configurable extends DeclarationBase
     else
     {
       if (emptyConfiguration == null)
-	emptyConfiguration = new EmptyConfiguration();
+        emptyConfiguration = new EmptyConfiguration();
       return emptyConfiguration;
     }
   }
@@ -187,7 +189,7 @@ public abstract class Configurable extends DeclarationBase
     // store the configuration
     //addKey(key);
     references.add(new ImmutableTriple<String, String, Scope>(
-	key, href, scope));
+        key, href, scope));
   }
 
   public int getConfigItemRefsSize()
@@ -222,29 +224,10 @@ public abstract class Configurable extends DeclarationBase
   }
 
   @Override
-  public String toString()
+  public void toString(ToStringBuilder builder)
   {
-    StringBuilder sb = new StringBuilder();
-    this.toString("", sb);
-    return sb.toString();
-  }
-
-  /**
-   *  Write each config item on the separate line.
-   */
-  @Override
-  void toString(String indent, StringBuilder sb)
-  {
-    if ((configuration == null || configuration.size() == 0)
-	&& (references == null || references.size() == 0))
-      return;
-    sb.append(indent).append("Configuration\n");
-    String indent2 = indent + "  ";
-    if (configuration != null)
-      configuration.toString(indent2, sb);
-    if (references != null)
-      sb.append(references.toString()); // TODO
-      //Helper.toString(references, indent2, sb);
+    super.toString(builder);
+    builder.append("configuration", configuration);
   }
 
 }

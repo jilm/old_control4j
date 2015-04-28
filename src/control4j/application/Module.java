@@ -31,6 +31,8 @@ import org.apache.commons.lang3.tuple.ImmutableTriple;
 import control4j.tools.DeclarationReference;
 import static control4j.tools.Logger.*;
 
+import cz.lidinsky.tools.ToStringBuilder;
+
 /**
  *
  *  Crate class for module definition. Contains all the information needed
@@ -459,90 +461,22 @@ public class Module extends Configurable
    */
 
   @Override
-  public String toString()
+  public void toString(ToStringBuilder builder)
   {
-    StringBuilder sb = new StringBuilder();
-    toString("", sb);
-    return sb.toString();
-  }
-
-  @Override
-  void toString(String indent, StringBuilder sb)
-  {
-    sb.append(indent)
-      .append("Module class=")
-      .append(className)
-      .append("\n");
-
-    String indent2 = indent + "  ";
-    String indent3 = indent2 + "  ";
-
-    // write configuration
-    super.toString(indent2, sb);
-
-    // write resources
-    if ((resources != null && resources.size() > 0)
-        || (resourceRefs != null && resourceRefs.size() > 0))
-    {
-      sb.append(indent2).append("Resources\n");
-      if (resources != null)
-        Helper.objectToString(resources, indent3, sb);
-      if (resourceRefs != null)
-        sb.append(resourceRefs.toString());
-        {}//Helper.toString(resourceRefs, indent3, sb); // TODO
-    }
-
-    // write input
-    if ((inputArray != null && inputArray.size() > 0)
-        || (variableInput != null && variableInput.size() > 0)
-        || (inputTags != null && inputTags.size() > 0))
-    {
-      sb.append(indent2).append("Module Input\n");
-      if (inputArray != null)
-        for (int i=0; i<inputArray.size(); i++)
-          if (inputArray.get(i) != null)
-          {
-            sb.append(indent3).append("Input[").append(i).append("]=");
-            inputArray.get(i).toString(indent3, sb);
-          }
-      if (variableInput != null)
-        for (Input input : variableInput)
-        {
-          sb.append(indent3).append("Input[-]=");
-          input.toString(indent3, sb);
-        }
-      if (inputTags != null)
-        sb.append(indent3)
-          .append("Input Tags")
-          .append(inputTags.toString())
-          .append("\n");
-    }
-
-    // write output
-    if ((outputArray != null && outputArray.size() > 0)
-        || (variableOutput != null && variableOutput.size() > 0)
-        || (outputTags != null && outputTags.size() > 0))
-    {
-      sb.append(indent2).append("Module Output\n");
-      if (outputArray != null)
-        for (int i=0; i<outputArray.size(); i++)
-          if (outputArray.get(i) != null)
-          {
-            sb.append(indent3).append("Output[").append(i).append("]=");
-            outputArray.get(i).toString(indent3, sb);
-          }
-      if (variableOutput != null)
-        for (Output output : variableOutput)
-        {
-          sb.append(indent3).append("Output[-]=");
-          output.toString(indent3, sb);
-        }
-      if (outputTags != null)
-        sb.append(indent3)
-          .append("Output Tags")
-          .append(outputTags.toString())
-          .append("\n");
-    }
+    super.toString(builder);
+    builder.append("className", className)
+        .append("inputArray", inputArray)
+        .append("variableInput", variableInput)
+        .append("outputArray", outputArray)
+        .append("variableOutput", variableOutput)
+        .append("resources", resources)
+        .append("resourceRefs", resourceRefs)
+        .append("inputTags", inputTags)
+        .append("outputTags", outputTags)
+        .append("fixedInputMap", fixedInputMap)
+        .append("variableInputMap", variableInputMap)
+        .append("fixedOutputMap", fixedOutputMap)
+        .append("variableOutputMap", variableOutputMap);
   }
 
 }

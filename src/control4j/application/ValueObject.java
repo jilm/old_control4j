@@ -18,6 +18,8 @@ package control4j.application;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import cz.lidinsky.tools.ToStringBuilder;
+
 public class ValueObject extends DeclarationBase
 {
   private String value;
@@ -33,9 +35,10 @@ public class ValueObject extends DeclarationBase
   }
 
   @Override
-  void toString(String indent, StringBuilder sb)
+  public void toString(ToStringBuilder builder)
   {
-    sb.append(value).append("\n");
+    super.toString(builder);
+    builder.append("value", value);
   }
 
 }

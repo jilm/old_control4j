@@ -18,6 +18,8 @@ package control4j.application;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import cz.lidinsky.tools.ToStringBuilder;
+
 /**
  *
  *  Contains declaration of a resource.
@@ -43,26 +45,10 @@ public class Resource extends Configurable
   }
 
   @Override
-  public String toString()
+  public void toString(ToStringBuilder builder)
   {
-    StringBuilder sb = new StringBuilder();
-    sb.append("Resource Definition{class=");
-    sb.append(className);
-    sb.append(", configuration={");
-    sb.append(super.toString());
-    sb.append("}");
-    return sb.toString();
-  }
-
-  @Override
-  void toString(String indent, StringBuilder sb)
-  {
-    sb.append("\n")
-      .append(indent)
-      .append("class = ")
-      .append(className)
-      .append("\n");
-    super.toString(indent, sb);
+    super.toString(builder);
+    builder.append("className", className);
   }
 
 }

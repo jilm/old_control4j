@@ -428,18 +428,6 @@ public class Preprocessor implements IGraph<Use>
    */
   public static void main(String[] args) throws Exception
   {
-    String filename = args[0];
-    java.io.File file = new java.io.File(filename);
-    Loader loader = new Loader();
-    ITranslatable translatable = loader.load(file);
-    Application app = new Application();
-    translatable.translate(app);
-    Preprocessor preprocessor = new Preprocessor();
-    System.out.println("----- Before -----");
-    System.out.println(app.toString());
-    preprocessor.process(app);
-    System.out.println("----- After -----");
-    System.out.println(app.toString());
   }
 
   /**

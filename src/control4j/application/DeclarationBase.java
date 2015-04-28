@@ -20,6 +20,8 @@ package control4j.application;
 
 import control4j.tools.DeclarationReference;
 
+import cz.lidinsky.tools.ToStringBuilder;
+
 /**
  * 
  *  A common base for classes that hold data about the place where
@@ -104,6 +106,13 @@ public abstract class DeclarationBase extends ObjectBase
   public String getDeclarationReferenceText()
   {
     return declarationReference.toString();
+  }
+
+  @Override
+  public void toString(ToStringBuilder builder)
+  {
+    super.toString(builder);
+    builder.append("declarationReference", declarationReference);
   }
 
 }

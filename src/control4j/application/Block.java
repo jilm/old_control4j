@@ -26,6 +26,8 @@ import java.util.Set;
 
 import control4j.tools.DuplicateElementException;
 
+import cz.lidinsky.tools.ToStringBuilder;
+
 public class Block extends DeclarationBase
 {
 
@@ -155,52 +157,15 @@ public class Block extends DeclarationBase
    *
    */
 
-  void toString(String indent, StringBuilder sb)
+  @Override
+  public void toString(ToStringBuilder builder)
   {
-    sb.append("\n");
-
-    String indent2 = indent + "  ";
-    String indent3 = indent2 + "  ";
-
-    // write input
-    if (inputSet != null && inputSet.size() > 0)
-    {
-      sb.append(indent).append("Input: ");
-      sb.append(inputSet.toString()).append("\n");
-    }
-
-    // write output
-    if (outputSet != null && outputSet.size() > 0)
-    {
-      sb.append(indent).append("Output: ");
-      sb.append(outputSet.toString()).append("\n");
-    }
-
-    // write modules
-    if (modules != null && modules.size() > 0)
-    {
-      sb.append(indent).append("Modules\n");
-      //for (Module module : modules)
-      //  module.toString(indent2, sb);
-    }
-
-    // write signals
-    if (signals != null && !signals.isEmpty())
-    {
-      sb.append(indent).append("Signal Definitions\n");
-      //signals.toString(indent2, sb); // TODO
-    }
-
-    // write use objects
-    if (uses != null && uses.size() > 0)
-    {
-      sb.append(indent).append("Use Objects\n");
-      /* TODO
-      for (Use use : uses)
-      {
-	use.toString(indent2, sb);
-      }
-      */
-    }
+    super.toString(builder);
+    builder.append("inputSet", inputSet)
+        .append("outputSet", outputSet)
+        .append("modules", modules)
+        .append("signals", signals)
+        .append("uses", uses);
   }
+
 }

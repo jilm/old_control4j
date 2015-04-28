@@ -68,6 +68,7 @@ public class XmlReader extends DefaultHandler
 
   private String localName;
   private String namespace;
+  private boolean isStartElement;
 
   /**
    *  Does nothing.
@@ -165,57 +166,57 @@ public class XmlReader extends DefaultHandler
       if (isStartElement)
       {
         XmlStartElement annotation 
-	    = method.getAnnotation(XmlStartElement.class);
-	if (annotation == null) continue;
-	annoLocalName = annotation.localName();
-	annoNamespace = annotation.namespace();
-	annoParent = annotation.parent();
-	annoParentNamespace = annotation.parentNamespace();
+            = method.getAnnotation(XmlStartElement.class);
+        if (annotation == null) continue;
+        annoLocalName = annotation.localName();
+        annoNamespace = annotation.namespace();
+        annoParent = annotation.parent();
+        annoParentNamespace = annotation.parentNamespace();
       }
       else
       {
         XmlEndElement annotation 
-	    = method.getAnnotation(XmlEndElement.class);
-	if (annotation == null) continue;
-	annoLocalName = annotation.localName();
-	annoNamespace = annotation.namespace();
-	annoParent = annotation.parent();
-	annoParentNamespace = annotation.parentNamespace();
+            = method.getAnnotation(XmlEndElement.class);
+        if (annotation == null) continue;
+        annoLocalName = annotation.localName();
+        annoNamespace = annotation.namespace();
+        annoParent = annotation.parent();
+        annoParentNamespace = annotation.parentNamespace();
       }
 
       int rank = 0;
 
       // decide wheather it match local name
       if (annoLocalName.equals(localName))
-	rank += 8;
+        rank += 8;
       else if (!annoLocalName.equals("*"))
-	continue;
+        continue;
 
       // if the namespace match
       if (annoNamespace.equals(namespace))
-	rank += 4;
+        rank += 4;
       else if (annoNamespace.equals("^") 
-	  && handlerStack.elementStack.namespace.equals(namespace))
-	rank += 4;
+          && handlerStack.elementStack.namespace.equals(namespace))
+        rank += 4;
       else if (!annoNamespace.equals("*"))
-	continue;
+        continue;
 
       // if it match parent local name
       if (annoParent.equals(handlerStack.elementStack.localName))
-	rank += 2;
+        rank += 2;
       else if (!annoParent.equals("*"))
-	continue;
+        continue;
 
       // parent namespace
       if (annoParentNamespace.equals(handlerStack.elementStack.namespace))
-	rank += 1;
+        rank += 1;
       else if (!annoParentNamespace.equals("*"))
-	continue;
+        continue;
 
       if (rank > resultRank)
       {
-	resultRank = rank;
-	result = method;
+        resultRank = rank;
+        result = method;
       }
     }
 
@@ -230,9 +231,7 @@ public class XmlReader extends DefaultHandler
    *  the method that match the most precisly to the given
    *  criteria.
    */
-  public Method findHandlerMethod(
-      Class handler, String namespace, String localName,
-      boolean isStartElement)
+  public Method findHandlerMethod(Class handler)
       throws NoSuchElementException
   {
     Method result = null;
@@ -250,57 +249,57 @@ public class XmlReader extends DefaultHandler
       if (isStartElement)
       {
         XmlStartElement annotation
-	    = method.getAnnotation(XmlStartElement.class);
-	if (annotation == null) continue;
-	annoLocalName = annotation.localName();
-	annoNamespace = annotation.namespace();
-	annoParent = annotation.parent();
-	annoParentNamespace = annotation.parentNamespace();
+            = method.getAnnotation(XmlStartElement.class);
+        if (annotation == null) continue;
+        annoLocalName = annotation.localName();
+        annoNamespace = annotation.namespace();
+        annoParent = annotation.parent();
+        annoParentNamespace = annotation.parentNamespace();
       }
       else
       {
         XmlEndElement annotation
-	    = method.getAnnotation(XmlEndElement.class);
-	if (annotation == null) continue;
-	annoLocalName = annotation.localName();
-	annoNamespace = annotation.namespace();
-	annoParent = annotation.parent();
-	annoParentNamespace = annotation.parentNamespace();
+            = method.getAnnotation(XmlEndElement.class);
+        if (annotation == null) continue;
+        annoLocalName = annotation.localName();
+        annoNamespace = annotation.namespace();
+        annoParent = annotation.parent();
+        annoParentNamespace = annotation.parentNamespace();
       }
 
       int rank = 0;
 
       // decide wheather it match local name
       if (annoLocalName.equals(localName))
-	rank += 8;
+        rank += 8;
       else if (!annoLocalName.equals("*"))
-	continue;
+        continue;
 
       // if the namespace match
       if (annoNamespace.equals(namespace))
-	rank += 4;
+        rank += 4;
       else if (annoNamespace.equals("^")
-	  && handlerStack.elementStack.namespace.equals(namespace))
-	rank += 4;
+          && handlerStack.elementStack.namespace.equals(namespace))
+        rank += 4;
       else if (!annoNamespace.equals("*"))
-	continue;
+        continue;
 
       // if it match parent local name
       if (annoParent.equals(handlerStack.elementStack.localName))
-	rank += 2;
+        rank += 2;
       else if (!annoParent.equals("*"))
-	continue;
+        continue;
 
       // parent namespace
       if (annoParentNamespace.equals(handlerStack.elementStack.namespace))
-	rank += 1;
+        rank += 1;
       else if (!annoParentNamespace.equals("*"))
-	continue;
+        continue;
 
       if (rank > resultRank)
       {
-	resultRank = rank;
-	result = method;
+        resultRank = rank;
+        result = method;
       }
     }
     
@@ -329,6 +328,7 @@ public class XmlReader extends DefaultHandler
   {
     this.localName = localName;
     this.namespace = uri;
+    this.isStartElement = true;
     try
     {
       while (true)
@@ -337,15 +337,15 @@ public class XmlReader extends DefaultHandler
         Method method = findHandler(uri, localName, true);
 
         // call the method
-	repeat = false;
+        repeat = false;
         method.setAccessible(true);
         method.invoke(handlerStack.handler, attributes);
         method.setAccessible(false);
 
         // if the event has not been handled, try again
-	if (!repeat) break;
+        if (!repeat) break;
 
-	handlerStack.handler.startProcessing(this);
+        handlerStack.handler.startProcessing(this);
       }
     }
     // there is no appropriate handler method
@@ -383,6 +383,7 @@ public class XmlReader extends DefaultHandler
   {
     this.localName = localName;
     this.namespace = uri;
+    this.isStartElement = false;
     // remove the last element from the element stack
     handlerStack.pop();
 
@@ -415,7 +416,7 @@ public class XmlReader extends DefaultHandler
       // top of the handler stack
       if (handlerStack.isEmpty()) 
       {
-	handlerStack.handler.endProcessing();
+        handlerStack.handler.endProcessing();
         removeHandler();
       }
       // remember the location
@@ -566,12 +567,12 @@ public class XmlReader extends DefaultHandler
   protected void reportMissingHandler(String event)
   {
     fine(java.text.MessageFormat.format(
-	"Didn''t find any handler for the event: {0}.\n" +
-	"Last start element: '{'{1}'}':{2},\n" +
-	"on line: {3,number,integer}; column: {4,number,integer}; " +
-	"public id: {5}; system id: {6}",
-	event, namespace, localName, line, column,
-	locator.getPublicId(), locator.getSystemId()));
+        "Didn''t find any handler for the event: {0}.\n" +
+        "Last start element: '{'{1}'}':{2},\n" +
+        "on line: {3,number,integer}; column: {4,number,integer}; " +
+        "public id: {5}; system id: {6}",
+        event, namespace, localName, line, column,
+        locator.getPublicId(), locator.getSystemId()));
   }
 
 }

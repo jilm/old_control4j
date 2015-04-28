@@ -36,6 +36,8 @@ import control4j.ErrorManager;
 import control4j.gui.Screens;
 import control4j.tools.DuplicateElementException;
 
+import cz.lidinsky.tools.ToStringBuilder;
+
 /**
  *
  *  A crate object that contains the application definition.
@@ -385,74 +387,16 @@ public class Application extends Configurable
       throw new IllegalArgumentException();
   }
 
-  /**
-   *  Returns the content of this object in the human readable form.
-   */
   @Override
-  public String toString()
+  public void toString(ToStringBuilder builder)
   {
-    StringBuilder sb = new StringBuilder();
-    sb.append("Application\n");
-    toString("  ", sb);
-    sb.append("\n");
-    return sb.toString();
+    super.toString(builder);
+    builder.append("definitions", definitions)
+        .append("blocks", blocks)
+        .append("signals", signals)
+        .append("modules", modules)
+        .append("uses", uses)
+        .append("resources", resources);
   }
 
-  /**
-   *  Returns the content of this object in the human readable form.
-   */
-  @Override
-  void toString(String indent, StringBuilder sb)
-  {
-    String indent2 = indent + "  ";
-
-    // print definitions
-    if (definitions != null && !definitions.isEmpty())
-    {
-      sb.append(indent)
-        .append("Definitions\n");
-      definitions.toString(indent2, sb);
-    }
-
-    // write configuration
-    super.toString(indent, sb);
-
-    // write resource definitions
-    if (resources != null && !resources.isEmpty())
-    {
-      sb.append(indent).append("Resource Definitions\n");
-      resources.toString(indent2, sb);
-    }
-
-    // write modules
-    if (modules != null && modules.size() > 0)
-    {
-      sb.append(indent).append("Modules\n");
-      for (Module module : modules)
-        module.toString(indent2, sb);
-    }
-
-    // write signal definitions
-    if (signals != null && !signals.isEmpty())
-    {
-      sb.append(indent).append("Signal Definitions\n");
-      signals.toString(indent2, sb);
-    }
-
-    // write use objects
-    if (uses != null && uses.size() > 0)
-    {
-      sb.append(indent).append("Use Objects\n");
-      //for (Use use : uses)
-        //use.toString(indent2, sb);
-    }
-
-    // print block objects
-    if (blocks != null && !blocks.isEmpty())
-    {
-      sb.append(indent).append("Block Definitions\n");
-      blocks.toString(indent2, sb);
-    }
-
-  }
 }

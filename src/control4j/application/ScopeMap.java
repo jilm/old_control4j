@@ -60,7 +60,7 @@ public class ScopeMap<E extends ObjectBase>
     Key(String name, Scope scope)
     {
       if (name == null || scope == null)
-	throw new IllegalArgumentException();
+        throw new IllegalArgumentException();
       this.name = name;
       this.scope = scope;
     }
@@ -76,11 +76,11 @@ public class ScopeMap<E extends ObjectBase>
       if (object == null) return false;
       if (object instanceof Key)
       {
-	Key key = (Key)object;
-	return name.equals(key.name) && scope == key.scope;
+        Key key = (Key)object;
+        return name.equals(key.name) && scope == key.scope;
       }
       else
-	return false;
+        return false;
     }
 
     @Override
@@ -169,26 +169,6 @@ public class ScopeMap<E extends ObjectBase>
   public String toString()
   {
     return buffer.toString();
-  }
-
-  /**
-   *  Writes each record on the separate line which starts
-   *  with indent string.
-   */
-  void toString(String indent, StringBuilder sb)
-  {
-    java.util.Set<Key> keys = buffer.keySet();
-    for (Key key : keys)
-    {
-      sb.append(indent)
-	//.append(buffer.get(key).getClass().getSimpleName())
-	.append('[')
-	.append(key.toString())
-	.append("] = ");
-      String indent2 = indent + "  ";
-      buffer.get(key).toString(indent2, sb);
-    }
-
   }
 
 }
