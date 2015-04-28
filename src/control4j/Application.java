@@ -110,15 +110,14 @@ class Application implements IToStringBuildable
         .toString();
   }
 
-  public String toString(ToStringBuilder builder)
+  public void toString(ToStringBuilder builder)
   {
-    return builder.append("cyclePeriod", cyclePeriod)
+    builder.append("cyclePeriod", cyclePeriod)
         .append("startCycleDelay", startCycleDelay)
         .append("dataBufferSize", dataBufferSize)
         .append("inputModules", inputModules)
         .append("processModules", processModules)
-        .append("outputModules", outputModules)
-        .toString();
+        .append("outputModules", outputModules);
   }
 
 }

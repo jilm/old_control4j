@@ -23,6 +23,10 @@ import java.util.Set;
 import java.util.Map;
 import org.xml.sax.Attributes;
 
+import cz.lidinsky.tools.ToStringBuilder;
+import cz.lidinsky.tools.ToStringStyle;
+import cz.lidinsky.tools.IToStringBuildable;
+
 import control4j.application.Scope;
 import control4j.tools.IXmlHandler;
 import control4j.tools.XmlReader;
@@ -36,7 +40,8 @@ import static control4j.tools.Logger.*;
  *  Stands for a module element.
  *
  */
-public class Module extends DescriptionBase implements IXmlHandler, IAdapter
+public class Module extends DescriptionBase
+implements IXmlHandler, IAdapter
 {
 
   private String className;
@@ -312,5 +317,17 @@ public class Module extends DescriptionBase implements IXmlHandler, IAdapter
   @XmlEndElement(localName="output-tag", parent="module")
   private void endModuleOutputTag()
   { }
+
+  @Override
+  public void toString(ToStringBuilder builder)
+  {
+    super.toString(builder);
+    builder.append("className", className)
+        .append("resources", resources)
+        .append("input", input)
+        .append("output", output)
+        .append("inputTags", inputTags)
+        .append("outputTags", outputTags);
+  }
 
 }

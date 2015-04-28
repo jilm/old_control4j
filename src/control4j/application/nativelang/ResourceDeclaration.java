@@ -28,6 +28,8 @@ import control4j.tools.XmlReader;
 import control4j.tools.XmlStartElement;
 import control4j.tools.XmlEndElement;
 
+import cz.lidinsky.tools.ToStringBuilder;
+
 /**
  *
  *  Resource definition.
@@ -149,6 +151,15 @@ implements IXmlHandler, IAdapter
   private void endResource()
   {
     adapter.put(this);
+  }
+
+  @Override
+  public void toString(ToStringBuilder builder)
+  {
+    super.toString(builder);
+    builder.append("className", className)
+        .append("name", name)
+        .append("scope", scope);
   }
 
 }

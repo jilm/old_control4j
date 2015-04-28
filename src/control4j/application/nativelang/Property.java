@@ -26,6 +26,8 @@ import control4j.tools.XmlReader;
 import control4j.tools.XmlStartElement;
 import control4j.tools.XmlEndElement;
 
+import cz.lidinsky.tools.ToStringBuilder;
+
 /**
  *
  *  Represents a property of some higher level object.
@@ -71,22 +73,6 @@ public class Property extends DeclarationBase implements IXmlHandler
     this.href = href;
     this.scope = scope;
     this.isReference = true;
-  }
-
-  /**
-   *  Returns a string which contains fields of this object in
-   *  the human readable form.
-   */
-  @Override
-  public String toString()
-  {
-    if (isReference)
-      return java.text.MessageFormat.format(
-          "Property; key: {0}, href: {1}, scope: {2}",
-          key, href, Parser.formatScope(scope));
-    else
-      return java.text.MessageFormat.format(
-          "Property; key: {0}, value: {1}", key, value);
   }
 
   /*
@@ -213,6 +199,17 @@ public class Property extends DeclarationBase implements IXmlHandler
   private void endProperty()
   {
     adapter.put(this);
+  }
+
+  @Override
+  public void toString(ToStringBuilder builder)
+  {
+    super.toString(builder);
+    builder.append("key", key)
+        .append("value", value)
+        .append("href", href)
+        .append("scope", scope)
+        .append("isReference", isReference);
   }
 
 }

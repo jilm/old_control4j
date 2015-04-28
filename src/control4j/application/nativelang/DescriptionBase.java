@@ -18,6 +18,8 @@ package control4j.application.nativelang;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import cz.lidinsky.tools.ToStringBuilder;
+
 /**
  *
  *  Provides common interface for objects which contain description.
@@ -44,6 +46,13 @@ public abstract class DescriptionBase extends Configurable
   public String getDescription()
   {
     return description;
+  }
+
+  @Override
+  public void toString(ToStringBuilder builder)
+  {
+    super.toString(builder);
+    builder.append("description", description);
   }
 
 }

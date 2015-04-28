@@ -23,13 +23,17 @@ import java.util.ArrayList;
 import control4j.application.Scope;
 import control4j.tools.DuplicateElementException;
 
+import cz.lidinsky.tools.IToStringBuildable;
+import cz.lidinsky.tools.ToStringBuilder;
+import cz.lidinsky.tools.ToStringStyle;
+
 /**
  *
  *  Provides common interface for objects which contain
  *  configuration.
  *
  */
-abstract class Configurable extends AdapterBase
+abstract class Configurable extends AdapterBase implements IToStringBuildable
 {
 
   private ArrayList<Property> properties;
@@ -83,6 +87,12 @@ abstract class Configurable extends AdapterBase
   public void put(Property property)
   {
     addProperty(property);
+  }
+
+  @Override
+  public void toString(ToStringBuilder builder)
+  {
+    builder.append("properties", properties);
   }
 
 }

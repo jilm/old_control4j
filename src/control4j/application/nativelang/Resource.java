@@ -30,6 +30,8 @@ import control4j.tools.XmlEndElement;
 
 import static control4j.tools.Logger.*;
 
+import cz.lidinsky.tools.ToStringBuilder;
+
 /**
  *
  *  Represents a resource element inside the module.
@@ -52,22 +54,6 @@ public class Resource extends Configurable implements IXmlHandler, IAdapter
   private int scope;
 
   private boolean isReference;
-
-  /**
-   *  Returns a string which contains fields of this object in
-   *  the human readable form.
-   */
-  @Override
-  public String toString()
-  {
-    if (isReference)
-      return java.text.MessageFormat.format(
-          "Resource; key: {0}, href: {1}, scope: {2}",
-          key, href, Parser.formatScope(scope));
-    else
-      return java.text.MessageFormat.format(
-          "Resource; key: {0}, class: {1}", key, className);
-  }
 
   public void translate(
       control4j.application.Resource destination, Scope localScope)
@@ -194,6 +180,17 @@ public class Resource extends Configurable implements IXmlHandler, IAdapter
       Property property = new Property(this);
       reader.addHandler(property);
     }
+  }
+
+  @Override
+  public void toString(ToStringBuilder builder)
+  {
+    super.toString(builder);
+    builder.append("key", key)
+        .append("className", className)
+        .append("href", href)
+        .append("scope", scope)
+        .append("isReference", isReference);
   }
 
 }

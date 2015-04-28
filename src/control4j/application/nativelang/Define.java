@@ -27,6 +27,8 @@ import control4j.tools.XmlReader;
 import control4j.tools.XmlStartElement;
 import control4j.tools.XmlEndElement;
 
+import cz.lidinsky.tools.ToStringBuilder;
+
 /**
  *
  *  Represents define element
@@ -40,18 +42,6 @@ public class Define extends DeclarationBase implements IXmlHandler
   private String value;
 
   private int scope;
-
-  /**
-   *  Returns a string which contains fields of this object in
-   *  the human readable form.
-   */
-  @Override
-  public String toString()
-  {
-    return java.text.MessageFormat.format(
-        "Define; name: {0}, value: {1}, scope: {2}",
-        name, value, Parser.formatScope(scope));
-  }
 
   /*
    *
@@ -133,6 +123,15 @@ public class Define extends DeclarationBase implements IXmlHandler
   private void endDefine()
   {
     adapter.put(this);
+  }
+
+  @Override
+  public void toString(ToStringBuilder builder)
+  {
+    super.toString(builder);
+    builder.append("name", name)
+        .append("value", value)
+        .append("scope", scope);
   }
 
 }

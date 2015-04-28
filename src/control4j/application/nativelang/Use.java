@@ -28,6 +28,8 @@ import control4j.tools.XmlReader;
 import control4j.tools.XmlStartElement;
 import control4j.tools.XmlEndElement;
 
+import cz.lidinsky.tools.ToStringBuilder;
+
 /**
  *
  *  Represents a use element.
@@ -53,17 +55,6 @@ public class Use extends Configurable implements IXmlHandler, IAdapter
   private ArrayList<Input> input = new ArrayList<Input>();
 
   private ArrayList<Output> output = new ArrayList<Output>();
-
-  /**
-   *  Returns a string which contains fields of this object in
-   *  the human readable form.
-   */
-  @Override
-  public String toString()
-  {
-    return java.text.MessageFormat.format(
-        "Use; href: {0}, scope: {1}", href, Parser.formatScope(scope));
-  }
 
   public void translate(
       control4j.application.Use destination, Scope localScope)
@@ -179,6 +170,16 @@ public class Use extends Configurable implements IXmlHandler, IAdapter
     Output output = new Output();
     this.output.add(output);
     reader.addHandler(output);
+  }
+
+  @Override
+  public void toString(ToStringBuilder builder)
+  {
+    super.toString(builder);
+    builder.append("href", href)
+        .append("scope", scope)
+        .append("input", input)
+        .append("output", output);
   }
 
 }

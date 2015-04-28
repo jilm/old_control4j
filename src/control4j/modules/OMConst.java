@@ -49,13 +49,14 @@ public class OMConst extends OutputModule implements IToStringBuildable
   @Override
   public String toString()
   {
-    return toString(new ToStringBuilder(new ToStringStyle()));
+    return new ToStringBuilder(new ToStringStyle())
+        .append(this)
+        .toString();
   }
 
-  public String toString(ToStringBuilder builder)
+  public void toString(ToStringBuilder builder)
   {
-    return builder.append("value", value)
-        .toString();
+    builder.append("value", value);
   }
 
 }

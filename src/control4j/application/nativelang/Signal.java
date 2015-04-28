@@ -28,6 +28,8 @@ import control4j.tools.XmlReader;
 import control4j.tools.XmlStartElement;
 import control4j.tools.XmlEndElement;
 
+import cz.lidinsky.tools.ToStringBuilder;
+
 /**
  *
  *  Stands for a signal element.
@@ -198,6 +200,14 @@ public class Signal extends DescriptionBase implements IXmlHandler, IAdapter
     Tag tag = new Tag();
     tags.add(tag);
     reader.addHandler(tag);
+  }
+
+  @Override
+  public void toString(ToStringBuilder builder)
+  {
+    super.toString(builder);
+    builder.append("name", name)
+        .append("scope", scope);
   }
 
 }

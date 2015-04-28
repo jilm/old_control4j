@@ -27,6 +27,9 @@ import control4j.tools.XmlReader;
 import control4j.tools.XmlStartElement;
 import control4j.tools.XmlEndElement;
 
+import cz.lidinsky.tools.ToStringBuilder;
+import cz.lidinsky.tools.ToStringStyle;
+
 /**
  *
  *  Represents an input element
@@ -54,18 +57,6 @@ public class Input extends Configurable implements IXmlHandler, IAdapter
   public int getScope()
   {
     return scope;
-  }
-
-  /**
-   *  Returns a string which contains fields of this object in
-   *  the human readable form.
-   */
-  @Override
-  public String toString()
-  {
-    return java.text.MessageFormat.format(
-        "Input; index: {0}, href: {1}, scope: {2}",
-        index, href, Parser.formatScope(scope));
   }
 
   /*
@@ -136,6 +127,15 @@ public class Input extends Configurable implements IXmlHandler, IAdapter
   {
     Property property = new Property(this);
     reader.addHandler(property);
+  }
+
+  @Override
+  public void toString(ToStringBuilder builder)
+  {
+    super.toString(builder);
+    builder.append("index", index)
+        .append("href", href)
+        .append("scope", scope);
   }
 
 }

@@ -20,6 +20,10 @@ package control4j.application.nativelang;
 
 import control4j.tools.DeclarationReference;
 
+import cz.lidinsky.tools.IToStringBuildable;
+import cz.lidinsky.tools.ToStringBuilder;
+import cz.lidinsky.tools.ToStringStyle;
+
 /**
  * 
  *  A common base for classes that hold data about the place where
@@ -34,7 +38,7 @@ import control4j.tools.DeclarationReference;
  *  @see control4j.tools.DeclarationReference
  *
  */
-public abstract class DeclarationBase
+public abstract class DeclarationBase implements IToStringBuildable
 {
 
   /**
@@ -102,7 +106,7 @@ public abstract class DeclarationBase
   {
     if (declarationReference == null)
       declarationReference 
-	  = new DeclarationReference(getDefaultObjectIdentification());
+          = new DeclarationReference(getDefaultObjectIdentification());
     return declarationReference;
   }
 
@@ -121,6 +125,19 @@ public abstract class DeclarationBase
       return getDefaultObjectIdentification();
     else
       return declarationReference.toString();
+  }
+
+  @Override
+  public String toString()
+  {
+    return new ToStringBuilder(new ToStringStyle())
+        .append(this)
+        .toString();
+  }
+
+  public void toString(ToStringBuilder builder)
+  {
+    builder.append("declarationReference", declarationReference);
   }
 
 }

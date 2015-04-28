@@ -151,14 +151,13 @@ implements IToStringBuildable
     }
   }
 
-  public String toString(ToStringBuilder builder)
+  public void toString(ToStringBuilder builder)
   {
-    return builder.append("textDevice", textDevice)
+    builder.append("textDevice", textDevice)
            .append("delimiter", delimiter)
            .append("language", language)
            .append("country", country)
            .append("maxFractionDigits", maxFractionDigits)
-           .append("signalFormat", signalFormat)
-           .toString();
+           .append("signalFormat", signalFormat);
   }
 }
