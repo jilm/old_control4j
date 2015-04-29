@@ -23,6 +23,7 @@ import org.xml.sax.Attributes;
 
 import control4j.application.ITranslatable;
 import control4j.application.Scope;
+import control4j.application.ILoader;
 import control4j.tools.DuplicateElementException;
 import control4j.tools.IXmlHandler;
 import control4j.tools.XmlReader;
@@ -37,7 +38,7 @@ import control4j.tools.XmlEndElement;
  *
  */
 public class Application extends DescriptionBase 
-implements IXmlHandler
+implements ILoader
 {
 
   protected IAdapter adapter;

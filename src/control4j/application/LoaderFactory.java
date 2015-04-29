@@ -18,31 +18,37 @@ package control4j.application;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import static control4j.tools.Logger.warning;
+import static org.apache.commons.lang3.Validate.notNull;
+
+import control4j.application.ILoader;
+import control4j.tools.IXmlHandler;
+import control4j.tools.XmlReader;
+
 import java.io.InputStream;
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.NoSuchElementException;
 
 /**
  *
- *  Returns appropriate loader based on a namespace.
+ *  Returns appropriate handler
  *
  */
 public class LoaderFactory
 {
 
-  protected final String mapFilename  
-      = "control4j/application/namespaceloadermap.conf";
+  protected ArrayList<Class<ILoader>> handlers
+      = new ArrayList<Class<ILoader>>();
 
-  protected HashMap<String, String> map = new HashMap<String, String>();
+  protected static final String mapFilename
+      = "control4j/application/xmlhandlers.conf";
 
   private static LoaderFactory instance;
 
-  private LoaderFactory()
-  {
-  }
+  private LoaderFactory() { }
 
-  public static LoaderFactory getInstance() throws IOException
+  public static LoaderFactory getInstance()
   {
     if (instance == null)
     {
@@ -52,14 +58,75 @@ public class LoaderFactory
     return instance;
   }
 
+  public void add(Class<? extends ILoader> handler)
+  {
+    notNull(handler);
+    if (!handlers.contains(handler))
+      handlers.add((Class<ILoader>)handler);
+  }
+
+  public void remove(Class handler)
+  {
+    notNull(handler);
+    handlers.remove(handler);
+  }
+
+  public Class<ILoader> get(XmlReader reader)
+  {
+    for (Class<ILoader> handler : handlers)
+    {
+      try
+      {
+        reader.findHandlerMethod(handler);
+	return handler;
+      }
+      catch (NoSuchElementException e) {} // just doesn't support this XML
+    }
+    throw new NoSuchElementException();
+  }
+
+  public ILoader getHandler(XmlReader reader)
+  {
+    while (true)
+    {
+      Class<ILoader> handlerClass = get(reader);
+      try
+      {
+        return handlerClass.newInstance();
+      }
+      catch (InstantiationException e)
+      {
+        warning(java.text.MessageFormat.format(
+	    "Failed to make instance of XML handler {0}. "
+	    + "The InstantiationException was catched:\n{1}",
+	    handlerClass.getName(), e.getMessage()));
+        remove(handlerClass);
+      }
+      catch (IllegalAccessException e)
+      {
+        warning(java.text.MessageFormat.format(
+	    "Failed to make instance of XML handler {0}. "
+	    + "Becouse of Illegal Access:\n{1}",
+	    handlerClass.getName(), e.getMessage()));
+        remove(handlerClass);
+      }
+    }
+  }
+
   /**
    *  Reads the map namespace loader from a configuration file.
    */
-  private void loadMap() throws IOException
+  private void loadMap()
   {
     // open the resource file
     InputStream stream
         = getClass().getClassLoader().getResourceAsStream(mapFilename);
+    if (stream == null)
+    {
+      warning(java.text.MessageFormat.format(
+	  "Cannot find a file with XML handlers: {0}!", mapFilename));
+      return;
+    }
     java.io.Reader reader = new java.io.InputStreamReader(stream);
     java.io.BufferedReader lineReader = new java.io.BufferedReader(reader);
     try
@@ -68,40 +135,48 @@ public class LoaderFactory
       String line = lineReader.readLine();
       while (line != null)
       {
-	// split the line
-        String[] tokens = line.split(" ");
-	map.put(tokens[0], tokens[1]);
-        // get next line
-	line = lineReader.readLine();
+	line = line.trim();
+	try
+	{
+	  if (line.length() > 0)
+	  {
+	    Class handler = Class.forName(line);
+	    add((Class<ILoader>)handler);
+	  }
+	}
+        catch (ClassNotFoundException e)
+        {
+	  warning(java.text.MessageFormat.format(
+	      "A handler class {0} was not found!", line));
+        }
+        catch (ClassCastException e)
+        {
+	  warning(java.text.MessageFormat.format(
+	      "A class {0} is not an XML handler!", line));
+        }
+	finally
+	{
+          // get next line
+	  line = lineReader.readLine();
+	}
       }
+    }
+    catch (IOException e)
+    {
+      warning(java.text.MessageFormat.format(
+	  "An IO exception was catched while reading the file with XML"
+	  + " handlers:\n{0}", e.getMessage()));
     }
     finally
     {
-      lineReader.close();
+      control4j.tools.Tools.close(lineReader);
     }
-  }
-
-  public String getLoaderClassName(String namespace) 
-  throws NoSuchElementException
-  {
-    String className = map.get(namespace);
-    if (className == null) throw new NoSuchElementException();
-    return className;
-  }
-
-  public ILoader getLoader(String namespace)
-  throws Exception
-  {
-      String className = getLoaderClassName(namespace);
-      Class loaderClass = Class.forName(className);
-      Object loaderInstance = loaderClass.newInstance();
-      return (ILoader)loaderInstance;
   }
 
   public static void main(String[] args) throws Exception
   {
-    LoaderFactory factory = new LoaderFactory();
-    System.out.println(factory.map);
+    LoaderFactory factory = getInstance();
+    System.out.println(factory.handlers);
   }
 
 }

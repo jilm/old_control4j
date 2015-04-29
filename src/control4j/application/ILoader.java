@@ -19,6 +19,7 @@ package control4j.application;
  */
 
 import java.io.IOException;
+import control4j.tools.IXmlHandler;
 
 /**
  *
@@ -26,8 +27,9 @@ import java.io.IOException;
  *  loader.
  *
  */
-public interface ILoader
+public interface ILoader extends IXmlHandler
 {
 
+  void setDestination(Object destination);
 
 }

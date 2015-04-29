@@ -27,6 +27,7 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
 //import control4j.tools.SaxReader;
+import control4j.application.ILoader;
 import control4j.tools.XmlStartElement;
 import control4j.tools.XmlEndElement;
 import control4j.tools.IXmlHandler;
@@ -41,7 +42,7 @@ import static control4j.tools.Logger.*;
  *  Reads the gui object tree from the XML file.
  *
  */
-public class Reader implements IXmlHandler
+public class Reader implements ILoader
 {
 
   public Reader() {}
@@ -53,6 +54,10 @@ public class Reader implements IXmlHandler
   public void startProcessing(XmlReader reader)
   {
     this.reader = reader;
+  }
+
+  public void setDestination(Object destination)
+  {
   }
 
   /**

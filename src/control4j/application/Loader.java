@@ -123,10 +123,7 @@ public class Loader implements IXmlHandler
   {
     try
     {
-      reader.findHandlerMethod(
-          control4j.application.nativelang.Application.class);
-      control4j.application.nativelang.Application handler
-          = new control4j.application.nativelang.Application();
+      ILoader handler = LoaderFactory.getInstance().getHandler(reader);
       handler.setDestination(application);
       reader.addHandler(handler);
     }
