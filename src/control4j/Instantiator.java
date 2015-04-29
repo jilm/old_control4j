@@ -19,6 +19,7 @@ package control4j;
  */
 
 import static control4j.tools.Logger.catched;
+import static control4j.tools.Logger.severe;
 import control4j.application.Input;
 import control4j.application.Output;
 
@@ -65,6 +66,7 @@ public class Instantiator
       control4j.application.Application application) 
   {
 
+    // preparation
     applicationDef = application;
     ArrayList<Pair<InputModule, int[]>> inputModules 
         = new ArrayList<Pair<InputModule, int[]>>();
@@ -73,25 +75,24 @@ public class Instantiator
     ArrayList<Pair<OutputModule, int[]>> outputModules
         = new ArrayList<Pair<OutputModule, int[]>>();
 
-    // Create instance of all of the modules
+    // Create instances of all of the modules
     int modules = application.getModulesSize();
     for (int i = 0; i < modules; i++) 
     {
+      // get module definition
+      control4j.application.Module moduleDef = application.getModule(i);
+      // get module class
+      String className = moduleDef.getClassName();
       try 
       {
-        // get module definition
-        control4j.application.Module moduleDef = application.getModule(i);
-        // get module class
-        String className = moduleDef.getClassName();
         Class<Module> moduleClass
             = (Class<Module>)Class.forName(className);
         // create instance
-        Module moduleInstance = instantiate(moduleClass);
-        System.out.println(moduleClass);
+        Module moduleInstance = moduleClass.newInstance();
         // create input map
-        int[] inputMap = getInputMap(moduleDef, moduleClass);
+        int[] inputMap = getInputMap(moduleDef, moduleInstance);
         // create output map
-        int[] outputMap = getOutputMap(moduleDef, moduleClass);
+        int[] outputMap = getOutputMap(moduleDef, moduleInstance);
         // method initialization
         moduleInstance.initialize(moduleDef.getConfiguration());
         // resource assignment
@@ -140,11 +141,23 @@ public class Instantiator
         }
         // TODO: Register as an ICycleListener
       }
-      catch (Exception e)
+      catch (ClassNotFoundException e)
       {
-        // TODO:
-        catched(getClass().getName(), "instantiate", e);
+        reportModuleClassNotFound(e, className);
       }
+      catch (InstantiationException e)
+      {
+        reportModuleInstantiationException(e, className);
+      }
+      catch (IllegalAccessException e)
+      {
+        reportModuleIllegalAccessException(e, className);
+      }
+      //catch (Exception e)
+      //{
+        // TODO:
+        //catched(getClass().getName(), "instantiate", e);
+      //}
     }
 
     // return result
@@ -179,7 +192,7 @@ public class Instantiator
       if (map[j] >= 0)
       {
         module.setInputConfiguration(
-            j, moduleDef.getInput(map[j]).getConfiguration());
+            j, moduleDef.getInput(j).getConfiguration());
       }
   }
 
@@ -195,13 +208,13 @@ public class Instantiator
       if (inputMap[j] >= 0)
       {
         module.setInputConfiguration(
-            j, moduleDef.getInput(inputMap[j]).getConfiguration());
+            j, moduleDef.getInput(j).getConfiguration());
       }
     for (int j = 0; j < outputMap.length; j++)
       if (outputMap[j] >= 0)
       {
         module.setOutputConfiguration(
-            j, moduleDef.getOutput(outputMap[j]).getConfiguration());
+            j, moduleDef.getOutput(j).getConfiguration());
       }
   }
 
@@ -216,58 +229,31 @@ public class Instantiator
       if (map[j] >= 0)
       {
         module.setOutputConfiguration(
-            j, moduleDef.getOutput(map[j]).getConfiguration());
+            j, moduleDef.getOutput(j).getConfiguration());
       }
-  }
-
-  /**
-   *  Create and return an instance of the module which correspond
-   *  to the given module definition.
-   */
-  protected Module instantiate(Class<Module> moduleClass)
-  {
-    try
-    {
-      // create the instance
-      return moduleClass.newInstance();
-    }
-    catch (InstantiationException e)
-    {
-      // TODO:
-      catched(getClass().getName(), "instantiate", e);
-    }
-    catch (IllegalAccessException e)
-    {
-      // TODO:
-      catched(getClass().getName(), "instantiate", e);
-    }
-    return null;
   }
 
   /**
    *  Creates and returns the input map for a given module definition.
    */
   protected int[] getInputMap(
-      control4j.application.Module moduleDef, Class<Module> moduleClass) 
+      control4j.application.Module moduleDef, Module module)
   {
-
-    // get AVariableInput annotation, if any
-    AVariableInput varInput 
-        = moduleClass.getAnnotation(AVariableInput.class);
-
     // calculate required size of the map array
     int varInputSize = moduleDef.getVariableInputSize();
-    if (varInputSize > 0 && varInput == null) 
+    if (varInputSize > 0 && !module.isVariableInputSupported())
     {
-      // TODO: variable input is not supported!
+      throw new SyntaxErrorException(java.text.MessageFormat.format(
+          "Variable input is not supported by the module {0}",
+          module.getClass().getName()));
     } 
-    else if (varInput != null)
+    else if (module.isVariableInputSupported())
     {
-      int varInputIndex = varInput.startIndex();
-      moduleDef.setVariableInputStartIndex(varInputIndex);
+      moduleDef.setVariableInputStartIndex(
+          module.getVariableInputFirstIndex());
       // TODO: index collision
     }
-    int mapSize = moduleDef.getInputSize();
+    int mapSize = module.getInputSize(moduleDef.getInputSize() - 1);
     if (mapSize == 0) return null;
 
     // allocate the map array
@@ -287,25 +273,23 @@ public class Instantiator
    *  Creates and returns the output map for a given module definition.
    */
   protected int[] getOutputMap(
-      control4j.application.Module moduleDef, Class<Module> moduleClass)
+      control4j.application.Module moduleDef, Module module)
   {
-    // get AVariableOutput annotation, if any
-    AVariableOutput varOutput 
-        = moduleClass.getAnnotation(AVariableOutput.class);
-
     // calculate required size of the map array
     int varOutputSize = moduleDef.getVariableOutputSize();
-    if (varOutputSize > 0 && varOutput == null)
+    if (varOutputSize > 0 && !module.isVariableOutputSupported())
     {
-      // TODO: variable output is not supported!
+      throw new SyntaxErrorException(java.text.MessageFormat.format(
+          "Variable output is not supported by the module {0}",
+          module.getClass().getName()));
     }
-    else if (varOutput != null)
+    else if (module.isVariableOutputSupported())
     {
-      int varOutputIndex = varOutput.startIndex();
-      moduleDef.setVariableOutputStartIndex(varOutputIndex);
+      moduleDef.setVariableOutputStartIndex(
+          module.getVariableOutputFirstIndex());
       // TODO: index collision
     }
-    int mapSize = moduleDef.getOutputSize();
+    int mapSize = module.getOutputSize(moduleDef.getOutputSize() - 1);
     if (mapSize == 0) return null;
 
     // allocate the map array
@@ -321,11 +305,46 @@ public class Instantiator
     return map;
   }
 
-  /**
-   *  For debug purposes
-   */
+  protected void reportModuleClassNotFound(Throwable e, String className)
+  {
+    severe(java.text.MessageFormat.format(
+        "A module class: {0} was not found", className));
+  }
+
+  protected void reportModuleInstantiationException(
+      Throwable e, String className)
+  {
+    severe(java.text.MessageFormat.format(
+        "It was not possible to create instance of a module with class name:"
+        + " {0}; the message of the exception:\n{1}", className,
+        e.getMessage()));
+  }
+
+  protected void reportModuleIllegalAccessException(
+      Throwable e, String className)
+  {
+    severe(java.text.MessageFormat.format(
+        "IllegalAccessException while module instance creation."
+        + " Module class name: {0}; exception message:\n{1}",
+        className, e.getMessage()));
+  }
+
   public static void main(String[] args) throws Exception
   {
+    java.io.File file = new java.io.File(args[0]);
+    control4j.application.Loader loader
+        = new control4j.application.Loader();
+    control4j.application.Application application
+        = loader.load(file);
+    control4j.application.Preprocessor preprocessor
+        = new control4j.application.Preprocessor();
+    preprocessor.process(application);
+    control4j.application.Sorter sorter
+        = new control4j.application.Sorter();
+    sorter.process(application);
+    Instantiator instantiator = new Instantiator();
+    Application instances = instantiator.instantiate(application);
+    System.out.println(instances.toString());
   }
 
 }

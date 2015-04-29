@@ -310,6 +310,11 @@ public class Application extends Configurable
     return modules.size();
   }
 
+  public void removeModules()
+  {
+    modules.clear();
+  }
+
   /*
    *
    *     Use Objects

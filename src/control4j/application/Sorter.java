@@ -69,8 +69,9 @@ public class Sorter {
     // perform sorting
     TopologicalOrderIterator<Module, DefaultEdge> topolIter
         = new TopologicalOrderIterator<Module, DefaultEdge>(graph);
+    application.removeModules();
     while (topolIter.hasNext()) {
-      System.out.println(topolIter.next());
+      application.addModule(topolIter.next());
     }
 
   }
@@ -179,12 +180,16 @@ public class Sorter {
     }
   }
 
-  /**
-   *
-   */
-  public static void main(String[] args) throws Exception {
-
-
+  public static void main(String[] args) throws Exception
+  {
+    java.io.File file = new java.io.File(args[0]);
+    Loader loader = new Loader();
+    Application application = loader.load(file);
+    Preprocessor preprocessor = new Preprocessor();
+    preprocessor.process(application);
+    Sorter sorter = new Sorter();
+    sorter.process(application);
+    System.out.println(application.toString());
   }
 
 }

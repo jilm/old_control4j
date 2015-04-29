@@ -186,6 +186,15 @@ public abstract class Module
       return maxInputAnno.value(); // TODO: check that the value is positive
   }
 
+  public int getIndexedOutputSize()
+  {
+    AOutputSize outputSizeAnno = getClass().getAnnotation(AOutputSize.class);
+    if (outputSizeAnno == null)
+      return 0;
+    else
+      return outputSizeAnno.value(); // TODO: check that the value is positive
+  }
+
   /**
    *  Returns true iff this module supports a variable input.
    *  It means input where signal order is meaningless.
@@ -193,6 +202,11 @@ public abstract class Module
   public boolean isVariableInputSupported()
   {
     return getClass().getAnnotation(AVariableInput.class) != null;
+  }
+
+  public boolean isVariableOutputSupported()
+  {
+    return getClass().getAnnotation(AVariableOutput.class) != null;
   }
 
   /**
@@ -205,6 +219,13 @@ public abstract class Module
     return getIndexedInputSize();
   }
 
+  public int getVariableOutputFirstIndex()
+  {
+    if (!isVariableOutputSupported())
+      throw new UnsupportedOperationException();
+    return getIndexedOutputSize();
+  }
+
   /**
    *
    */
@@ -215,6 +236,11 @@ public abstract class Module
       return mandatorySize;
     else
       return lastDeclaredIndex + 1;
+  }
+
+  public int getOutputSize(int lastDeclaredIndex)
+  {
+    return Math.max(lastDeclaredIndex + 1, getIndexedOutputSize());
   }
 
   public void prepare()

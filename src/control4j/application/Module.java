@@ -80,7 +80,7 @@ public class Module extends Configurable
    *  Array of the input references with fixed index.
    *  This array may contain null values!
    */
-  private ArrayList<Input> inputArray;
+  private ArrayList<Input> inputArray = new ArrayList<Input>();
 
   /**
    *  Puts given input reference to the specified index.
@@ -119,7 +119,7 @@ public class Module extends Configurable
   }
 
   /** Buffer for input references without index specified. */
-  private ArrayList<Input> variableInput;
+  private ArrayList<Input> variableInput = new ArrayList<Input>();
 
   /**
    *  Adds an input which doesn't have index attached.
@@ -152,7 +152,7 @@ public class Module extends Configurable
   /** 
    *  An array of the output definitions.
    */
-  private ArrayList<Output> outputArray;
+  private ArrayList<Output> outputArray = new ArrayList<Output>();
 
   /**
    *  Puts given output reference to the specified index.
@@ -191,7 +191,7 @@ public class Module extends Configurable
   }
 
   /** Buffer for output references without index specified. */
-  private ArrayList<Output> variableOutput;
+  private ArrayList<Output> variableOutput = new ArrayList<Output>();
 
   /**
    *  Adds an output which doesn't have index attached.

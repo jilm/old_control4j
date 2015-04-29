@@ -154,18 +154,17 @@ public class Control
     java.io.File file = new java.io.File(filename);
     control4j.application.Loader loader
         = new control4j.application.Loader();
-    control4j.application.Application translatable = loader.load(file);
-    control4j.application.Application app
-        = new control4j.application.Application();
+    control4j.application.Application application
+        = loader.load(file);
     control4j.application.Preprocessor preprocessor
         = new control4j.application.Preprocessor();
-    preprocessor.process(app);
+    preprocessor.process(application);
     control4j.application.Sorter sorter
         = new control4j.application.Sorter();
-    sorter.process(app);
-    Instantiator inst = new Instantiator();
-    Application application = inst.instantiate(app);
-    controlLoop.run(application);
+    sorter.process(application);
+    Instantiator instantiator = new Instantiator();
+    Application instances = instantiator.instantiate(application);
+    controlLoop.run(instances);
   }
 
   /**
