@@ -110,6 +110,10 @@ public abstract class Module
         this, configuration, declarationReference);
   }
 
+  public void initialize(control4j.application.Module definition)
+  {
+  }
+
   /**
    *  Checks that it is possible to connect a signal into
    *  the input with given index.

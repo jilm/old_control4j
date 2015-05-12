@@ -117,9 +117,7 @@ public class Loader implements IXmlHandler
   {
   }
 
-  @XmlStartElement(
-      localName="*", namespace="*", parent="*", parentNamespace="*")
-  private void startElement(Attributes attributes)
+  public void missingHandler(XmlReader reader)
   {
     try
     {

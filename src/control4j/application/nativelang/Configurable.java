@@ -18,6 +18,8 @@ package control4j.application.nativelang;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import static org.apache.commons.lang3.Validate.notNull;
+
 import java.util.ArrayList;
 
 import control4j.application.Scope;
@@ -40,8 +42,10 @@ abstract class Configurable extends AdapterBase implements IToStringBuildable
 
   public void addProperty(Property property)
   {
-    if (properties == null)
+    notNull(property);
+    if (properties == null) {
       properties = new ArrayList<Property>();
+    }
     properties.add(property);
   }
 

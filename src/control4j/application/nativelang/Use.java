@@ -18,7 +18,12 @@ package control4j.application.nativelang;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import static org.apache.commons.lang3.Validate.notNull;
+import static org.apache.commons.collections4.CollectionUtils.emptyIfNull;
+import static org.apache.commons.collections4.CollectionUtils.unmodifiableCollection;
+
 import java.util.ArrayList;
+import java.util.Collection;
 import org.xml.sax.Attributes;
 
 import control4j.application.Scope;
@@ -35,26 +40,60 @@ import cz.lidinsky.tools.ToStringBuilder;
  *  Represents a use element.
  *
  */
-public class Use extends Configurable implements IXmlHandler, IAdapter
+public class Use extends Configurable implements IAdapter
 {
+
+  public Use() {}
 
   private String href;
 
-  public String getHref()
-  {
+  public String getHref() {
     return href;
+  }
+
+  Use setHref(String href) {
+    this.href = href;
+    return this;
   }
 
   private int scope;
 
-  public int getScope()
-  {
+  public int getScope() {
     return scope;
   }
 
-  private ArrayList<Input> input = new ArrayList<Input>();
+  Use setScope(int scope) {
+    this.scope = scope;
+    return this;
+  }
 
-  private ArrayList<Output> output = new ArrayList<Output>();
+  private ArrayList<Input> input;
+
+  void add(Input input) {
+    notNull(input);
+    if (this.input == null) {
+      this.input = new ArrayList<Input>();
+    }
+    this.input.add(input);
+  }
+
+  public Collection<Input> getInput() {
+    return unmodifiableCollection(emptyIfNull(input));
+  }
+
+  private ArrayList<Output> output;
+
+  void add(Output output) {
+    notNull(output);
+    if (this.output == null) {
+      this.output = new ArrayList<Output>();
+    }
+    this.output.add(output);
+  }
+
+  public Collection<Output> getOutput() {
+    return unmodifiableCollection(emptyIfNull(output));
+  }
 
   public void translate(
       control4j.application.Use destination, Scope localScope)
@@ -83,93 +122,6 @@ public class Use extends Configurable implements IXmlHandler, IAdapter
         out.translate(destOutput, localScope);
         destination.putOutput(out.getIndex(), destOutput);
       }
-  }
-
-  /*
-   *
-   *    Getters
-   *
-   */
-
-  /*
-   *
-   *    SAX handler implementation.
-   *
-   */
-
-  private XmlReader reader;
-
-  protected IAdapter adapter;
-
-  /**
-   *  An empty constructor for objects that will be loaded
-   *  from a XML document.
-   */
-  Use(IAdapter adapter)
-  {
-    this.adapter = adapter;
-  }
-
-  public void startProcessing(XmlReader reader)
-  {
-    this.reader = reader;
-  }
-
-  public void endProcessing()
-  {
-    this.reader = null;
-  }
-
-  /**
-   *  Initialize fields according to the elements attributes.
-   */
-  @XmlStartElement(localName="use", parent="", 
-      namespace="http://control4j.lidinsky.cz/application")
-  private void startUse(Attributes attributes)
-  {
-    href = Parser.parseToken(attributes.getValue("href"));
-    if (href == null) {} // TODO
-
-    try
-    {
-      scope = Parser.parseScope3(attributes.getValue("scope"));
-    }
-    catch (ParseException e)
-    {
-      // TODO
-    }
-  }
-
-  /**
-   */
-  @XmlEndElement(localName="use", parent="", 
-      namespace="http://control4j.lidinsky.cz/application")
-  private void endUse()
-  {
-    adapter.put(this);
-  }
-
-  @XmlStartElement(localName="property", parent="use")
-  private void startUseProperty(Attributes attributes)
-  {
-    Property property = new Property(this);
-    reader.addHandler(property);
-  }
-
-  @XmlStartElement(localName="input", parent="use")
-  private void startUseInput(Attributes attributes)
-  {
-    Input input = new Input();
-    this.input.add(input);
-    reader.addHandler(input);
-  }
-
-  @XmlStartElement(localName="output", parent="use")
-  private void startUseOutput(Attributes attributes)
-  {
-    Output output = new Output();
-    this.output.add(output);
-    reader.addHandler(output);
   }
 
   @Override

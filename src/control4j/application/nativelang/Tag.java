@@ -33,75 +33,23 @@ import cz.lidinsky.tools.ToStringBuilder;
  *  Represents a tag of the signal.
  *
  */
-public class Tag extends Configurable implements IXmlHandler, IAdapter
+public class Tag extends Configurable implements IAdapter
 {
 
-  private String name;
+  public Tag() {}
 
-  /*
-   *
-   *    Getters
-   *
-   */
+  private String name;
 
   /**
    *  Returns the value of the property.
    */
-  public String getName()
-  {
+  public String getName() {
     return name;
   }
 
-  /*
-   *
-   *    SAX handler implementation.
-   *
-   */
-
-  private XmlReader reader;
-
-  /**
-   *  An empty constructor for objects that will be loaded
-   *  from a XML document.
-   */
-  Tag()
-  {
-  }
-
-  public void startProcessing(XmlReader reader)
-  {
-    this.reader = reader;
-  }
-
-  public void endProcessing()
-  {
-    this.reader = null;
-  }
-
-  /**
-   *  Initialize fields according to the elements attributes.
-   */
-  @XmlStartElement(localName="tag", parent="", 
-      namespace="http://control4j.lidinsky.cz/application")
-  private void startTag(Attributes attributes)
-  {
-    name = Parser.parseToken(attributes.getValue("name"));
-    if (name == null) {} // TODO:
-  }
-
-  /**
-   *  Does nothing.
-   */
-  @XmlEndElement(localName="tag", parent="", 
-      namespace="http://control4j.lidinsky.cz/application")
-  private void endProperty()
-  { }
-
-  @XmlStartElement(localName="property", parent="tag")
-  private void startTagProperty(Attributes attributes)
-  {
-    Property property = new Property(this);
-    reader.addHandler(property);
+  Tag setName(String name) {
+    this.name = name;
+    return this;
   }
 
   @Override

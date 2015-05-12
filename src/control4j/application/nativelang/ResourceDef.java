@@ -21,6 +21,7 @@ package control4j.application.nativelang;
 import java.util.ArrayList;
 import org.xml.sax.Attributes;
 
+import control4j.application.Scope;
 import control4j.tools.IXmlHandler;
 import control4j.tools.ParseException;
 import control4j.tools.XmlReader;
@@ -28,56 +29,83 @@ import control4j.tools.XmlStartElement;
 import control4j.tools.XmlEndElement;
 
 import cz.lidinsky.tools.ToStringBuilder;
-import cz.lidinsky.tools.ToStringStyle;
 
 /**
  *
- *  Represents an output element
+ *  Resource definition.
  *
  */
-public class Output extends Configurable implements IAdapter {
+public class ResourceDef extends DescriptionBase
+implements IAdapter
+{
 
-  public Output() {}
+  public ResourceDef() {}
 
-  private String index;
+  /** Name of the java class that implements functionality of
+      the resource */
+  private String className;
 
-  public String getIndex() {
-    return index;
+  /**
+   *  Returns the name of the java class that implements functionality
+   *  of the resource.
+   */
+  public String getClassName() {
+    return className;
   }
 
-  Output setIndex(String index) {
-    this.index = index;
+  ResourceDef setClassName(String className) {
+    this.className = className;
     return this;
   }
 
-  private String href;
-
-  public String getHref() {
-    return href;
-  }
-
-  Output setHref(String href) {
-    this.href = href;
-    return this;
-  }
-
+  /** Identification of this resource definition to be referenced. */
+  private String name;
   private int scope;
+
+  public String getName() {
+    return name;
+  }
+
+  ResourceDef setName(String name) {
+    this.name = name;
+    return this;
+  }
 
   public int getScope() {
     return scope;
   }
 
-  Output setScope(int scope) {
+  ResourceDef setScope(int scope) {
     this.scope = scope;
     return this;
+  }
+
+  /**
+   *  Initialize fields of this object.
+   */
+  public ResourceDef(
+       String className, String name, int scope)
+  {
+    this.className = className;
+    this.name = name;
+    this.scope = scope;
+  }
+
+  /**
+   *  Transfer all of the settings into the given object.
+   */
+  public void translate(
+      control4j.application.Resource resource, Scope localScope)
+  {
+    super.translate(resource, localScope);
   }
 
   @Override
   public void toString(ToStringBuilder builder)
   {
     super.toString(builder);
-    builder.append("index", index)
-        .append("href", href)
+    builder.append("className", className)
+        .append("name", name)
         .append("scope", scope);
   }
 

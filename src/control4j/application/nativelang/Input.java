@@ -35,98 +35,41 @@ import cz.lidinsky.tools.ToStringStyle;
  *  Represents an input element
  *
  */
-public class Input extends Configurable implements IXmlHandler, IAdapter
-{
+public class Input extends Configurable implements IAdapter {
+
+  public Input() {}
 
   private String index;
 
-  public String getIndex()
-  {
+  public String getIndex() {
     return index;
+  }
+
+  Input setIndex(String index) {
+    this.index = index;
+    return this;
   }
 
   private String href;
 
-  public String getHref()
-  {
+  public String getHref() {
     return href;
+  }
+
+  Input setHref(String href) {
+    this.href = href;
+    return this;
   }
 
   private int scope;
 
-  public int getScope()
-  {
+  public int getScope() {
     return scope;
   }
 
-  /*
-   *
-   *    Getters
-   *
-   */
-
-  /*
-   *
-   *    SAX handler implementation.
-   *
-   */
-
-  private XmlReader reader;
-
-  /**
-   *  An empty constructor for objects that will be loaded
-   *  from a XML document.
-   */
-  Input()
-  {
-  }
-
-  public void startProcessing(XmlReader reader)
-  {
-    this.reader = reader;
-  }
-
-  public void endProcessing()
-  {
-    this.reader = null;
-  }
-
-  /**
-   *  Initialize fields according to the elements attributes.
-   */
-  @XmlStartElement(localName="input", parent="", 
-      namespace="http://control4j.lidinsky.cz/application")
-  private void startInput(Attributes attributes)
-  {
-    index = Parser.parseToken(attributes.getValue("index"));
-    if (index == null) {} // TODO
-
-    href = Parser.parseToken(attributes.getValue("href"));
-    if (href == null) {} // TODO
-
-    try
-    {
-      scope = Parser.parseScope3(attributes.getValue("scope"));
-    }
-    catch (ParseException e)
-    {
-      // TODO
-    }
-  }
-
-  /**
-   *  Does nothing.
-   */
-  @XmlEndElement(localName="input", parent="", 
-      namespace="http://control4j.lidinsky.cz/application")
-  private void endProperty()
-  { }
-
-  @XmlStartElement(localName="property", parent="input")
-  private void startInputProperty(Attributes attributes)
-  {
-    Property property = new Property(this);
-    reader.addHandler(property);
+  Input setScope(int scope) {
+    this.scope = scope;
+    return this;
   }
 
   @Override

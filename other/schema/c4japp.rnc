@@ -1,40 +1,90 @@
-default namespace = "http://application.control4j.cz"
+default namespace = "http://control4j.lidinsky.cz/application"
 
-grammar
-{
+grammar {
 
-  start = element application
-  {
-    Brick+
+  start = Application
+
+  Application = element application {
+    Application*,
+    Define*,
+    Property*,
+    Signal*,
+    Resource*,
+    Block*,
+    Use*,
+    Module*
   }
 
-  Brick = ( Module | Resource | Signal | Scope )
-
-  Scope = element scope
-  {
-    Brick+
+  # A nemed value which may be referenced by a property element
+  Define = element define {
+    Value,
+    Referent
   }
 
-  Module = element module
-  {
+  # Properties of some element
+  Property = element property {
+    Key,
+    # A value or a reference to some define element
+    (Value | Reference)
+  }
+
+  # Definition of the signal
+  Signal = element signal {
+    Referent,
+    Property*,
+    Tag*,
+    DefaultValue?
+  }
+
+  # Resource declaration
+  Resource = element resource {
+    attribute class { text },
+    Referent,
+    Property*
+  }
+
+  Block = element block {
+    Referent,
+    element input {
+      attribute name { text }
+    }*,
+    element output {
+      attribute name { text }
+    }*,
+    Module*,
+    Signal*,
+    Use*
+  }
+
+  Use = element use {
+    Reference,
+    Property*,
+    element input {
+      attribute index { text },
+      Reference
+    }*,
+    element output {
+      attribute index { text },
+      Reference
+    }*
+  }
+
+  # Module placement
+  Module = element module {
     attribute class { text },
     Property*,
-    IO*
+    Resource*,
+    IO*,
+    InputTag*,
+    OutputTag*
   }
 
-  Resource = element resource
-  {
-    attribute class { text },
-    attribute name { text },
-    Property*
+  InputTag = element input-tag {
+    attribute tag { text }
   }
 
-  Signal = element signal
-  {
-    attribute name { text },
-    attribute unit { text }?,
-    ScopeAttribute?,
-    Property*
+  OutputTag = element output-tag {
+    attribute tag { text }
   }
 
   IO = (Input | Output)
@@ -43,20 +93,25 @@ grammar
 
   Output = element output { IOContent }
 
+  # Content of the input / output elements of the module
   IOContent = 
     attribute index { xsd:integer }?,
-    attribute signal { text },
-    ScopeAttribute?,
+    # reference to the signal declaration
+    Reference,
     Property*
 
-  Property = element property
-  {
-    attribute key { text },
-    attribute value { text }
-  }
+  Key = attribute key { text }
 
-  ScopeAttribute = attribute scope { ScopeContent }
+  Value = attribute value { text }
 
-  ScopeContent = ( "global" | "file" | "local" )
+  # A reference to some referent object
+  Reference =
+    attribute href { text },
+    attribute scope { "local" | "global" | "parent" }?
 
-}  
+  # A referent object attributes
+  Referent =
+    attribute name { text },
+    attribute scope { "local" | "global" }?
+
+}

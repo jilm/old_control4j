@@ -46,7 +46,7 @@ public class PrintAdapter implements IAdapter
     System.out.println(signal.toString());
   }
 
-  public void put(ResourceDeclaration resource)
+  public void put(ResourceDef resource)
   {
     System.out.println(resource.toString());
   }

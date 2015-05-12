@@ -18,6 +18,8 @@ package control4j.application.nativelang;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import static org.apache.commons.lang3.Validate.notNull;
+
 import java.util.ArrayList;
 import java.util.Set;
 import java.util.Map;
@@ -40,26 +42,70 @@ import static control4j.tools.Logger.*;
  *  Stands for a module element.
  *
  */
-public class Module extends DescriptionBase
-implements IXmlHandler, IAdapter
-{
+public class Module extends DescriptionBase implements IAdapter {
+
+  public Module() {}
 
   private String className;
 
-  public String getClassName()
-  {
+  public String getClassName() {
     return className;
+  }
+
+  Module setClassName(String className) {
+    this.className = className;
+    return this;
   }
 
   private ArrayList<Resource> resources = new ArrayList<Resource>();
 
+  void add(Resource resource) {
+    notNull(resource);
+    if (resources == null) {
+      resources = new ArrayList<Resource>();
+    }
+    resources.add(resource);
+  }
+
   private ArrayList<Input> input = new ArrayList<Input>();
+
+  void add(Input input) {
+    notNull(input);
+    if (this.input == null) {
+      this.input = new ArrayList<Input>();
+    }
+    this.input.add(input);
+  }
 
   private ArrayList<Output> output = new ArrayList<Output>();
 
+  void add(Output output) {
+    notNull(output);
+    if (this.output == null) {
+      this.output = new ArrayList<Output>();
+    }
+    this.output.add(output);
+  }
+
   private ArrayList<String> inputTags = new ArrayList<String>();
 
+  void addInputTag(String tag) {
+    notNull(tag);
+    if (inputTags == null) {
+      inputTags = new ArrayList<String>();
+    }
+    inputTags.add(tag);
+  }
+
   private ArrayList<String> outputTags = new ArrayList<String>();
+
+  void addOutputTag(String tag) {
+    notNull(tag);
+    if (outputTags == null) {
+      outputTags = new ArrayList<String>();
+    }
+    outputTags.add(tag);
+  }
 
   /**
    *  Creates an empty module object.
@@ -216,107 +262,6 @@ implements IXmlHandler, IAdapter
       destination.addOutputTag(tag);
 
   }
-
-  /*
-   *
-   *    SAX parser methods
-   *
-   */
-
-  private XmlReader reader;
-
-  protected IAdapter adapter;
-
-  /**
-   *  An empty constructor which may be used if the content
-   *  of the module will be loaded from XML document.
-   */
-  Module(IAdapter adapter)
-  {
-    this.adapter = adapter;
-  }
-
-  public void startProcessing(XmlReader reader)
-  {
-    this.reader = reader;
-  }
-
-  public void endProcessing()
-  {
-    this.reader = null;
-  }
-
-  @XmlStartElement(localName="module", parent="", 
-      namespace="http://control4j.lidinsky.cz/application")
-  private void startModule(Attributes attributes)
-  {
-    className = Parser.parseToken(attributes.getValue("class"));
-    if (className == null) {} // TODO
-  }
-
-  @XmlEndElement(localName="module", parent="",
-      namespace="http://control4j.lidinsky.cz/application")
-  private void endModule()
-  {
-    adapter.put(this);
-  }
-
-  @XmlStartElement(localName="property", parent="module")
-  private void startModuleProperty(Attributes attributes)
-  {
-    Property property = new Property(this);
-    reader.addHandler(property);
-  }
-
-  @XmlStartElement(localName="resource", parent="module")
-  private void startModuleResource(Attributes attributes)
-  {
-    Resource resource = new Resource();
-    resources.add(resource);
-    reader.addHandler(resource);
-  }
-
-  @XmlStartElement(localName="input", parent="module")
-  private void startModuleInput(Attributes attributes)
-  {
-    Input input = new Input();
-    this.input.add(input);
-    reader.addHandler(input);
-  }
-
-  @XmlStartElement(localName="output", parent="module")
-  private void startModuleOutput(Attributes attributes)
-  {
-    Output output = new Output();
-    this.output.add(output);
-    reader.addHandler(output);
-  }
-
-  @XmlStartElement(localName="input-tag", parent="module")
-  private void startModuleInputTag(Attributes attributes)
-  {
-    String tag = Parser.parseToken(attributes.getValue("tag"));
-    if (tag == null) {} // TODO
-    else
-      inputTags.add(tag);
-  }
-
-  @XmlEndElement(localName="input-tag", parent="module")
-  private void endModuleInputTag()
-  { }
-
-  @XmlStartElement(localName="output-tag", parent="module")
-  private void startModuleOutputTag(Attributes attributes)
-  {
-    String tag = Parser.parseToken(attributes.getValue("tag"));
-    if (tag == null) {} // TODO
-    else
-      outputTags.add(tag);
-  }
-
-  @XmlEndElement(localName="output-tag", parent="module")
-  private void endModuleOutputTag()
-  { }
 
   @Override
   public void toString(ToStringBuilder builder)

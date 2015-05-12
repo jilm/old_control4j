@@ -18,15 +18,13 @@ package control4j.application.nativelang;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import static org.apache.commons.lang3.Validate.notBlank;
+
 import java.util.ArrayList;
 import org.xml.sax.Attributes;
 
 import control4j.application.Scope;
-import control4j.tools.IXmlHandler;
 import control4j.tools.ParseException;
-import control4j.tools.XmlReader;
-import control4j.tools.XmlStartElement;
-import control4j.tools.XmlEndElement;
 
 import cz.lidinsky.tools.ToStringBuilder;
 
@@ -35,23 +33,31 @@ import cz.lidinsky.tools.ToStringBuilder;
  *  Stands for a signal element.
  *
  */
-public class Signal extends DescriptionBase implements IXmlHandler, IAdapter
+public class Signal extends DescriptionBase
 {
+
+  public Signal() {}
 
   private String name;
 
-  protected IAdapter adapter;
-
-  public String getName()
-  {
+  public String getName() {
     return name;
+  }
+
+  Signal setName(String name) {
+    this.name = notBlank(name);
+    return this;
   }
 
   private int scope;
 
-  public int getScope()
-  {
+  public int getScope() {
     return scope;
+  }
+
+  Signal setScope(int scope) {
+    this.scope = scope;
+    return this;
   }
 
   /**
@@ -93,6 +99,17 @@ public class Signal extends DescriptionBase implements IXmlHandler, IAdapter
   private boolean isValueT_1Valid = false;
   private String valueT_1;
 
+  void setInvalidDefaultValue() {
+    isValueT_1Specified = true;
+    isValueT_1Valid = false;
+  }
+
+  void setDefaultValue(String value) {
+    isValueT_1Specified = true;
+    isValueT_1Valid = true;
+    valueT_1 = value;
+  }
+
   /*
    *
    *     Tags
@@ -101,113 +118,13 @@ public class Signal extends DescriptionBase implements IXmlHandler, IAdapter
 
   private ArrayList<Tag> tags = new ArrayList<Tag>();
 
-  /*
-   *
-   *    SAX parser methods
-   *
-   */
-
-  private XmlReader reader;
-
-  /**
-   *  An empty constructor which may be used if the content
-   *  of the signal will be loaded from XML document.
-   */
-  Signal(IAdapter adapter)
-  {
-    this.adapter = adapter;
-  }
-
-  public void startProcessing(XmlReader reader)
-  {
-    this.reader = reader;
-  }
-
-  public void endProcessing()
-  {
-    this.reader = null;
-  }
-
-  @XmlStartElement(localName="signal", parent="", 
-      namespace="http://control4j.lidinsky.cz/application")
-  private void startSignal(Attributes attributes)
-  {
-    name = Parser.parseToken(attributes.getValue("name"));
-    if (name == null) {} // TODO
-
-    try
-    {
-      scope = Parser.parseScope2(attributes.getValue("scope"));
-    }
-    catch (ParseException e)
-    {
-      // TODO
-    }
-  }
-
-  @XmlEndElement(localName="signal", parent="",
-      namespace="http://control4j.lidinsky.cz/application")
-  private void endSignal()
-  {
-    adapter.put(this);
-  }
-
-  @XmlStartElement(localName="property", parent="signal")
-  private void startSignalProperty(Attributes attributes)
-  {
-    Property property = new Property(this);
-    reader.addHandler(property);
-  }
-
-  @XmlStartElement(localName="value-t-1", parent="signal")
-  private void startSignalValue(Attributes attributes)
-  {
-    if (isValueT_1Specified) {} // TODO
-  }
-
-  @XmlEndElement(localName="value-t-1", parent="signal")
-  private void endSignalValue()
-  { }
-
-  @XmlStartElement(localName="invalid", parent="value-t-1")
-  private void startValueInvalid(Attributes attributes)
-  {
-    isValueT_1Specified = true;
-    isValueT_1Valid = false;
-    valueT_1 = null;
-  }
-
-  @XmlEndElement(localName="invalid", parent="value-t-1")
-  private void endValueInvalid()
-  { }
-
-  @XmlStartElement(localName="signal", parent="value-t-1")
-  private void startValueSignal(Attributes attributes)
-  {
-    isValueT_1Specified = true;
-    isValueT_1Valid = true;
-    valueT_1 = Parser.parseToken(attributes.getValue("value"));
-    if (valueT_1 == null) {} // TODO
-  }
-
-  @XmlEndElement(localName="signal", parent="value-t-1")
-  private void endValueSignal()
-  { }
-
-  @XmlStartElement(localName="tag", parent="signal")
-  private void startSignalTag(Attributes attributes)
-  {
-    Tag tag = new Tag();
-    tags.add(tag);
-    reader.addHandler(tag);
-  }
-
   @Override
   public void toString(ToStringBuilder builder)
   {
     super.toString(builder);
     builder.append("name", name)
         .append("scope", scope);
+    // TODO:
   }
 
 }

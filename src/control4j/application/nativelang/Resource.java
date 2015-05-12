@@ -42,144 +42,65 @@ import cz.lidinsky.tools.ToStringBuilder;
  *  </ol>
  *
  */
-public class Resource extends Configurable implements IXmlHandler, IAdapter
-{
+public class Resource extends Configurable implements IAdapter {
+
+  public Resource() {}
 
   private String key;
 
+  public String getKey() {
+    return key;
+  }
+
+  Resource setKey(String key) {
+    this.key = key;
+    return this;
+  }
+
   private String className;
+
+  public String getClassName() {
+    return className;
+  }
+
+  Resource setClassName(String className) {
+    this.className = className;
+    return this;
+  }
 
   private String href;
 
+  public String getHref() {
+    return href;
+  }
+
+  Resource setHref(String href) {
+    this.href = href;
+    isReference = true;
+    return this;
+  }
+
   private int scope;
 
+  public int getScope() {
+    return scope;
+  }
+
+  Resource setScope(int scope) {
+    this.scope = scope;
+    return this;
+  }
+
   private boolean isReference;
+
+  public boolean isReference() {
+    return isReference;
+  }
 
   public void translate(
       control4j.application.Resource destination, Scope localScope)
   {
     super.translate(destination, localScope);
-  }
-
-  /*
-   *
-   *    Getters
-   *
-   */
-
-  public String getClassName()
-  {
-    return className;
-  }
-
-  public String getKey()
-  {
-    return key;
-  }
-
-  public String getHref()
-  {
-    return href;
-  }
-
-  public int getScope()
-  {
-    return scope;
-  }
-
-  public boolean isReference()
-  {
-    return isReference;
-  }
-
-  /*
-   *
-   *    SAX handler implementation.
-   *
-   */
-
-  private XmlReader reader;
-
-  /**
-   *  An empty constructor for objects that will be loaded
-   *  from a XML document.
-   */
-  Resource()
-  {
-  }
-
-  public void startProcessing(XmlReader reader)
-  {
-    this.reader = reader;
-  }
-
-  public void endProcessing()
-  {
-    this.reader = null;
-  }
-
-  /**
-   *  Initialize fields according to the elements attributes.
-   */
-  @XmlStartElement(localName="resource", parent="", 
-      namespace="http://control4j.lidinsky.cz/application")
-  private void startProperty(Attributes attributes)
-  {
-    key = Parser.parseToken(attributes.getValue("key"));
-    if (key == null) {} // TODO
-
-    href = Parser.parseToken(attributes.getValue("href"));
-    className = Parser.parseToken(attributes.getValue("class"));
-
-    try
-    {
-      scope = Parser.parseScope3(attributes.getValue("scope"));
-    }
-    catch (ParseException e)
-    {
-      // TODO
-      warning("Bad scope");
-    }
-
-    if (className != null && href == null)
-    {
-      isReference = false;
-    }
-    else if (className == null && href != null)
-    {
-      isReference = true;
-      fine("resource reference" + key + href); // TODO
-    }
-    else if (className == null && href == null)
-    {
-      // TODO
-      warning("class name == null && href == null");
-    }
-    else
-    {
-      // TODO
-      warning("class name != null && href != null");
-    }
-  }
-
-
-  /**
-   *  Does nothing.
-   */
-  @XmlEndElement(localName="resource", parent="", 
-      namespace="http://control4j.lidinsky.cz/application")
-  private void endResource()
-  { }
-
-  @XmlStartElement(localName="property", parent="resource")
-  private void startResourceProperty(Attributes attributes)
-  {
-    if (isReference) {} // TODO
-    else
-    {
-      Property property = new Property(this);
-      reader.addHandler(property);
-    }
   }
 
   @Override

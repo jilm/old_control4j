@@ -33,7 +33,7 @@ public interface IAdapter
 
   public void put(Signal signal);
 
-  public void put(ResourceDeclaration resource);
+  public void put(ResourceDef resource);
 
   public void put(Define define);
 

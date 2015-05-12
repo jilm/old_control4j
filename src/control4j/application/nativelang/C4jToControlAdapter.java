@@ -63,7 +63,7 @@ public class C4jToControlAdapter implements IAdapter
     }
     catch (DuplicateElementException e)
     {
-	  // TODO:
+          // TODO:
     }
   }
 
@@ -80,11 +80,11 @@ public class C4jToControlAdapter implements IAdapter
     }
     catch (DuplicateElementException e)
     {
-	  // TODO:
+          // TODO:
     }
   }
 
-  public void put(ResourceDeclaration resource)
+  public void put(ResourceDef resource)
   {
     try
     {
@@ -97,7 +97,7 @@ public class C4jToControlAdapter implements IAdapter
     }
     catch (DuplicateElementException e)
     {
-	  // TODO:
+          // TODO:
     }
   }
 
@@ -113,7 +113,7 @@ public class C4jToControlAdapter implements IAdapter
     }
     catch (DuplicateElementException e)
     {
-	  // TODO:
+          // TODO:
     }
   }
 
@@ -125,7 +125,7 @@ public class C4jToControlAdapter implements IAdapter
       if (property.isReference())
       {
         destination.putProperty(property.getKey(), property.getHref(),
-	    resolveScope(property.getScope(), localScope));
+            resolveScope(property.getScope(), localScope));
       }
       else
       {

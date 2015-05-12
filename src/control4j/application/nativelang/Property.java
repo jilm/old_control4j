@@ -18,14 +18,6 @@ package control4j.application.nativelang;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.xml.sax.Attributes;
-
-import control4j.tools.IXmlHandler;
-import control4j.tools.ParseException;
-import control4j.tools.XmlReader;
-import control4j.tools.XmlStartElement;
-import control4j.tools.XmlEndElement;
-
 import cz.lidinsky.tools.ToStringBuilder;
 
 /**
@@ -38,167 +30,64 @@ import cz.lidinsky.tools.ToStringBuilder;
  *  </ol>
  *
  */
-public class Property extends DeclarationBase implements IXmlHandler
-{
+public class Property extends DeclarationBase {
+
+  public Property() {}
 
   private String key;
+
+  public String getKey() {
+    return key;
+  }
+
+  Property setKey(String key) {
+    this.key = key;
+    return this;
+  }
 
   /** Value of the property. */
   private String value;
 
-  private String href;
-
-  private int scope;
-
-  private boolean isReference;
-
-  /**
-   *  This constructor is dedicated to the property which directly
-   *  contains a value.
-   */
-  public Property(String key, String value)
-  {
-    this.key = key;
-    this.value = value;
-    this.isReference = false;
-  }
-
-  /**
-   *  This constructor is used for the property which refers
-   *  to some define object.
-   */
-  public Property(String key, String href, int scope)
-  {
-    this.key = key;
-    this.href = href;
-    this.scope = scope;
-    this.isReference = true;
-  }
-
-  /*
-   *
-   *    Access Methods
-   *
-   */
-
-  public String getKey()
-  {
-    return key;
-  }
-
   /**
    *  Returns the value of the property.
    */
-  public String getValue()
-  {
+  public String getValue() {
     return value;
   }
 
-  public String getHref()
-  {
+  Property setValue(String value) {
+    this.value = value;
+    this.isReference = false;
+    return this;
+  }
+
+  private String href;
+
+  public String getHref() {
     return href;
   }
 
-  public int getScope()
-  {
+  Property setHref(String href) {
+    this.value = href;
+    this.isReference = true;
+    return this;
+  }
+
+  private int scope;
+
+  public int getScope() {
     return scope;
   }
 
-  public boolean isReference()
-  {
+  Property setScope(int scope) {
+    this.scope = scope;
+    return this;
+  }
+
+  private boolean isReference;
+
+  public boolean isReference() {
     return isReference;
-  }
-
-  /*
-   *
-   *    SAX handler implementation.
-   *
-   */
-
-  private XmlReader reader;
-
-  protected IAdapter adapter;
-
-  /**
-   *  An empty constructor for objects that will be loaded
-   *  from a XML document.
-   */
-  Property(IAdapter adapter)
-  {
-    this.adapter = adapter;
-  }
-
-  public void startProcessing(XmlReader reader)
-  {
-    this.reader = reader;
-  }
-
-  public void endProcessing()
-  {
-    this.reader = null;
-  }
-
-  /**
-   *  Initialize fields according to the elements attributes.
-   */
-  @XmlStartElement(localName="property", parent="", 
-      namespace="http://control4j.lidinsky.cz/application")
-  private void startProperty(Attributes attributes)
-  {
-    String key = Parser.parseToken(attributes.getValue("key"));
-    String value = attributes.getValue("value");
-    String href = Parser.parseToken(attributes.getValue("href"));
-    String strScope = attributes.getValue("scope");
-    
-    if (key == null) {} // TODO
-    else
-      this.key = key;
-
-    if (value != null && href == null)
-    {
-      isReference = false;
-      this.value = value;
-    }
-    else if (value == null && href != null)
-    {
-      isReference = true;
-      this.href = href;
-      try
-      {
-        this.scope = Parser.parseScope3(strScope);
-      }
-      catch (ParseException e)
-      {
-        // TODO
-      }
-    }
-    else if (value == null && href == null)
-    {
-      // TODO
-    }
-    else
-    {
-      // TODO
-    }
-  }
-
-  /**
-   *  Elements inside the property element are not allowed.
-   */
-  @XmlStartElement(localName="*", parent="property")
-  private void startElement(Attributes attributes)
-  {
-    // TODO
-  }
-
-  /**
-   *  Does nothing.
-   */
-  @XmlEndElement(localName="property", parent="", 
-      namespace="http://control4j.lidinsky.cz/application")
-  private void endProperty()
-  {
-    adapter.put(this);
   }
 
   @Override

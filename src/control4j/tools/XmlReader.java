@@ -151,6 +151,9 @@ public class XmlReader extends DefaultHandler
       String namespace, String localName, boolean isStartElement)
       throws NoSuchElementException
   {
+    if (handlerStack == null)
+      throw new NoSuchElementException();
+
     Method result = null;
     int resultRank = -1;
 
@@ -333,25 +336,41 @@ public class XmlReader extends DefaultHandler
     {
       while (true)
       {
-        // find a method that can handle the event
-        Method method = findHandler(uri, localName, true);
+        try
+        {
+          // find a method that can handle the event
+          Method method = findHandler(uri, localName, true);
 
-        // call the method
-        repeat = false;
-        method.setAccessible(true);
-        method.invoke(handlerStack.handler, attributes);
-        method.setAccessible(false);
+          // call the method
+          repeat = false;
+          method.setAccessible(true);
+          method.invoke(handlerStack.handler, attributes);
+          method.setAccessible(false);
 
-        // if the event has not been handled, try again
-        if (!repeat) break;
+          // if the event has not been handled, try again
+          if (!repeat) break;
 
-        handlerStack.handler.startProcessing(this);
+          handlerStack.handler.startProcessing(this);
+        }
+        // there is no appropriate handler method
+        catch (NoSuchElementException e)
+        {
+          reportMissingHandler("start element");
+          //handlerStack.handler.missingHandler(this);
+          if (!repeat) break;
+        }
+        finally
+        {
+          // add an element into the element stack
+          handlerStack.elementStack
+              = new ElementCrate(handlerStack.elementStack);
+          handlerStack.elementStack.localName = localName;
+          handlerStack.elementStack.namespace = uri;
+          // remember the location
+          line = locator.getLineNumber();
+          column = locator.getColumnNumber();
+        }
       }
-    }
-    // there is no appropriate handler method
-    catch (NoSuchElementException e)
-    {
-      reportMissingHandler("start element");
     }
     catch (IllegalAccessException e)
     {
@@ -360,16 +379,6 @@ public class XmlReader extends DefaultHandler
     catch (java.lang.reflect.InvocationTargetException e)
     {
       throw new SAXException(e);
-    }
-    finally
-    {
-      // add an element into the element stack
-      handlerStack.elementStack = new ElementCrate(handlerStack.elementStack);
-      handlerStack.elementStack.localName = localName;
-      handlerStack.elementStack.namespace = uri;
-      // remember the location
-      line = locator.getLineNumber();
-      column = locator.getColumnNumber();
     }
   }
 
