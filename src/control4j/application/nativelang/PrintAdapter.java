@@ -18,7 +18,7 @@ package control4j.application.nativelang;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-public class PrintAdapter implements IAdapter
+public class PrintAdapter extends AbstractAdapter
 {
 
   public void startLevel()

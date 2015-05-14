@@ -36,7 +36,6 @@ import cz.lidinsky.tools.ToStringBuilder;
  *
  */
 public class ResourceDef extends DescriptionBase
-implements IAdapter
 {
 
   public ResourceDef() {}

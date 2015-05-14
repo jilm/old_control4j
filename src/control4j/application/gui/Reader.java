@@ -1,7 +1,7 @@
-package control4j.application.nativelang;
+package control4j.application.gui;
 
 /*
- *  Copyright 2015 Jiri Lidinsky
+ *  Copyright 2013, 2014, 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -18,27 +18,16 @@ package control4j.application.nativelang;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-abstract class AdapterBase extends DeclarationBase
+import java.io.IOException;
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+import control4j.application.ILoader;
+import control4j.application.ITranslatable;
+import control4j.tools.DeclarationReference;
+import control4j.tools.IXmlHandler;
+import control4j.tools.XmlReader;
+
+public class Reader extends control4j.gui.Reader
 {
-
-  protected IAdapter adapter;
-
-  public void startLevel() {}
-
-  public void endLevel() {}
-
-  public void put(Module module) {}
-
-  public void put(Block block) {}
-
-  public void put(Signal signal) {}
-
-  public void put(ResourceDef resource) {}
-
-  public void put(Define define) {}
-
-  public void put(Property property) {}
-
-  public void put(Use use) {}
 
 }

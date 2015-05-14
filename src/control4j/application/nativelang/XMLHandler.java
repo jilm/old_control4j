@@ -18,6 +18,9 @@ package control4j.application.nativelang;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import static cz.lidinsky.tools.chain.Factory.getInstantiator;
+import static org.apache.commons.collections4.PredicateUtils.notNullPredicate;
+
 import java.util.ArrayList;
 import control4j.tools.ParseException;
 import org.xml.sax.Attributes;
@@ -31,6 +34,19 @@ import cz.lidinsky.tools.xml.XMLReader;
 import cz.lidinsky.tools.xml.AXMLStartElement;
 import cz.lidinsky.tools.xml.AXMLEndElement;
 import cz.lidinsky.tools.xml.AXMLDefaultUri;
+import cz.lidinsky.tools.chain.Factory;
+
+import java.io.InputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.awt.Color;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+
+import org.apache.commons.collections4.Transformer;
+import org.apache.commons.collections4.Predicate;
 
 /**
  *
@@ -43,13 +59,25 @@ import cz.lidinsky.tools.xml.AXMLDefaultUri;
 public class XMLHandler implements IXMLHandler
 {
 
-  private IAdapter adapter;
+  protected static Factory<Object, AbstractAdapter> adapterFactory;
+
+  {
+    adapterFactory = new Factory<Object, AbstractAdapter>();
+    adapterFactory.add(getInstantiator(C4jToControlAdapter.class));
+  }
+
+  private AbstractAdapter adapter;
 
   /**
    *
    */
   public XMLHandler()
   {
+  }
+
+  public void setDestination(Object destination) {
+    Predicate<AbstractAdapter> filter = notNullPredicate();
+    adapter = adapterFactory.findFirst(destination, filter);
   }
 
   /*

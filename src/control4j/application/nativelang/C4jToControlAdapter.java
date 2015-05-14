@@ -21,14 +21,18 @@ package control4j.application.nativelang;
 import control4j.application.Scope;
 import control4j.tools.DuplicateElementException;
 
-public class C4jToControlAdapter implements IAdapter
+public class C4jToControlAdapter extends AbstractAdapter
 {
 
   protected control4j.application.Application destination;
 
-  public void setDestination(Object destination)
-  {
-    this.destination = (control4j.application.Application)destination;
+  public C4jToControlAdapter(control4j.application.Application destination) {
+    System.out.println(destination.getClass().getName());
+    if (destination instanceof control4j.application.Application) {
+      this.destination = (control4j.application.Application)destination;
+    } else {
+      throw new UnsupportedOperationException();
+    }
   }
 
   public void startLevel()

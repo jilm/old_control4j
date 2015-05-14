@@ -18,45 +18,25 @@ package control4j.application.nativelang;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import java.util.ArrayList;
-import org.xml.sax.Attributes;
-
-import control4j.tools.IXmlHandler;
-import control4j.tools.XmlReader;
-import control4j.tools.XmlStartElement;
-import control4j.tools.XmlEndElement;
-
-import cz.lidinsky.tools.ToStringBuilder;
-
-/**
- *
- *  Represents a tag of the signal.
- *
- */
-public class Tag extends Configurable
+abstract class AbstractAdapter
 {
 
-  public Tag() {}
+  public void startLevel() {}
 
-  private String name;
+  public void endLevel() {}
 
-  /**
-   *  Returns the value of the property.
-   */
-  public String getName() {
-    return name;
-  }
+  public void put(Module module) {}
 
-  Tag setName(String name) {
-    this.name = name;
-    return this;
-  }
+  public void put(Block block) {}
 
-  @Override
-  public void toString(ToStringBuilder builder)
-  {
-    super.toString(builder);
-    builder.append("name", name);
-  }
+  public void put(Signal signal) {}
+
+  public void put(ResourceDef resource) {}
+
+  public void put(Define define) {}
+
+  public void put(Property property) {}
+
+  public void put(Use use) {}
 
 }

@@ -35,7 +35,7 @@ import cz.lidinsky.tools.ToStringStyle;
  *  Represents an output element
  *
  */
-public class Output extends Configurable implements IAdapter {
+public class Output extends Configurable {
 
   public Output() {}
 

@@ -35,7 +35,7 @@ import cz.lidinsky.tools.ToStringStyle;
  *  Represents an input element
  *
  */
-public class Input extends Configurable implements IAdapter {
+public class Input extends Configurable {
 
   public Input() {}
 

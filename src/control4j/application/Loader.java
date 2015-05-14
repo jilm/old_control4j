@@ -26,9 +26,7 @@ import java.util.Collection;
 import java.util.NoSuchElementException;
 import org.xml.sax.Attributes;
 
-import control4j.tools.IXmlHandler;
-import control4j.tools.XmlReader;
-import control4j.tools.XmlStartElement;
+import cz.lidinsky.tools.xml.XMLReader;
 import static control4j.tools.Logger.*;
 
 /**
@@ -41,14 +39,10 @@ import static control4j.tools.Logger.*;
  *  read from a ...
  *
  */
-public class Loader implements IXmlHandler
+public class Loader
 {
 
-  private XmlReader reader;
-
   private ILoader loader;
-
-  private LoaderFactory loaderFactory;
 
   private Application application = new Application();
 
@@ -61,7 +55,6 @@ public class Loader implements IXmlHandler
    */
   public Loader() throws IOException
   {
-    loaderFactory = LoaderFactory.getInstance();
   }
 
   /**
@@ -83,8 +76,16 @@ public class Loader implements IXmlHandler
   public Application load(InputStream inputStream)
   throws IOException
   {
-    reader = new XmlReader();
-    reader.addHandler(this);
+    control4j.application.nativelang.XMLHandler c4jHandler
+        = new control4j.application.nativelang.XMLHandler();
+    control4j.application.gui.XMLHandler guiHandler
+        = new control4j.application.gui.XMLHandler();
+    Application application = new Application();
+    c4jHandler.setDestination(application);
+    guiHandler.setDestination(application);
+    XMLReader reader = new XMLReader();
+    reader.addHandler(c4jHandler);
+    reader.addHandler(guiHandler);
     reader.load(inputStream);
     return application;
   }
@@ -95,45 +96,6 @@ public class Loader implements IXmlHandler
     Loader loader = new Loader();
     Application application = loader.load(file);
     System.out.println(application.toString());
-  }
-
-  /*
-   *
-   *  Implementation of IXmlHandler intarface
-   *
-   */
-
-  /**
-   *  Does nothing.
-   */
-  public void startProcessing(XmlReader reader)
-  {
-  }
-
-  /**
-   *  Does nothing.
-   */
-  public void endProcessing()
-  {
-  }
-
-  public void missingHandler(XmlReader reader)
-  {
-    try
-    {
-      ILoader handler = LoaderFactory.getInstance().getHandler(reader);
-      handler.setDestination(application);
-      reader.addHandler(handler);
-    }
-    catch (NoSuchElementException e)
-    {
-      System.out.println("Didn't find appropriate handler");
-      System.exit(1);
-    }
-    catch (Exception e)
-    {
-      catched(getClass().getName(), "startElement", e);
-    }
   }
 
 }

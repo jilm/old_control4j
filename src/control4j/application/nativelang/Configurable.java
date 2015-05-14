@@ -35,7 +35,8 @@ import cz.lidinsky.tools.ToStringStyle;
  *  configuration.
  *
  */
-abstract class Configurable extends AdapterBase implements IToStringBuildable
+abstract class Configurable
+extends DeclarationBase implements IToStringBuildable
 {
 
   private ArrayList<Property> properties;
@@ -87,7 +88,6 @@ abstract class Configurable extends AdapterBase implements IToStringBuildable
     }
   }
 
-  @Override
   public void put(Property property)
   {
     addProperty(property);

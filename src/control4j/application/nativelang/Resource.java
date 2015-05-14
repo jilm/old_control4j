@@ -42,7 +42,7 @@ import cz.lidinsky.tools.ToStringBuilder;
  *  </ol>
  *
  */
-public class Resource extends Configurable implements IAdapter {
+public class Resource extends Configurable {
 
   public Resource() {}
 

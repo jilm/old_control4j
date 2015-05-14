@@ -42,7 +42,7 @@ import static control4j.tools.Logger.*;
  *  Stands for a module element.
  *
  */
-public class Module extends DescriptionBase implements IAdapter {
+public class Module extends DescriptionBase {
 
   public Module() {}
 

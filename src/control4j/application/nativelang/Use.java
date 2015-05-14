@@ -40,7 +40,7 @@ import cz.lidinsky.tools.ToStringBuilder;
  *  Represents a use element.
  *
  */
-public class Use extends Configurable implements IAdapter
+public class Use extends Configurable
 {
 
   public Use() {}

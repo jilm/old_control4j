@@ -1,4 +1,4 @@
-package control4j.application.nativelang;
+package control4j.application.gui;
 
 /*
  *  Copyright 2015 Jiri Lidinsky
@@ -18,27 +18,22 @@ package control4j.application.nativelang;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-public interface IAdapter
+import control4j.gui.Screens;
+
+public class GuiResource extends control4j.application.Resource
 {
 
-  //public void setDestination(Object destination);
+  private Screens gui;
 
-  public void startLevel();
+  public GuiResource(Screens gui)
+  {
+    super("control4j.application.gui.Gui");
+    this.gui = gui;
+  }
 
-  public void endLevel();
-
-  public void put(Module module);
-
-  public void put(Block block);
-
-  public void put(Signal signal);
-
-  public void put(ResourceDef resource);
-
-  public void put(Define define);
-
-  public void put(Property property);
-
-  public void put(Use use);
+  public Screens getGui()
+  {
+    return gui;
+  }
 
 }
