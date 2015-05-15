@@ -80,12 +80,16 @@ public class Loader
         = new control4j.application.nativelang.XMLHandler();
     control4j.application.gui.XMLHandler guiHandler
         = new control4j.application.gui.XMLHandler();
+    control4j.application.ld.XMLHandler ldHandler
+        = new control4j.application.ld.XMLHandler();
     Application application = new Application();
     c4jHandler.setDestination(application);
     guiHandler.setDestination(application);
+    ldHandler.setHandler(application);
     XMLReader reader = new XMLReader();
     reader.addHandler(c4jHandler);
     reader.addHandler(guiHandler);
+    reader.addHandler(ldHandler);
     reader.load(inputStream);
     return application;
   }

@@ -59,8 +59,8 @@ public class XMLHandler implements IXMLHandler
   protected static Factory<Object, AbstractAdapter> adapterFactory;
 
   {
-    //adapterFactory = new Factory<Object, AbstractAdapter>();
-    //adapterFactory.add(getInstantiator(LdToControlAdapter.class));
+    adapterFactory = new Factory<Object, AbstractAdapter>();
+    adapterFactory.add(getInstantiator(Ld2ControlAdapter.class));
   }
 
   private AbstractAdapter adapter;
@@ -72,9 +72,9 @@ public class XMLHandler implements IXMLHandler
   {
   }
 
-  public void setDestination(Object destination) {
+  public void setHandler(Object handler) {
     Predicate<AbstractAdapter> filter = notNullPredicate();
-    adapter = adapterFactory.findFirst(destination, filter);
+    adapter = adapterFactory.findFirst(handler, filter);
   }
 
   /*
@@ -100,18 +100,22 @@ public class XMLHandler implements IXMLHandler
   @AXMLStartElement("{http://control4j.lidinsky.cz/application}application/ld")
   public boolean startApplicationLd(Attributes attributes) {
     ld = new LadderDiagram();
+    adapter.startLd();
     return true;
   }
 
   @AXMLStartElement("/ld")
   public boolean startLd(Attributes attributes) {
     ld = new LadderDiagram();
+    adapter.startLd();
     return true;
   }
 
   @AXMLEndElement("ld")
   public boolean endLd() {
     // TODO:
+    adapter.put(ld);
+    adapter.endLd();
     ld = null;
     return true;
   }
@@ -127,6 +131,7 @@ public class XMLHandler implements IXMLHandler
   @AXMLEndElement("ld/rung")
   public boolean endLdRung() {
     // TODO:
+    adapter.put(rung);
     rung = null;
     return true;
   }
@@ -219,8 +224,7 @@ public class XMLHandler implements IXMLHandler
   }
 
   @AXMLStartElement("rung/coil")
-  public boolean startRungCoil(Attributes attributes)
-  {
+  public boolean startRungCoil(Attributes attributes) {
     Coil coil = new Coil(attributes.getValue("name"));
     coil.setType(attributes.getValue("type"));
     rung.addCoil(coil);
@@ -229,6 +233,18 @@ public class XMLHandler implements IXMLHandler
 
   @AXMLEndElement("coil")
   public boolean endCoil() {
+    return true;
+  }
+
+  @AXMLStartElement("description")
+  public boolean startDescription(Attributes attributes) {
+    // TODO:
+    return true;
+  }
+
+  @AXMLEndElement("description")
+  public boolean endDescription() {
+    // TODO:
     return true;
   }
 

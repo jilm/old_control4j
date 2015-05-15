@@ -19,6 +19,7 @@ package control4j.application.ld;
  */
 
 import control4j.ld.Rung;
+import control4j.ld.LadderDiagram;
 
 /**
  *
@@ -26,6 +27,12 @@ import control4j.ld.Rung;
  */
 abstract class AbstractAdapter {
 
+  public void startLd() {}
+
+  public void endLd() {}
+
   public void put(Rung rung) {}
+
+  public void put(LadderDiagram ld) {}
 
 }
