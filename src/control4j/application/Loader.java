@@ -69,8 +69,22 @@ public class Loader
   public Application load(File file)
   throws IOException
   {
-    InputStream inputStream = new FileInputStream(file);
-    return load(inputStream);
+    control4j.application.nativelang.XMLHandler c4jHandler
+        = new control4j.application.nativelang.XMLHandler();
+    control4j.application.gui.XMLHandler guiHandler
+        = new control4j.application.gui.XMLHandler();
+    control4j.application.ld.XMLHandler ldHandler
+        = new control4j.application.ld.XMLHandler();
+    Application application = new Application();
+    c4jHandler.setDestination(application);
+    guiHandler.setDestination(application);
+    ldHandler.setHandler(application);
+    XMLReader reader = new XMLReader();
+    reader.addHandler(c4jHandler);
+    reader.addHandler(guiHandler);
+    reader.addHandler(ldHandler);
+    reader.load(file);
+    return application;
   }
 
   public Application load(InputStream inputStream)

@@ -105,29 +105,25 @@ public class XMLHandler implements IXMLHandler
    */
 
   @AXMLStartElement("/application")
-  public boolean startApplication(Attributes attributes)
-  {
+  public boolean startApplication(Attributes attributes) {
     adapter.startLevel();
-    System.out.println("/application");
     return true;
   }
 
   @AXMLStartElement("application/application")
-  public boolean startApplicationApplication(Attributes attributes)
-  {
+  public boolean startApplicationApplication(Attributes attributes) {
+    adapter.startLevel();
     return true;
   }
 
   @AXMLEndElement("application")
-  public boolean endApplication()
-  {
+  public boolean endApplication() {
     adapter.endLevel();
     return true;
   }
 
   @AXMLStartElement("application/property")
-  public boolean startApplicationProperty(Attributes attributes)
-  {
+  public boolean startApplicationProperty(Attributes attributes) {
     Property property = getProperty(attributes);
     adapter.put(property);
     return true;
@@ -270,7 +266,7 @@ public class XMLHandler implements IXMLHandler
     return true;
   }
 
-  @AXMLStartElement("resource/property")
+  @AXMLStartElement("application/resource/property")
   public boolean startResourceProperty(Attributes attributes) {
     resource.put(getProperty(attributes));
     return true;
