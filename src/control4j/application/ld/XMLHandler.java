@@ -41,6 +41,7 @@ import cz.lidinsky.tools.xml.XMLReader;
 import cz.lidinsky.tools.xml.AXMLStartElement;
 import cz.lidinsky.tools.xml.AXMLEndElement;
 import cz.lidinsky.tools.xml.AXMLDefaultUri;
+import cz.lidinsky.tools.xml.AXMLText;
 import cz.lidinsky.tools.chain.Factory;
 
 import java.lang.reflect.Method;
@@ -120,6 +121,12 @@ public class XMLHandler implements IXMLHandler
     return true;
   }
 
+  @AXMLText("ld/description")
+  public boolean textLdDescription(String text) {
+    // TODO:
+    return true;
+  }
+
   protected Rung rung;
 
   @AXMLStartElement("ld/rung")
@@ -138,7 +145,6 @@ public class XMLHandler implements IXMLHandler
 
   protected ArrayDeque<ContactBlock> contactStack
                                            = new ArrayDeque<ContactBlock>();
-
   @AXMLStartElement("rung/serial")
   public boolean startRungSerial(Attributes attributes) {
     // TODO: contact stack should be empty
@@ -165,6 +171,11 @@ public class XMLHandler implements IXMLHandler
     contact.setType(attributes.getValue("type"));
     rung.setContactBlock(contact);
     //contactStack.push(contact);
+    return true;
+  }
+
+  @AXMLText("rung/description")
+  public boolean textRungDescription(String text) {
     return true;
   }
 
