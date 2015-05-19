@@ -18,6 +18,10 @@ package control4j.application;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import static org.apache.commons.collections4.CollectionUtils.emptyCollection;
+import static org.apache.commons.collections4.CollectionUtils.unmodifiableCollection;
+
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.NoSuchElementException;
 
@@ -180,6 +184,14 @@ public class ScopeMap<E extends ObjectBase> implements IToStringBuildable
   public void toString(ToStringBuilder builder)
   {
     builder.append("buffer", buffer);
+  }
+
+  public Collection<E> values() {
+    if (buffer == null) {
+      return emptyCollection();
+    } else {
+      return unmodifiableCollection(buffer.values());
+    }
   }
 
 }

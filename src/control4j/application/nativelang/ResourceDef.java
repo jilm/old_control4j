@@ -18,15 +18,15 @@ package control4j.application.nativelang;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import static org.apache.commons.lang3.Validate.notNull;
+import static org.apache.commons.lang3.Validate.notBlank;
+import static org.apache.commons.lang3.StringUtils.trim;
+import static control4j.tools.LogMessages.getMessage;
+
 import java.util.ArrayList;
-import org.xml.sax.Attributes;
+//import org.xml.sax.Attributes;
 
 import control4j.application.Scope;
-import control4j.tools.IXmlHandler;
-import control4j.tools.ParseException;
-import control4j.tools.XmlReader;
-import control4j.tools.XmlStartElement;
-import control4j.tools.XmlEndElement;
 
 import cz.lidinsky.tools.ToStringBuilder;
 
@@ -35,10 +35,18 @@ import cz.lidinsky.tools.ToStringBuilder;
  *  Resource definition.
  *
  */
-public class ResourceDef extends DescriptionBase
-{
+public class ResourceDef extends DescriptionBase {
 
   public ResourceDef() {}
+
+  /**
+   *  Initialize fields of this object.
+   */
+  public ResourceDef(String className, String name, int scope) {
+    setClassName(className);
+    setName(name);
+    setScope(scope);
+  }
 
   /** Name of the java class that implements functionality of
       the resource */
@@ -49,11 +57,13 @@ public class ResourceDef extends DescriptionBase
    *  of the resource.
    */
   public String getClassName() {
+    check();
     return className;
   }
 
   ResourceDef setClassName(String className) {
-    this.className = className;
+    this.className = trim(notBlank(className, getMessage("msg004", "class",
+        getDeclarationReferenceText())));
     return this;
   }
 
@@ -62,15 +72,18 @@ public class ResourceDef extends DescriptionBase
   private int scope;
 
   public String getName() {
+    check();
     return name;
   }
 
   ResourceDef setName(String name) {
-    this.name = name;
+    this.name = trim(notBlank(name, getMessage("msg004", "name",
+        getDeclarationReferenceText())));
     return this;
   }
 
   public int getScope() {
+    check();
     return scope;
   }
 
@@ -80,32 +93,30 @@ public class ResourceDef extends DescriptionBase
   }
 
   /**
-   *  Initialize fields of this object.
-   */
-  public ResourceDef(
-       String className, String name, int scope)
-  {
-    this.className = className;
-    this.name = name;
-    this.scope = scope;
-  }
-
-  /**
    *  Transfer all of the settings into the given object.
    */
   public void translate(
-      control4j.application.Resource resource, Scope localScope)
-  {
+      control4j.application.Resource resource, Scope localScope) {
     super.translate(resource, localScope);
   }
 
   @Override
-  public void toString(ToStringBuilder builder)
-  {
+  public void toString(ToStringBuilder builder) {
     super.toString(builder);
     builder.append("className", className)
         .append("name", name)
         .append("scope", scope);
+  }
+
+  protected void check() {
+    if (className == null) {
+      throw new IllegalStateException(getMessage("msg002", "className",
+          getDeclarationReferenceText()));
+    }
+    if (name == null) {
+      throw new IllegalStateException(getMessage("msg002", "name",
+          getDeclarationReferenceText()));
+    }
   }
 
 }

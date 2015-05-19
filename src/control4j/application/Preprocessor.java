@@ -18,6 +18,9 @@ package control4j.application;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import static org.apache.commons.lang3.Validate.notNull;
+import static control4j.tools.LogMessages.getMessage;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -43,14 +46,12 @@ import control4j.tools.DuplicateElementException;
  *  Preprocessing of the application.
  *
  */
-public class Preprocessor implements IGraph<Use>
-{
+public class Preprocessor implements IGraph<Use> {
 
   /**
-   *  Does nothing.
+   *  Empty constructor
    */
-  public Preprocessor()
-  { }
+  public Preprocessor() { }
 
   private Application application;
 
@@ -58,32 +59,13 @@ public class Preprocessor implements IGraph<Use>
    *  Entry point of the preprocessor. Given application
    *  serves as the input and output of this method.
    */
-  public void process(Application application)
-  {
+  public void process(Application application) {
 
-    this.application = application;
+    this.application = notNull(application);
 
     // blocks expansion
-    // cycle test
-    /*
-    Graph<Use> graph = new Graph<Use>();
-    boolean cycle = false;
-    for (int i=0; i<application.getUseObjectsSize(); i++)
-      if (!graph.isAcyclicDFS(this, application.getUse(i).getKey()))
-      {
-        System.out.println("Cyclic: "
-            + application.getUse(i).getKey().getHref());
-        cycle = true;
-      }
-      else
-        System.out.println("Acyclic: "
-            + application.getUse(i).getKey().getHref());
-    */
-
     // expand all of the use objects
-    //if (!cycle)
-    while (application.getUseObjectsSize() > 0)
-    {
+    while (application.getUseObjectsSize() > 0) {
       Pair<Use, Scope> use = application.getUse(0);
       expand(use.getKey(), use.getValue());
       application.removeUse(0);
@@ -92,24 +74,21 @@ public class Preprocessor implements IGraph<Use>
     // resource substitution
     // for all of the modules, if there is a resource reference
     // find it and substitude in place of the reference
-    for (int i=0; i<application.getModulesSize(); i++)
-    {
+    for (int i=0; i<application.getModulesSize(); i++) {
       Module module = application.getModule(i);
-      System.out.println(module.getClassName());
-      while(module.getResourceRefsSize() > 0)
-      {
+      while(module.getResourceRefsSize() > 0) {
         Triple<String, String, Scope> resourceRef = module.getResourceRef(0);
-        System.out.println(resourceRef.toString());
-        try
-        {
-          Resource resource = application.getResource(
-              resourceRef.getMiddle(), resourceRef.getRight());
+        String key = resourceRef.getLeft();
+        String href = resourceRef.getMiddle();
+        Scope scope = resourceRef.getRight();
+        try {
+          Resource resource = application.getResource(href, scope);
           module.putResource(resourceRef.getLeft(), resource);
           module.removeResourceRef(0);
-        }
-        catch (NoSuchElementException e)
-        {
-          catched(getClass().getName(), "process", e); // TODO
+        } catch (NoSuchElementException e) {
+          throw new SyntaxErrorException(
+              getMessage("pre004", href, scope.toString(),
+              module.getDeclarationReferenceText()));
         }
       }
     }
@@ -398,26 +377,23 @@ public class Preprocessor implements IGraph<Use>
    *  finds appropriate referenced object and substitude the
    *  value for the reference inside the object.
    */
-  protected void resolveConfiguration(Configurable object)
-  {
-    while(object.getConfigItemRefsSize() > 0)
-    {
+  protected void resolveConfiguration(Configurable object) {
+    while(object.getConfigItemRefsSize() > 0) {
       Triple<String, String, Scope> reference 
           = object.getConfigItemReference(0);
-      try
-      {
+      String key = reference.getLeft();
+      String href = reference.getMiddle();
+      Scope scope = reference.getRight();
+      try {
         String value = application.getDefinition(
             reference.getMiddle(), reference.getRight());
         object.removeConfigItemReference(0);
         object.putProperty(reference.getLeft(), value);
-      }
-      catch (NoSuchElementException e)
-      {
-        //reportMissingDefinition(reference.getLeft(), reference, object); // TODO
-        warning("Missing definition");
-      }
-      catch (DuplicateElementException e)
-      {  
+      } catch (NoSuchElementException e) {
+        throw new SyntaxErrorException(
+            getMessage("pre002", href, scope.toString(),
+            object.getDeclarationReferenceText()));
+      } catch (DuplicateElementException e) {
         warning("Duplicate element");
       } // TODO
     }

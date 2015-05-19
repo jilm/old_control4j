@@ -1,7 +1,7 @@
 package control4j.tools;
 
 /*
- *  Copyright 2013 Jiri Lidinsky
+ *  Copyright 2013, 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -53,5 +53,9 @@ public class LogMessages
     return String.format(message, param);
   }
 
+  public static String getMessage(String key, Object... args) {
+    String message = logMessages.getString(key);
+    return String.format(message, args);
+  }
 
 }

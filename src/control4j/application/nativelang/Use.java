@@ -19,19 +19,18 @@ package control4j.application.nativelang;
  */
 
 import static org.apache.commons.lang3.Validate.notNull;
+import static org.apache.commons.lang3.Validate.notBlank;
+import static org.apache.commons.lang3.StringUtils.trim;
 import static org.apache.commons.collections4.CollectionUtils.emptyIfNull;
 import static org.apache.commons.collections4.CollectionUtils.unmodifiableCollection;
+import static control4j.tools.LogMessages.getMessage;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import org.xml.sax.Attributes;
+//import org.xml.sax.Attributes;
 
 import control4j.application.Scope;
-import control4j.tools.IXmlHandler;
 import control4j.tools.ParseException;
-import control4j.tools.XmlReader;
-import control4j.tools.XmlStartElement;
-import control4j.tools.XmlEndElement;
 
 import cz.lidinsky.tools.ToStringBuilder;
 
@@ -40,25 +39,27 @@ import cz.lidinsky.tools.ToStringBuilder;
  *  Represents a use element.
  *
  */
-public class Use extends Configurable
-{
+public class Use extends Configurable {
 
   public Use() {}
 
   private String href;
 
   public String getHref() {
+    check();
     return href;
   }
 
   Use setHref(String href) {
-    this.href = href;
+    this.href = trim(notBlank(href, getMessage("msg004", "href",
+        getDeclarationReferenceText())));
     return this;
   }
 
   private int scope;
 
   public int getScope() {
+    check();
     return scope;
   }
 
@@ -70,7 +71,8 @@ public class Use extends Configurable
   private ArrayList<Input> input;
 
   void add(Input input) {
-    notNull(input);
+    notNull(input, getMessage("msg006", "input",
+        getDeclarationReferenceText()));
     if (this.input == null) {
       this.input = new ArrayList<Input>();
     }
@@ -84,7 +86,8 @@ public class Use extends Configurable
   private ArrayList<Output> output;
 
   void add(Output output) {
-    notNull(output);
+    notNull(output, getMessage("msg006", "output",
+        getDeclarationReferenceText()));
     if (this.output == null) {
       this.output = new ArrayList<Output>();
     }
@@ -95,16 +98,24 @@ public class Use extends Configurable
     return unmodifiableCollection(emptyIfNull(output));
   }
 
+  protected void check() {
+    if (href == null) {
+      throw new IllegalStateException(getMessage("msg002", "href",
+          getDeclarationReferenceText()));
+    }
+  }
+
   public void translate(
-      control4j.application.Use destination, Scope localScope)
-  {
+      control4j.application.Use destination, Scope localScope) {
+
+    check();
+
     // translate configuration
     super.translate(destination, localScope);
 
     // translate input
     if (input != null)
-      for (Input inp : input)
-      {
+      for (Input inp : input) {
         control4j.application.Input destInput
             = new control4j.application.Input(
             resolveScope(inp.getScope(), localScope), inp.getHref());
@@ -114,8 +125,7 @@ public class Use extends Configurable
 
     // translate output
     if (output != null)
-      for (Output out : output)
-      {
+      for (Output out : output) {
         control4j.application.Output destOutput
             = new control4j.application.Output(
             resolveScope(out.getScope(), localScope), out.getHref());
@@ -125,8 +135,7 @@ public class Use extends Configurable
   }
 
   @Override
-  public void toString(ToStringBuilder builder)
-  {
+  public void toString(ToStringBuilder builder) {
     super.toString(builder);
     builder.append("href", href)
         .append("scope", scope)

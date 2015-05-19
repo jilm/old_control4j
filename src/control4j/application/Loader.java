@@ -113,7 +113,7 @@ public class Loader
     File file = new File(args[0]);
     Loader loader = new Loader();
     Application application = loader.load(file);
-    System.out.println(application.toString());
+    //System.out.println(application.toString());
   }
 
 }

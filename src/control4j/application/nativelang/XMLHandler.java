@@ -20,6 +20,7 @@ package control4j.application.nativelang;
 
 import static cz.lidinsky.tools.chain.Factory.getInstantiator;
 import static org.apache.commons.collections4.PredicateUtils.notNullPredicate;
+import static org.apache.commons.lang3.Validate.notNull;
 
 import java.util.ArrayList;
 import control4j.tools.ParseException;
@@ -68,12 +69,16 @@ public class XMLHandler implements IXMLHandler
 
   private AbstractAdapter adapter;
 
+  protected XMLReader reader;
+
+  public void setXMLReader(XMLReader reader) {
+    this.reader = notNull(reader);
+  }
+
   /**
    *
    */
-  public XMLHandler()
-  {
-  }
+  public XMLHandler() { }
 
   public void setDestination(Object destination) {
     Predicate<AbstractAdapter> filter = notNullPredicate();
@@ -86,17 +91,12 @@ public class XMLHandler implements IXMLHandler
    *
    */
 
-
-  public void startProcessing()
-  {
-  }
+  public void startProcessing() { }
 
   /**
    *  Cleen up.
    */
-  public void endProcessing()
-  {
-  }
+  public void endProcessing() { }
 
   /*
    *
@@ -141,7 +141,8 @@ public class XMLHandler implements IXMLHandler
   public boolean startApplicationDefine(Attributes attributes) {
     try {
       define = new Define();
-      define.setName(Parser.parseToken(attributes.getValue("name")));
+      setDeclarationReference(define);
+      define.setName(attributes.getValue("name"));
       define.setScope(Parser.parseScope2(attributes.getValue("scope")));
       define.setValue(attributes.getValue("value"));
     } catch (control4j.tools.ParseException e) {
@@ -153,6 +154,7 @@ public class XMLHandler implements IXMLHandler
   @AXMLEndElement("define")
   public boolean endDefine() {
     adapter.put(define);
+    define = null;
     return true;
   }
 
@@ -168,7 +170,8 @@ public class XMLHandler implements IXMLHandler
   public boolean startApplicationSignal(Attributes attributes) {
     try {
       signal = new Signal();
-      signal.setName(Parser.parseToken(attributes.getValue("name")));
+      setDeclarationReference(signal);
+      signal.setName(attributes.getValue("name"));
       signal.setScope(Parser.parseScope2(attributes.getValue("scope")));
     } catch (control4j.tools.ParseException e) {
       // TODO:
@@ -197,7 +200,6 @@ public class XMLHandler implements IXMLHandler
 
   @AXMLStartElement("signal/value-t-1")
   public boolean startSignalValue(Attributes attributes) {
-    //if (isValueT_1Specified) {} // TODO
     return true;
   }
 
@@ -219,7 +221,7 @@ public class XMLHandler implements IXMLHandler
 
   @AXMLStartElement("value-t-1/signal")
   public boolean startValueSignal(Attributes attributes) {
-    signal.setDefaultValue(Parser.parseToken(attributes.getValue("value")));
+    signal.setDefaultValue(attributes.getValue("value"));
     return true;
   }
 
@@ -227,15 +229,23 @@ public class XMLHandler implements IXMLHandler
   public boolean endValueSignal() {
     return true;
   }
-/*
-  @XmlStartElement(localName="tag", parent="signal")
-  private void startSignalTag(Attributes attributes)
-  {
-    Tag tag = new Tag();
-    tags.add(tag);
-    reader.addHandler(tag);
+
+  private Tag tag;
+
+  @AXMLStartElement("signal/tag")
+  public boolean startSignalTag(Attributes attributes) {
+    tag = new Tag();
+    setDeclarationReference(tag);
+    // TODO:
+    return true;
   }
-*/
+
+  @AXMLEndElement("signal/tag")
+  public boolean endSignalTag() {
+    signal.add(tag);
+    tag = null;
+    return true;
+  }
 
   /*
    *
@@ -246,11 +256,11 @@ public class XMLHandler implements IXMLHandler
   private ResourceDef resource;
 
   @AXMLStartElement("application/resource")
-  public boolean startApplicationResource(Attributes attributes)
-  {
+  public boolean startApplicationResource(Attributes attributes) {
     try {
-      resource = new ResourceDef()
-          .setClassName(attributes.getValue("class"))
+      resource = new ResourceDef();
+      setDeclarationReference(resource);
+      resource.setClassName(attributes.getValue("class"))
           .setName(attributes.getValue("name"))
           .setScope(Parser.parseScope2(attributes.getValue("scope")));
     } catch (ParseException e) {
@@ -283,9 +293,10 @@ public class XMLHandler implements IXMLHandler
   @AXMLStartElement("application/block")
   public boolean startApplicationBlock(Attributes attributes) {
     try {
-      block = new Block()
-          .setName(attributes.getValue("name"))
-          .setScope(Parser.parseScope2(attributes.getValue("scope")));
+      block = new Block();
+      setDeclarationReference(block);
+      block.setName(attributes.getValue("name"))
+           .setScope(Parser.parseScope2(attributes.getValue("scope")));
     } catch (ParseException e) {
       // TODO:
     }
@@ -354,8 +365,9 @@ public class XMLHandler implements IXMLHandler
   public boolean startUse(Attributes attributes)
   {
     try {
-      use = new Use()
-          .setHref(attributes.getValue("href"))
+      use = new Use();
+      setDeclarationReference(use);
+      use.setHref(attributes.getValue("href"))
           .setScope(Parser.parseScope3(attributes.getValue("scope")));
     } catch (ParseException e) {
       // TODO:
@@ -554,6 +566,12 @@ public class XMLHandler implements IXMLHandler
       // TODO:
     }
     return null;
+  }
+
+  protected void setDeclarationReference(DeclarationBase object) {
+    if (reader != null) {
+      object.setDeclarationReference(reader.getLocation());
+    }
   }
 
   /**

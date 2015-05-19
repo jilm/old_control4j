@@ -19,8 +19,11 @@ package control4j.application.nativelang;
  */
 
 import static org.apache.commons.lang3.Validate.notNull;
+import static org.apache.commons.lang3.Validate.notBlank;
+import static org.apache.commons.lang3.StringUtils.trim;
 import static org.apache.commons.collections4.CollectionUtils.unmodifiableCollection;
 import static org.apache.commons.collections4.CollectionUtils.emptyIfNull;
+import static control4j.tools.LogMessages.getMessage;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -46,30 +49,33 @@ public class Block extends DescriptionBase {
   private String name;
 
   public String getName() {
+    check();
     return name;
   }
 
   Block setName(String name) {
-    this.name = name;
+    this.name = trim(notBlank(name, getMessage("msg004", "name",
+        getDeclarationReferenceText())));
     return this;
   }
 
   private int scope;
 
   public int getScope() {
+    check();
     return scope;
   }
 
-  Block setScope(int scope) {
+  Block setScope(final int scope) {
     this.scope = scope;
     return this;
   }
 
   private ArrayList<String> input;
 
-  public void addInput(String name)
-  {
-    notNull(name);
+  public void addInput(String name) {
+    name = trim(notBlank(name, getMessage("msg004", "input name",
+        getDeclarationReferenceText())));
     if (input == null) {
       input = new ArrayList<String>();
     }
@@ -83,9 +89,9 @@ public class Block extends DescriptionBase {
 
   private ArrayList<String> output;
 
-  public void addOutput(String name)
-  {
-    notNull(name);
+  public void addOutput(String name) {
+    name = trim(notBlank(name, getMessage("msg004", "output name",
+        getDeclarationReferenceText())));
     if (output == null) {
       output = new ArrayList<String>();
     }
@@ -100,7 +106,8 @@ public class Block extends DescriptionBase {
   private ArrayList<Module> modules;
 
   public void add(Module module) {
-    notNull(module);
+    notNull(module, getMessage("msg006", "module",
+        getDeclarationReferenceText()));
     if (modules == null) {
       modules = new ArrayList<Module>();
     }
@@ -114,9 +121,9 @@ public class Block extends DescriptionBase {
 
   private ArrayList<Signal> signals;
 
-  public void add(Signal signal)
-  {
-    notNull(signal);
+  public void add(Signal signal) {
+    notNull(signal, getMessage("msg006", "signal",
+        getDeclarationReferenceText()));
     if (signals == null) {
       signals = new ArrayList<Signal>();
     }
@@ -130,9 +137,9 @@ public class Block extends DescriptionBase {
 
   private ArrayList<Use> uses;
 
-  public void add(Use use)
-  {
-    notNull(use);
+  public void add(Use use) {
+    notNull(use, getMessage("msg006", "use",
+        getDeclarationReferenceText()));
     if (uses == null) {
       uses = new ArrayList<Use>();
     }
@@ -144,12 +151,19 @@ public class Block extends DescriptionBase {
         emptyIfNull(uses));
   }
 
+  protected void check() {
+    if (name == null) {
+      throw new IllegalStateException(getMessage("msg002", "name",
+          getDeclarationReferenceText()));
+    }
+  }
+
   /**
    *
    */
   public void translate(
-      control4j.application.Block destination, Scope localScope)
-  {
+      control4j.application.Block destination, Scope localScope) {
+
     // translate all of the input
     if (input != null)
       for (String inp : input)
@@ -176,12 +190,7 @@ public class Block extends DescriptionBase {
         destination.addUse(use);
   }
 
-  /*
-   *
-   *    Access Methods
-   *
-   */
-
+  // TODO: delete
   protected static Scope resolveScope(int code, Scope localScope)
   {
     switch (code)
@@ -198,8 +207,7 @@ public class Block extends DescriptionBase {
   }
 
   @Override
-  public void toString(ToStringBuilder builder)
-  {
+  public void toString(ToStringBuilder builder) {
     super.toString(builder);
     builder.append("name", name)
         .append("scope", scope)

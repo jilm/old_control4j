@@ -26,6 +26,8 @@ import java.util.NoSuchElementException;
 
 import static org.apache.commons.lang3.Validate.notNull;
 import static org.apache.commons.lang3.Validate.notBlank;
+import static org.apache.commons.collections4.CollectionUtils.emptyCollection;
+
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Triple;
@@ -158,6 +160,14 @@ public class Application extends Configurable
     if (blocks == null)
       throw new NoSuchElementException();
     return blocks.get(name, scope);
+  }
+
+  public Collection<Block> getBlocks() {
+    if (blocks == null) {
+      return emptyCollection();
+    } else {
+      return blocks.values();
+    }
   }
 
   /*

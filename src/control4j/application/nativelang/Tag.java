@@ -18,13 +18,11 @@ package control4j.application.nativelang;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import static org.apache.commons.lang3.Validate.notBlank;
+import static org.apache.commons.lang3.StringUtils.trim;
+
 import java.util.ArrayList;
 import org.xml.sax.Attributes;
-
-import control4j.tools.IXmlHandler;
-import control4j.tools.XmlReader;
-import control4j.tools.XmlStartElement;
-import control4j.tools.XmlEndElement;
 
 import cz.lidinsky.tools.ToStringBuilder;
 
@@ -44,11 +42,13 @@ public class Tag extends Configurable
    *  Returns the value of the property.
    */
   public String getName() {
+    check();
     return name;
   }
 
   Tag setName(String name) {
-    this.name = name;
+    this.name = trim(notBlank(name, "The name property may not be blank!\n"
+        + getDeclarationReferenceText()));
     return this;
   }
 
@@ -57,6 +57,13 @@ public class Tag extends Configurable
   {
     super.toString(builder);
     builder.append("name", name);
+  }
+
+  protected void check() {
+    if (name == null) {
+      throw new IllegalStateException("The name property may not be null!\n"
+          + getDeclarationReferenceText());
+    }
   }
 
 }

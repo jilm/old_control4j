@@ -18,6 +18,11 @@ package control4j.application.nativelang;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import static org.apache.commons.lang3.Validate.notNull;
+import static org.apache.commons.lang3.Validate.notBlank;
+import static org.apache.commons.lang3.StringUtils.trim;
+import static control4j.tools.LogMessages.getMessage;
+
 import java.util.ArrayList;
 import org.xml.sax.Attributes;
 
@@ -53,7 +58,8 @@ public class Resource extends Configurable {
   }
 
   Resource setKey(String key) {
-    this.key = key;
+    this.key = trim(notBlank(key, getMessage("msg004", "key",
+        getDeclarationReference())));
     return this;
   }
 
@@ -64,7 +70,7 @@ public class Resource extends Configurable {
   }
 
   Resource setClassName(String className) {
-    this.className = className;
+    this.className = trim(className);
     return this;
   }
 
@@ -75,8 +81,8 @@ public class Resource extends Configurable {
   }
 
   Resource setHref(String href) {
-    this.href = href;
-    isReference = true;
+    this.href = trim(href);
+    isReference = href != null;
     return this;
   }
 
@@ -98,14 +104,12 @@ public class Resource extends Configurable {
   }
 
   public void translate(
-      control4j.application.Resource destination, Scope localScope)
-  {
+      control4j.application.Resource destination, Scope localScope) {
     super.translate(destination, localScope);
   }
 
   @Override
-  public void toString(ToStringBuilder builder)
-  {
+  public void toString(ToStringBuilder builder) {
     super.toString(builder);
     builder.append("key", key)
         .append("className", className)

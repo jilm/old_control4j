@@ -18,6 +18,8 @@ package control4j.application.nativelang;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import static org.apache.commons.lang3.StringUtils.trim;
+
 import cz.lidinsky.tools.ToStringBuilder;
 
 /**
@@ -57,7 +59,7 @@ public class Property extends DeclarationBase {
 
   Property setValue(String value) {
     this.value = value;
-    this.isReference = false;
+    this.isReference = value == null;
     return this;
   }
 
@@ -68,8 +70,8 @@ public class Property extends DeclarationBase {
   }
 
   Property setHref(String href) {
-    this.value = href;
-    this.isReference = true;
+    this.href = trim(href);
+    this.isReference = href != null;
     return this;
   }
 
@@ -91,8 +93,7 @@ public class Property extends DeclarationBase {
   }
 
   @Override
-  public void toString(ToStringBuilder builder)
-  {
+  public void toString(ToStringBuilder builder) {
     super.toString(builder);
     builder.append("key", key)
         .append("value", value)

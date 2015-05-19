@@ -19,12 +19,12 @@ package control4j.application.nativelang;
  */
 
 import static org.apache.commons.lang3.Validate.notBlank;
+import static org.apache.commons.lang3.Validate.notNull;
+import static org.apache.commons.lang3.StringUtils.trim;
 
 import java.util.ArrayList;
-import org.xml.sax.Attributes;
 
 import control4j.application.Scope;
-import control4j.tools.ParseException;
 
 import cz.lidinsky.tools.ToStringBuilder;
 
@@ -41,11 +41,16 @@ public class Signal extends DescriptionBase
   private String name;
 
   public String getName() {
+    if (name == null) {
+      throw new IllegalStateException("Name attribute may not be null\n"
+          + getDeclarationReferenceText());
+    }
     return name;
   }
 
   Signal setName(String name) {
-    this.name = notBlank(name);
+    this.name = trim(notBlank(name,
+        "Name attribute may not be blank" + getDeclarationReferenceText()));
     return this;
   }
 
@@ -64,28 +69,28 @@ public class Signal extends DescriptionBase
    *
    */
   public void translate(
-      control4j.application.Signal destination, Scope localScope)
-  {
+      control4j.application.Signal destination, Scope localScope) {
+
     // translate configuration
     super.translate(destination, localScope);
 
     // translate value for the time t-1
-    if (isValueT_1Specified)
-    {
-      if (isValueT_1Valid)
+    if (isValueT_1Specified) {
+      if (isValueT_1Valid) {
         destination.setValueT_1(valueT_1);
-      else
+      } else {
         destination.setValueT_1Invalid();
+      }
     }
 
     // translate tag objects
-    if (tags != null)
-      for (Tag tag : tags)
-      {
+    if (tags != null) {
+      for (Tag tag : tags) {
         control4j.application.Tag destTag = new control4j.application.Tag();
         tag.translate(destTag, localScope);
         destination.putTag(tag.getName(), destTag);
       }
+    }
 
   }
 
@@ -105,9 +110,10 @@ public class Signal extends DescriptionBase
   }
 
   void setDefaultValue(String value) {
+    valueT_1 = trim(notBlank(value, "Default value may not be blank.\n"
+        + getDeclarationReference()));
     isValueT_1Specified = true;
     isValueT_1Valid = true;
-    valueT_1 = value;
   }
 
   /*
@@ -116,15 +122,28 @@ public class Signal extends DescriptionBase
    *
    */
 
-  private ArrayList<Tag> tags = new ArrayList<Tag>();
+  private ArrayList<Tag> tags;
+
+  public void add(Tag tag) {
+    if (tags == null) {
+      tags = new ArrayList<Tag>();
+    }
+    tags.add(notNull(tag));
+  }
 
   @Override
-  public void toString(ToStringBuilder builder)
-  {
+  public void toString(ToStringBuilder builder) {
     super.toString(builder);
     builder.append("name", name)
-        .append("scope", scope);
-    // TODO:
+        .append("scope", scope)
+        .append("isValueT_1Specified", isValueT_1Specified);
+    if (isValueT_1Specified) {
+      builder.append("isValueT_1Valid", isValueT_1Valid);
+      if (isValueT_1Valid) {
+        builder.append("valueT_1", valueT_1);
+      }
+    }
+    builder.append(tags);
   }
 
 }
