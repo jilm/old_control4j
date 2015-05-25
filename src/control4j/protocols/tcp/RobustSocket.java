@@ -148,7 +148,7 @@ implements Runnable, java.io.Closeable {
    *             if connection has not been estabilished
    */
   public IResponseCrate write(byte[] request,
-      Transformer<InputStream, byte[]> reader) throws IOException {
+      Transformer<InputStream, Object> reader) throws IOException {
 
     if (connected) {
       TransactionCrate transaction = new TransactionCrate(request, reader);
@@ -196,7 +196,7 @@ implements Runnable, java.io.Closeable {
             finest("Request has been sent.\n" + identification);
             // wait for response
             if (stop) break;
-            byte[] response = transaction.getReader().transform(inputStream);
+            Object response = transaction.getReader().transform(inputStream);
             finest("Response received\n" + identification);
             transaction.setResponse(response, null);
           }
@@ -257,14 +257,14 @@ implements Runnable, java.io.Closeable {
    *  timeout.
    *
    */
-  private class TransactionCrate implements IResponseCrate<byte[]> {
+  private class TransactionCrate implements IResponseCrate {
 
     private byte[] request;
-    private byte[] response = null;
+    private Object response = null;
     private IOException exception = null;
     private long requestTimestamp;
     private long responseTimestamp;
-    private Transformer<InputStream, byte[]> reader;
+    private Transformer<InputStream, Object> reader;
 
     /** A time when this object was created. It is used for expiration
         purposes. */
@@ -275,7 +275,7 @@ implements Runnable, java.io.Closeable {
     /**
      *  Initialize fields.
      */
-    TransactionCrate(byte[] request, Transformer<InputStream, byte[]> reader) {
+    TransactionCrate(byte[] request, Transformer<InputStream, Object> reader) {
       this.request = request;
       this.reader = reader;
       created = System.currentTimeMillis();
@@ -294,7 +294,7 @@ implements Runnable, java.io.Closeable {
      *  Return response message. This method blocks until the response
      *  is received.
      */
-    public synchronized byte[] getResponse() throws IOException {
+    public synchronized Object getResponse() throws IOException {
       while (!isFinished())
         try {
           long timeToTimeout
@@ -312,7 +312,7 @@ implements Runnable, java.io.Closeable {
       }
     }
 
-    synchronized void setResponse(byte[] response, IOException exception) {
+    synchronized void setResponse(Object response, IOException exception) {
       if (!isFinished()) {
         this.responseTimestamp = System.currentTimeMillis();
         this.response = response;
@@ -345,7 +345,7 @@ implements Runnable, java.io.Closeable {
       }
     }
 
-    public Transformer<InputStream, byte[]> getReader() {
+    public Transformer<InputStream, Object> getReader() {
       return reader;
     }
 

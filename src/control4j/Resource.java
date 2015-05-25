@@ -18,19 +18,46 @@ package control4j;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import static control4j.tools.Logger.catched;
+
+import cz.lidinsky.tools.reflect.ObjectMapDecorator;
+
 import org.apache.commons.lang3.reflect.MethodUtils;
 
 import java.lang.reflect.InvocationTargetException;
 
-public abstract class Resource
-{
+import java.io.Closeable;
+import java.util.Set;
+
+/**
+ *  Common predecesor of all the resources.
+ */
+public abstract class Resource implements Closeable {
 
   public Resource() {}
 
-  public abstract boolean satisfies(IConfigBuffer configuration);
+  public abstract boolean isEquivalent(
+      control4j.application.Resource definition);
 
-  public abstract void initialize(IConfigBuffer configuration);
+  /**
+   *  Initialize the resource.
+   */
+  public void initialize(control4j.application.Resource definition) {
+    ObjectMapDecorator objectMap = new ObjectMapDecorator(String.class);
+    objectMap.setDecorated(this,
+        ObjectMapDecorator.getStringSetterClosureFactory(this, true));
+    Set<String> keySet = objectMap.keySet();
+    for (String key : keySet) {
+      try {
+        objectMap.put(key, definition.getConfiguration().getString(key));
+      } catch (ConfigItemNotFoundException e) {
+        catched(this.getClass().getName(), "initialize", e);
+      }
+    }
+  }
 
   public void prepare() {}
+
+  public void close() {}
 
 }

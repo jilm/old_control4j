@@ -85,22 +85,21 @@ public class ResourceManager
    *  method returns it. If doesn't it creates and returns new
    *  instance.
    */
-  public Resource getResource(
-      Class<Resource> resourceClass, IConfigBuffer configuration)
-      throws InstantiationException, IllegalAccessException
-  {
+  public Resource getResource(control4j.application.Resource definition)
+      throws InstantiationException,
+             IllegalAccessException,
+             ClassNotFoundException {
+
     // if the instance of requested resource already exists, return it
-    for (Resource resource : resources)
-    {
-      if (resourceClass.isAssignableFrom(resource.getClass()))
-      {
-        if (resource.satisfies(configuration))
-          return resource;
+    for (Resource resource : resources) {
+      if (resource.isEquivalent(definition)) {
+        return resource;
       }
     }
     // if not, create new instance
-    Resource resource = resourceClass.newInstance();
-    resource.initialize(configuration);
+    Resource resource
+        = (Resource)(Class.forName(definition.getClassName()).newInstance());
+    resource.initialize(definition);
     resources.add(resource);
     return resource;
   }

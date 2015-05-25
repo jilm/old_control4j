@@ -35,14 +35,9 @@ public class Gui extends Resource
 
   private Screens gui;
 
-  public void initialize(control4j.application.Resource definition)
-  {
-    gui = ((GuiResource)definition).getGui();
-  }
-
   @Override
-  public void initialize(IConfigBuffer configuration)
-  {
+  public void initialize(control4j.application.Resource definition) {
+    gui = ((GuiResource)definition).getGui();
   }
 
   public void setGui(Screens gui)
@@ -69,10 +64,10 @@ public class Gui extends Resource
       new Runnable()
       {
         public void run()
-	{
-	  mainFrame.pack();
-	  mainFrame.setVisible(true);
-	}
+        {
+          mainFrame.pack();
+          mainFrame.setVisible(true);
+        }
       }
     );
   }
@@ -93,9 +88,14 @@ public class Gui extends Resource
   }
 
   @Override
-  public boolean satisfies(IConfigBuffer configuration)
-  {
-    return true;
+  public boolean isEquivalent(control4j.application.Resource definition) {
+    try {
+      Class _class = Class.forName(definition.getClassName());
+      return this.getClass().isAssignableFrom(_class);
+    } catch (ClassNotFoundException e) {
+      // TODO:
+      return false;
+    }
   }
 
 }

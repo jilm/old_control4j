@@ -104,8 +104,7 @@ public class Instantiator
               = moduleDef.getResource(key);
           Class<Resource> resourceClass
               = (Class<Resource>)Class.forName(resourceDef.getClassName());
-          Resource resource = resourceManager.getResource(
-              resourceClass, resourceDef.getConfiguration());
+          Resource resource = resourceManager.getResource(resourceDef);
           moduleInstance.putResource(key, resource);
         }
         // TODO: check that all of the resources are assigned

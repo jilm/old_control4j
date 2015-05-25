@@ -44,8 +44,8 @@
         <move file="guicomponents.csv" todir="${bindir}/control4j/gui/edit" />
         <copy file="${srcdir}/control4j/application/namespaceloadermap.conf"
               todir="${bindir}/control4j/application" />
-	<copy file="${srcdir}/control4j/application/xmlhandlers.conf"
-	      todir="${bindir}/control4j/application" />
+        <copy file="${srcdir}/control4j/application/xmlhandlers.conf"
+              todir="${bindir}/control4j/application" />
     </target>
 
     <target name="test" depends="compile" >
@@ -71,6 +71,9 @@
             <fileset dir="${srcdir}">
                 <include name="**/*.java" />
             </fileset>
+            <classpath>
+                <pathelement path="depend/lidinsky-tools.jar:depend/commons-lang3.jar:depend/jgrapht.jar:depend/commons-collections.jar" />
+            </classpath>
         </javadoc>
     </target>
     

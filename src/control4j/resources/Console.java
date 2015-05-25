@@ -38,14 +38,18 @@ implements ITextWriter
   }
 
   @Override
-  public boolean satisfies(IConfigBuffer configuration)
-  {
-    return true;
+  public boolean isEquivalent(control4j.application.Resource definition) {
+    try {
+      String className = definition.getClassName();
+      Class _class = Class.forName(className);
+      return this.getClass().isAssignableFrom(_class);
+    } catch (ClassNotFoundException e) {
+      // TODO:
+      return false;
+    }
   }
 
   @Override
-  public void initialize(IConfigBuffer configuration)
-  {
-  }
+  public void initialize(control4j.application.Resource definition) { }
 
 }
