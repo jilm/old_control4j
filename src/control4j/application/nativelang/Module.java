@@ -170,7 +170,7 @@ public class Module extends DescriptionBase {
       Map<String, control4j.application.Input> inputSubstitution,
       Map<String, control4j.application.Output> outputSubstitution) {
 
-    check();
+    //check();
 
     // translate configuration
     super.translate(destination, localScope);
@@ -179,8 +179,7 @@ public class Module extends DescriptionBase {
     if (resources != null) {
       for (Resource resource : resources) {
         if (resource.isReference()) {
-          destination.putResource(resource.getKey(), resource.getHref(),
-              resolveScope(resource.getScope(), localScope));
+	  // resource references are translated in the adapter
         } else {
           control4j.application.Resource translated
               = new control4j.application.Resource(resource.getClassName());

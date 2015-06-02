@@ -23,7 +23,6 @@ package control4j.modules;
 
 import cz.lidinsky.tools.IToStringBuildable;
 import cz.lidinsky.tools.ToStringBuilder;
-import cz.lidinsky.tools.ToStringStyle;
 
 import control4j.Signal;
 import control4j.OutputModule;
@@ -49,7 +48,7 @@ public class OMConst extends OutputModule implements IToStringBuildable
   @Override
   public String toString()
   {
-    return new ToStringBuilder(new ToStringStyle())
+    return new ToStringBuilder()
         .append(this)
         .toString();
   }

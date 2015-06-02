@@ -130,7 +130,7 @@ public abstract class DeclarationBase implements IToStringBuildable
   @Override
   public String toString()
   {
-    return new ToStringBuilder(new ToStringStyle())
+    return new ToStringBuilder()
         .append(this)
         .toString();
   }

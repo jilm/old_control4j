@@ -58,8 +58,7 @@ public class Resource extends Configurable {
   }
 
   Resource setKey(String key) {
-    this.key = trim(notBlank(key, getMessage("msg004", "key",
-        getDeclarationReference())));
+    this.key = key;
     return this;
   }
 

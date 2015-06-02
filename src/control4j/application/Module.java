@@ -18,6 +18,11 @@ package control4j.application;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import static org.apache.commons.lang3.Validate.notNull;
+import static org.apache.commons.lang3.Validate.notBlank;
+import static org.apache.commons.lang3.StringUtils.trim;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -223,40 +228,6 @@ public class Module extends Configurable
 
   /*
    *
-   *     Resource References.
-   *
-   */
-
-  /** References to the resource definitions. */
-  private ArrayList<Triple<String, String, Scope>> resourceRefs
-      = new ArrayList<Triple<String, String, Scope>>();
-
-  /**
-   *  Puts a reference to some resource definition.
-   */
-  public void putResource(String key, String href, Scope scope)
-  {
-    resourceRefs.add(new ImmutableTriple(key, href, scope));
-    fine("New resource reference added");
-  }
-
-  public int getResourceRefsSize()
-  {
-    return resourceRefs.size();
-  }
-
-  public Triple<String, String, Scope> getResourceRef(int index)
-  {
-    return resourceRefs.get(index);
-  }
-
-  public void removeResourceRef(int index)
-  {
-    resourceRefs.remove(index);
-  }
-
-  /*
-   *
    *     Resource Definitions.
    *
    *     Each resource of the module is identified by a unique key.
@@ -267,25 +238,39 @@ public class Module extends Configurable
   private HashMap<String, Resource> resources 
       = new HashMap<String, Resource>();
 
+  private Resource singleResource;
+
   /**
    *  Puts a resource definition.
    */
-  public void putResource(String key, Resource resource)
-  {
-    resources.put(key, resource);
+  public void putResource(String key, Resource resource) {
+    if (isBlank(key) && singleResource == null && resources.size() == 0) {
+      this.singleResource = resource;
+    } else if (!isBlank(key) && singleResource == null) {
+      resources.put(trim(key), resource);
+    } else {
+      throw new SyntaxErrorException("The Resource Key property may be blank only if it is the only resource of the module!\n"); // TODO:
+    }
   }
 
   /**
    *  Returns all of the resouce keys.
    */
-  public Set<String> getResourceKeys()
-  {
-    return resources.keySet();
+  public Set<String> getResourceKeys() {
+    if (singleResource != null) {
+      return java.util.Collections.singleton(null);
+    } else {
+      return resources.keySet();
+    }
   }
 
   public Resource getResource(String key)
   {
-    return resources.get(key); // TODO
+    if (key == null) {
+      return singleResource;
+    } else {
+      return resources.get(key); // TODO
+    }
   }
 
   /*
@@ -470,7 +455,6 @@ public class Module extends Configurable
         .append("outputArray", outputArray)
         .append("variableOutput", variableOutput)
         .append("resources", resources)
-        .append("resourceRefs", resourceRefs)
         .append("inputTags", inputTags)
         .append("outputTags", outputTags)
         .append("fixedInputMap", fixedInputMap)

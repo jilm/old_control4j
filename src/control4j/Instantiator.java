@@ -32,6 +32,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Set;
 
+import cz.lidinsky.scorpio.OMDA;
+
 /**
  *
  *  A class which is responsible for modules instantiation.
@@ -66,6 +68,7 @@ public class Instantiator
       control4j.application.Application application) 
   {
 
+    OMDA omda = new OMDA();
     // preparation
     applicationDef = application;
     ArrayList<Pair<InputModule, int[]>> inputModules 
@@ -87,6 +90,7 @@ public class Instantiator
       {
         Class<Module> moduleClass
             = (Class<Module>)Class.forName(className);
+	    //= (Class<Module>)ClassLoader.getSystemClassLoader().loadClass(className);
         // create instance
         Module moduleInstance = moduleClass.newInstance();
         // create input map
@@ -307,7 +311,7 @@ public class Instantiator
   protected void reportModuleClassNotFound(Throwable e, String className)
   {
     severe(java.text.MessageFormat.format(
-        "A module class: {0} was not found", className));
+        "A module class: {0} was not found\n{1}", className, e.getMessage()));
   }
 
   protected void reportModuleInstantiationException(

@@ -20,7 +20,6 @@ package control4j.application;
 
 import cz.lidinsky.tools.IToStringBuildable;
 import cz.lidinsky.tools.ToStringBuilder;
-import cz.lidinsky.tools.ToStringStyle;
 
 /**
  *
@@ -55,7 +54,7 @@ class Reference implements IToStringBuildable
   @Override
   public String toString()
   {
-    return new ToStringBuilder(new ToStringStyle())
+    return new ToStringBuilder()
         .append(this)
         .toString();
   }

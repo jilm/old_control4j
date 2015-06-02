@@ -28,6 +28,8 @@ import control4j.tools.Tools;
 import static control4j.tools.Logger.*;
 import static control4j.tools.LogMessages.*;
 
+import cz.lidinsky.tools.ToStringMultilineStyle;
+
 /**
  *
  *  This is the runtime engine of the control4j application.
@@ -35,8 +37,8 @@ import static control4j.tools.LogMessages.*;
  *  it repeatedly execute all of the modules.
  *
  *  <p>Duration of one cycle is fixed and may be specified by
- *  configuration item cycle-period. If the processing of the 
- *  cycle is longer than specified the warnig is logged. 
+ *  configuration item cycle-period. If the processing of the
+ *  cycle is longer than specified the warnig is logged.
  *
  */
 public class ControlLoop
@@ -54,8 +56,8 @@ public class ControlLoop
    */
   private boolean exit = false;
 
-  /** 
-   *  Duration of the last cycle in ms. 
+  /**
+   *  Duration of the last cycle in ms.
    */
   private long lastCycleDuration = 0l;
 
@@ -74,7 +76,7 @@ public class ControlLoop
    *    <li> Creates {@link control4j.DataBuffer} instance.
    *    <li> Runs a {@link control4j.resources.Resource#prepare}
    *         method for all of the resources.
-   *    <li> Runs a {@link control4j.Module#prepare} method for 
+   *    <li> Runs a {@link control4j.Module#prepare} method for
    *         all of the modules.
    *    <li> Enters an infinite loop.
    *    <li> Note the cycle start time.
@@ -145,7 +147,7 @@ public class ControlLoop
           else break;
         }
         lastCycleDuration = System.currentTimeMillis() - cycleStartTime;
-      } 
+      }
       catch (Exception e)
       {
         // if an exception arise during the processing some
@@ -233,7 +235,7 @@ public class ControlLoop
   }
 
   /**
-   *  Duration of the last cycle in ms. It returns zero during the first 
+   *  Duration of the last cycle in ms. It returns zero during the first
    *  cycle.
    *
    *  @return duration of the last cycle in ms
@@ -266,7 +268,7 @@ public class ControlLoop
     {
       // create dump file
       String tempDir = System.getProperty("java.io.tmpdir");
-      String filename = "control4j_" 
+      String filename = "control4j_"
           + java.util.UUID.randomUUID().toString() + ".dump";
       java.io.File dumpFile = new java.io.File(tempDir, filename);
       writer = new java.io.PrintWriter(dumpFile);
@@ -293,6 +295,10 @@ public class ControlLoop
       // write the modules
       //ModuleManager.getInstance().dump(writer);
       //
+      writer.println(
+	  new ToStringMultilineStyle()
+	      .append(application)
+	      .toString());
       info("The dump file was created: " + dumpFile.getAbsolutePath());
       dump = false;
     }

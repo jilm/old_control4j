@@ -26,6 +26,9 @@ import control4j.Resource;
 import control4j.protocols.tcp.RobustSocket;
 import control4j.tools.IResponseCrate;
 
+import cz.lidinsky.tools.reflect.Setter;
+import cz.lidinsky.tools.reflect.Getter;
+
 import org.apache.commons.collections4.Transformer;
 
 import java.io.InputStream;
@@ -33,13 +36,13 @@ import java.io.IOException;
 
 public class Socket extends Resource {
 
-  @ConfigItem
+  @Setter("host")
   public String host;
 
-  @ConfigItem
+  @Setter("port")
   public int port;
 
-  @ConfigItem
+  @Setter("timeout")
   public int timeout;
 
   RobustSocket socket;

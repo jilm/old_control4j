@@ -176,7 +176,7 @@ public class ScopeMap<E extends ObjectBase> implements IToStringBuildable
   @Override
   public String toString()
   {
-    return new ToStringBuilder(new ToStringStyle())
+    return new ToStringBuilder()
         .append(this)
         .toString();
   }

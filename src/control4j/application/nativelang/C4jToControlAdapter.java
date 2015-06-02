@@ -52,6 +52,16 @@ public class C4jToControlAdapter extends AbstractAdapter
         new control4j.application.Module(module.getClassName());
     module.translate(translated, localScope, null, null);
     destination.addModule(translated);
+    // put all of the resource references
+    for (Resource resource : module.getResources()) {
+      if (resource.isReference()) {
+	destination.addResourceRef(
+	    translated,
+	    resource.getHref(),
+	    resolveScope(resource.getScope(), localScope),
+	    resource.getKey());
+      }
+    }
   }
 
   public void put(Block block)

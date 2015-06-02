@@ -74,22 +74,20 @@ public class Preprocessor implements IGraph<Use> {
     // resource substitution
     // for all of the modules, if there is a resource reference
     // find it and substitude in place of the reference
-    for (int i=0; i<application.getModulesSize(); i++) {
-      Module module = application.getModule(i);
-      while(module.getResourceRefsSize() > 0) {
-        Triple<String, String, Scope> resourceRef = module.getResourceRef(0);
-        String key = resourceRef.getLeft();
-        String href = resourceRef.getMiddle();
-        Scope scope = resourceRef.getRight();
-        try {
-          Resource resource = application.getResource(href, scope);
-          module.putResource(resourceRef.getLeft(), resource);
-          module.removeResourceRef(0);
-        } catch (NoSuchElementException e) {
-          throw new SyntaxErrorException(
-              getMessage("pre004", href, scope.toString(),
-              module.getDeclarationReferenceText()));
-        }
+    for (ReferenceDecorator<Module, String> resourceRef
+	: application.getResourceReferences()) {
+
+      String key = resourceRef.getValue();
+      String href = resourceRef.getHref();
+      Scope scope = resourceRef.getScope();
+      Module module = resourceRef.getDecorated();
+      try {
+        Resource resource = application.getResource(href, scope);
+        module.putResource(key, resource);
+      } catch (NoSuchElementException e) {
+        throw new SyntaxErrorException(
+            getMessage("pre004", href, scope.toString(),
+            module.getDeclarationReferenceText()));
       }
     }
 

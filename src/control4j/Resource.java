@@ -21,6 +21,7 @@ package control4j;
 import static control4j.tools.Logger.catched;
 
 import cz.lidinsky.tools.reflect.ObjectMapDecorator;
+import cz.lidinsky.tools.reflect.Setter;
 
 import org.apache.commons.lang3.reflect.MethodUtils;
 
@@ -44,6 +45,8 @@ public abstract class Resource implements Closeable {
    */
   public void initialize(control4j.application.Resource definition) {
     ObjectMapDecorator objectMap = new ObjectMapDecorator(String.class);
+    objectMap.setSetterFilter(
+	ObjectMapDecorator.getAnnotationPredicate(Setter.class));
     objectMap.setDecorated(this,
         ObjectMapDecorator.getStringSetterClosureFactory(this, true));
     Set<String> keySet = objectMap.keySet();

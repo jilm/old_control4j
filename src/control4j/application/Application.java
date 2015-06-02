@@ -20,6 +20,7 @@ package control4j.application;
 
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Collection;
 import java.util.ArrayList;
 import java.util.NoSuchElementException;
@@ -32,6 +33,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
+import org.apache.commons.collections4.ListUtils;
 
 import control4j.ErrorManager;
 //import control4j.application.gui.ScreenDeclaration;
@@ -323,6 +325,20 @@ public class Application extends Configurable
   public void removeModules()
   {
     modules.clear();
+  }
+
+  private ArrayList<ReferenceDecorator<Module, String>> resourceReferences
+      = new ArrayList<ReferenceDecorator<Module, String>>();
+
+  public void addResourceRef(
+      Module module, String href, Scope scope, String key) {
+
+    resourceReferences.add(
+	new ReferenceDecorator<Module, String>(href, scope, key, module));
+  }
+
+  public List<ReferenceDecorator<Module, String>> getResourceReferences() {
+    return ListUtils.unmodifiableList(resourceReferences);
   }
 
   /*
