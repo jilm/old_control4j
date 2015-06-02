@@ -98,14 +98,22 @@ class Application implements IToStringBuildable
   {
   }
 
-  void prepare()
-  {
+  void prepare() {
+    for (Pair<InputModule, int[]> module : inputModules) {
+      module.getLeft().prepare();
+    }
+    for (Triple<ProcessModule, int[], int[]> module : processModules) {
+      module.getLeft().prepare();
+    }
+    for (Pair<OutputModule, int[]> module : outputModules) {
+      module.getLeft().prepare();
+    }
   }
 
   @Override
   public String toString()
   {
-    return new ToStringBuilder(new ToStringStyle())
+    return new ToStringBuilder()
         .append(this)
         .toString();
   }
