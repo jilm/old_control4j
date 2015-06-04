@@ -119,7 +119,12 @@ implements IToStringBuildable
     int inputs = definition.getInputSize() - 1;
     labels = new String[inputs];
     for (int i = 0; i < inputs; i++) {
-      labels[i] = definition.getInput(i + 1).getHref();
+      try {
+        labels[i]
+            = definition.getInput(i + 1).getConfiguration().getString("label");
+      } catch (ConfigItemNotFoundException e) {
+        labels[i] = definition.getInput(i + 1).getHref();
+      }
     }
     //
     Locale locale;
