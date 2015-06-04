@@ -24,7 +24,7 @@ import control4j.AMaxInput;
 import control4j.AVariableInput;
 import control4j.Signal;
 import control4j.AResource;
-import control4j.ConfigItem;
+//import control4j.ConfigItem;
 import control4j.InputModule;
 import control4j.SignalFormat;
 import control4j.IConfigBuffer;
@@ -33,11 +33,12 @@ import control4j.resources.ITextWriter;
 
 import cz.lidinsky.tools.IToStringBuildable;
 import cz.lidinsky.tools.ToStringBuilder;
+import cz.lidinsky.tools.reflect.Setter;
 
 /**
  *
- *  Prints values of input signals in a human readable form on 
- *  the given text device. Text device may be a file or just a 
+ *  Prints values of input signals in a human readable form on
+ *  the given text device. Text device may be a file or just a
  *  console. Value of each signal is printed on separate line
  *  together with timestamp and signal name.
  *
@@ -58,43 +59,45 @@ implements IToStringBuildable
    *  A string which is used to separate particular data.
    *  Default value is a space.
    */
-  @ConfigItem(optional=true)
+  @Setter("delimiter")
   public String delimiter = " ";
 
   /**
-   *  A valid ISO Language Code. These codes are the lower-case, 
-   *  two-letter codes as defined by ISO-639 (en or cz for example). 
-   *  You can find a full list of these codes at a number of sites, 
-   *  such as 
+   *  A valid ISO Language Code. These codes are the lower-case,
+   *  two-letter codes as defined by ISO-639 (en or cz for example).
+   *  You can find a full list of these codes at a number of sites,
+   *  such as
    *  <a href="http://www.loc.gov/standards/iso639-2/php/English_list.php">
    *  here</a>
    *  Default value is taken from system settings of the computer.
-   *  
+   *
    *  @see #initialize
    */
-  @ConfigItem(optional=true)
+  @Setter("language")
   public String language = null;
 
   /**
-   *  A valid ISO Country Code. These codes are the upper-case, 
-   *  two-letter codes as defined by ISO-3166 (CZ or US for example). 
+   *  A valid ISO Country Code. These codes are the upper-case,
+   *  two-letter codes as defined by ISO-3166 (CZ or US for example).
    *  You can find a full list of these codes at a number of sites, such as:
    *  <a href="http://www.iso.ch/iso/en/prods-services/iso3166ma/02iso-3166-code-lists/list-en1.html">here</a>
    *  Default value is taken from system settings.
    *
    *  @see #initialize
    */
-  @ConfigItem(optional=true)
+  @Setter("country")
   public String country = null;
 
   /**
    *  Maximum fraction digits for decimal numbers.
    *  Default value is two.
    */
-  @ConfigItem(key="max-fraction-digits", optional=true)
+  @Setter("max-fraction-digits")
   public int maxFractionDigits = 2;
 
   private SignalFormat signalFormat;
+
+  private String[] labels;
 
   /**
    *  Initialize the formatter. It uses variables: language, country
@@ -110,9 +113,15 @@ implements IToStringBuildable
    *  @see java.util.Locale
    */
   @Override
-  public void initialize(IConfigBuffer configuration) 
-  {
-    super.initialize(configuration);
+  public void initialize(control4j.application.Module definition) {
+    super.initialize(definition);
+    // initialize input labels
+    int inputs = definition.getInputSize() - 1;
+    labels = new String[inputs];
+    for (int i = 0; i < inputs; i++) {
+      labels[i] = definition.getInput(i + 1).getHref();
+    }
+    //
     Locale locale;
     if (language == null)
       locale = Locale.getDefault();
@@ -123,7 +132,7 @@ implements IToStringBuildable
     signalFormat = new SignalFormat(locale);
     signalFormat.setMaximumFractionDigits(maxFractionDigits);
   }
-  
+
   /**
    *  Prints input signals on the text device in the human readable
    *  form. Signals are printed on separate lines. First input
@@ -131,7 +140,7 @@ implements IToStringBuildable
    *  which index starts from one are printed only if the enable
    *  input is valid and true, or if this input is not used (null).
    *  Otherwise the print is disabled.
-   *  
+   *
    *  @param input
    *             signal with index zero is interpreted as boolean.
    *             Function of this module is enabled only if this
@@ -147,7 +156,7 @@ implements IToStringBuildable
     {
       for (int i=1; i<inputLength; i++)
         textDevice.println(input[i].toString(
-            signalFormat, delimiter, "???"));
+            signalFormat, delimiter, labels[i - 1]));
     }
   }
 
