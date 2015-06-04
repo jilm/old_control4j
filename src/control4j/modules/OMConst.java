@@ -23,10 +23,10 @@ package control4j.modules;
 
 import cz.lidinsky.tools.IToStringBuildable;
 import cz.lidinsky.tools.ToStringBuilder;
+import cz.lidinsky.tools.reflect.Setter;
 
 import control4j.Signal;
 import control4j.OutputModule;
-import control4j.ConfigItem;
 
 /**
  *  Output module, which returns one constant value,
@@ -37,7 +37,8 @@ import control4j.ConfigItem;
  */
 public class OMConst extends OutputModule implements IToStringBuildable
 {
-  @ConfigItem
+
+  @Setter("value")
   public double value;
 
   public void get(Signal[] output, int outputLength)

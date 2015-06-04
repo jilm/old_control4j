@@ -46,7 +46,7 @@ public abstract class Resource implements Closeable {
   public void initialize(control4j.application.Resource definition) {
     ObjectMapDecorator objectMap = new ObjectMapDecorator(String.class);
     objectMap.setSetterFilter(
-	ObjectMapDecorator.getAnnotationPredicate(Setter.class));
+        ObjectMapDecorator.getAnnotationPredicate(Setter.class));
     objectMap.setDecorated(this,
         ObjectMapDecorator.getStringSetterClosureFactory(this, true));
     Set<String> keySet = objectMap.keySet();

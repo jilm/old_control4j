@@ -39,7 +39,7 @@ import cz.lidinsky.scorpio.OMDA;
  *  A class which is responsible for modules instantiation.
  *
  */
-public class Instantiator 
+public class Instantiator
 {
 
   /**
@@ -52,7 +52,7 @@ public class Instantiator
   Application result;
 
   /**
-   *  Creates instances of all of the modules. The sequence is as 
+   *  Creates instances of all of the modules. The sequence is as
    *  follows:
    *  <ol>
    *    <li>Creates instance of the module. The constructor of the
@@ -65,32 +65,34 @@ public class Instantiator
    *  </ol>
    */
   public Application instantiate(
-      control4j.application.Application application) 
+      control4j.application.Application application)
   {
 
     OMDA omda = new OMDA();
     // preparation
     applicationDef = application;
-    ArrayList<Pair<InputModule, int[]>> inputModules 
+    ArrayList<Pair<InputModule, int[]>> inputModules
         = new ArrayList<Pair<InputModule, int[]>>();
     ArrayList<Triple<ProcessModule, int[], int[]>> processModules
         = new ArrayList<Triple<ProcessModule, int[], int[]>>();
     ArrayList<Pair<OutputModule, int[]>> outputModules
         = new ArrayList<Pair<OutputModule, int[]>>();
+    // result
+    Application result = new Application();
 
     // Create instances of all of the modules
     int modules = application.getModulesSize();
-    for (int i = 0; i < modules; i++) 
+    for (int i = 0; i < modules; i++)
     {
       // get module definition
       control4j.application.Module moduleDef = application.getModule(i);
       // get module class
       String className = moduleDef.getClassName();
-      try 
+      try
       {
         Class<Module> moduleClass
             = (Class<Module>)Class.forName(className);
-	    //= (Class<Module>)ClassLoader.getSystemClassLoader().loadClass(className);
+            //= (Class<Module>)ClassLoader.getSystemClassLoader().loadClass(className);
         // create instance
         Module moduleInstance = moduleClass.newInstance();
         // create input map
@@ -98,13 +100,14 @@ public class Instantiator
         // create output map
         int[] outputMap = getOutputMap(moduleDef, moduleInstance);
         // method initialization
-        moduleInstance.initialize(moduleDef.getConfiguration());
+        //moduleInstance.initialize(moduleDef.getConfiguration());
+        moduleInstance.initialize(moduleDef);
         // resource assignment
         ResourceManager resourceManager = ResourceManager.getInstance();
         Set<String> resourceKeys = moduleDef.getResourceKeys();
         for (String key : resourceKeys)
         {
-          control4j.application.Resource resourceDef 
+          control4j.application.Resource resourceDef
               = moduleDef.getResource(key);
           Class<Resource> resourceClass
               = (Class<Resource>)Class.forName(resourceDef.getClassName());
@@ -143,6 +146,9 @@ public class Instantiator
           // TODO: Not a module
         }
         // TODO: Register as an ICycleListener
+        if (moduleInstance instanceof ICycleEventListener) {
+          result.addCycleEventListener((ICycleEventListener)moduleInstance);
+        }
       }
       catch (ClassNotFoundException e)
       {
@@ -163,8 +169,6 @@ public class Instantiator
       //}
     }
 
-    // return result
-    Application result = new Application();
     // store modules
     result.inputModules
         = (Pair<InputModule, int[]>[])java.lang.reflect.Array.newInstance(
@@ -249,7 +253,7 @@ public class Instantiator
       throw new SyntaxErrorException(java.text.MessageFormat.format(
           "Variable input is not supported by the module {0}",
           module.getClass().getName()));
-    } 
+    }
     else if (module.isVariableInputSupported())
     {
       moduleDef.setVariableInputStartIndex(

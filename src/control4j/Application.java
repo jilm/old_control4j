@@ -18,6 +18,8 @@ package control4j;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import static org.apache.commons.lang3.Validate.notNull;
+
 import cz.lidinsky.tools.ToStringBuilder;
 import cz.lidinsky.tools.ToStringStyle;
 import cz.lidinsky.tools.IToStringBuildable;
@@ -39,7 +41,11 @@ class Application implements IToStringBuildable
   int dataBufferSize;
 
   LinkedList<ICycleEventListener> eventListeners
-      = new LinkedList<ICycleEventListener>();
+                           = new LinkedList<ICycleEventListener>();
+
+  void addCycleEventListener(ICycleEventListener listener) {
+    eventListeners.add(notNull(listener));
+  }
 
   /**
    *  Specify duration of the one cycle loop in ms.
@@ -86,16 +92,22 @@ class Application implements IToStringBuildable
   {
   }
 
-  void fireCycleEndEvent()
-  {
+  void fireCycleEndEvent() {
+    for (ICycleEventListener listener : eventListeners) {
+      listener.cycleEnd();
+    }
   }
 
-  void fireCycleStartEvent()
-  {
+  void fireCycleStartEvent() {
+    for (ICycleEventListener listener : eventListeners) {
+      listener.cycleStart();
+    }
   }
 
-  void fireProcessingStartEvent()
-  {
+  void fireProcessingStartEvent() {
+    for (ICycleEventListener listener : eventListeners) {
+      listener.processingStart();
+    }
   }
 
   void prepare() {

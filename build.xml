@@ -24,7 +24,6 @@
     <target name="clean" depends="init"
             description="Removes all except source code directory.">
         <delete dir="${bindir}" />
-        <delete dir="${docdir}" />
         <delete dir="${reports}" />
     </target>
 

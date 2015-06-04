@@ -20,10 +20,16 @@ package control4j;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.lang.reflect.Field;
+import java.lang.reflect.AccessibleObject;
+
+import cz.lidinsky.tools.reflect.ObjectMapDecorator;
+import cz.lidinsky.tools.reflect.Setter;
 
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.commons.collections4.Predicate;
+import org.apache.commons.collections4.PredicateUtils;
 import org.apache.commons.collections4.iterators.FilterIterator;
 
 import control4j.tools.DeclarationReference;
@@ -98,20 +104,73 @@ public abstract class Module
    *  custom initialization and than call this to finish the
    *  initialization.
    *
-   *  @param configuration 
+   *  @param configuration
    *             the configuration of the module.
    *
    *  @see ConfigurationHelper
    */
-  public void initialize(IConfigBuffer configuration) 
-  { 
+  protected void initialize(IConfigBuffer configuration) {
     // assign configuration items
-    ConfigurationHelper.assignConfiguration(
-        this, configuration, declarationReference);
+    ObjectMapDecorator<String> objectMap
+        = new ObjectMapDecorator<String>(String.class);
+    objectMap.setSetterFilter(PredicateUtils.allPredicate(
+        ObjectMapDecorator.getSetterSignatureCheckPredicate(),
+        ObjectMapDecorator.getHasAnnotationPredicate(Setter.class)));
+    objectMap.setGetterFilter(PredicateUtils.falsePredicate());
+    objectMap.setDecorated(
+        this, ObjectMapDecorator.getStringSetterClosureFactory(this, true));
+    Set<String> keys = objectMap.keySet();
+    for (String key : keys) {
+      try {
+        objectMap.put(key, configuration.getString(key));
+      } catch (ConfigItemNotFoundException e) {
+        fine("ConfigItem missing: " + key);
+      }
+    }
   }
 
-  public void initialize(control4j.application.Module definition)
-  {
+  /**
+   *
+   *
+   */
+  protected void assignResources(control4j.application.Module definition) {
+    ObjectMapDecorator<Resource> objectMap
+        = new ObjectMapDecorator<Resource>(Resource.class);
+    objectMap.setSetterFilter(PredicateUtils.allPredicate(
+        ObjectMapDecorator.getSetterSignatureCheckPredicate(),
+        ObjectMapDecorator.getSetterDataTypeCheckPredicate(Resource.class),
+        ObjectMapDecorator.getHasAnnotationPredicate(AResource.class)));
+    objectMap.setGetterFilter(PredicateUtils.falsePredicate());
+    objectMap.setDecorated(this);
+    Set<String> keys = objectMap.keySet();
+    ResourceManager resourceManager = ResourceManager.getInstance();
+    try {
+      if (keys.size() == 1) {
+        objectMap.put(
+            keys.iterator().next(),
+            resourceManager.getResource(definition.getResource()));
+      } else {
+        for (String key : keys) {
+          objectMap.put(
+              key, resourceManager.getResource(definition.getResource(key)));
+        }
+      }
+    } catch (Exception e) {
+      throw new SyntaxErrorException(e);
+    }
+  }
+
+  /**
+   *  Assign values into the configuration fields, calls configuration
+   *  methods and assign resources. This method calls an
+   *  {@link #initialize(IConfigBuffer)} method to assign configuration
+   *  items. If you need different behaviour, override this method.
+   */
+  public void initialize(control4j.application.Module definition) {
+    // Assign all of the configuration items
+    initialize(definition.getConfiguration());
+    // Assign all of the resources
+    assignResources(definition);
   }
 
   /**
@@ -247,8 +306,7 @@ public abstract class Module
     return Math.max(lastDeclaredIndex + 1, getIndexedOutputSize());
   }
 
-  public void prepare()
-  { }
+  public void prepare() { }
 
   /**
    *  Returns a reference to the config file
@@ -287,11 +345,11 @@ public abstract class Module
 
   public void putResource(final String key, Resource resource)
   {
-    List<Field> resourceFields 
+    List<Field> resourceFields
         = FieldUtils.getFieldsListWithAnnotation(
         getClass(), AResource.class);
-    Iterator<Field> resourceFieldsIter 
-        = new FilterIterator(resourceFields.iterator(), 
+    Iterator<Field> resourceFieldsIter
+        = new FilterIterator(resourceFields.iterator(),
         new Predicate<Field>()
         {
           public boolean evaluate(Field field)

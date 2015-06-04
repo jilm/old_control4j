@@ -18,6 +18,8 @@ package control4j.application;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import static org.apache.commons.lang3.Validate.notBlank;
+
 import cz.lidinsky.tools.ToStringBuilder;
 
 /**
@@ -32,7 +34,8 @@ public class Resource extends Configurable
 
   public Resource(String className)
   {
-    this.className = className;
+    this.className = notBlank(className,
+        "Class name of the resource may not be blank!");
   }
 
   /**

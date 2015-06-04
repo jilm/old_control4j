@@ -29,6 +29,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.NoSuchElementException;
 
 import org.apache.commons.lang3.tuple.Triple;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
@@ -41,7 +42,7 @@ import cz.lidinsky.tools.ToStringBuilder;
 /**
  *
  *  Crate class for module definition. Contains all the information needed
- *  to create and configure an instance of the class which implements the 
+ *  to create and configure an instance of the class which implements the
  *  functionality of the module.
  *
  */
@@ -64,9 +65,9 @@ public class Module extends Configurable
       this.className = className;
   }
 
-  /** 
+  /**
    *  Name of the class which implements functionality of that module.
-   *  It may not contain empty string or null value. 
+   *  It may not contain empty string or null value.
    */
   private String className;
 
@@ -81,7 +82,7 @@ public class Module extends Configurable
     return className;
   }
 
-  /** 
+  /**
    *  Array of the input references with fixed index.
    *  This array may contain null values!
    */
@@ -108,7 +109,7 @@ public class Module extends Configurable
    */
   public int getInputSize()
   {
-    if (inputArray == null) 
+    if (inputArray == null)
       return 0;
     else
       return inputArray.size();
@@ -154,7 +155,7 @@ public class Module extends Configurable
     return variableInput.get(index);
   }
 
-  /** 
+  /**
    *  An array of the output definitions.
    */
   private ArrayList<Output> outputArray = new ArrayList<Output>();
@@ -180,7 +181,7 @@ public class Module extends Configurable
    */
   public int getOutputSize()
   {
-    if (outputArray == null) 
+    if (outputArray == null)
       return 0;
     else
       return outputArray.size();
@@ -235,7 +236,7 @@ public class Module extends Configurable
    */
 
   /** Resource definitions. */
-  private HashMap<String, Resource> resources 
+  private HashMap<String, Resource> resources
       = new HashMap<String, Resource>();
 
   private Resource singleResource;
@@ -245,9 +246,9 @@ public class Module extends Configurable
    */
   public void putResource(String key, Resource resource) {
     if (isBlank(key) && singleResource == null && resources.size() == 0) {
-      this.singleResource = resource;
+      this.singleResource = notNull(resource);
     } else if (!isBlank(key) && singleResource == null) {
-      resources.put(trim(key), resource);
+      resources.put(trim(key), notNull(resource));
     } else {
       throw new SyntaxErrorException("The Resource Key property may be blank only if it is the only resource of the module!\n"); // TODO:
     }
@@ -264,12 +265,34 @@ public class Module extends Configurable
     }
   }
 
-  public Resource getResource(String key)
-  {
-    if (key == null) {
-      return singleResource;
+  public Resource getResource(String key) {
+    if (isBlank(key) || singleResource != null) {
+      return getResource();
     } else {
-      return resources.get(key); // TODO
+      Resource result = resources.get(key); // TODO
+      if (result == null) {
+        throw new NoSuchElementException();
+      } else {
+        return result;
+      }
+    }
+  }
+
+  public int getResourceSize() {
+    if (singleResource != null) {
+      return 1;
+    } else {
+      return resources.size();
+    }
+  }
+
+  public Resource getResource() {
+    if (singleResource != null) {
+      return singleResource;
+    } else if (resources.size() == 1) {
+      return resources.values().iterator().next();
+    } else {
+      throw new IllegalStateException(); // TODO:
     }
   }
 

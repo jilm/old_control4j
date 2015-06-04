@@ -102,8 +102,13 @@ public class ControlLoop
     info("Runnig control loop...");
     dataBuffer = new DataBuffer(application.dataBufferSize);
     // prepare for execution
-    ResourceManager.getInstance().prepare();
-    application.prepare();
+    try {
+      ResourceManager.getInstance().prepare();
+      application.prepare();
+    } catch (Exception e) {
+      dump(e);
+      throw e;
+    }
 
     // The control loop !
     while (true)
