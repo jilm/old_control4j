@@ -34,6 +34,7 @@ import cz.lidinsky.tools.xml.IXMLHandler;
 import cz.lidinsky.tools.xml.XMLReader;
 import cz.lidinsky.tools.xml.AXMLStartElement;
 import cz.lidinsky.tools.xml.AXMLEndElement;
+import cz.lidinsky.tools.xml.AXMLText;
 import cz.lidinsky.tools.xml.AXMLDefaultUri;
 import cz.lidinsky.tools.chain.Factory;
 
@@ -117,6 +118,21 @@ public class XMLHandler implements IXMLHandler
   @AXMLEndElement("application")
   public boolean endApplication() {
     adapter.endLevel();
+    return true;
+  }
+
+  @AXMLStartElement("description")
+  public boolean startDescription(Attributes attributes) {
+    return true;
+  }
+
+  @AXMLEndElement("description")
+  public boolean endDescription() {
+    return true;
+  }
+
+  @AXMLText("application/description")
+  public boolean applicationDescriptionText(String text) {
     return true;
   }
 
@@ -246,6 +262,12 @@ public class XMLHandler implements IXMLHandler
     return true;
   }
 
+  @AXMLText("signal/description")
+  public boolean signalDescriptionText(String text) {
+    signal.setDescription(text);
+    return true;
+  }
+
   /*
    *
    *     Resource
@@ -280,6 +302,13 @@ public class XMLHandler implements IXMLHandler
     resource.put(getProperty(attributes));
     return true;
   }
+
+  @AXMLText("application/resource/description")
+  public boolean appResourceDescriptionText(String text) {
+    resource.setDescription(text);
+    return true;
+  }
+
 
   /*
    *
@@ -349,6 +378,12 @@ public class XMLHandler implements IXMLHandler
   public boolean endBlockUse() {
     block.add(use);
     use = null;
+    return true;
+  }
+
+  @AXMLText("block/description")
+  public boolean blockDescriptionText(String text) {
+    block.setDescription(text);
     return true;
   }
 
@@ -443,6 +478,12 @@ public class XMLHandler implements IXMLHandler
   @AXMLStartElement("module/property")
   public boolean startModuleProperty(Attributes attributes) {
     module.put(getProperty(attributes));
+    return true;
+  }
+
+  @AXMLText("module/description")
+  public boolean moduleDescriptionText(String text) {
+    module.setDescription(text);
     return true;
   }
 
