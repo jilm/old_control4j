@@ -30,7 +30,7 @@ import cz.lidinsky.tools.ToStringStyle;
  *  Represents an input element
  *
  */
-public class Input extends Configurable {
+public class Input extends Configurable implements IReference {
 
   public Input() {}
 
@@ -51,9 +51,8 @@ public class Input extends Configurable {
     return href;
   }
 
-  Input setHref(String href) {
+  public void setHref(String href) {
     this.href = href;
-    return this;
   }
 
   private int scope;
@@ -62,9 +61,8 @@ public class Input extends Configurable {
     return scope;
   }
 
-  Input setScope(int scope) {
+  public void setScope(int scope) {
     this.scope = scope;
-    return this;
   }
 
   @Override

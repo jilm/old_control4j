@@ -35,7 +35,7 @@ import cz.lidinsky.tools.ToStringBuilder;
  *  Resource definition.
  *
  */
-public class ResourceDef extends DescriptionBase {
+public class ResourceDef extends DescriptionBase implements IDefinition {
 
   public ResourceDef() {}
 
@@ -76,10 +76,9 @@ public class ResourceDef extends DescriptionBase {
     return name;
   }
 
-  ResourceDef setName(String name) {
+  public void setName(String name) {
     this.name = trim(notBlank(name, getMessage("msg004", "name",
         getDeclarationReferenceText())));
-    return this;
   }
 
   public int getScope() {
@@ -87,9 +86,8 @@ public class ResourceDef extends DescriptionBase {
     return scope;
   }
 
-  ResourceDef setScope(int scope) {
+  public void setScope(int scope) {
     this.scope = scope;
-    return this;
   }
 
   /**

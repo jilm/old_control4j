@@ -33,8 +33,7 @@ import cz.lidinsky.tools.ToStringBuilder;
  *  Stands for a signal element.
  *
  */
-public class Signal extends DescriptionBase
-{
+public class Signal extends DescriptionBase implements IDefinition {
 
   public Signal() {}
 
@@ -48,10 +47,9 @@ public class Signal extends DescriptionBase
     return name;
   }
 
-  Signal setName(String name) {
+  public void setName(String name) {
     this.name = trim(notBlank(name,
         "Name attribute may not be blank" + getDeclarationReferenceText()));
-    return this;
   }
 
   private int scope;
@@ -60,9 +58,8 @@ public class Signal extends DescriptionBase
     return scope;
   }
 
-  Signal setScope(int scope) {
+  public void setScope(int scope) {
     this.scope = scope;
-    return this;
   }
 
   /**

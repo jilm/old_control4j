@@ -27,6 +27,8 @@ import control4j.tools.ParseException;
 import org.xml.sax.Attributes;
 
 import control4j.application.ITranslatable;
+import control4j.application.ErrorManager;
+import control4j.application.ErrorRecord;
 import control4j.application.Scope;
 import control4j.application.ILoader;
 import control4j.tools.DuplicateElementException;
@@ -153,15 +155,10 @@ public class XMLHandler implements IXMLHandler
 
   @AXMLStartElement("application/define")
   public boolean startApplicationDefine(Attributes attributes) {
-    try {
-      define = new Define();
-      setDeclarationReference(define);
-      define.setName(attributes.getValue("name"));
-      define.setScope(Parser.parseScope2(attributes.getValue("scope")));
-      define.setValue(attributes.getValue("value"));
-    } catch (control4j.tools.ParseException e) {
-      // TODO:
-    }
+    define = new Define();
+    setDeclarationReference(define);
+    setDefinition(define, attributes);
+    define.setValue(attributes.getValue("value"));
     return true;
   }
 
@@ -182,14 +179,9 @@ public class XMLHandler implements IXMLHandler
 
   @AXMLStartElement("application/signal")
   public boolean startApplicationSignal(Attributes attributes) {
-    try {
-      signal = new Signal();
-      setDeclarationReference(signal);
-      signal.setName(attributes.getValue("name"));
-      signal.setScope(Parser.parseScope2(attributes.getValue("scope")));
-    } catch (control4j.tools.ParseException e) {
-      // TODO:
-    }
+    signal = new Signal();
+    setDeclarationReference(signal);
+    setDefinition(signal, attributes);
     return true;
   }
 
@@ -278,15 +270,10 @@ public class XMLHandler implements IXMLHandler
 
   @AXMLStartElement("application/resource")
   public boolean startApplicationResource(Attributes attributes) {
-    try {
-      resource = new ResourceDef();
-      setDeclarationReference(resource);
-      resource.setClassName(attributes.getValue("class"))
-          .setName(attributes.getValue("name"))
-          .setScope(Parser.parseScope2(attributes.getValue("scope")));
-    } catch (ParseException e) {
-      // TODO:
-    }
+    resource = new ResourceDef();
+    setDeclarationReference(resource);
+    setDefinition(resource, attributes);
+    resource.setClassName(attributes.getValue("class"));
     return true;
   }
 
@@ -320,14 +307,9 @@ public class XMLHandler implements IXMLHandler
 
   @AXMLStartElement("application/block")
   public boolean startApplicationBlock(Attributes attributes) {
-    try {
-      block = new Block();
-      setDeclarationReference(block);
-      block.setName(attributes.getValue("name"))
-           .setScope(Parser.parseScope2(attributes.getValue("scope")));
-    } catch (ParseException e) {
-      // TODO:
-    }
+    block = new Block();
+    setDeclarationReference(block);
+    setDefinition(block, attributes);
     return true;
   }
 
@@ -398,14 +380,9 @@ public class XMLHandler implements IXMLHandler
   @AXMLStartElement("use")
   public boolean startUse(Attributes attributes)
   {
-    try {
-      use = new Use();
-      setDeclarationReference(use);
-      use.setHref(attributes.getValue("href"))
-          .setScope(Parser.parseScope3(attributes.getValue("scope")));
-    } catch (ParseException e) {
-      // TODO:
-    }
+    use = new Use();
+    setDeclarationReference(use);
+    setReference(use, attributes);
     return true;
   }
 
@@ -424,31 +401,19 @@ public class XMLHandler implements IXMLHandler
 
   @AXMLStartElement("use/input")
   public boolean startUseInput(Attributes attributes) {
-    try {
-      use.add(
-          new Input()
-              .setIndex(attributes.getValue("index"))
-              .setHref(attributes.getValue("href"))
-              .setScope(Parser.parseScope3(attributes.getValue("scope")))
-      );
-    } catch (ParseException e) {
-      // TODO:
-    }
+    Input input = new Input()
+        .setIndex(attributes.getValue("index"));
+    setReference(input, attributes);
+    use.add(input);
     return true;
   }
 
   @AXMLStartElement("use/output")
   public boolean startUseOutput(Attributes attributes) {
-    try {
-      use.add(
-          new Output()
-              .setIndex(attributes.getValue("index"))
-              .setHref(attributes.getValue("href"))
-              .setScope(Parser.parseScope3(attributes.getValue("scope")))
-      );
-    } catch (ParseException e) {
-      // TODO:
-    }
+    Output output = new Output()
+        .setIndex(attributes.getValue("index"));
+    setReference(output, attributes);
+    use.add(output);
     return true;
   }
 
@@ -491,14 +456,9 @@ public class XMLHandler implements IXMLHandler
 
   @AXMLStartElement("module/input")
   public boolean startModuleInput(Attributes attributes) {
-    try {
-      input = new Input()
-          .setIndex(attributes.getValue("index"))
-          .setHref(attributes.getValue("href"))
-          .setScope(Parser.parseScope3(attributes.getValue("scope")));
-    } catch (ParseException e) {
-      // TODO:
-    }
+    input = new Input()
+        .setIndex(attributes.getValue("index"));
+    setReference(input, attributes);
     return true;
   }
 
@@ -519,14 +479,9 @@ public class XMLHandler implements IXMLHandler
 
   @AXMLStartElement("module/output")
   public boolean startModuleOutput(Attributes attributes) {
-    try {
-      output = new Output()
-          .setIndex(attributes.getValue("index"))
-          .setHref(attributes.getValue("href"))
-          .setScope(Parser.parseScope3(attributes.getValue("scope")));
-    } catch (ParseException e) {
-      // TODO:
-    }
+    output = new Output()
+        .setIndex(attributes.getValue("index"));
+    setReference(output, attributes);
     return true;
   }
 
@@ -547,15 +502,10 @@ public class XMLHandler implements IXMLHandler
 
   @AXMLStartElement("module/resource")
   public boolean startModuleResource(Attributes attributes) {
-    try {
-      moduleResource = new Resource()
+    moduleResource = new Resource()
           .setKey(attributes.getValue("key"))
-          .setHref(attributes.getValue("href"))
-          .setScope(Parser.parseScope3(attributes.getValue("scope")))
           .setClassName(attributes.getValue("class"));
-    } catch (ParseException e) {
-      // TODO:
-    }
+    setReference(moduleResource, attributes);
     return true;
   }
 
@@ -594,18 +544,38 @@ public class XMLHandler implements IXMLHandler
     return true;
   }
 
-  private Property getProperty(Attributes attributes) {
+  // -------------------------------------------------- Private methods
 
+  private Property getProperty(Attributes attributes) {
+    Property property = new Property()
+        .setKey(Parser.parseToken(attributes.getValue("key")))
+        .setValue(attributes.getValue("value"));
+    setReference(property, attributes);
+    return property;
+  }
+
+  private void setDefinition(IDefinition object, Attributes attributes) {
     try {
-      return new Property()
-          .setKey(Parser.parseToken(attributes.getValue("key")))
-          .setValue(attributes.getValue("value"))
-          .setHref(Parser.parseToken(attributes.getValue("href")))
-          .setScope(Parser.parseScope3(attributes.getValue("scope")));
+      object.setName(attributes.getValue("name"));
+      object.setScope(Parser.parseScope2(attributes.getValue("scope")));
+    } catch (ParseException e) {
+      ErrorManager.newError()
+        .set(ErrorRecord.DATATYPE_ERROR)
+        .set(ErrorRecord.WHAT_CODE, "scope")
+        .set(ErrorRecord.SHOULD_BE_CODE, "local, global")
+        .set(ErrorRecord.IS_CODE, attributes.getValue("scope"))
+        .set(ErrorRecord.WHERE_CODE,
+            ((DeclarationBase)object).getDeclarationReferenceText());
+    }
+  }
+
+  private void setReference(IReference object, Attributes attributes) {
+    try {
+      object.setHref(attributes.getValue("href"));
+      object.setScope(Parser.parseScope3(attributes.getValue("scope")));
     } catch (ParseException e) {
       // TODO:
     }
-    return null;
   }
 
   protected void setDeclarationReference(DeclarationBase object) {

@@ -47,7 +47,7 @@ import cz.lidinsky.tools.ToStringBuilder;
  *  </ol>
  *
  */
-public class Resource extends Configurable {
+public class Resource extends Configurable implements IReference {
 
   public Resource() {}
 
@@ -79,10 +79,9 @@ public class Resource extends Configurable {
     return href;
   }
 
-  Resource setHref(String href) {
+  public void setHref(String href) {
     this.href = trim(href);
     isReference = href != null;
-    return this;
   }
 
   private int scope;
@@ -91,9 +90,8 @@ public class Resource extends Configurable {
     return scope;
   }
 
-  Resource setScope(int scope) {
+  public void setScope(int scope) {
     this.scope = scope;
-    return this;
   }
 
   private boolean isReference;

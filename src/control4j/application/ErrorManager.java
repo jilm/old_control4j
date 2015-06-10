@@ -33,13 +33,13 @@ import java.util.LinkedList;
  *  object.
  *
  */
-public class ErrorManager
-{
+public class ErrorManager {
+
 
   /*
    *    Singleton Implementation.
    */
-  
+
   /** Error manager instance. */
   private static ErrorManager instance;
 
@@ -70,7 +70,7 @@ public class ErrorManager
    */
   public void addError(String message)
   {
-    if (errors == null) 
+    if (errors == null)
       errors = new LinkedList<String>();
     errors.add(message);
   }
@@ -81,7 +81,7 @@ public class ErrorManager
   public void printErrors()
   {
     if (errors != null)
-      for (String message : errors) 
+      for (String message : errors)
 	severe(message);
   }
 
@@ -129,6 +129,10 @@ public class ErrorManager
 
   public void clean()
   {
+  }
+
+  public static ErrorRecord newError() {
+    return new ErrorRecord();
   }
 
 }

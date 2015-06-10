@@ -39,7 +39,7 @@ import cz.lidinsky.tools.ToStringBuilder;
  *  Represents a use element.
  *
  */
-public class Use extends Configurable {
+public class Use extends Configurable implements IReference {
 
   public Use() {}
 
@@ -50,10 +50,9 @@ public class Use extends Configurable {
     return href;
   }
 
-  Use setHref(String href) {
+  public void setHref(String href) {
     this.href = trim(notBlank(href, getMessage("msg004", "href",
         getDeclarationReferenceText())));
-    return this;
   }
 
   private int scope;
@@ -63,9 +62,8 @@ public class Use extends Configurable {
     return scope;
   }
 
-  Use setScope(int scope) {
+  public void setScope(int scope) {
     this.scope = scope;
-    return this;
   }
 
   private ArrayList<Input> input;

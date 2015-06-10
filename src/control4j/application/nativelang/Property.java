@@ -32,7 +32,7 @@ import cz.lidinsky.tools.ToStringBuilder;
  *  </ol>
  *
  */
-public class Property extends DeclarationBase {
+public class Property extends DeclarationBase implements IReference {
 
   public Property() {}
 
@@ -69,10 +69,9 @@ public class Property extends DeclarationBase {
     return href;
   }
 
-  Property setHref(String href) {
+  public void setHref(String href) {
     this.href = trim(href);
     this.isReference = href != null;
-    return this;
   }
 
   private int scope;
@@ -81,9 +80,8 @@ public class Property extends DeclarationBase {
     return scope;
   }
 
-  Property setScope(int scope) {
+  public void setScope(int scope) {
     this.scope = scope;
-    return this;
   }
 
   private boolean isReference;

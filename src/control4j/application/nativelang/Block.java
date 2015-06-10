@@ -42,33 +42,29 @@ import cz.lidinsky.tools.ToStringStyle;
  *  Stands for a block element.
  *
  */
-public class Block extends DescriptionBase {
+public class Block extends DescriptionBase implements IDefinition {
 
   public Block() {}
 
   private String name;
 
   public String getName() {
-    check();
     return name;
   }
 
-  Block setName(String name) {
+  public void setName(String name) {
     this.name = trim(notBlank(name, getMessage("msg004", "name",
         getDeclarationReferenceText())));
-    return this;
   }
 
   private int scope;
 
   public int getScope() {
-    check();
     return scope;
   }
 
-  Block setScope(final int scope) {
+  public void setScope(final int scope) {
     this.scope = scope;
-    return this;
   }
 
   private ArrayList<String> input;

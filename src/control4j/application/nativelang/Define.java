@@ -30,7 +30,7 @@ import cz.lidinsky.tools.ToStringBuilder;
  *  Represents define element
  *
  */
-public class Define extends DeclarationBase {
+public class Define extends DeclarationBase implements IDefinition {
 
   public Define() {}
 
@@ -44,10 +44,9 @@ public class Define extends DeclarationBase {
     return name;
   }
 
-  Define setName(final String name) {
+  public void setName(final String name) {
     this.name = trim(notBlank(name,
         "Name attribute may not be empty\n" + getDeclarationReferenceText()));
-    return this;
   }
 
   private int scope;
@@ -56,11 +55,10 @@ public class Define extends DeclarationBase {
     return scope;
   }
 
-  Define setScope(final int scope) {
+  public void setScope(final int scope) {
     inclusiveBetween(0, 1, scope, "Scope attribute must be between 0 and 1\n"
         + getDeclarationReferenceText());
     this.scope = scope;
-    return this;
   }
 
   private String value;
