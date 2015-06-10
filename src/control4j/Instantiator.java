@@ -244,21 +244,17 @@ public class Instantiator
    *  Creates and returns the input map for a given module definition.
    */
   protected int[] getInputMap(
-      control4j.application.Module moduleDef, Module module)
-  {
+      control4j.application.Module moduleDef, Module module) {
+
     // calculate required size of the map array
     int varInputSize = moduleDef.getVariableInputSize();
-    if (varInputSize > 0 && !module.isVariableInputSupported())
-    {
-      throw new SyntaxErrorException(java.text.MessageFormat.format(
-          "Variable input is not supported by the module {0}",
-          module.getClass().getName()));
-    }
-    else if (module.isVariableInputSupported())
-    {
+    if (varInputSize > 0 && !module.isVariableInputSupported()) {
+      throw new SyntaxErrorException()
+        .set("message", "Variable input is not supported by the module")
+        .set("module", moduleDef.toString());
+    } else if (module.isVariableInputSupported()) {
       moduleDef.setVariableInputStartIndex(
           module.getVariableInputFirstIndex());
-      // TODO: index collision
     }
     int mapSize = module.getInputSize(moduleDef.getInputSize() - 1);
     if (mapSize == 0) return null;
@@ -316,6 +312,7 @@ public class Instantiator
   {
     severe(java.text.MessageFormat.format(
         "A module class: {0} was not found\n{1}", className, e.getMessage()));
+    System.exit(1);
   }
 
   protected void reportModuleInstantiationException(

@@ -34,11 +34,14 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 
+import cz.lidinsky.tools.ToStringMultilineStyle;
+import cz.lidinsky.tools.ToStringBuilder;
 import cz.lidinsky.tools.graph.Graph;
 import cz.lidinsky.tools.graph.IGraph;
 
 import static control4j.tools.Logger.*;
 
+import control4j.SyntaxErrorException;
 import control4j.tools.DuplicateElementException;
 
 /**
@@ -75,7 +78,7 @@ public class Preprocessor implements IGraph<Use> {
     // for all of the modules, if there is a resource reference
     // find it and substitude in place of the reference
     for (ReferenceDecorator<Module, String> resourceRef
-	: application.getResourceReferences()) {
+        : application.getResourceReferences()) {
 
       String key = resourceRef.getValue();
       String href = resourceRef.getHref();
@@ -127,35 +130,64 @@ public class Preprocessor implements IGraph<Use> {
         resolveConfiguration(signal.getTag(name));
     }
 
-    for (int i=0; i<application.getModulesSize(); i++)
-    {
+    for (int i=0; i<application.getModulesSize(); i++) {
+
       Module module = application.getModule(i);
+
+      // tagged signals
+      if (module.getInputTagsSize() > 0 || module.getOutputTagsSize() > 0) {
+        for (int j=0; j<application.getSignalsSize(); j++) {
+          String name = application.getSignal(j).getLeft();
+          Scope scope = application.getSignal(j).getMiddle();
+          Signal signal = application.getSignal(j).getRight();
+          Set<String> tags = signal.getTagNames();
+          for (String tag : tags) {
+            if (module.containsInputTag(tag)) {
+              //module.addInputSignalIndex(j);
+              module.putInput(new Input(scope, name));
+            }
+            if (module.containsOutputTag(tag)) {
+              //module.addOutputSignalIndex(j);
+              module.putOutput(new Output(scope, name));
+            }
+          }
+        }
+      }
 
       // create module input map
       // input with fixed index
-      for (int j=0; j<module.getInputSize(); j++)
-        if (module.getInput(j) != null)
-          try
-          {
+      for (int j = 0; j < module.getInputSize(); j++) {
+        if (module.getInput(j) != null) {
+          try {
             Input input = module.getInput(j);
             Signal signal
                 = application.getSignal(input.getHref(), input.getScope());
             int signalIndex = application.getSignalIndex(signal);
             module.putInputSignalIndex(j, signalIndex);
+          } catch (Exception e) {
+            throw new SyntaxErrorException()
+              .setCause(e)
+              .set("hint", "Module fixed input map creation")
+              .set("module", module.toString());
           }
-          catch (NoSuchElementException e) { } // TODO
+        }
+      }
 
       // input with variable index
-      for (int j=0; j<module.getVariableInputSize(); j++)
-        try
-        {
+      for (int j = 0; j < module.getVariableInputSize(); j++) {
+        try {
           Input input = module.getVariableInput(j);
           Signal signal
               = application.getSignal(input.getHref(), input.getScope());
           int signalIndex = application.getSignalIndex(signal);
           module.addInputSignalIndex(signalIndex);
+        } catch (Exception e) {
+          throw new SyntaxErrorException()
+            .setCause(e)
+            .set("hint", "Module variable input map creation")
+            .set("module", module.toString());
         }
-        catch (NoSuchElementException e) { } // TODO
+      }
 
       // create module output map
       // output with fixed index
@@ -183,20 +215,6 @@ public class Preprocessor implements IGraph<Use> {
         }
         catch (NoSuchElementException e) { } // TODO
 
-      // tagged signals
-      if (module.getInputTagsSize() > 0 || module.getOutputTagsSize() > 0)
-        for (int j=0; j<application.getSignalsSize(); j++)
-        {
-          Signal signal = application.getSignal(j).getRight();
-          Set<String> tags = signal.getTagNames();
-          for (String tag : tags)
-          {
-            if (module.containsInputTag(tag))
-              module.addInputSignalIndex(j);
-            if (module.containsOutputTag(tag))
-              module.addOutputSignalIndex(j);
-          }
-        }
     }
 
     // cleen-up
@@ -223,11 +241,11 @@ public class Preprocessor implements IGraph<Use> {
       // get appropriate block definition
       Block block = application.getBlock(use.getHref(), use.getScope());
       // Pair a block input and output with the use's input and output
-      Map<String, Input> inputSubstitution 
+      Map<String, Input> inputSubstitution
           = pairInput(use, block.getInputSet());
-      Map<String, Output> outputSubstitution 
+      Map<String, Output> outputSubstitution
           = pairOutput(use, block.getOutputSet());
-      // expand 
+      // expand
       expand(block, innerScope, inputSubstitution, outputSubstitution);
     }
     catch (NoSuchElementException e)
@@ -255,7 +273,7 @@ public class Preprocessor implements IGraph<Use> {
    *
    *  @param outputSubstitution
    *             a map of the block output to the signal references.
-   *             Accept the null value in case there is no block 
+   *             Accept the null value in case there is no block
    *             output.
    */
   protected void expand(
@@ -266,7 +284,7 @@ public class Preprocessor implements IGraph<Use> {
     for (control4j.application.nativelang.Signal signal : block.getSignals())
       translate(signal, scope);
     // Expand all of the modules
-    for (control4j.application.nativelang.Module rawModule 
+    for (control4j.application.nativelang.Module rawModule
         : block.getModules())
     {
       Module module = translate(
@@ -277,7 +295,7 @@ public class Preprocessor implements IGraph<Use> {
     for (control4j.application.nativelang.Use rawUse : block.getUseObjects())
     {
       Use use = new Use(
-          rawUse.getHref(), 
+          rawUse.getHref(),
           Translator.resolveScope(rawUse.getScope(), scope));
       rawUse.translate(use, scope);
       application.add(use, scope);
@@ -321,9 +339,9 @@ public class Preprocessor implements IGraph<Use> {
    *             block is expanded
    */
   protected Module translate(
-      control4j.application.nativelang.Module rawModule, 
-      Scope localScope, 
-      Map<String, Input> inputSubstitution, 
+      control4j.application.nativelang.Module rawModule,
+      Scope localScope,
+      Map<String, Input> inputSubstitution,
       Map<String, Output> outputSubstitution)
   {
       Module module = new Module(rawModule.getClassName());
@@ -377,7 +395,7 @@ public class Preprocessor implements IGraph<Use> {
    */
   protected void resolveConfiguration(Configurable object) {
     while(object.getConfigItemRefsSize() > 0) {
-      Triple<String, String, Scope> reference 
+      Triple<String, String, Scope> reference
           = object.getConfigItemReference(0);
       String key = reference.getLeft();
       String href = reference.getMiddle();
@@ -449,14 +467,18 @@ public class Preprocessor implements IGraph<Use> {
     ErrorManager.getInstance().addError(message);
   }
 
-  public static void main(String[] args) throws Exception
-  {
+  /**
+   *  Only for debug purposes.
+   */
+  public static void main(String[] args) throws Exception {
     java.io.File file = new java.io.File(args[0]);
     Loader loader = new Loader();
     Application application = loader.load(file);
     Preprocessor preprocessor = new Preprocessor();
     preprocessor.process(application);
-    System.out.println(application.toString());
+    ToStringBuilder sb = new ToStringMultilineStyle();
+    application.toString(sb);
+    System.out.println(sb.toString());
   }
 
 }

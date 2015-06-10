@@ -52,7 +52,7 @@ implements IToStringBuildable
   /**
    *  Text device on which it will be printed.
    */
-  @AResource(key="text-device")
+  @AResource
   public ITextWriter textDevice;
 
   /**
@@ -155,23 +155,22 @@ implements IToStringBuildable
    *             printed on text device. These cannot be null.
    */
   @Override
-  public void put(Signal[] input, int inputLength)
-  {
-    if (input[0] == null || (input[0].isValid() && input[0].getBoolean()))
-    {
-      for (int i=1; i<inputLength; i++)
+  public void put(Signal[] input, int inputLength) {
+    if (input[0] == null || (input[0].isValid() && input[0].getBoolean())) {
+      for (int i=1; i<inputLength; i++) {
         textDevice.println(input[i].toString(
             signalFormat, delimiter, labels[i - 1]));
+      }
     }
   }
 
-  public void toString(ToStringBuilder builder)
-  {
+  public void toString(ToStringBuilder builder) {
     builder.append("textDevice", textDevice)
            .append("delimiter", delimiter)
            .append("language", language)
            .append("country", country)
            .append("maxFractionDigits", maxFractionDigits)
-           .append("signalFormat", signalFormat);
+           .append("signalFormat", signalFormat)
+           .append("labels", labels);
   }
 }

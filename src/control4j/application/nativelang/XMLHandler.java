@@ -51,9 +51,7 @@ import org.apache.commons.collections4.Predicate;
 
 /**
  *
- *  The root object of the whole application, it holds instances of
- *  other object declarations which were loaded. It contains only
- *  objects that belong to the native c4j language.
+ *  Loads the
  *
  */
 @AXMLDefaultUri("http://control4j.lidinsky.cz/application")
@@ -236,6 +234,7 @@ public class XMLHandler implements IXMLHandler
   public boolean startSignalTag(Attributes attributes) {
     tag = new Tag();
     setDeclarationReference(tag);
+    tag.setName(attributes.getValue("name"));
     // TODO:
     return true;
   }

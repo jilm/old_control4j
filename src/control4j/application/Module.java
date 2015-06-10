@@ -22,6 +22,7 @@ import static org.apache.commons.lang3.Validate.notNull;
 import static org.apache.commons.lang3.Validate.notBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static control4j.tools.LogMessages.getMessage;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,6 +35,7 @@ import java.util.NoSuchElementException;
 import org.apache.commons.lang3.tuple.Triple;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 
+import control4j.SyntaxErrorException;
 import control4j.tools.DeclarationReference;
 import static control4j.tools.Logger.*;
 
@@ -46,8 +48,7 @@ import cz.lidinsky.tools.ToStringBuilder;
  *  functionality of the module.
  *
  */
-public class Module extends Configurable
-{
+public class Module extends Configurable {
 
   /**
    *  @param className
@@ -57,12 +58,9 @@ public class Module extends Configurable
    *  @throws IllegalArgumentException
    *             if className is null or an empty string
    */
-  public Module(String className)
-  {
-    if (className == null || className.length() == 0)
-      throw new IllegalArgumentException();
-    else
-      this.className = className;
+  public Module(String className) {
+    this.className = trim(notBlank(className,
+        getMessage("msg004", "className", getDeclarationReferenceText())));
   }
 
   /**
@@ -77,8 +75,7 @@ public class Module extends Configurable
    *
    *  @return class name, it will never be null
    */
-  public String getClassName()
-  {
+  public String getClassName() {
     return className;
   }
 
@@ -91,8 +88,13 @@ public class Module extends Configurable
   /**
    *  Puts given input reference to the specified index.
    */
-  public void putInput(int index, Input input)
-  {
+  public void putInput(int index, Input input) {
+    notNull(input,
+        getMessage("msg006", "input", getDeclarationReferenceText()));
+    if (index < 0) {
+      throw new IndexOutOfBoundsException(
+          "Input index may not be a negative number: " + index);
+    }
     if (inputArray == null)
       inputArray = new ArrayList<Input>();
     // if the array list is not big enough
@@ -107,8 +109,7 @@ public class Module extends Configurable
   /**
    *  Returns the highest assigned index plus one.
    */
-  public int getInputSize()
-  {
+  public int getInputSize() {
     if (inputArray == null)
       return 0;
     else
@@ -118,8 +119,7 @@ public class Module extends Configurable
   /**
    *  Returns input with given index.
    */
-  public Input getInput(int index)
-  {
+  public Input getInput(int index) {
     if (inputArray == null) {} // TODO
     return inputArray.get(index);
   }
@@ -130,8 +130,9 @@ public class Module extends Configurable
   /**
    *  Adds an input which doesn't have index attached.
    */
-  public void putInput(Input input)
-  {
+  public void putInput(Input input) {
+    notNull(input,
+        getMessage("msg006", "input", getDeclarationReferenceText()));
     if (variableInput == null)
       variableInput = new ArrayList<Input>();
     variableInput.add(input);
@@ -140,8 +141,7 @@ public class Module extends Configurable
   /**
    *  Returns number of variable input signals.
    */
-  public int getVariableInputSize()
-  {
+  public int getVariableInputSize() {
     if (variableInput == null) return 0;
     return variableInput.size();
   }
@@ -149,8 +149,7 @@ public class Module extends Configurable
   /**
    *  Returns a variable input on given position.
    */
-  public Input getVariableInput(int index)
-  {
+  public Input getVariableInput(int index) {
     if (variableInput == null) {} // TODO
     return variableInput.get(index);
   }
@@ -358,15 +357,18 @@ public class Module extends Configurable
   private ArrayList<Integer> fixedInputMap = new ArrayList<Integer>();
   private ArrayList<Integer> variableInputMap = new ArrayList<Integer>();
 
-  public void putInputSignalIndex(int index, int signalIndex)
-  {
+  public void putInputSignalIndex(int index, int signalIndex) {
+    if (index < 0) {
+      throw new SyntaxErrorException()
+        .set("message", "Negative index!")
+        .set("index", Integer.valueOf(index).toString());
+    }
     while (index >= fixedInputMap.size())
       fixedInputMap.add(-1);
     fixedInputMap.set(index, signalIndex);
   }
 
-  public void addInputSignalIndex(int signalIndex)
-  {
+  public void addInputSignalIndex(int signalIndex) {
     variableInputMap.add(signalIndex);
   }
 
@@ -380,26 +382,30 @@ public class Module extends Configurable
     return variableInputMap;
   }
 
-  public void setVariableInputStartIndex(int index)
-  {
-    if (variableInputMap.size() == 0)
-    {
+  public void setVariableInputStartIndex(int index) {
+    if (index < 0) {
+      throw new SyntaxErrorException()
+        .set("message", "Negative index!")
+        .set("index", Integer.valueOf(index).toString())
+        .set("module def.", toString());
+    }
+    if (variableInputMap.size() == 0) {
       return;
+    } else if (fixedInputMap.size() > index) {
+      throw new SyntaxErrorException()
+        .set("message", "Input index colision!")
+        .set("index", Integer.valueOf(index).toString())
+        .set("module def", toString());
     }
-    else if (fixedInputMap.size() > index)
-    {
-      // TODO indexes colision
-    }
-    while (fixedInputMap.size() < index)
-    {
+    while (fixedInputMap.size() < index) {
       fixedInputMap.add(-1);
       inputArray.add(null);
     }
-    for (int i = 0; i < variableInputMap.size(); i++)
-    {
+    for (int i = 0; i < variableInputMap.size(); i++) {
       fixedInputMap.add(variableInputMap.get(i));
       inputArray.add(variableInput.get(i));
     }
+    // cleen up
     variableInputMap.clear();
     variableInput.clear();
   }

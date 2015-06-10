@@ -179,7 +179,7 @@ public class Module extends DescriptionBase {
     if (resources != null) {
       for (Resource resource : resources) {
         if (resource.isReference()) {
-	  // resource references are translated in the adapter
+          // resource references are translated in the adapter
         } else {
           control4j.application.Resource translated
               = new control4j.application.Resource(resource.getClassName());
@@ -216,7 +216,9 @@ public class Module extends DescriptionBase {
             int index = Integer.parseInt(strIndex);
             destination.putInput(index, translated);
           } catch (NumberFormatException e) {
-            // TODO:
+            throw new control4j.SyntaxErrorException()
+              .setCause(e)
+              .set("Input index", strIndex);
           }
         }
       }

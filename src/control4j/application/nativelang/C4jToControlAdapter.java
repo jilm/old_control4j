@@ -45,8 +45,7 @@ public class C4jToControlAdapter extends AbstractAdapter
     destination.endScope();
   }
 
-  public void put(Module module)
-  {
+  public void put(Module module) {
     Scope localScope = destination.getScopePointer();
     control4j.application.Module translated =
         new control4j.application.Module(module.getClassName());
@@ -55,11 +54,11 @@ public class C4jToControlAdapter extends AbstractAdapter
     // put all of the resource references
     for (Resource resource : module.getResources()) {
       if (resource.isReference()) {
-	destination.addResourceRef(
-	    translated,
-	    resource.getHref(),
-	    resolveScope(resource.getScope(), localScope),
-	    resource.getKey());
+        destination.addResourceRef(
+            translated,
+            resource.getHref(),
+            resolveScope(resource.getScope(), localScope),
+            resource.getKey());
       }
     }
   }

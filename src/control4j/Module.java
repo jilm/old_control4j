@@ -24,6 +24,8 @@ import java.util.Set;
 import java.lang.reflect.Field;
 import java.lang.reflect.AccessibleObject;
 
+import cz.lidinsky.tools.IToStringBuildable;
+import cz.lidinsky.tools.ToStringBuilder;
 import cz.lidinsky.tools.reflect.ObjectMapDecorator;
 import cz.lidinsky.tools.reflect.Setter;
 
@@ -87,7 +89,7 @@ import static control4j.tools.Logger.*;
  *  @see AMinInput
  *  @see AMaxInput
  */
-public abstract class Module
+public abstract class Module implements IToStringBuildable
 {
 
   /**
@@ -134,11 +136,10 @@ public abstract class Module
    *
    */
   protected void assignResources(control4j.application.Module definition) {
-    ObjectMapDecorator<Resource> objectMap
-        = new ObjectMapDecorator<Resource>(Resource.class);
+    ObjectMapDecorator<Object> objectMap
+        = new ObjectMapDecorator<Object>(Object.class);
     objectMap.setSetterFilter(PredicateUtils.allPredicate(
         ObjectMapDecorator.getSetterSignatureCheckPredicate(),
-        ObjectMapDecorator.getSetterDataTypeCheckPredicate(Resource.class),
         ObjectMapDecorator.getHasAnnotationPredicate(AResource.class)));
     objectMap.setGetterFilter(PredicateUtils.falsePredicate());
     objectMap.setDecorated(this);
@@ -376,6 +377,17 @@ public abstract class Module
     // TODO: Non existent key field
     if (!assigned)
       warning("The resource was not assigned, key: " + key);
+  }
+
+  @Override
+  public String toString() {
+    return new ToStringBuilder()
+      .append(this)
+      .toString();
+  }
+
+  public void toString(ToStringBuilder sb) {
+    sb.append("declarationReference", declarationReference);
   }
 
 }

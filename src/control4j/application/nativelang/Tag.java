@@ -31,8 +31,7 @@ import cz.lidinsky.tools.ToStringBuilder;
  *  Represents a tag of the signal.
  *
  */
-public class Tag extends Configurable
-{
+public class Tag extends Configurable {
 
   public Tag() {}
 
@@ -42,7 +41,6 @@ public class Tag extends Configurable
    *  Returns the value of the property.
    */
   public String getName() {
-    check();
     return name;
   }
 
@@ -53,17 +51,9 @@ public class Tag extends Configurable
   }
 
   @Override
-  public void toString(ToStringBuilder builder)
-  {
+  public void toString(ToStringBuilder builder) {
     super.toString(builder);
     builder.append("name", name);
-  }
-
-  protected void check() {
-    if (name == null) {
-      throw new IllegalStateException("The name property may not be null!\n"
-          + getDeclarationReferenceText());
-    }
   }
 
 }

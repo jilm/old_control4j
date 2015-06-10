@@ -24,6 +24,7 @@ import cz.lidinsky.tools.reflect.ObjectMapDecorator;
 import cz.lidinsky.tools.reflect.Setter;
 
 import org.apache.commons.lang3.reflect.MethodUtils;
+import org.apache.commons.collections4.PredicateUtils;
 
 import java.lang.reflect.InvocationTargetException;
 
@@ -47,7 +48,9 @@ public abstract class Resource implements Closeable {
     ObjectMapDecorator objectMap = new ObjectMapDecorator(String.class);
     objectMap.setSetterFilter(
         ObjectMapDecorator.getAnnotationPredicate(Setter.class));
-    objectMap.setDecorated(this,
+    objectMap.setGetterFilter(PredicateUtils.falsePredicate());
+    objectMap.setDecorated(
+        this,
         ObjectMapDecorator.getStringSetterClosureFactory(this, true));
     Set<String> keySet = objectMap.keySet();
     for (String key : keySet) {

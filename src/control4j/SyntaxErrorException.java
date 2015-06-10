@@ -18,25 +18,27 @@ package control4j;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-public class SyntaxErrorException extends RuntimeException
-{
-  public SyntaxErrorException()
-  {
+import cz.lidinsky.tools.BaseException;
+
+public class SyntaxErrorException extends BaseException {
+
+  public SyntaxErrorException() {
     super();
   }
 
-  public SyntaxErrorException(String message)
-  {
-    super(message);
+  @Deprecated
+  public SyntaxErrorException(String message) {
+    set("message", message);
   }
 
-  public SyntaxErrorException(String message, Throwable cause)
-  {
-    super(message, cause);
+  @Deprecated
+  public SyntaxErrorException(String message, Throwable cause) {
+    set("message", message);
+    setCause(cause);
   }
 
-  public SyntaxErrorException(Throwable cause)
-  {
-    super(cause);
+  @Deprecated
+  public SyntaxErrorException(Throwable cause) {
+    setCause(cause);
   }
 }
