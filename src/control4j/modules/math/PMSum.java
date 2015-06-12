@@ -25,16 +25,16 @@ import control4j.ProcessModule;
 /**
  *  Provides sum of the values on the input.
  */
-public class PMSum extends ProcessModule
-{
+@AVariableInput
+public class PMSum extends ProcessModule {
 
   /**
    *  Returns a sum of the input signal values.
    *
-   *  <p>Provides only one output which is the sum of the input signal 
+   *  <p>Provides only one output which is the sum of the input signal
    *  values. Number of input signals must be at least one.
    *
-   *  <p>If there is one or more invalid input signals, then the 
+   *  <p>If there is one or more invalid input signals, then the
    *  output signal is invalid. Output signal is valid only if all
    *  of the input signals are valid.
    *

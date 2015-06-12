@@ -177,7 +177,7 @@ public class XMLHandler implements IXMLHandler
 
   private Signal signal;
 
-  @AXMLStartElement("application/signal")
+  @AXMLStartElement("signal")
   public boolean startApplicationSignal(Attributes attributes) {
     signal = new Signal();
     setDeclarationReference(signal);
@@ -408,12 +408,22 @@ public class XMLHandler implements IXMLHandler
     return true;
   }
 
+  @AXMLEndElement("use/input")
+  public boolean endUseInput() {
+    return true;
+  }
+
   @AXMLStartElement("use/output")
   public boolean startUseOutput(Attributes attributes) {
     Output output = new Output()
         .setIndex(attributes.getValue("index"));
     setReference(output, attributes);
     use.add(output);
+    return true;
+  }
+
+  @AXMLEndElement("use/output")
+  public boolean endUseOutput() {
     return true;
   }
 

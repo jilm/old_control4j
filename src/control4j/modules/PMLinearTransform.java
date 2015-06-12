@@ -23,15 +23,16 @@ import control4j.AMaxInput;
 import control4j.Signal;
 import control4j.ProcessModule;
 import control4j.ConfigItem;
+import cz.lidinsky.tools.reflect.Setter;
 
 @AMinInput(1)
 @AMaxInput(1)
 public class PMLinearTransform extends ProcessModule
 {
-  @ConfigItem(optional = true)
+  @Setter("mul")
   public double mul = 1.0;
 
-  @ConfigItem(optional = true)
+  @Setter("add")
   public double add = 0.0;
 
   /**

@@ -280,17 +280,13 @@ public class Instantiator
   {
     // calculate required size of the map array
     int varOutputSize = moduleDef.getVariableOutputSize();
-    if (varOutputSize > 0 && !module.isVariableOutputSupported())
-    {
-      throw new SyntaxErrorException(java.text.MessageFormat.format(
-          "Variable output is not supported by the module {0}",
-          module.getClass().getName()));
-    }
-    else if (module.isVariableOutputSupported())
-    {
+    if (varOutputSize > 0 && !module.isVariableOutputSupported()) {
+      throw new SyntaxErrorException()
+          .set("message", "Variable output is not supported by the module!")
+          .set("module", moduleDef.toString());
+    } else if (module.isVariableOutputSupported()) {
       moduleDef.setVariableOutputStartIndex(
           module.getVariableOutputFirstIndex());
-      // TODO: index collision
     }
     int mapSize = module.getOutputSize(moduleDef.getOutputSize() - 1);
     if (mapSize == 0) return null;

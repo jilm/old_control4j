@@ -191,29 +191,38 @@ public class Preprocessor implements IGraph<Use> {
 
       // create module output map
       // output with fixed index
-      for (int j=0; j<module.getOutputSize(); j++)
-        if (module.getOutput(j) != null)
-          try
-          {
+      for (int j=0; j<module.getOutputSize(); j++) {
+        if (module.getOutput(j) != null) {
+          try {
             Output output = module.getOutput(j);
             Signal signal
                 = application.getSignal(output.getHref(), output.getScope());
             int signalIndex = application.getSignalIndex(signal);
             module.putOutputSignalIndex(j, signalIndex);
+          } catch (Exception e) {
+            throw new SyntaxErrorException()
+              .setCause(e)
+              .set("hint", "Module fixed output map creation")
+              .set("module", module.toString());
           }
-          catch (NoSuchElementException e) { } // TODO
+        }
+      }
 
       // output with variable index
-      for (int j=0; j<module.getVariableOutputSize(); j++)
-        try
-        {
+      for (int j=0; j<module.getVariableOutputSize(); j++) {
+        try {
           Output output = module.getVariableOutput(j);
           Signal signal
               = application.getSignal(output.getHref(), output.getScope());
           int signalIndex = application.getSignalIndex(signal);
           module.addOutputSignalIndex(signalIndex);
+        } catch (Exception e) {
+          throw new SyntaxErrorException()
+            .setCause(e)
+            .set("hint", "Module variable output map creation")
+            .set("module", module.toString());
         }
-        catch (NoSuchElementException e) { } // TODO
+      }
 
     }
 
