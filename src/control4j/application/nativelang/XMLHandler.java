@@ -544,7 +544,7 @@ public class XMLHandler implements IXMLHandler
     return true;
   }
 
-  // -------------------------------------------------- Private methods
+  // ---------------------------------------------------------- Private methods
 
   private Property getProperty(Attributes attributes) {
     Property property = new Property()
@@ -560,10 +560,8 @@ public class XMLHandler implements IXMLHandler
       object.setScope(Parser.parseScope2(attributes.getValue("scope")));
     } catch (ParseException e) {
       ErrorManager.newError()
-        .set(ErrorRecord.DATATYPE_ERROR)
-        .set(ErrorRecord.WHAT_CODE, "scope")
-        .set(ErrorRecord.SHOULD_BE_CODE, "local, global")
-        .set(ErrorRecord.IS_CODE, attributes.getValue("scope"))
+        .set(ErrorRecord.WRONG_SCOPE2_VALUE_ERROR)
+        .set(ErrorRecord.VALUE_CODE, attributes.getValue("scope"))
         .set(ErrorRecord.WHERE_CODE,
             ((DeclarationBase)object).getDeclarationReferenceText());
     }
@@ -574,7 +572,11 @@ public class XMLHandler implements IXMLHandler
       object.setHref(attributes.getValue("href"));
       object.setScope(Parser.parseScope3(attributes.getValue("scope")));
     } catch (ParseException e) {
-      // TODO:
+      ErrorManager.newError()
+        .set(ErrorRecord.WRONG_SCOPE3_VALUE_ERROR)
+        .set(ErrorRecord.VALUE_CODE, attributes.getValue("scope"))
+        .set(ErrorRecord.WHERE_CODE,
+            ((DeclarationBase)object).getDeclarationReferenceText());
     }
   }
 

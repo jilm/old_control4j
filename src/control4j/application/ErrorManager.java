@@ -46,14 +46,12 @@ public class ErrorManager {
   /**
    *  An empty constructor; doesn't allow to create instances.
    */
-  private ErrorManager()
-  { }
+  private ErrorManager() { }
 
   /**
    *  Use this method to get instance of the error manager.
    */
-  public static ErrorManager getInstance()
-  {
+  public static ErrorManager getInstance() {
     if (instance == null) instance = new ErrorManager();
     return instance;
   }
@@ -63,26 +61,20 @@ public class ErrorManager {
    */
 
   /** The list of fatal errors. */
-  private LinkedList<String> errors;
+  private LinkedList<ErrorRecord> errors;
 
   /**
    *  Adds an error into the buffer.
    */
-  public void addError(String message)
-  {
-    if (errors == null)
-      errors = new LinkedList<String>();
-    errors.add(message);
-  }
+  public void addError(String message) { }
 
   /**
    *  Print all of the error messages.
    */
-  public void printErrors()
-  {
-    if (errors != null)
-      for (String message : errors)
-	severe(message);
+  public void printErrors() {
+    for (ErrorRecord error : errors) {
+      System.out.println(error.getMessage());
+    }
   }
 
   /*
@@ -109,7 +101,7 @@ public class ErrorManager {
   {
     if (warnings != null)
       for (String message : warnings)
-	warning(message);
+        warning(message);
   }
 
   /*
@@ -120,8 +112,7 @@ public class ErrorManager {
    *  Print both the warnings and the errors. If there is at least
    *  one error in the buffer, it exits the application.
    */
-  public void print()
-  {
+  public void print() {
     printWarnings();
     printErrors();
     if (errors.size() > 0) System.exit(1);
@@ -132,7 +123,10 @@ public class ErrorManager {
   }
 
   public static ErrorRecord newError() {
-    return new ErrorRecord();
+    ErrorRecord error = new ErrorRecord();
+    ErrorManager manager = getInstance();
+    manager.errors.add(error);
+    return error;
   }
 
 }
