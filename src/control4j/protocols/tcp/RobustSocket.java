@@ -327,9 +327,12 @@ implements Runnable, java.io.Closeable {
       long timeToTimeout
           = transactionTimeout - System.currentTimeMillis() + created;
       if (timeToTimeout < 0l) {
-        setResponse(null, new IOException("Transaction timeout"));
+        this.exception = new IOException("Transaction timeout");
+        this.responseTimestamp = System.currentTimeMillis();
+        return true;
+      } else {
+        return response != null || exception != null;
       }
-      return response != null || exception != null;
     }
 
     synchronized void markRequest() {
