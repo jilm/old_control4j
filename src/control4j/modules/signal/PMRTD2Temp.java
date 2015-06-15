@@ -23,12 +23,20 @@ import control4j.Signal;
 import control4j.AMaxInput;
 import control4j.AMinInput;
 
+/**
+ *  Link: http://www.mosaic-industries.com/embedded-systems/microcontroller-projects/temperature-measurement/platinum-rtd-sensors/resistance-calibration-table
+ */
 @AMaxInput(1) @AMinInput(1)
 public class PMRTD2Temp extends ProcessModule {
 
-  public static final double A = 3.9093e-3d;
-  public static final double B = -5.775e-7d;
-  public static final double C = -4.183e-12d;
+  public static final double c0 = -245.19d;
+  public static final double c1 = 2.5293d;
+  public static final double c2 = -0.066046d;
+  public static final double c3 = 4.0422e-3d;
+  public static final double c4 = -2.0697e-6d;
+  public static final double c5 = -0.025422d;
+  public static final double c6 = 1.6883e-3d;
+  public static final double c7 = -1.3601e-6d;
 
   @Override
   public void process(Signal[] input, int inputLength,
@@ -36,7 +44,8 @@ public class PMRTD2Temp extends ProcessModule {
 
     if (input[0].isValid()) {
       double r = input[0].getValue();
-      double temp = (-A + Math.sqrt(A*A - 4*B*(100d - 0.01d*r))) * 0.5d / B;
+      double temp = c0 + (r * (c1 + r*(c2 + r*(c3 + r*c4))))
+          / (1 + r*(c5 + r*(c6 + r*c7)));
       output[0] = Signal.getSignal(temp, input[0].getTimestamp());
     } else {
       output[0] = Signal.getSignal(input[0].getTimestamp());
