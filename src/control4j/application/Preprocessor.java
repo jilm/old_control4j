@@ -19,6 +19,8 @@ package control4j.application;
  */
 
 import static org.apache.commons.lang3.Validate.notNull;
+import static org.apache.commons.lang3.Validate.notBlank;
+import static org.apache.commons.collections4.CollectionUtils.emptyCollection;
 import static control4j.tools.LogMessages.getMessage;
 
 import java.util.ArrayList;
@@ -27,12 +29,14 @@ import java.util.HashMap;
 import java.util.Set;
 import java.util.NoSuchElementException;
 import java.util.Map;
+import java.util.List;
 import java.text.MessageFormat;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
+import org.apache.commons.collections4.ListUtils;
 
 import cz.lidinsky.tools.ToStringMultilineStyle;
 import cz.lidinsky.tools.ToStringBuilder;
@@ -49,431 +53,507 @@ import control4j.tools.DuplicateElementException;
  *  Preprocessing of the application.
  *
  */
-public class Preprocessor implements IGraph<Use> {
+public class Preprocessor {
+
+  //---------------------------------------------------------- Public Interface
 
   /**
    *  Empty constructor
    */
   public Preprocessor() { }
 
-  private Application application;
+  /** Holds actual scope during the process of translation. */
+  private Scope scopePointer = Scope.getGlobal();
+
+  public Scope getScopePointer() {
+    return scopePointer;
+  }
+
+  public void startScope() {
+    scopePointer = new Scope(scopePointer);
+  }
+
+  public void endScope() {
+    scopePointer = scopePointer.getParent();
+  }
+
+  /**
+   *  Adds a definition into the internal buffer.
+   */
+  public void putDefinition(String name, Scope scope, String value) {
+    if (definitions == null) {
+      definitions = new ScopeMap<ValueObject>();
+    }
+    try {
+      definitions.put(name, scope, new ValueObject(value));
+    } catch (DuplicateElementException e) {
+      ErrorManager.newError()
+        .set(ErrorRecord.DUPLICATE_DEFINITION_ERROR)
+        .set(ErrorRecord.NAME_CODE, name)
+        .set(ErrorRecord.SCOPE_CODE, scope.toString());
+    }
+  }
+
+  public void putResource(String name, Scope scope, Resource resource) {
+    // TODO:
+    if (resources == null) {
+      resources = new ScopeMap<Resource>();
+    }
+    try {
+      resources.put(name, scope, resource);
+    } catch (DuplicateElementException e) {
+      ErrorManager.newError()
+        .set(ErrorRecord.DUPLICATE_DEFINITION_ERROR)
+        .set(ErrorRecord.NAME_CODE, name)
+        .set(ErrorRecord.SCOPE_CODE, scope.toString())
+        .set(ErrorRecord.REFERENCE1_CODE,
+            resources.get(name, scope).getDeclarationReferenceText())
+        .set(ErrorRecord.REFERENCE2_CODE,
+            resource.getDeclarationReferenceText());
+    }
+  }
+
+  public void putBlock(String name, Scope scope, Block block) {
+    if (blocks == null) {
+      blocks = new ScopeMap<Block>();
+    }
+    try {
+      blocks.put(name, scope, block);
+    } catch (DuplicateElementException e) {
+      // TODO:
+    }
+  }
+
+  /**
+   *  Puts given signal into the internal data structure.
+   *  A unique order number is assigned to the signal (index).
+   *
+   *  @param name
+   *             an identifier of the signal which serves
+   *             for referencing it
+   *
+   *  @param scope
+   *             a scope under which the signal was defined
+   *
+   *  @param signal
+   *             a signal object to store
+   *
+   *  @throws IllegalArgumentException
+   *             if the name is empty string or a blank string
+   *
+   *  @throws NullPointerException
+   *             if either of the parameters is <code>null</code>
+   *             value
+   *
+   *  @throws DuplicateElementException
+   *             the pair name and scope must be unique across
+   *             the whole application. If it isn't, this exception
+   *             is thrown
+   */
+  public void putSignal(String name, Scope scope, Signal signal) {
+    String trimmedName = notBlank(name).trim();
+    notNull(scope);
+    notNull(signal);
+    if (signals == null) {
+      signals = new ScopeMap<Signal>();
+      signalIndexes = new ArrayList<Triple<String, Scope, Signal>>();
+    }
+    try {
+    signals.put(name, scope, signal);
+    signalIndexes.add(
+        new ImmutableTriple<String, Scope, Signal>(name, scope, signal));
+    } catch (DuplicateElementException e) {
+      // TODO:
+    }
+  }
+
+  /**
+   *  Adds a module definition into the internal buffer.
+   */
+  public void addModule(Module module) {
+    if (modules == null) modules = new ArrayList<Module>();
+    modules.add(module);
+  }
+
+  public void addResourceRef(
+      String href, Scope scope, Resource resource) {
+    resourceReferences.add(
+      new ReferenceDecorator<Resource, Object>(href, scope, null, resource));
+  }
+
+  public void addModuleInput(String href, Scope scope, Input input) {
+    moduleInputs.add(
+        new ReferenceDecorator<Input, Object>(href, scope, null, input));
+  }
+
+  public void addModuleOutput(String href, Scope scope, Output output) {
+    moduleOutputs.add(
+        new ReferenceDecorator<Output, Object>(href, scope, null, output));
+  }
+
+  /**
+   *  Adds a given use object into the internal buffer.
+   *
+   *  @param use
+   *             an object to add
+   *
+   *  @param scope
+   *             a scope under which the use object was defined
+   */
+  public void add(Use use, Scope scope) {
+    notNull(use);
+    notNull(scope);
+    uses.add(new ImmutablePair<Use, Scope>(use, scope));
+  }
+
+  public void addPropertyReference(
+      String href, Scope scope, Property property) {
+    propertyRefs.add(
+        new ReferenceDecorator<Property, Object>(href, scope, null, property));
+  }
+
+  public void addInputTag(Module module, String tag) {
+    // TODO:
+    inputTags.add(new ImmutablePair<Module, String>(module, tag));
+  }
+
+  public void addOutputTag(Module module, String tag) {
+    // TODO:
+    outputTags.add(new ImmutablePair<Module, String>(module, tag));
+  }
+
+  public Property putProperty(String key, String value)
+      throws DuplicateElementException {
+    if (configuration.containsKey(key)) {
+      throw new DuplicateElementException();
+    } else {
+      Property property = new Property();
+      property.setValue(value);
+      configuration.put(key, property);
+      return property;
+    }
+  }
+
+  public Property putProperty(String key, Property property)
+      throws DuplicateElementException {
+    if (configuration.containsKey(key)) {
+      throw new DuplicateElementException();
+    } else {
+      configuration.put(key, property);
+      return property;
+    }
+  }
+
+  //--------------------------------------------------------------- Collections
+
+  /** Global Configuration. */
+  private HashMap<String, Property> configuration
+    = new HashMap<String, Property>();
+
+  /** Define objects. */
+  private ScopeMap<ValueObject> definitions;
+
+  /** Resource definitions. */
+  private ScopeMap<Resource> resources;
+
+  /** Block definitions */
+  private ScopeMap<Block> blocks;
+
+  /** A data structure for name and scope signal look up. */
+  private ScopeMap<Signal> signals;
+
+  /** A data structure for indexed signal look up. */
+  private ArrayList<Triple<String, Scope, Signal>> signalIndexes;
+
+  /** An array of module definitions. */
+  private ArrayList<Module> modules;
+
+  private ArrayList<ReferenceDecorator<Resource, Object>> resourceReferences
+      = new ArrayList<ReferenceDecorator<Resource, Object>>();
+
+  private ArrayList<ReferenceDecorator<Input, Object>> moduleInputs
+      = new ArrayList<ReferenceDecorator<Input, Object>>();
+
+  private ArrayList<ReferenceDecorator<Output, Object>> moduleOutputs
+      = new ArrayList<ReferenceDecorator<Output, Object>>();
+
+  private ArrayList<Pair<Use, Scope>> uses
+      = new ArrayList<Pair<Use, Scope>>();
+
+  protected ArrayList<ReferenceDecorator<Property, Object>> propertyRefs
+      = new ArrayList<ReferenceDecorator<Property, Object>>();
+
+  protected ArrayList<Pair<Module, String>> inputTags
+      = new ArrayList<Pair<Module, String>>();
+
+  protected ArrayList<Pair<Module, String>> outputTags
+      = new ArrayList<Pair<Module, String>>();
+
+  //---------------------------------------------------- Private Access Methods
+
+  /**
+   *  Returns a value of definition with given name and scope.
+   */
+  protected String getDefinition(String name, Scope scope) {
+    if (definitions == null) {
+      throw new NoSuchElementException();
+    }
+    return definitions.get(name, scope).getValue();
+  }
+
+  protected Resource getResource(String name, Scope scope) {
+    if (resources == null) {
+      throw new NoSuchElementException();
+    }
+    return resources.get(name, scope);
+  }
+
+  /**
+   *  Returns a block definition with given name which is under
+   *  the given scope.
+   *
+   *  @throws NoSuchElementException
+   *             if such a blok is not present in the internal
+   *             buffer
+   */
+  protected Block getBlock(String name, Scope scope) {
+    if (blocks == null)
+      throw new NoSuchElementException();
+    return blocks.get(name, scope);
+  }
+
+  /** ??? */
+  protected Collection<Block> getBlocks() {
+    if (blocks == null) {
+      return emptyCollection();
+    } else {
+      return blocks.values();
+    }
+  }
+
+  /**
+   *  Returns the index of the given signal.
+   *
+   *  @param signal
+   *
+   *  @return an order number of the given signal
+   *
+   *  @throws NullPointerException
+   *             if the parameter is <code>null</code> value
+   *
+   *  @throws NoSuchElementException
+   *             if the given signal is not present in the internal
+   *             buffer
+   */
+  protected int getSignalIndex(Signal signal)
+  {
+    notNull(signal);
+    if (signalIndexes == null) // TODO:
+      throw new NoSuchElementException();
+    for (int i = 0; i < signalIndexes.size(); i++)
+    {
+      if (signalIndexes.get(i).getRight() == signal)
+        return i;
+    }
+    throw new NoSuchElementException(); // TODO:
+  }
+
+  /**
+   *  Returns the signal with the given name that was defined
+   *  under the given scope or some of the parent scope.
+   *
+   *  @throws NullPointerException
+   *
+   *  @throws NoSuchElementException
+   */
+  protected Signal getSignal(String name, Scope scope)
+  {
+    notNull(name);
+    notNull(scope);
+    if (signals == null)  // TODO:
+      throw new NoSuchElementException();
+    return signals.get(name, scope);
+  }
+
+  /**
+   *  Returns the signal with the given order number (index).
+   *
+   *  @throws IndexOutOfBoundsException
+   *             if the index if out of range
+   */
+  protected Triple<String, Scope, Signal> getSignal(int index)
+  {
+    if (signalIndexes == null)  // TODO:
+      throw new IndexOutOfBoundsException();
+    return signalIndexes.get(index);
+  }
+
+  /**
+   *  Returns number of signal objects inside the internal buffer.
+   */
+  public int getSignalsSize()
+  {
+    if (signalIndexes == null) return 0;
+    return signalIndexes.size();
+  }
+
+  public Module getModule(int index)
+  {
+    if (modules == null) {} // TODO
+    return modules.get(index);
+  }
+
+  public int getModulesSize()
+  {
+    if (modules == null) return 0;
+    return modules.size();
+  }
+
+  public void removeModules()
+  {
+    modules.clear();
+  }
+
+  public List<ReferenceDecorator<Resource, Object>> getResourceReferences() {
+    return ListUtils.unmodifiableList(resourceReferences);
+  }
+
+  public int getUseObjectsSize()
+  {
+    return uses.size();
+  }
+
+  public Pair<Use, Scope> getUse(int index)
+  {
+    return uses.get(index);
+  }
+
+  public void removeUse(int index)
+  {
+    uses.remove(index);
+  }
+
+  public int indexOf(Use use, Scope scope)
+  {
+    for (int i=0; i<uses.size(); i++)
+    {
+      Pair<Use, Scope> u = uses.get(i);
+      if (u.getKey().equals(use) && u.getValue().equals(scope))
+        return i;
+    }
+    throw new NoSuchElementException();
+  }
+
+  public int indexOf(Use use, int startIndex)
+  {
+    for (int i=startIndex; i<uses.size(); i++)
+      if (uses.get(i).getKey().equals(use))
+        return i;
+    throw new NoSuchElementException();
+  }
+
+  //---------------------------------------------------------------- Processing
 
   /**
    *  Entry point of the preprocessor. Given application
    *  serves as the input and output of this method.
    */
-  public void process(Application application) {
+  public void process() {
 
-    this.application = notNull(application);
-
-    // blocks expansion
-    // expand all of the use objects
-    while (application.getUseObjectsSize() > 0) {
-      Pair<Use, Scope> use = application.getUse(0);
-      expand(use.getKey(), use.getValue());
-      application.removeUse(0);
+    // Block expansion
+    while (uses.size() > 0) {
+      try {
+        // get use to substitute
+        Pair<Use, Scope> use = uses.get(0);
+        // get referenced block
+        Block block
+          = getBlock(use.getLeft().getHref(), use.getLeft().getScope());
+        // set appropriate scope
+        scopePointer = new Scope(use.getRight());
+        // set appropriate field for cycle detection
+        // TODO:
+        // expand block
+        block.expand(use.getLeft(), this);
+        // remove substuted use
+        uses.remove(0);
+      } catch (NoSuchElementException e) {
+        // block definition for given use is missing
+      }
     }
 
     // resource substitution
     // for all of the modules, if there is a resource reference
     // find it and substitude in place of the reference
-    for (ReferenceDecorator<Module, String> resourceRef
-        : application.getResourceReferences()) {
-
-      String key = resourceRef.getValue();
-      String href = resourceRef.getHref();
-      Scope scope = resourceRef.getScope();
-      Module module = resourceRef.getDecorated();
+    for (ReferenceDecorator<Resource, Object> reference : resourceReferences) {
       try {
-        Resource resource = application.getResource(href, scope);
-        module.putResource(key, resource);
+        Resource resource
+            = getResource(reference.getHref(), reference.getScope());
+        reference.getDecorated().putConfiguration(resource);
       } catch (NoSuchElementException e) {
-        throw new SyntaxErrorException(
-            getMessage("pre004", href, scope.toString(),
-            module.getDeclarationReferenceText()));
+        // TODO:
       }
     }
 
     // property substitution
-    // global properties
-    resolveConfiguration(application);
-    // module properties
-    for (int i=0; i<application.getModulesSize(); i++)
-    {
-      Module module = application.getModule(i);
-      resolveConfiguration(module);
-      // substitute properties of the resources of the module
-      Set<String> keys = module.getResourceKeys();
-      for (String key : keys)
-        resolveConfiguration(module.getResource(key));
-      // substitute properties of the input elements
-      for (int j=0; j<module.getInputSize(); j++)
-        if (module.getInput(j) != null)
-          resolveConfiguration(module.getInput(j));
-      for (int j=0; j<module.getVariableInputSize(); j++)
-        resolveConfiguration(module.getVariableInput(j));
-      // substitute properties of the output elements
-      for (int j=0; j<module.getOutputSize(); j++)
-        if (module.getOutput(j) != null)
-          resolveConfiguration(module.getOutput(j));
-      for (int j=0; j<module.getVariableOutputSize(); j++)
-        resolveConfiguration(module.getVariableOutput(j));
-    }
-    // signal definitions properties
-    for (int i=0; i<application.getSignalsSize(); i++)
-    {
-      Signal signal = application.getSignal(i).getRight();
-      resolveConfiguration(signal);
-      // tag properties
-      Set<String> tagNames = signal.getTagNames();
-      for (String name : tagNames)
-        resolveConfiguration(signal.getTag(name));
-    }
-
-    for (int i=0; i<application.getModulesSize(); i++) {
-
-      Module module = application.getModule(i);
-
-      // tagged signals
-      if (module.getInputTagsSize() > 0 || module.getOutputTagsSize() > 0) {
-        for (int j=0; j<application.getSignalsSize(); j++) {
-          String name = application.getSignal(j).getLeft();
-          Scope scope = application.getSignal(j).getMiddle();
-          Signal signal = application.getSignal(j).getRight();
-          Set<String> tags = signal.getTagNames();
-          for (String tag : tags) {
-            if (module.containsInputTag(tag)) {
-              //module.addInputSignalIndex(j);
-              module.putInput(new Input(scope, name));
-            }
-            if (module.containsOutputTag(tag)) {
-              //module.addOutputSignalIndex(j);
-              module.putOutput(new Output(scope, name));
-            }
-          }
-        }
-      }
-
-      // create module input map
-      // input with fixed index
-      for (int j = 0; j < module.getInputSize(); j++) {
-        if (module.getInput(j) != null) {
-          try {
-            Input input = module.getInput(j);
-            Signal signal
-                = application.getSignal(input.getHref(), input.getScope());
-            int signalIndex = application.getSignalIndex(signal);
-            module.putInputSignalIndex(j, signalIndex);
-          } catch (Exception e) {
-            throw new SyntaxErrorException()
-              .setCause(e)
-              .set("hint", "Module fixed input map creation")
-              .set("module", module.toString());
-          }
-        }
-      }
-
-      // input with variable index
-      for (int j = 0; j < module.getVariableInputSize(); j++) {
-        try {
-          Input input = module.getVariableInput(j);
-          Signal signal
-              = application.getSignal(input.getHref(), input.getScope());
-          int signalIndex = application.getSignalIndex(signal);
-          module.addInputSignalIndex(signalIndex);
-        } catch (Exception e) {
-          throw new SyntaxErrorException()
-            .setCause(e)
-            .set("hint", "Module variable input map creation")
-            .set("module", module.toString());
-        }
-      }
-
-      // create module output map
-      // output with fixed index
-      for (int j=0; j<module.getOutputSize(); j++) {
-        if (module.getOutput(j) != null) {
-          try {
-            Output output = module.getOutput(j);
-            Signal signal
-                = application.getSignal(output.getHref(), output.getScope());
-            int signalIndex = application.getSignalIndex(signal);
-            module.putOutputSignalIndex(j, signalIndex);
-          } catch (Exception e) {
-            throw new SyntaxErrorException()
-              .setCause(e)
-              .set("hint", "Module fixed output map creation")
-              .set("module", module.toString());
-          }
-        }
-      }
-
-      // output with variable index
-      for (int j=0; j<module.getVariableOutputSize(); j++) {
-        try {
-          Output output = module.getVariableOutput(j);
-          Signal signal
-              = application.getSignal(output.getHref(), output.getScope());
-          int signalIndex = application.getSignalIndex(signal);
-          module.addOutputSignalIndex(signalIndex);
-        } catch (Exception e) {
-          throw new SyntaxErrorException()
-            .setCause(e)
-            .set("hint", "Module variable output map creation")
-            .set("module", module.toString());
-        }
-      }
-
-    }
-
-    // cleen-up
-    this.application = null;
-
-  }
-
-  /**
-   *  Finds appropriate block definition and expand it into the
-   *  application crate in place of the use object.
-   *
-   *  @param use
-   *             a use element to expand
-   *
-   *  @param scope
-   *             a scope under which the use element was defined
-   */
-  protected void expand(Use use, Scope scope)
-  {
-    try
-    {
-      // create the inner scope of the use element
-      Scope innerScope = new Scope(scope);
-      // get appropriate block definition
-      Block block = application.getBlock(use.getHref(), use.getScope());
-      // Pair a block input and output with the use's input and output
-      Map<String, Input> inputSubstitution
-          = pairInput(use, block.getInputSet());
-      Map<String, Output> outputSubstitution
-          = pairOutput(use, block.getOutputSet());
-      // expand
-      expand(block, innerScope, inputSubstitution, outputSubstitution);
-    }
-    catch (NoSuchElementException e)
-    {
-      // TODO
-    }
-  }
-
-  /**
-   *  Expand the given block. Returns the use elements that were
-   *  defined inside the block. These objects are not placed into
-   *  the application object.
-   *
-   *  @param block
-   *             a block definition to expand
-   *
-   *  @param scope
-   *             a scope into which the content of the block will
-   *             be placed
-   *
-   *  @param inputSubstitution
-   *             a map of the block input to the signal references
-   *             Accept the null value in case there in no block
-   *             input.
-   *
-   *  @param outputSubstitution
-   *             a map of the block output to the signal references.
-   *             Accept the null value in case there is no block
-   *             output.
-   */
-  protected void expand(
-      Block block, Scope scope, Map<String, Input> inputSubstitution,
-      Map<String, Output> outputSubstitution)
-  {
-    // Expand all of the signal definitions
-    for (control4j.application.nativelang.Signal signal : block.getSignals())
-      translate(signal, scope);
-    // Expand all of the modules
-    for (control4j.application.nativelang.Module rawModule
-        : block.getModules())
-    {
-      Module module = translate(
-          rawModule, scope, inputSubstitution, outputSubstitution);
-      application.addModule(module);
-    }
-    // Expand all of the nested use objects
-    for (control4j.application.nativelang.Use rawUse : block.getUseObjects())
-    {
-      Use use = new Use(
-          rawUse.getHref(),
-          Translator.resolveScope(rawUse.getScope(), scope));
-      rawUse.translate(use, scope);
-      application.add(use, scope);
-    }
-  }
-
-  /**
-   *  Procedure that translate all of the signal definitions inside
-   *  the block and place them into the application object.
-   *
-   *  @param block
-   *             a block to expand
-   *
-   *  @param localScope
-   *             an inner scope of the use element into which the
-   *             block is expanded
-   */
-  protected void translate(
-      control4j.application.nativelang.Signal rawSignal, Scope localScope)
-  {
-    Signal signal = new Signal();
-    rawSignal.translate(signal, localScope);
-    String name = rawSignal.getName();
-    Scope scope = Translator.resolveScope(rawSignal.getScope(), localScope);
-    try
-    {
-      application.putSignal(name, scope, signal);
-    }
-    catch (DuplicateElementException e) {}
-  }
-
-  /**
-   *  Procedure that translate all of the modules inside
-   *  the block and place them into the application object.
-   *
-   *  @param block
-   *             a block to expand
-   *
-   *  @param localScope
-   *             an inner scope of the use element into which the
-   *             block is expanded
-   */
-  protected Module translate(
-      control4j.application.nativelang.Module rawModule,
-      Scope localScope,
-      Map<String, Input> inputSubstitution,
-      Map<String, Output> outputSubstitution)
-  {
-      Module module = new Module(rawModule.getClassName());
-      rawModule.translate(module, localScope, inputSubstitution,
-          outputSubstitution);
-      return module;
-      // TODO
-  }
-
-  protected Map<String, Input> pairInput(Use use, Set<String> inputSet)
-  {
-    HashMap<String, Input> result = new HashMap<String, Input>();
-    try
-    {
-      for (String alias : inputSet)
-      {
-        Input input = use.getInput(alias);
-        result.put(alias, input);
-      }
-    }
-    catch (NoSuchElementException e)
-    {
-      // TODO
-    }
-    return result;
-  }
-
-  protected Map<String, Output> pairOutput(Use use, Set<String> outputSet)
-  {
-    HashMap<String, Output> result = new HashMap<String, Output>();
-    try
-    {
-      for (String alias : outputSet)
-      {
-        Output output = use.getOutput(alias);
-        result.put(alias, output);
-      }
-    }
-    catch (NoSuchElementException e)
-    {
-      // TODO
-    }
-    return result;
-  }
-
-  /**
-   *  Goes through the all of the configuration items of the
-   *  given object that were specified in the form of reference,
-   *  finds appropriate referenced object and substitude the
-   *  value for the reference inside the object.
-   */
-  protected void resolveConfiguration(Configurable object) {
-    while(object.getConfigItemRefsSize() > 0) {
-      Triple<String, String, Scope> reference
-          = object.getConfigItemReference(0);
-      String key = reference.getLeft();
-      String href = reference.getMiddle();
-      Scope scope = reference.getRight();
+    for (ReferenceDecorator<Property, Object> reference : propertyRefs) {
       try {
-        String value = application.getDefinition(
-            reference.getMiddle(), reference.getRight());
-        object.removeConfigItemReference(0);
-        object.putProperty(reference.getLeft(), value);
+        String value = getDefinition(reference.getHref(), reference.getScope());
+        reference.getDecorated().setValue(value);
       } catch (NoSuchElementException e) {
-        throw new SyntaxErrorException(
-            getMessage("pre002", href, scope.toString(),
-            object.getDeclarationReferenceText()));
-      } catch (DuplicateElementException e) {
-        warning("Duplicate element");
-      } // TODO
-    }
-  }
-
-  /**
-   *  Returns the direct successors of the use element.
-   *  This method is used by the algorithm for test of
-   *  acyclic property.
-   */
-  public Collection<Use> getDirectSuccessors(Use use)
-  {
-    try
-    {
-      // find given use in the application
-      Scope scope = use.getScope();
-      // find appropriate block
-      Block block = application.getBlock(use.getHref(), use.getScope());
-      // Expand all of the nested use objects
-      int size = block.getUseObjects().size();
-      ArrayList<Use> nestedUseObjects = new ArrayList<Use>(size);
-      for (control4j.application.nativelang.Use rawUse : block.getUseObjects())
-      {
-        Use nestedUse = new Use(
-            rawUse.getHref(),
-            Translator.resolveScope(rawUse.getScope(), scope));
-        rawUse.translate(nestedUse, scope);
-        nestedUseObjects.add(nestedUse);
+        // TODO:
       }
-      return nestedUseObjects;
     }
-    catch (NoSuchElementException e) {} // TODO
-    return null; // TODO
-  }
 
-  /*
-   *
-   *     Report Errors
-   *
-   */
+    // tagged signals
+    for (int j = 0; j < getSignalsSize(); j++) {
+      Signal signal = getSignal(j).getRight();
+      Set<String> tagNames = signal.getTagNames();
+      if (!tagNames.isEmpty()) {
+        String name = getSignal(j).getLeft();
+        Scope scope = getSignal(j).getMiddle();
+        for (Pair<Module, String> tag : inputTags) {
+          if (tagNames.contains(tag.getRight())) {
+            Input input = new Input();
+            addModuleInput(name, scope, input);
+            tag.getLeft().putInput(input);
+          }
+        }
+        for (Pair<Module, String> tag : outputTags) {
+          if (tagNames.contains(tag.getRight())) {
+            Output output = new Output();
+            addModuleOutput(name, scope, output);
+            tag.getLeft().putOutput(output);
+          }
+        }
+      }
+    }
 
-  /**
-   *  Reports a message about missing definition.
-   */
-  private void reportMissingDefinition(
-      String key, Reference reference, DeclarationBase object)
-  {
-    StringBuilder sb = new StringBuilder();
-    sb.append("Cannot find appropriate define element for a property.\n")
-      .append("Key: {0}, href: {1}.")
-      .append("The property element is a part of:\n{2}\n");
-    String message = MessageFormat.format(
-        sb.toString(), key, reference.getHref(),
-        object.getDeclarationReferenceText());
-    ErrorManager.getInstance().addError(message);
+    // resolve module inputs and outputs
+    for (ReferenceDecorator<Input, Object> inputRef : moduleInputs) {
+      try {
+        Signal signal = getSignal(inputRef.getHref(), inputRef.getScope());
+        int pointer = getSignalIndex(signal);
+        inputRef.getDecorated().setPointer(pointer);
+        // TODO: copy signal properties
+      } catch (NoSuchElementException e) {
+        // TODO: Signal was not defined!
+      }
+    }
+
+    // resolve module outputs
+    for (ReferenceDecorator<Output, Object> outputRef : moduleOutputs) {
+      try {
+        Signal signal = getSignal(outputRef.getHref(), outputRef.getScope());
+        int pointer = getSignalIndex(signal);
+        outputRef.getDecorated().setPointer(pointer);
+        // TODO: copy signal properties
+      } catch (NoSuchElementException e) {
+        // TODO: Signal was not defined!
+      }
+    }
+
+    // -----------------------
+
   }
 
   /**
@@ -484,9 +564,8 @@ public class Preprocessor implements IGraph<Use> {
     Loader loader = new Loader();
     Application application = loader.load(file);
     Preprocessor preprocessor = new Preprocessor();
-    preprocessor.process(application);
+    preprocessor.process();
     ToStringBuilder sb = new ToStringMultilineStyle();
-    application.toString(sb);
     System.out.println(sb.toString());
   }
 

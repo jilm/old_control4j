@@ -67,12 +67,12 @@ class Ld2ControlAdapter extends AbstractAdapter {
     // translate contact blocks
     Output output = translateContactBlock(rung.getContactBlock());
     Module adapter = new Module(ADAPTER_MODULE_CLASS_NAME);
-    adapter.putInput(0, new Input(output.getScope(), output.getHref()));
+    //adapter.putInput(0, new Input(output.getScope(), output.getHref())); TODO:
     // translate coils
     try {
       for (int i = 0; i < rung.coilBlockSize(); i++) {
         Coil coil = rung.getCoil(i);
-        adapter.putOutput(new Output(Scope.getGlobal(), coil.getName()));
+        //adapter.putOutput(new Output(Scope.getGlobal(), coil.getName())); TODO:
         handler.putSignal(
 	    coil.getName(), Scope.getGlobal(), new Signal());
       }
@@ -101,16 +101,17 @@ class Ld2ControlAdapter extends AbstractAdapter {
     try {
       Module module = new Module(AND_MODULE_CLASS_NAME);
       for (int i = 0; i < contacts.size(); i++) {
-        Output output = translateContactBlock(contacts.get(i));
-        module.putInput(new Input(output.getScope(), output.getHref()));
+        //Output output = translateContactBlock(contacts.get(i)); // TODO:
+        //module.putInput(new Input(output.getScope(), output.getHref())); TODO:
       }
       String outputSignalName = getTempSignalName();
-      Output output = new Output(handler.getScopePointer(), outputSignalName);
-      module.putOutput(0, output);
+      //Output output = new Output(handler.getScopePointer(), outputSignalName); TODO:
+      //module.putOutput(0, output); // TODO:
       handler.addModule(module);
       handler.putSignal(
 	  outputSignalName, handler.getScopePointer(), new Signal());
-      return output;
+      //return output;
+      return null;
     } catch (control4j.tools.DuplicateElementException e) {
       // should not happen
       throw new AssertionError();
@@ -123,16 +124,17 @@ class Ld2ControlAdapter extends AbstractAdapter {
     try {
       Module module = new Module(OR_MODULE_CLASS_NAME);
       for (int i = 0; i < contacts.size(); i++) {
-        Output output = translateContactBlock(contacts.get(i));
-        module.putInput(new Input(output.getScope(), output.getHref()));
+        //Output output = translateContactBlock(contacts.get(i)); // TODO;
+        //module.putInput(new Input(output.getScope(), output.getHref())); // TODO:
       }
       String outputSignalName = getTempSignalName();
-      Output output = new Output(handler.getScopePointer(), outputSignalName);
-      module.putOutput(0, output);
+      //Output output = new Output(handler.getScopePointer(), outputSignalName); TODO:
+      //module.putOutput(0, output);
       handler.addModule(module);
       handler.putSignal(
 	  outputSignalName, handler.getScopePointer(), new Signal());
-      return output;
+      //return output;
+      return null;
     } catch (control4j.tools.DuplicateElementException e) {
       // should not happen
       throw new AssertionError();
@@ -140,7 +142,8 @@ class Ld2ControlAdapter extends AbstractAdapter {
   }
 
   protected Output translateContact(Contact contact) {
-    return new Output(Scope.getGlobal(), contact.getName());
+    //return new Output(Scope.getGlobal(), contact.getName());
+    return null;
   }
 
   protected String getTempSignalName() {

@@ -27,12 +27,9 @@ public class ChangerModule extends control4j.application.Module
 
   Changer changer;
 
-  public ChangerModule(Changer changer, Scope localScope)
-  {
+  public ChangerModule(Changer changer, Scope localScope) {
     super("control4j.application.gui.IMGuiChanger");
     this.changer = changer;
-    Input input = new Input(localScope, changer.getSignalName());
-    putInput(0, input);
   }
 
   public Changer getChanger()

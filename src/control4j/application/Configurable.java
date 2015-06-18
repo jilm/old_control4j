@@ -21,8 +21,9 @@ package control4j.application;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Set;
+import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Triple;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
@@ -46,188 +47,74 @@ import cz.lidinsky.tools.ToStringBuilder;
  *  some define object.
  *
  */
-public abstract class Configurable extends DeclarationBase
-{
+public abstract class Configurable extends DeclarationBase {
 
-  public Configurable()
-  { }
+  public Configurable() { }
 
-  /**
-   *  Copy constructor.
-   */
-  public Configurable(Configurable model)
-  {
-    
-  }
-
-  /** A set that contains all of the keys. It is used for
-      duplicate elements detection. */ 
-  private HashSet<String> configKeys;
+  private HashMap<String, Property> configuration
+      = new HashMap<String, Property>();
 
   /**
    *  Returns true if and only if the key is already defined.
    */
-  private boolean containsKey(String key)
-  {
-    if (key == null)
+  public boolean containsKey(String key) {
+    if (key == null) {
       throw new IllegalArgumentException();
-    if (configKeys == null)
-      return false;
-    else
-      return configKeys.contains(key);
-  }
-
-  /**
-   *  Adds a given key into the internal buffer.
-   */
-  private void addKey(String key)
-  {
-    if (key == null)
-      throw new IllegalArgumentException();
-    if (configKeys == null)
-      configKeys = new HashSet<String>();
-    configKeys.add(key);
-  }
-
-  /** Contains configuration. */
-  private ConfigBuffer configuration;
-
-  /** An empty configuration buffer. */
-  protected static EmptyConfiguration emptyConfiguration;
-
-  /**
-   *  Puts given configuration item into the internal
-   *  configuration buffer.
-   */
-  private void putConfigItem(String key, String value)
-  {
-    if (key == null || value == null)
-      throw new IllegalArgumentException();
-    if (configuration == null)
-      configuration = new ConfigBuffer();
-    configuration.put(key, value);
-  }
-
-  /**
-   *  Returns either the configuration or empty configuration
-   *  object. The result is not meant to add elements.
-   */
-  private IConfigBuffer getConfigurationBuffer()
-  {
-    if (configuration != null)
-      return configuration;
-    else
-    {
-      if (emptyConfiguration == null)
-        emptyConfiguration = new EmptyConfiguration();
-      return emptyConfiguration;
+    } else {
+      return configuration.containsKey(key);
     }
   }
 
   /**
    *  Puts given property into the internal buffer.
-   *
-   *  @throws DuplicateElementException
-   *             if there already is a config item with given key
-   *             under this object
    */
-  public void putProperty(String key, String value)
-  throws DuplicateElementException
-  {
-    // detect duplicate keys
-    if (containsKey(key))
-      throw new DuplicateElementException();
-    // store the configuration
-    addKey(key);
-    putConfigItem(key, value);
+  public Property putProperty(String key, String value) {
+    if (containsKey(key)) {
+      Property property = configuration.get(key);
+      property.setValue(value);
+      return property;
+    } else {
+      Property property = new Property();
+      property.setValue(value);
+      configuration.put(key, property);
+      return property;
+    }
+  }
+
+  public String getValue(String key) {
+    Property property = configuration.get(key);
+    if (property != null) {
+      return property.getValue();
+    } else {
+      throw new NoSuchElementException();
+    }
+  }
+
+  public Property getProperty(String key) {
+    return configuration.get(key);
   }
 
   /**
    *  Returns resolved configuration.
    */
-  public IConfigBuffer getConfiguration()
-  {
-    return getConfigurationBuffer();
-  }
-
-  /*
-   *
-   *     Configuration in the form of references.
-   *
-   */
-
-  /** Configuration in the form of references to some definition. */
-  private ArrayList<Triple<String, String, Scope>> references
-      = new ArrayList<Triple<String, String, Scope>>();
-
-  private static Set<String> emptySet;
-
-  /**
-   *  Remove reference config item with given key from the internal
-   *  buffer.
-   */
-  public void removeConfigItemReference(int index)
-  {
-    references.remove(index);
-  }
-
-  /**
-   *  Puts given property into the internal buffer.
-   *  this method accepts a property in the form of
-   *  reference to some definition.
-   *
-   *  @throws DuplicateElementException
-   *             if there already is a config item with given key
-   *             under this object
-   */
-  public void putProperty(String key, String href, Scope scope)
-  throws DuplicateElementException
-  {
-    // detect duplicate keys
-    if (containsKey(key))
-      throw new DuplicateElementException();
-    // store the configuration
-    //addKey(key);
-    references.add(new ImmutableTriple<String, String, Scope>(
-        key, href, scope));
-  }
-
-  public int getConfigItemRefsSize()
-  {
-    return references.size();
-  }
-
-  public Triple<String, String, Scope> getConfigItemReference(int index)
-  {
-    return references.get(index);
-  }
-
-  /**
-   *
-   *  An empty configuration collection.
-   *
-   */
-  protected static class EmptyConfiguration 
-  extends ConfigBufferTemplate
-  implements IConfigBuffer
-  {
-
-    /**
-     *  Always throws ConfigItemNotFoundException exception.
-     */
-    public String getString(String key)
-    throws ConfigItemNotFoundException
-    {
-      throw new ConfigItemNotFoundException(key);
+  public IConfigBuffer getConfiguration() {
+    ConfigBuffer buffer = new ConfigBuffer();
+    for (Map.Entry<String, Property> entry : configuration.entrySet()) {
+      buffer.put(entry.getKey(), entry.getValue().getValue());
     }
-
+    return buffer;
   }
 
   @Override
-  public void toString(ToStringBuilder builder)
-  {
+  public void toString(ToStringBuilder builder) {
     super.toString(builder);
     builder.append("configuration", configuration);
+  }
+
+  public void putConfiguration(Configurable source) {
+    if (source != null) {
+      this.configuration.putAll(source.configuration);
+    }
   }
 
 }

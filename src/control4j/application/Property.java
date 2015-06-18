@@ -1,7 +1,7 @@
 package control4j.application;
 
 /*
- *  Copyright 2013, 2014, 2015 Jiri Lidinsky
+ *  Copyright 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -18,27 +18,18 @@ package control4j.application;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import cz.lidinsky.tools.ToStringBuilder;
+public class Property extends DeclarationBase {
 
-public class Output extends Configurable
-{
+  public Property() {}
 
-  public Output() {}
+  private String value;
 
-  private int pointer = -1;
-
-  public void setPointer(int pointer) {
-    this.pointer = pointer;
+  public void setValue(String value) {
+    this.value = value;
   }
 
-  public int getPointer() {
-    return pointer;
-  }
-
-  @Override
-  public void toString(ToStringBuilder builder) {
-    super.toString(builder);
-    builder.append("pointer", pointer);
+  public String getValue() {
+    return value;
   }
 
 }

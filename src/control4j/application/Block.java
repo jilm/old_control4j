@@ -28,13 +28,14 @@ import control4j.tools.DuplicateElementException;
 
 import cz.lidinsky.tools.ToStringBuilder;
 
-public class Block extends DeclarationBase
+public abstract class Block extends DeclarationBase
 {
 
-  public Block()
-  {
+  public Block() {
     super();
   }
+
+  public abstract void expand(Use use, Preprocessor handler);
 
   /*
    *
@@ -89,7 +90,7 @@ public class Block extends DeclarationBase
    */
 
   /** Internal buffer for modules. */
-  private LinkedList<control4j.application.nativelang.Module> modules 
+  private LinkedList<control4j.application.nativelang.Module> modules
       = new LinkedList<control4j.application.nativelang.Module>();
 
   /**

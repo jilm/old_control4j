@@ -103,35 +103,6 @@ public class Use extends Configurable implements IReference {
     }
   }
 
-  public void translate(
-      control4j.application.Use destination, Scope localScope) {
-
-    check();
-
-    // translate configuration
-    super.translate(destination, localScope);
-
-    // translate input
-    if (input != null)
-      for (Input inp : input) {
-        control4j.application.Input destInput
-            = new control4j.application.Input(
-            resolveScope(inp.getScope(), localScope), inp.getHref());
-        inp.translate(destInput, localScope);
-        destination.putInput(inp.getIndex(), destInput);
-      }
-
-    // translate output
-    if (output != null)
-      for (Output out : output) {
-        control4j.application.Output destOutput
-            = new control4j.application.Output(
-            resolveScope(out.getScope(), localScope), out.getHref());
-        out.translate(destOutput, localScope);
-        destination.putOutput(out.getIndex(), destOutput);
-      }
-  }
-
   @Override
   public void toString(ToStringBuilder builder) {
     super.toString(builder);

@@ -30,6 +30,13 @@ public class ErrorRecord {
   public static final int WRONG_SCOPE2_VALUE_ERROR = 3;
   public static final int WRONG_SCOPE3_VALUE_ERROR = 4;
 
+  public static final int DUPLICATE_DEFINITION_ERROR = 5;
+  public static final int NAME_CODE = 1;
+  public static final int SCOPE_CODE = 2;
+  public static final int REFERENCE1_CODE = 3;
+  public static final int REFERENCE2_CODE = 4;
+
+
   public static final int MESSAGE_CODE = 1;
   public static final int SHOULD_BE_CODE = 2;
   public static final int IS_CODE = 3;
@@ -108,6 +115,19 @@ public class ErrorRecord {
           sb.append("The error was detected here: ")
             .append(params[WHERE_CODE]);
         }
+        break;
+
+      case DUPLICATE_DEFINITION_ERROR:
+        sb.append("There are two definitions with the same name and under")
+          .append(" the same scope!")
+          .append("\nName: ")
+          .append(params[NAME_CODE])
+          .append("\nScope: ")
+          .append(params[SCOPE_CODE])
+          .append("\nReference 1: ")
+          .append(params[REFERENCE1_CODE])
+          .append("\nReference 2: ")
+          .append(params[REFERENCE2_CODE]);
         break;
 
     }

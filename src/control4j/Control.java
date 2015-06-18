@@ -72,7 +72,7 @@ public class Control
 
   /**
    *  Schedules termination of the application at the end of the current
-   *  loop. This method is only a facade for method 
+   *  loop. This method is only a facade for method
    *  {@link control4j.ControlLoop#exit}
    *
    *  @see control4j.ControlLoop#exit
@@ -158,7 +158,8 @@ public class Control
         = loader.load(file);
     control4j.application.Preprocessor preprocessor
         = new control4j.application.Preprocessor();
-    preprocessor.process(application);
+    // TODO:
+    preprocessor.process();
     control4j.application.Sorter sorter
         = new control4j.application.Sorter();
     sorter.process(application);

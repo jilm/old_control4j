@@ -123,7 +123,7 @@ implements IToStringBuildable
         labels[i]
             = definition.getInput(i + 1).getConfiguration().getString("label");
       } catch (ConfigItemNotFoundException e) {
-        labels[i] = definition.getInput(i + 1).getHref();
+        labels[i] = "???"; //definition.getInput(i + 1).getHref(); TODO:
       }
     }
     //

@@ -62,35 +62,6 @@ public class Signal extends DescriptionBase implements IDefinition {
     this.scope = scope;
   }
 
-  /**
-   *
-   */
-  public void translate(
-      control4j.application.Signal destination, Scope localScope) {
-
-    // translate configuration
-    super.translate(destination, localScope);
-
-    // translate value for the time t-1
-    if (isValueT_1Specified) {
-      if (isValueT_1Valid) {
-        destination.setValueT_1(valueT_1);
-      } else {
-        destination.setValueT_1Invalid();
-      }
-    }
-
-    // translate tag objects
-    if (tags != null) {
-      for (Tag tag : tags) {
-        control4j.application.Tag destTag = new control4j.application.Tag();
-        tag.translate(destTag, localScope);
-        destination.putTag(tag.getName(), destTag);
-      }
-    }
-
-  }
-
   /*
    *
    *    Value for time t-1 specification

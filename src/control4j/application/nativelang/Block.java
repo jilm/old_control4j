@@ -27,8 +27,11 @@ import static control4j.tools.LogMessages.getMessage;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.NoSuchElementException;
 import org.xml.sax.Attributes;
 
+import control4j.application.Preprocessor;
 import control4j.application.Scope;
 import control4j.tools.DuplicateElementException;
 import control4j.tools.ParseException;
@@ -154,36 +157,62 @@ public class Block extends DescriptionBase implements IDefinition {
     }
   }
 
+  private class ExpandableBlock extends control4j.application.Block {
+
+    @Override
+    public void expand(control4j.application.Use use, Preprocessor handler) {
+
+      C4jToControlAdapter translator = new C4jToControlAdapter(handler);
+
+      // Expand all of the signal definitions
+      for (Signal signal : getSignals()) {
+        translator.put(signal);
+      }
+
+      // Create an input map
+      HashMap<String, control4j.application.Input> inputMap
+          = new HashMap<String, control4j.application.Input>();
+      try {
+        for (String alias : getInput()) {
+          control4j.application.Input input = use.getInput(alias);
+          inputMap.put(alias, input);
+        }
+      } catch (NoSuchElementException e) {
+        // TODO:
+      }
+
+      // Create an output map
+      HashMap<String, control4j.application.Output> outputMap
+          = new HashMap<String, control4j.application.Output>();
+      try {
+        for (String alias : getOutput()) {
+          control4j.application.Output output = use.getOutput(alias);
+          outputMap.put(alias, output);
+        }
+      } catch (NoSuchElementException e) {
+        // TODO:
+      }
+
+      // Expand all of the modules
+      for (Module module : getModules()) {
+        // TODO: substitue block IO
+        translator.put(module);
+      }
+
+      // Expand all of the nested use objects
+      for (Use nestedUse : getUses()) {
+        translator.put(nestedUse);
+      }
+
+    }
+
+  }
+
   /**
    *
    */
-  public void translate(
-      control4j.application.Block destination, Scope localScope) {
-
-    // translate all of the input
-    if (input != null)
-      for (String inp : input)
-        destination.addInput(inp);
-
-    // translate all of the output
-    if (output != null)
-      for (String out : output)
-        destination.addOutput(out);
-
-    // translate all of the signals
-    if (signals != null)
-      for (Signal signal : signals)
-        destination.addSignal(signal);
-
-    // translate all of the modules
-    if (modules != null)
-      for (Module module : modules)
-        destination.addModule(module);
-
-    // translate all of the use elements
-    if (uses != null)
-      for (Use use : uses)
-        destination.addUse(use);
+  public control4j.application.Block getExpandable() {
+    return new ExpandableBlock();
   }
 
   // TODO: delete

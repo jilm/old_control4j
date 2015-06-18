@@ -57,7 +57,7 @@ public class Sorter {
     init();
 
     // create graph
-    DirectedAcyclicGraph<Module, DefaultEdge> graph 
+    DirectedAcyclicGraph<Module, DefaultEdge> graph
         = new DirectedAcyclicGraph<Module, DefaultEdge>(DefaultEdge.class);
     initGraph(graph);
 
@@ -93,21 +93,14 @@ public class Sorter {
     for (int i = 0; i < application.getModulesSize(); i++) {
       Module module = application.getModule(i);
       // add output with given index
-      for (int out : module.getFixedOutputMap()) {
-        if (out >= 0) {
+      for (int j = 0; j < module.getOutputSize(); j++) {
+        if (module.getOutput(j) != null) {
+          int out = module.getOutput(j).getPointer();
           if (signalModuleMap[out] < 0) {
             signalModuleMap[out] = i;
           } else {
             // TODO more interconnected outputs
           }
-        }
-      }
-      // process output with variable index
-      for (int out : module.getVariableOutputMap()) {
-        if (signalModuleMap[out] < 0) {
-          signalModuleMap[out] = i;
-        } else {
-          // TODO more interconnected outputs
         }
       }
     }
@@ -132,9 +125,9 @@ public class Sorter {
     for (int i = 0; i < application.getModulesSize(); i++) {
       Module module2 = application.getModule(i);
       // for all of the input with given index
-      addEdges(graph, module2, module2.getFixedInputMap());
+      //addEdges(graph, module2, module2.getFixedInputMap()); TODO:
       // for all of the input with variable index
-      addEdges(graph, module2, module2.getVariableInputMap());
+      //addEdges(graph, module2, module2.getVariableInputMap()); TODO:
     }
 
     // add edges with default value
@@ -167,7 +160,7 @@ public class Sorter {
           if (application.getSignal(in).getRight().isValueT_1Specified()) {
             // if the signal has default value specified
             // postphone the edge
-            delayedEdges.add(new ImmutableTriple<Module, Module, Integer>( 
+            delayedEdges.add(new ImmutableTriple<Module, Module, Integer>(
                 module1, module2, in));
           } else { // else insert it into the graph
             graph.addEdge(module1, module2);
@@ -186,7 +179,7 @@ public class Sorter {
     Loader loader = new Loader();
     Application application = loader.load(file);
     Preprocessor preprocessor = new Preprocessor();
-    preprocessor.process(application);
+    preprocessor.process(); // TODO:
     Sorter sorter = new Sorter();
     sorter.process(application);
     System.out.println(application.toString());

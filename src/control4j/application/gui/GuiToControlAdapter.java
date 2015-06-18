@@ -25,6 +25,7 @@ import control4j.gui.Changer;
 import control4j.application.Application;
 import control4j.application.Module;
 import control4j.application.Resource;
+import control4j.application.Input;
 
 public class GuiToControlAdapter extends AbstractAdapter
 {
@@ -56,6 +57,8 @@ public class GuiToControlAdapter extends AbstractAdapter
   public void put(Changer changer)
   {
     Module module = new ChangerModule(changer, destination.getScopePointer());
+    Input input = new Input();
+    // TODO:  place input
     destination.addModule(module);
   }
 

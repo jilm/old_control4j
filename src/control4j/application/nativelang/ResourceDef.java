@@ -90,14 +90,6 @@ public class ResourceDef extends DescriptionBase implements IDefinition {
     this.scope = scope;
   }
 
-  /**
-   *  Transfer all of the settings into the given object.
-   */
-  public void translate(
-      control4j.application.Resource resource, Scope localScope) {
-    super.translate(resource, localScope);
-  }
-
   @Override
   public void toString(ToStringBuilder builder) {
     super.toString(builder);

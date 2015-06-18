@@ -247,15 +247,8 @@ public class Instantiator
       control4j.application.Module moduleDef, Module module) {
 
     // calculate required size of the map array
-    int varInputSize = moduleDef.getVariableInputSize();
-    if (varInputSize > 0 && !module.isVariableInputSupported()) {
-      throw new SyntaxErrorException()
-        .set("message", "Variable input is not supported by the module")
-        .set("module", moduleDef.toString());
-    } else if (module.isVariableInputSupported()) {
-      moduleDef.setVariableInputStartIndex(
+    moduleDef.setVariableInputStartIndex(
           module.getVariableInputFirstIndex());
-    }
     int mapSize = module.getInputSize(moduleDef.getInputSize() - 1);
     if (mapSize == 0) return null;
 
@@ -264,9 +257,8 @@ public class Instantiator
     Arrays.fill(map, -1);
 
     // fixed index input
-    for (int i=0; i<mapSize; i++)
-    {
-      map[i] = moduleDef.getFixedInputMap().get(i);
+    for (int i=0; i<mapSize; i++) {
+      map[i] = moduleDef.getInput(i).getPointer();
     }
 
     return map;
@@ -276,18 +268,9 @@ public class Instantiator
    *  Creates and returns the output map for a given module definition.
    */
   protected int[] getOutputMap(
-      control4j.application.Module moduleDef, Module module)
-  {
-    // calculate required size of the map array
-    int varOutputSize = moduleDef.getVariableOutputSize();
-    if (varOutputSize > 0 && !module.isVariableOutputSupported()) {
-      throw new SyntaxErrorException()
-          .set("message", "Variable output is not supported by the module!")
-          .set("module", moduleDef.toString());
-    } else if (module.isVariableOutputSupported()) {
-      moduleDef.setVariableOutputStartIndex(
-          module.getVariableOutputFirstIndex());
-    }
+      control4j.application.Module moduleDef, Module module) {
+    moduleDef.setVariableOutputStartIndex(
+        module.getVariableOutputFirstIndex());
     int mapSize = module.getOutputSize(moduleDef.getOutputSize() - 1);
     if (mapSize == 0) return null;
 
@@ -296,9 +279,8 @@ public class Instantiator
     Arrays.fill(map, -1);
 
     // fixed index output
-    for (int i = 0; i < mapSize; i++)
-    {
-      map[i] = moduleDef.getFixedOutputMap().get(i);
+    for (int i = 0; i < mapSize; i++) {
+      map[i] = moduleDef.getOutput(i).getPointer();
     }
 
     return map;
@@ -338,7 +320,8 @@ public class Instantiator
         = loader.load(file);
     control4j.application.Preprocessor preprocessor
         = new control4j.application.Preprocessor();
-    preprocessor.process(application);
+    // TODO:
+    preprocessor.process();
     control4j.application.Sorter sorter
         = new control4j.application.Sorter();
     sorter.process(application);

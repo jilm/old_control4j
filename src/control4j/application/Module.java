@@ -106,6 +106,18 @@ public class Module extends Configurable {
     // TODO input with duble indexes
   }
 
+  public void putInput(Input input) {
+    // TODO:
+  }
+
+  public void setVariableInputStartIndex(int index) {
+    // TODO:
+  }
+
+  public void setVariableOutputStartIndex(int index) {
+    // TODO:
+  }
+
   /**
    *  Returns the highest assigned index plus one.
    */
@@ -122,36 +134,6 @@ public class Module extends Configurable {
   public Input getInput(int index) {
     if (inputArray == null) {} // TODO
     return inputArray.get(index);
-  }
-
-  /** Buffer for input references without index specified. */
-  private ArrayList<Input> variableInput = new ArrayList<Input>();
-
-  /**
-   *  Adds an input which doesn't have index attached.
-   */
-  public void putInput(Input input) {
-    notNull(input,
-        getMessage("msg006", "input", getDeclarationReferenceText()));
-    if (variableInput == null)
-      variableInput = new ArrayList<Input>();
-    variableInput.add(input);
-  }
-
-  /**
-   *  Returns number of variable input signals.
-   */
-  public int getVariableInputSize() {
-    if (variableInput == null) return 0;
-    return variableInput.size();
-  }
-
-  /**
-   *  Returns a variable input on given position.
-   */
-  public Input getVariableInput(int index) {
-    if (variableInput == null) {} // TODO
-    return variableInput.get(index);
   }
 
   /**
@@ -175,6 +157,10 @@ public class Module extends Configurable {
     // TODO output with duble indexes
   }
 
+  public void putOutput(Output output) {
+    // TODO:
+  }
+
   /**
    *  Returns the highest assigned index plus one.
    */
@@ -193,37 +179,6 @@ public class Module extends Configurable {
   {
     if (outputArray == null) {} // TODO
     return outputArray.get(index);
-  }
-
-  /** Buffer for output references without index specified. */
-  private ArrayList<Output> variableOutput = new ArrayList<Output>();
-
-  /**
-   *  Adds an output which doesn't have index attached.
-   */
-  public void putOutput(Output output)
-  {
-    if (variableOutput == null)
-      variableOutput = new ArrayList<Output>();
-    variableOutput.add(output);
-  }
-
-  /**
-   *  Returns number of variable output signals.
-   */
-  public int getVariableOutputSize()
-  {
-    if (variableOutput == null) return 0;
-    return variableOutput.size();
-  }
-
-  /**
-   *  Returns a variable output on given position.
-   */
-  public Output getVariableOutput(int index)
-  {
-    if (variableOutput == null) {} // TODO
-    return variableOutput.get(index);
   }
 
   /*
@@ -297,179 +252,6 @@ public class Module extends Configurable {
 
   /*
    *
-   *     Input Tags
-   *
-   */
-
-  /** A set of input tags. */
-  private HashSet<String> inputTags;
-
-  public void addInputTag(String name)
-  {
-    if (inputTags == null)
-      inputTags = new HashSet<String>();
-    inputTags.add(name);
-  }
-
-  public int getInputTagsSize()
-  {
-    if (inputTags == null) return 0;
-    return inputTags.size();
-  }
-
-  public boolean containsInputTag(String name)
-  {
-    if (inputTags == null) return false;
-    return inputTags.contains(name);
-  }
-
-  /** A set of output tags. */
-  private HashSet<String> outputTags;
-
-  public void addOutputTag(String name)
-  {
-    if (outputTags == null)
-      outputTags = new HashSet<String>();
-    outputTags.add(name);
-  }
-
-  public int getOutputTagsSize()
-  {
-    if (outputTags == null) return 0;
-    return outputTags.size();
-  }
-
-  public boolean containsOutputTag(String name)
-  {
-    if (outputTags == null) return false;
-    return outputTags.contains(name);
-  }
-
-  /*
-   *
-   *     Input Map.
-   *
-   *     There are two kinds of input. Input with explicitly given
-   *     index, and input without it.
-   *
-   */
-
-  private ArrayList<Integer> fixedInputMap = new ArrayList<Integer>();
-  private ArrayList<Integer> variableInputMap = new ArrayList<Integer>();
-
-  public void putInputSignalIndex(int index, int signalIndex) {
-    if (index < 0) {
-      throw new SyntaxErrorException()
-        .set("message", "Negative index!")
-        .set("index", Integer.valueOf(index).toString());
-    }
-    while (index >= fixedInputMap.size())
-      fixedInputMap.add(-1);
-    fixedInputMap.set(index, signalIndex);
-  }
-
-  public void addInputSignalIndex(int signalIndex) {
-    variableInputMap.add(signalIndex);
-  }
-
-  public List<Integer> getFixedInputMap()
-  {
-    return fixedInputMap;
-  }
-
-  public List<Integer> getVariableInputMap()
-  {
-    return variableInputMap;
-  }
-
-  public void setVariableInputStartIndex(int index) {
-    if (index < 0) {
-      throw new SyntaxErrorException()
-        .set("message", "Negative index!")
-        .set("index", Integer.valueOf(index).toString())
-        .set("module def.", toString());
-    }
-    if (variableInputMap.size() == 0) {
-      return;
-    } else if (fixedInputMap.size() > index) {
-      throw new SyntaxErrorException()
-        .set("message", "Input index colision!")
-        .set("index", Integer.valueOf(index).toString())
-        .set("module def", toString());
-    }
-    while (fixedInputMap.size() < index) {
-      fixedInputMap.add(-1);
-      inputArray.add(null);
-    }
-    for (int i = 0; i < variableInputMap.size(); i++) {
-      fixedInputMap.add(variableInputMap.get(i));
-      inputArray.add(variableInput.get(i));
-    }
-    // cleen up
-    variableInputMap.clear();
-    variableInput.clear();
-  }
-
-  /*
-   *
-   *     Output Map.
-   *
-   *     There are two kinds of output. Output with explicitly given
-   *     index, and output without it.
-   *
-   */
-
-  private ArrayList<Integer> fixedOutputMap = new ArrayList<Integer>();
-  private ArrayList<Integer> variableOutputMap = new ArrayList<Integer>();
-
-  public void putOutputSignalIndex(int index, int signalIndex)
-  {
-    while (index >= fixedOutputMap.size())
-      fixedOutputMap.add(-1);
-    fixedOutputMap.set(index, signalIndex);
-  }
-
-  public void addOutputSignalIndex(int signalIndex)
-  {
-    variableOutputMap.add(signalIndex);
-  }
-
-  public List<Integer> getFixedOutputMap()
-  {
-    return fixedOutputMap;
-  }
-
-  public List<Integer> getVariableOutputMap()
-  {
-    return variableOutputMap;
-  }
-
-  public void setVariableOutputStartIndex(int index)
-  {
-    if (variableOutputMap.size() == 0)
-    {
-      return;
-    }
-    else if (fixedOutputMap.size() > index)
-    {
-      // TODO indexes colision
-    }
-    while (fixedOutputMap.size() < index)
-    {
-      fixedOutputMap.add(-1);
-      outputArray.add(null);
-    }
-    for (int i = 0; i < variableOutputMap.size(); i++)
-    {
-      fixedOutputMap.add(variableOutputMap.get(i));
-      outputArray.add(variableOutput.get(i));
-    }
-    variableOutputMap.clear();
-    variableOutput.clear();
-  }
-
-  /*
-   *
    *     To String.
    *
    */
@@ -480,16 +262,8 @@ public class Module extends Configurable {
     super.toString(builder);
     builder.append("className", className)
         .append("inputArray", inputArray)
-        .append("variableInput", variableInput)
         .append("outputArray", outputArray)
-        .append("variableOutput", variableOutput)
-        .append("resources", resources)
-        .append("inputTags", inputTags)
-        .append("outputTags", outputTags)
-        .append("fixedInputMap", fixedInputMap)
-        .append("variableInputMap", variableInputMap)
-        .append("fixedOutputMap", fixedOutputMap)
-        .append("variableOutputMap", variableOutputMap);
+        .append("resources", resources);
   }
 
 }

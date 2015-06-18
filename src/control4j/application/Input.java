@@ -25,70 +25,26 @@ import cz.lidinsky.tools.ToStringBuilder;
 /**
  *
  *  This is a crate object for the module input definition.
- *  Each input definition has to contain a reference to the
- *  signal which is the name of the signal and its scope.
- *  Each individual input may have its own configuration.
- *  It may modify the behavior of the module, it may tell, for
- *  instance that some input will be negated before the processing.
  *
  */
-public class Input extends Configurable
-{
+public class Input extends Configurable {
 
-  /** Name of the signal that is attached to the input */
-  private String href;
+  public Input() { }
 
-  /** input scope */
-  private Scope scope;
+  private int pointer = -1;
 
-  /**
-   *  Initialize new object. The default value for index is -1.
-   *
-   *  @param scope
-   *             scope where the signal will be searched. May
-   *             not be null.
-   *
-   *  @param href
-   *             id of the signal. May not be null nor empty string.
-   */
-  public Input(Scope scope, String href)
-  {
-    this.scope = scope;
-    this.href = href;
+  public void setPointer(int pointer) {
+    this.pointer = pointer;
   }
 
-  /**
-   *  Copy constructor.
-   */
-  public Input(Input input)
-  {
-    super(input);
-    this.href = input.href;
-    this.scope = input.scope;
-  }
-
-  /**
-   *  Returns the name of the signal it refers to.
-   */
-  public String getHref()
-  {
-    return href;
-  }
-
-  /**
-   *  Returns the scope where the referenced signal will be searched.
-   */
-  public Scope getScope()
-  {
-    return scope;
+  public int getPointer() {
+    return pointer;
   }
 
   @Override
-  public void toString(ToStringBuilder builder)
-  {
+  public void toString(ToStringBuilder builder) {
     super.toString(builder);
-    builder.append("href", href)
-        .append("scope", scope);
+    builder.append("pointer", pointer);
   }
 
 }

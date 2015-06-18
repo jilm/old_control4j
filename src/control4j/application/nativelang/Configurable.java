@@ -19,8 +19,10 @@ package control4j.application.nativelang;
  */
 
 import static org.apache.commons.lang3.Validate.notNull;
+import static org.apache.commons.collections4.CollectionUtils.emptyIfNull;
 
 import java.util.ArrayList;
+import java.util.Collection;
 
 import control4j.application.Scope;
 import control4j.tools.DuplicateElementException;
@@ -36,13 +38,11 @@ import cz.lidinsky.tools.ToStringStyle;
  *
  */
 abstract class Configurable
-extends DeclarationBase implements IToStringBuildable
-{
+extends DeclarationBase implements IToStringBuildable {
 
   private ArrayList<Property> properties;
 
-  public void addProperty(Property property)
-  {
+  public void addProperty(Property property) {
     notNull(property);
     if (properties == null) {
       properties = new ArrayList<Property>();
@@ -50,52 +50,16 @@ extends DeclarationBase implements IToStringBuildable
     properties.add(property);
   }
 
-  public void translate(
-      control4j.application.Configurable destination, Scope localScope)
-  {
-    if (properties != null)
-      for (Property property : properties)
-        try
-        {
-          if (property.isReference())
-          {
-            destination.putProperty(property.getKey(), property.getHref(),
-                resolveScope(property.getScope(), localScope));
-          }
-          else
-          {
-            destination.putProperty(property.getKey(), property.getValue());
-          }
-        }
-        catch (DuplicateElementException e)
-        {
-          // TODO
-        }
+  public Collection<Property> getConfiguration() {
+    return emptyIfNull(properties);
   }
 
-  protected static Scope resolveScope(int code, Scope localScope)
-  {
-    switch (code)
-    {
-      case 0:
-        return Scope.getGlobal();
-      case 1:
-        return localScope;
-      case 2:
-        return localScope.getParent();
-      default:
-        throw new IllegalArgumentException();
-    }
-  }
-
-  public void put(Property property)
-  {
+  public void put(Property property) {
     addProperty(property);
   }
 
   @Override
-  public void toString(ToStringBuilder builder)
-  {
+  public void toString(ToStringBuilder builder) {
     builder.append("properties", properties);
   }
 

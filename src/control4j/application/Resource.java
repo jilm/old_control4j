@@ -27,29 +27,33 @@ import cz.lidinsky.tools.ToStringBuilder;
  *  Contains declaration of a resource.
  *
  */
-public class Resource extends Configurable
-{
+public class Resource extends Configurable {
 
   private String className;
 
-  public Resource(String className)
-  {
+  public Resource(String className) {
     this.className = notBlank(className,
         "Class name of the resource may not be blank!");
+  }
+
+  public Resource() {}
+
+  public Resource setClassName(String className) {
+    this.className = notBlank(className,
+        "Class name of the resource may not be blank!");
+    return this;
   }
 
   /**
    *  Returns a name of class that implements functionality
    *  of the resource.
    */
-  public String getClassName()
-  {
+  public String getClassName() {
     return className;
   }
 
   @Override
-  public void toString(ToStringBuilder builder)
-  {
+  public void toString(ToStringBuilder builder) {
     super.toString(builder);
     builder.append("className", className);
   }

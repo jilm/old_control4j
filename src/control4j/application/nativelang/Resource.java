@@ -100,11 +100,6 @@ public class Resource extends Configurable implements IReference {
     return isReference;
   }
 
-  public void translate(
-      control4j.application.Resource destination, Scope localScope) {
-    super.translate(destination, localScope);
-  }
-
   @Override
   public void toString(ToStringBuilder builder) {
     super.toString(builder);
