@@ -20,12 +20,22 @@ package control4j.application.nativelang;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+
 import control4j.application.Scope;
 import control4j.application.ErrorManager;
+import control4j.application.ReferenceDecorator;
 import control4j.tools.DuplicateElementException;
 
+/**
+ *  An adapter which can translate objects from nativelang package
+ *  to the objects from the application package. Translated objects
+ *  are sent into the given handler object.
+ */
 public class C4jToControlAdapter extends AbstractAdapter {
 
+  /** A destination for translated objects. */
   protected control4j.application.Preprocessor handler;
 
   public C4jToControlAdapter(control4j.application.Preprocessor handler) {
@@ -36,18 +46,29 @@ public class C4jToControlAdapter extends AbstractAdapter {
     }
   }
 
+  /**
+   *  Call to start new inner local scope.
+   */
   public void startLevel() {
     handler.startScope();
   }
 
+  /**
+   *  Call to end current inner local scope and to return to the parent
+   *  scope.
+   */
   public void endLevel() {
     handler.endScope();
   }
 
+  /**
+   *  Put a module object.
+   */
   public void put(Module module) {
+
     Scope localScope = handler.getScopePointer();
     control4j.application.Module destModule =
-        new control4j.application.Module(module.getClassName());
+      new control4j.application.Module(module.getClassName());
 
     // translate configuration
     translateConfiguration(module, destModule, localScope);
@@ -56,7 +77,7 @@ public class C4jToControlAdapter extends AbstractAdapter {
     for (Resource resource : module.getResources()) {
       try {
         control4j.application.Resource destResource
-              = new control4j.application.Resource();
+          = new control4j.application.Resource();
         if (resource.isReference()) {
           handler.addResourceRef(
               resource.getHref(),
@@ -79,18 +100,16 @@ public class C4jToControlAdapter extends AbstractAdapter {
     // translate input
     for (Input inp : module.getInput()) {
       control4j.application.Input translated
-                  = new control4j.application.Input();
+        = new control4j.application.Input();
       translateConfiguration(inp, translated, localScope);
-      handler.addModuleInput(
-                  inp.getHref(),
-                  resolveScope(inp.getScope(), localScope),
-                  translated);
+      control4j.application.Input sub
+        = substitute(inp.getHref(), inp.getScope(), translated);
       try {
         if (!isBlank(inp.getIndex())) {
           int index = Integer.parseInt(inp.getIndex());
-          destModule.putInput(index, translated);
+          destModule.putInput(index, sub);
         } else {
-          destModule.putInput(translated);
+          destModule.putInput(sub);
         }
       } catch (NumberFormatException e) {
         ErrorManager.newError();
@@ -101,18 +120,16 @@ public class C4jToControlAdapter extends AbstractAdapter {
     // translate output
     for (Output outp : module.getOutput()) {
       control4j.application.Output translated
-                  = new control4j.application.Output();
+        = new control4j.application.Output();
       translateConfiguration(outp, translated, localScope);
-      handler.addModuleOutput(
-                  outp.getHref(),
-                  resolveScope(outp.getScope(), localScope),
-                  translated);
+      control4j.application.Output sub
+        = substitute(outp.getHref(), outp.getScope(), translated);
       try {
         if (!isBlank(outp.getIndex())) {
           int index = Integer.parseInt(outp.getIndex());
-          destModule.putOutput(index, translated);
+          destModule.putOutput(index, sub);
         } else {
-          destModule.putOutput(translated);
+          destModule.putOutput(sub);
         }
       } catch (NumberFormatException e) {
         ErrorManager.newError();
@@ -132,13 +149,88 @@ public class C4jToControlAdapter extends AbstractAdapter {
 
   }
 
+  /**
+   *  Put a block object.
+   */
   public void put(Block block) {
-      Scope localScope = handler.getScopePointer();
-      control4j.application.Block translated = block.getExpandable();
-      handler.putBlock(
-          block.getName(),
-          resolveScope(block.getScope(), localScope),
-          translated);
+    Scope localScope = handler.getScopePointer();
+    control4j.application.Block translated = block.getExpandable();
+    handler.putBlock(
+        block.getName(),
+        resolveScope(block.getScope(), localScope),
+        translated);
+  }
+
+  /** If the block is expanded, this fields contains references to
+      relevant objects, otherwise, these contains null. */
+  private control4j.application.Use use;
+  private Block block;
+
+  /**
+   *  Use this method to put a module which is part of a block.
+   */
+  void put(
+      Module module,
+      control4j.application.Use use,
+      Block block) {
+
+    this.use = use;
+    this.block = block;
+    put(module);
+  }
+
+  /**
+   *  If the module is inside the block, this method provide substitution
+   *  of given input if necessary.
+   */
+  protected control4j.application.Input substitute(
+      String href, int scopeCode, control4j.application.Input input) {
+
+    // If the block is expanded
+    if (block != null && use != null) {
+      // If the input is a reference to the block input
+      if (scopeCode == Parser.LOCAL_SCOPE_CODE
+              && block.getInput().contains(href)) {
+        // Provide a substitution,
+        // taka appropriate reference from the use object
+        ReferenceDecorator<control4j.application.Input, Object> useInput
+          = use.getInput(href);
+        handler.addModuleInput(
+            useInput.getHref(), useInput.getScope(), useInput.getDecorated());
+        return useInput.getDecorated();
+      }
+    }
+    // Otherwise, just return given data.
+    handler.addModuleInput(
+            href, resolveScope(scopeCode, handler.getScopePointer()), input);
+    return input;
+  }
+
+  /**
+   *  If the module is inside the block, this method provide substitution
+   *  of given output if necessary.
+   */
+  protected control4j.application.Output substitute(
+      String href, int scopeCode, control4j.application.Output output) {
+
+    // If the block is expanded
+    if (block != null && use != null) {
+      // If the output is a reference to the block output
+      if (scopeCode == Parser.LOCAL_SCOPE_CODE
+              && block.getOutput().contains(href)) {
+        // Provide a substitution,
+        // take appropriate reference from the use object
+        ReferenceDecorator<control4j.application.Output, Object> useOutput
+          = use.getOutput(href);
+        handler.addModuleOutput(
+          useOutput.getHref(), useOutput.getScope(), useOutput.getDecorated());
+        return useOutput.getDecorated();
+      }
+    }
+    // Otherwise, just return given data.
+    handler.addModuleOutput(
+            href, resolveScope(scopeCode, handler.getScopePointer()), output);
+    return output;
   }
 
   public void put(Signal signal) {
@@ -204,11 +296,21 @@ public class C4jToControlAdapter extends AbstractAdapter {
     translateConfiguration(use, translated, localScope);
     for (Input input : use.getInput()) {
       translated.putInput(
-          input.getIndex(), new control4j.application.Input());
+          input.getIndex(),
+          new ReferenceDecorator<control4j.application.Input, Object>(
+              input.getHref(),
+              resolveScope(input.getScope(), localScope),
+              null,
+              new control4j.application.Input()));
     }
     for (Output output : use.getOutput()) {
       translated.putOutput(
-          output.getIndex(), new control4j.application.Output());
+          output.getIndex(),
+          new ReferenceDecorator<control4j.application.Output, Object>(
+              output.getHref(),
+              resolveScope(output.getScope(), localScope),
+              null,
+              new control4j.application.Output()));
     }
     handler.add(translated, localScope);
   }

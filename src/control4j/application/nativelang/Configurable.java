@@ -63,4 +63,13 @@ extends DeclarationBase implements IToStringBuildable {
     builder.append("properties", properties);
   }
 
+  public void putConfiguration(Configurable source) {
+    if (source.properties != null && source.properties.size() > 0) {
+      if (properties == null) {
+        properties = new ArrayList<Property>();
+      }
+      properties.addAll(source.properties);
+    }
+  }
+
 }

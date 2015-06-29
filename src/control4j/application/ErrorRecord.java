@@ -22,15 +22,15 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class ErrorRecord {
 
-  public static final int DATATYPE_ERROR = 1;
 
+  public static final int DATATYPE_ERROR = 1;
   /** If the value of some attribute is out of bounds or is not allowed. */
   public static final int WRONG_ATTRIBUTE_VALUE_ERROR = 2;
-
   public static final int WRONG_SCOPE2_VALUE_ERROR = 3;
   public static final int WRONG_SCOPE3_VALUE_ERROR = 4;
-
   public static final int DUPLICATE_DEFINITION_ERROR = 5;
+  public static final int USE_MISSING_IO_ERROR = 6;
+
   public static final int NAME_CODE = 1;
   public static final int SCOPE_CODE = 2;
   public static final int REFERENCE1_CODE = 3;
@@ -45,6 +45,9 @@ public class ErrorRecord {
   public static final int POSSIBLE_VALUES_CODE = 6;
   public static final int ATTRIBUTE_CODE = 7;
   public static final int VALUE_CODE = 8;
+
+  public static final int ALIAS_CODE = 3;
+  public static final int REFERENCE_CODE = 4;
 
   private int errorCode;
 
@@ -130,6 +133,15 @@ public class ErrorRecord {
           .append(params[REFERENCE2_CODE]);
         break;
 
+      case USE_MISSING_IO_ERROR:
+        sb.append("Use object doesn't define an input or output for some")
+          .append(" block input or output!")
+          .append("\nBlock name: ")
+          .append(params[NAME_CODE])
+          .append("\nBlock scope: ")
+          .append(params[SCOPE_CODE])
+          .append("\nUse reference: ")
+          .append(params[REFERENCE_CODE]);
     }
     return sb.toString();
   }

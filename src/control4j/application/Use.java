@@ -30,26 +30,22 @@ import cz.lidinsky.tools.ToStringBuilder;
  *  References and places a block into the processing.
  *
  */
-public class Use extends Configurable
-{
+public class Use extends Configurable {
 
   private String href;
   private Scope scope;
 
-  public Use(String href, Scope scope)
-  {
+  public Use(String href, Scope scope) {
     super();
     this.href = href;
     this.scope = scope;
   }
 
-  public String getHref()
-  {
+  public String getHref() {
     return href;
   }
 
-  public Scope getScope()
-  {
+  public Scope getScope() {
     return scope;
   }
 
@@ -59,20 +55,18 @@ public class Use extends Configurable
    *
    */
 
-  private HashMap<String, Input> inputMap;
+  private HashMap<String, ReferenceDecorator<Input, Object>> inputMap;
 
-  public void putInput(String index, Input input)
-  {
+  public void putInput(String index, ReferenceDecorator<Input, Object> input) {
     if (inputMap == null)
-      inputMap = new HashMap<String, Input>();
+      inputMap = new HashMap<String, ReferenceDecorator<Input, Object>>();
     inputMap.put(index, input);
   }
 
-  public Input getInput(String index)
-  {
+  public ReferenceDecorator<Input, Object> getInput(String index) {
     if (inputMap == null)
       throw new NoSuchElementException();
-    Input input = inputMap.get(index);
+    ReferenceDecorator<Input, Object> input = inputMap.get(index);
     if (input == null)
       throw new NoSuchElementException();
     return input;
@@ -84,20 +78,19 @@ public class Use extends Configurable
    *
    */
 
-  private HashMap<String, Output> outputMap;
+  private HashMap<String, ReferenceDecorator<Output, Object>> outputMap;
 
-  public void putOutput(String index, Output output)
-  {
+  public void putOutput(
+      String index, ReferenceDecorator<Output, Object> output) {
     if (outputMap == null)
-      outputMap = new HashMap<String, Output>();
+      outputMap = new HashMap<String, ReferenceDecorator<Output, Object>>();
     outputMap.put(index, output);
   }
 
-  public Output getOutput(String index)
-  {
+  public ReferenceDecorator<Output, Object> getOutput(String index) {
     if (outputMap == null)
       throw new NoSuchElementException();
-    Output output = outputMap.get(index);
+    ReferenceDecorator<Output, Object> output = outputMap.get(index);
     if (output == null)
       throw new NoSuchElementException();
     return output;

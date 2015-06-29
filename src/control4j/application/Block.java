@@ -18,155 +18,26 @@ package control4j.application;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Set;
 
-import control4j.tools.DuplicateElementException;
+public abstract class Block extends DeclarationBase {
 
-import cz.lidinsky.tools.ToStringBuilder;
-
-public abstract class Block extends DeclarationBase
-{
-
+  /** Does nothing. */
   public Block() {
     super();
   }
 
+  /**
+   *  Expands inner elements of the block (which is modules, signals, inner
+   *  block references) into the given handler.
+   *
+   *  @param use
+   *             reference to this block. It is used to resolve block input
+   *             and output
+   *
+   *  @param handler
+   *             an object to send epanded modules, signals, etc.
+   */
   public abstract void expand(Use use, Preprocessor handler);
-
-  /*
-   *
-   *     Input of the Block
-   *
-   */
-
-  private HashSet<String> inputSet = new HashSet<String>();
-
-  public void addInput(String name)
-  {
-    inputSet.add(name);
-  }
-
-  public boolean containsInput(String name)
-  {
-    return inputSet.contains(name);
-  }
-
-  public Set<String> getInputSet()
-  {
-    return inputSet;
-  }
-
-  /*
-   *
-   *     Output of the Block
-   *
-   */
-
-  private HashSet<String> outputSet = new HashSet<String>();
-
-  public void addOutput(String name)
-  {
-    outputSet.add(name);
-  }
-
-  public boolean containsOutput(String name)
-  {
-    return outputSet.contains(name);
-  }
-
-  public Set<String> getOutputSet()
-  {
-    return outputSet;
-  }
-
-  /*
-   *
-   *     Modules.
-   *
-   */
-
-  /** Internal buffer for modules. */
-  private LinkedList<control4j.application.nativelang.Module> modules
-      = new LinkedList<control4j.application.nativelang.Module>();
-
-  /**
-   *  Add given module into the internal buffer.
-   */
-  public void addModule(control4j.application.nativelang.Module module)
-  {
-    modules.add(module);
-  }
-
-  /**
-   *  Return collection that contains all of the modules that
-   *  are under this block.
-   */
-  public Collection<control4j.application.nativelang.Module> getModules()
-  {
-    return modules;
-  }
-
-  /*
-   *
-   *     Signal Definitions.
-   *
-   *     Because it is not possible to resolve the scope of the
-   *     signal definition by the time of translation, the signal
-   *     definitions must be here in their raw object.
-   *
-   */
-
-  private ArrayList<control4j.application.nativelang.Signal> signals
-      = new ArrayList<control4j.application.nativelang.Signal>();
-
-  public void addSignal(control4j.application.nativelang.Signal signal)
-  {
-    signals.add(signal);
-  }
-
-  Collection<control4j.application.nativelang.Signal> getSignals()
-  {
-    return signals;
-  }
-
-  /*
-   *
-   *     Use Objects
-   *
-   */
-
-  private LinkedList<control4j.application.nativelang.Use> uses
-      = new LinkedList<control4j.application.nativelang.Use>();
-
-  public void addUse(control4j.application.nativelang.Use use)
-  {
-    uses.add(use);
-  }
-
-  Collection<control4j.application.nativelang.Use> getUseObjects()
-  {
-    return uses;
-  }
-
-  /*
-   *
-   *     Other Methods
-   *
-   */
-
-  @Override
-  public void toString(ToStringBuilder builder)
-  {
-    super.toString(builder);
-    builder.append("inputSet", inputSet)
-        .append("outputSet", outputSet)
-        .append("modules", modules)
-        .append("signals", signals)
-        .append("uses", uses);
-  }
 
 }

@@ -29,28 +29,34 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.NoSuchElementException;
-import org.xml.sax.Attributes;
 
 import control4j.application.Preprocessor;
 import control4j.application.Scope;
+import control4j.application.ErrorRecord;
+import control4j.application.ErrorManager;
 import control4j.tools.DuplicateElementException;
 import control4j.tools.ParseException;
 
 import cz.lidinsky.tools.IToStringBuildable;
 import cz.lidinsky.tools.ToStringBuilder;
-import cz.lidinsky.tools.ToStringStyle;
 
 /**
  *
- *  Stands for a block element.
+ *  Stands for a block element. The block is a definition object. It contains
+ *  modules, signal definitions, references to other blocks, input and output
+ *  objects. Each block is identified by a name. Each block could be referenced
+ *  by a use object.
  *
  */
 public class Block extends DescriptionBase implements IDefinition {
 
+  /** An empty constructor. */
   public Block() {}
 
+  /** Identification of the block. */
   private String name;
 
+  /** Returns a name, which is identification of the block. */
   public String getName() {
     return name;
   }
@@ -157,10 +163,16 @@ public class Block extends DescriptionBase implements IDefinition {
     }
   }
 
+  /**
+   *  A class that contain code to resolve the scope and expand inner
+   *  elements of the block into the handler.
+   */
   private class ExpandableBlock extends control4j.application.Block {
 
     @Override
-    public void expand(control4j.application.Use use, Preprocessor handler) {
+    public void expand(
+        control4j.application.Use use,
+        Preprocessor handler) {
 
       C4jToControlAdapter translator = new C4jToControlAdapter(handler);
 
@@ -169,34 +181,9 @@ public class Block extends DescriptionBase implements IDefinition {
         translator.put(signal);
       }
 
-      // Create an input map
-      HashMap<String, control4j.application.Input> inputMap
-          = new HashMap<String, control4j.application.Input>();
-      try {
-        for (String alias : getInput()) {
-          control4j.application.Input input = use.getInput(alias);
-          inputMap.put(alias, input);
-        }
-      } catch (NoSuchElementException e) {
-        // TODO:
-      }
-
-      // Create an output map
-      HashMap<String, control4j.application.Output> outputMap
-          = new HashMap<String, control4j.application.Output>();
-      try {
-        for (String alias : getOutput()) {
-          control4j.application.Output output = use.getOutput(alias);
-          outputMap.put(alias, output);
-        }
-      } catch (NoSuchElementException e) {
-        // TODO:
-      }
-
       // Expand all of the modules
       for (Module module : getModules()) {
-        // TODO: substitue block IO
-        translator.put(module);
+        translator.put(module, use, Block.this);
       }
 
       // Expand all of the nested use objects
@@ -213,22 +200,6 @@ public class Block extends DescriptionBase implements IDefinition {
    */
   public control4j.application.Block getExpandable() {
     return new ExpandableBlock();
-  }
-
-  // TODO: delete
-  protected static Scope resolveScope(int code, Scope localScope)
-  {
-    switch (code)
-    {
-      case 0:
-        return Scope.getGlobal();
-      case 1:
-        return localScope;
-      case 2:
-        return localScope.getParent();
-      default:
-        throw new IllegalArgumentException();
-    }
   }
 
   @Override

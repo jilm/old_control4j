@@ -23,33 +23,33 @@ import static org.apache.commons.lang3.Validate.notNull;
 import static org.apache.commons.lang3.StringUtils.trim;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-class ReferenceDecorator<S, T> {
+public class ReferenceDecorator<S, T> {
 
   String href;
   Scope scope;
   T value;
   protected S decorated;
 
-  ReferenceDecorator(String href, Scope scope, T value, S decorated) {
+  public ReferenceDecorator(String href, Scope scope, T value, S decorated) {
     this.href = trim(notBlank(href));
     this.scope = notNull(scope);
     this.value = value;
     this.decorated = notNull(decorated);
   }
 
-  S getDecorated() {
+  public S getDecorated() {
     return decorated;
   }
 
-  String getHref() {
+  public String getHref() {
     return href;
   }
 
-  Scope getScope() {
+  public Scope getScope() {
     return scope;
   }
 
-  T getValue() {
+  public T getValue() {
     return value;
   }
 
