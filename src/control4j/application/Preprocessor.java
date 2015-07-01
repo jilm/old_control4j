@@ -213,7 +213,7 @@ public class Preprocessor {
    */
   public void addResourceRef(
       String href, Scope scope, Resource resource) {
-    resourceReferences.add(
+    resourceRefs.push(
       new ReferenceDecorator<Resource, Object>(href, scope, null, resource));
   }
 
@@ -244,7 +244,7 @@ public class Preprocessor {
 
   public void addPropertyReference(
       String href, Scope scope, Property property) {
-    propertyRefs.add(
+    propertyRefs.push(
         new ReferenceDecorator<Property, Object>(href, scope, null, property));
   }
 
@@ -304,8 +304,8 @@ public class Preprocessor {
   /** Module definitions. */
   private Deque<Module> modules = new ArrayDeque<Module>();
 
-  private ArrayList<ReferenceDecorator<Resource, Object>> resourceReferences
-      = new ArrayList<ReferenceDecorator<Resource, Object>>();
+  private Deque<ReferenceDecorator<Resource, Object>> resourceRefs
+      = new ArrayDeque<ReferenceDecorator<Resource, Object>>();
 
   private ArrayList<ReferenceDecorator<Input, Object>> moduleInputs
       = new ArrayList<ReferenceDecorator<Input, Object>>();
@@ -316,8 +316,8 @@ public class Preprocessor {
   /** Block references. */
   private Deque<Pair<Use, Scope>> uses = new ArrayDeque<Pair<Use, Scope>>();
 
-  protected ArrayList<ReferenceDecorator<Property, Object>> propertyRefs
-      = new ArrayList<ReferenceDecorator<Property, Object>>();
+  protected Deque<ReferenceDecorator<Property, Object>> propertyRefs
+      = new ArrayDeque<ReferenceDecorator<Property, Object>>();
 
   protected ArrayList<Pair<Module, String>> inputTags
       = new ArrayList<Pair<Module, String>>();
@@ -410,10 +410,6 @@ public class Preprocessor {
     return signalIndexes.size();
   }
 
-  public List<ReferenceDecorator<Resource, Object>> getResourceReferences() {
-    return ListUtils.unmodifiableList(resourceReferences);
-  }
-
   //---------------------------------------------------------------- Processing
 
   /**
@@ -447,23 +443,29 @@ public class Preprocessor {
     // resource substitution
     // for all of the modules, if there is a resource reference
     // find it and substitude in place of the reference
-    for (ReferenceDecorator<Resource, Object> reference : resourceReferences) {
+    while (!resourceRefs.isEmpty()) {
       try {
+        ReferenceDecorator<Resource, Object> reference = resourceRefs.pop();
         Resource resource
-          = getResource(reference.getHref(), reference.getScope());
+          = resources.get(reference.getHref(), reference.getScope());
         reference.getDecorated().putConfiguration(resource);
-      } catch (NoSuchElementException e) {
-        // TODO:
+      } catch (SyntaxErrorException e) {
+        ErrorManager.newError()
+          .setCause(e)
+          .setCode(ErrorCode.RESOURCE_SUBSTITUTION);
       }
     }
 
     // property substitution
-    for (ReferenceDecorator<Property, Object> reference : propertyRefs) {
+    while (!propertyRefs.isEmpty()) {
       try {
+        ReferenceDecorator<Property, Object> reference = propertyRefs.pop();
         String value = getDefinition(reference.getHref(), reference.getScope());
         reference.getDecorated().setValue(value);
-      } catch (NoSuchElementException e) {
-        // TODO:
+      } catch (SyntaxErrorException e) {
+        ErrorManager.newError()
+          .setCause(e)
+          .setCode(ErrorCode.PROPERTY_SUBSTITUTION);
       }
     }
 
