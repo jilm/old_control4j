@@ -159,9 +159,9 @@ public class Control
     control4j.application.Preprocessor preprocessor
         = new control4j.application.Preprocessor();
     // TODO:
-    preprocessor.process();
     control4j.application.Sorter sorter
         = new control4j.application.Sorter();
+    preprocessor.process(sorter);
     sorter.process(application);
     Instantiator instantiator = new Instantiator();
     Application instances = instantiator.instantiate(application);

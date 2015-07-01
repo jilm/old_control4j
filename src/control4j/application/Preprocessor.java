@@ -31,6 +31,8 @@ import java.util.NoSuchElementException;
 import java.util.Map;
 import java.util.List;
 import java.text.MessageFormat;
+import java.util.Deque;
+import java.util.ArrayDeque;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -50,17 +52,17 @@ import control4j.tools.DuplicateElementException;
 
 /**
  *
- *  Preprocessing of the application.
+ *  Application preprocessing.
  *
  */
 public class Preprocessor {
-
-  //---------------------------------------------------------- Public Interface
 
   /**
    *  Empty constructor
    */
   public Preprocessor() { }
+
+  //---------------------------------------------------------- Public Interface
 
   /** Holds actual scope during the process of translation. */
   private Scope scopePointer = Scope.getGlobal();
@@ -78,49 +80,81 @@ public class Preprocessor {
   }
 
   /**
-   *  Adds a definition into the internal buffer.
+   *  Adds a definition into the internal buffer. A definition is a named
+   *  value which may be referenced by the property object. This method
+   *  doesn't throw exception, rather it create a record in the error
+   *  manager.
+   *
+   *  @param name
+   *             identification of the definition. May not be a null not
+   *             empty value. Must be a unique idetifier under the given
+   *             scope.
+   *
+   *  @param scope
+   *             scope of the definition. May not be a null value.
+   *
+   *  @param value
+   *             value of the definition. May not be a null value.
+   *
    */
   public void putDefinition(String name, Scope scope, String value) {
-    if (definitions == null) {
-      definitions = new ScopeMap<ValueObject>();
-    }
     try {
+      // lazy buffer
+      if (definitions == null) {
+        definitions = new ScopeMap<ValueObject>();
+      }
+      // insert a definition into the buffer
       definitions.put(name, scope, new ValueObject(value));
-    } catch (DuplicateElementException e) {
+    } catch (SyntaxErrorException e) {
       ErrorManager.newError()
-        .set(ErrorRecord.DUPLICATE_DEFINITION_ERROR)
-        .set(ErrorRecord.NAME_CODE, name)
-        .set(ErrorRecord.SCOPE_CODE, scope.toString());
+        .setCause(e)
+        .setCode(ErrorCode.DEFINITION);
     }
   }
 
+  /**
+   *  Adds a resource definition into the internal buffer. The resource
+   *  may be referenced from inside a module. Each resource definition
+   *  is identified by a name and scope.
+   *
+   *  @param name
+   *             must be a unique idetifer under the given scope. May
+   *             not be blank.
+   *
+   *  @param scope
+   *             a scope, may not be a null value
+   *
+   *  @param resource
+   *             a resource definition, may not be null value
+   */
   public void putResource(String name, Scope scope, Resource resource) {
-    // TODO:
+    // lazy buffer
     if (resources == null) {
       resources = new ScopeMap<Resource>();
     }
+    // put resource
     try {
       resources.put(name, scope, resource);
-    } catch (DuplicateElementException e) {
+    } catch (SyntaxErrorException e) {
       ErrorManager.newError()
-        .set(ErrorRecord.DUPLICATE_DEFINITION_ERROR)
-        .set(ErrorRecord.NAME_CODE, name)
-        .set(ErrorRecord.SCOPE_CODE, scope.toString())
-        .set(ErrorRecord.REFERENCE1_CODE,
-            resources.get(name, scope).getDeclarationReferenceText())
-        .set(ErrorRecord.REFERENCE2_CODE,
-            resource.getDeclarationReferenceText());
+        .setCause(e)
+        .setCode(ErrorCode.RESOURCE_DEFINITION);
     }
   }
 
+  /**
+   *  Adds a block definition into the internal buffer. The block may be
+   *  referenced by the use object. Each block is identified by a name
+   *  and scope.
+   */
   public void putBlock(String name, Scope scope, Block block) {
-    if (blocks == null) {
-      blocks = new ScopeMap<Block>();
-    }
+    // put definition into the buffer
     try {
       blocks.put(name, scope, block);
-    } catch (DuplicateElementException e) {
-      // TODO:
+    } catch (SyntaxErrorException e) {
+      ErrorManager.newError()
+        .setCause(e)
+        .setCode(ErrorCode.BLOCK_DEFINITION);
     }
   }
 
@@ -151,30 +185,32 @@ public class Preprocessor {
    *             is thrown
    */
   public void putSignal(String name, Scope scope, Signal signal) {
-    String trimmedName = notBlank(name).trim();
-    notNull(scope);
-    notNull(signal);
+    // lazy buffer
     if (signals == null) {
       signals = new ScopeMap<Signal>();
       signalIndexes = new ArrayList<Triple<String, Scope, Signal>>();
     }
     try {
-    signals.put(name, scope, signal);
-    signalIndexes.add(
-        new ImmutableTriple<String, Scope, Signal>(name, scope, signal));
-    } catch (DuplicateElementException e) {
-      // TODO:
+      signals.put(name, scope, signal);
+      signalIndexes.add(
+          new ImmutableTriple<String, Scope, Signal>(name, scope, signal));
+    } catch (SyntaxErrorException e) {
+      ErrorManager.newError()
+        .setCause(e)
+        .setCode(ErrorCode.SIGNAL_DEFINITION);
     }
   }
 
   /**
-   *  Adds a module definition into the internal buffer.
+   *  Adds a module definition. ???
    */
   public void addModule(Module module) {
-    if (modules == null) modules = new ArrayList<Module>();
-    modules.add(module);
+    modules.push(module);
   }
 
+  /**
+   *  Adds a reference to some resource definition.
+   */
   public void addResourceRef(
       String href, Scope scope, Resource resource) {
     resourceReferences.add(
@@ -257,7 +293,7 @@ public class Preprocessor {
   private ScopeMap<Resource> resources;
 
   /** Block definitions */
-  private ScopeMap<Block> blocks;
+  private ScopeMap<Block> blocks = new ScopeMap<Block>();
 
   /** A data structure for name and scope signal look up. */
   private ScopeMap<Signal> signals;
@@ -265,8 +301,8 @@ public class Preprocessor {
   /** A data structure for indexed signal look up. */
   private ArrayList<Triple<String, Scope, Signal>> signalIndexes;
 
-  /** An array of module definitions. */
-  private ArrayList<Module> modules;
+  /** Module definitions. */
+  private Deque<Module> modules = new ArrayDeque<Module>();
 
   private ArrayList<ReferenceDecorator<Resource, Object>> resourceReferences
       = new ArrayList<ReferenceDecorator<Resource, Object>>();
@@ -277,8 +313,8 @@ public class Preprocessor {
   private ArrayList<ReferenceDecorator<Output, Object>> moduleOutputs
       = new ArrayList<ReferenceDecorator<Output, Object>>();
 
-  private ArrayList<Pair<Use, Scope>> uses
-      = new ArrayList<Pair<Use, Scope>>();
+  /** Block references. */
+  private Deque<Pair<Use, Scope>> uses = new ArrayDeque<Pair<Use, Scope>>();
 
   protected ArrayList<ReferenceDecorator<Property, Object>> propertyRefs
       = new ArrayList<ReferenceDecorator<Property, Object>>();
@@ -306,29 +342,6 @@ public class Preprocessor {
       throw new NoSuchElementException();
     }
     return resources.get(name, scope);
-  }
-
-  /**
-   *  Returns a block definition with given name which is under
-   *  the given scope.
-   *
-   *  @throws NoSuchElementException
-   *             if such a blok is not present in the internal
-   *             buffer
-   */
-  protected Block getBlock(String name, Scope scope) {
-    if (blocks == null)
-      throw new NoSuchElementException();
-    return blocks.get(name, scope);
-  }
-
-  /** ??? */
-  protected Collection<Block> getBlocks() {
-    if (blocks == null) {
-      return emptyCollection();
-    } else {
-      return blocks.values();
-    }
   }
 
   /**
@@ -397,59 +410,8 @@ public class Preprocessor {
     return signalIndexes.size();
   }
 
-  public Module getModule(int index)
-  {
-    if (modules == null) {} // TODO
-    return modules.get(index);
-  }
-
-  public int getModulesSize()
-  {
-    if (modules == null) return 0;
-    return modules.size();
-  }
-
-  public void removeModules()
-  {
-    modules.clear();
-  }
-
   public List<ReferenceDecorator<Resource, Object>> getResourceReferences() {
     return ListUtils.unmodifiableList(resourceReferences);
-  }
-
-  public int getUseObjectsSize()
-  {
-    return uses.size();
-  }
-
-  public Pair<Use, Scope> getUse(int index)
-  {
-    return uses.get(index);
-  }
-
-  public void removeUse(int index)
-  {
-    uses.remove(index);
-  }
-
-  public int indexOf(Use use, Scope scope)
-  {
-    for (int i=0; i<uses.size(); i++)
-    {
-      Pair<Use, Scope> u = uses.get(i);
-      if (u.getKey().equals(use) && u.getValue().equals(scope))
-        return i;
-    }
-    throw new NoSuchElementException();
-  }
-
-  public int indexOf(Use use, int startIndex)
-  {
-    for (int i=startIndex; i<uses.size(); i++)
-      if (uses.get(i).getKey().equals(use))
-        return i;
-    throw new NoSuchElementException();
   }
 
   //---------------------------------------------------------------- Processing
@@ -458,26 +420,27 @@ public class Preprocessor {
    *  Entry point of the preprocessor. Given application
    *  serves as the input and output of this method.
    */
-  public void process() {
+  public void process(Sorter handler) {
 
     // Block expansion
-    while (uses.size() > 0) {
+    while (!uses.isEmpty()) {
       try {
         // get use to substitute
-        Pair<Use, Scope> use = uses.get(0);
+        Pair<Use, Scope> use = uses.pop();
         // get referenced block
         Block block
-          = getBlock(use.getLeft().getHref(), use.getLeft().getScope());
+          = blocks.get(use.getLeft().getHref(), use.getLeft().getScope());
         // set appropriate scope
         scopePointer = new Scope(use.getRight());
         // set appropriate field for cycle detection
         // TODO:
         // expand block
         block.expand(use.getLeft(), this);
-        // remove substuted use
-        uses.remove(0);
-      } catch (NoSuchElementException e) {
+      } catch (SyntaxErrorException e) {
         // block definition for given use is missing
+        ErrorManager.newError()
+          .setCause(e)
+          .setCode(ErrorCode.BLOCK_EXPANSION);
       }
     }
 
@@ -487,7 +450,7 @@ public class Preprocessor {
     for (ReferenceDecorator<Resource, Object> reference : resourceReferences) {
       try {
         Resource resource
-            = getResource(reference.getHref(), reference.getScope());
+          = getResource(reference.getHref(), reference.getScope());
         reference.getDecorated().putConfiguration(resource);
       } catch (NoSuchElementException e) {
         // TODO:
@@ -552,21 +515,11 @@ public class Preprocessor {
       }
     }
 
-    // -----------------------
+    // Sends all of the modules
+    while (!modules.isEmpty()) {
+      handler.add(modules.pop());
+    }
 
-  }
-
-  /**
-   *  Only for debug purposes.
-   */
-  public static void main(String[] args) throws Exception {
-    java.io.File file = new java.io.File(args[0]);
-    Loader loader = new Loader();
-    Application application = loader.load(file);
-    Preprocessor preprocessor = new Preprocessor();
-    preprocessor.process();
-    ToStringBuilder sb = new ToStringMultilineStyle();
-    System.out.println(sb.toString());
   }
 
 }

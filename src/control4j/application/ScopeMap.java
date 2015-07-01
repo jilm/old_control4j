@@ -20,12 +20,16 @@ package control4j.application;
 
 import static org.apache.commons.collections4.CollectionUtils.emptyCollection;
 import static org.apache.commons.collections4.CollectionUtils.unmodifiableCollection;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.NoSuchElementException;
 
 import control4j.tools.DuplicateElementException;
+
+import control4j.SyntaxErrorException;
+import control4j.ExceptionCode;
 
 import cz.lidinsky.tools.IToStringBuildable;
 import cz.lidinsky.tools.ToStringBuilder;
@@ -37,20 +41,14 @@ import cz.lidinsky.tools.ToStringStyle;
  *  pair: a name and a scope.
  *
  */
-public class ScopeMap<E extends ObjectBase> implements IToStringBuildable
-{
+public class ScopeMap<E extends ObjectBase> implements IToStringBuildable {
 
   /**
    *  Creates an empty storage.
    */
-  public ScopeMap()
-  { }
+  public ScopeMap() { }
 
-  /*
-   *
-   *    Back-end storage implemantation
-   *
-   */
+  //------------------------------------------- Back-end Storage Implemantation
 
   private HashMap<Key, E> buffer;
 
@@ -59,16 +57,23 @@ public class ScopeMap<E extends ObjectBase> implements IToStringBuildable
    *  A key object which consists of a pair: a name and a scope.
    *
    */
-  protected static class Key
-  {
+  protected static class Key {
 
     String name;
     Scope scope;
 
-    Key(String name, Scope scope)
-    {
-      if (name == null || scope == null)
-        throw new IllegalArgumentException();
+    Key(String name, Scope scope) {
+      // param check
+      if (isBlank(name) || scope == null) {
+        throw new SyntaxErrorException()
+          .setCode(ExceptionCode.ILLEGAL_ARGUMENT)
+          .set("message", "Ellegal argument")
+          .set("name", name)
+          .set("scope", scope)
+          .set("method", "constructor")
+          .set("class", getClass().getName());
+      }
+      // store param
       this.name = name;
       this.scope = scope;
     }
@@ -109,32 +114,47 @@ public class ScopeMap<E extends ObjectBase> implements IToStringBuildable
 
   }
 
-  /*
-   *
-   *     Access Methods
-   *
-   */
+  //------------------------------------------------------------ Access Methods
 
   /**
    *  Associates the given value with the specified key and scope.
    *
-   *  @throws IllegalArgumentException
+   *  @throws SyntaxErrorException
    *             if eather of the params contain a null value
    *
    *  @throws DuplicateElementException
    *             if there already is a value with given name
    *             and scope inside the buffer
    */
-  public void put(String name, Scope scope, E value)
-  throws DuplicateElementException
-  {
-    if (name == null || scope == null || value == null)
-      throw new IllegalArgumentException();
-    if (buffer == null) buffer = new HashMap<Key, E>();
-    Key key = new Key(name, scope);
-    E result = buffer.put(key, value);
-    if (result != null)
-      throw new DuplicateElementException();
+  public void put(String name, Scope scope, E value) {
+    try {
+      // param check
+      if (value == null) {
+        throw new SyntaxErrorException()
+          .setCode(ExceptionCode.ILLEGAL_ARGUMENT)
+          .set("message", "Null argument")
+          .set("value", value);
+      }
+      // combined key
+      Key key = new Key(name, scope);
+      // lazy buffer
+      if (buffer == null) {
+        buffer = new HashMap<Key, E>();
+      }
+      // put the value
+      E result = buffer.put(key, value);
+      if (result != null) {
+        throw new SyntaxErrorException()
+          .setCode(ExceptionCode.DUPLICATE_ELEMENT)
+          .set("message", "Duplicate value")
+          .set("name", name)
+          .set("scope", scope);
+      }
+    } catch (SyntaxErrorException se) {
+      se.set("method", "put")
+        .set("class", getClass().getName());
+      throw se;
+    }
   }
 
   /**
@@ -152,37 +172,41 @@ public class ScopeMap<E extends ObjectBase> implements IToStringBuildable
    *  @throws NoSuchElementException
    *             if there is no such value in the internal buffer
    */
-  public E get(String name, Scope scope)
-  {
-    if (name == null || scope == null)
-      throw new IllegalArgumentException();
-    if (buffer == null)
-      throw new NoSuchElementException();
+  public E get(String name, Scope scope) {
+    try {
+    if (buffer == null) {
+      throw new SyntaxErrorException()
+        .setCode(ExceptionCode.NO_SUCH_ELEMENT)
+        .set("message", "Buffer is empty");
+    }
     Key tempKey = new Key(name, scope);
-    while (tempKey.scope != null)
-    {
+    while (tempKey.scope != null) {
       E result = buffer.get(tempKey);
       if (result != null) return result;
       tempKey.scope = tempKey.scope.getParent();
     }
-    throw new NoSuchElementException();
+    throw new SyntaxErrorException()
+      .setCode(ExceptionCode.NO_SUCH_ELEMENT)
+      .set("message", "Missing element");
+    } catch (SyntaxErrorException se) {
+      se.set("method", "get")
+        .set("class", getClass().getName());
+      throw se;
+    }
   }
 
-  public boolean isEmpty()
-  {
+  public boolean isEmpty() {
     return buffer.isEmpty();
   }
 
   @Override
-  public String toString()
-  {
+  public String toString() {
     return new ToStringBuilder()
         .append(this)
         .toString();
   }
 
-  public void toString(ToStringBuilder builder)
-  {
+  public void toString(ToStringBuilder builder) {
     builder.append("buffer", buffer);
   }
 

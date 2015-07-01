@@ -73,7 +73,7 @@ public class ErrorManager {
    */
   public void printErrors() {
     for (ErrorRecord error : errors) {
-      System.out.println(error.getMessage());
+      //System.out.println(error.getMessage());
     }
   }
 

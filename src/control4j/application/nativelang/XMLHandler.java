@@ -26,6 +26,8 @@ import java.util.ArrayList;
 import control4j.tools.ParseException;
 import org.xml.sax.Attributes;
 
+import control4j.SyntaxErrorException;
+import control4j.ExceptionCode;
 import control4j.application.ITranslatable;
 import control4j.application.ErrorManager;
 import control4j.application.ErrorRecord;
@@ -54,7 +56,7 @@ import org.apache.commons.collections4.Predicate;
 
 /**
  *
- *  Loads the
+ *  Loads the application from the xml document.
  *
  */
 @AXMLDefaultUri("http://control4j.lidinsky.cz/application")
@@ -68,6 +70,10 @@ public class XMLHandler implements IXMLHandler
     adapterFactory.add(getInstantiator(C4jToControlAdapter.class));
   }
 
+  /**
+   *  An object which translates objects under this package into the
+   *  objects from destination package.
+   */
   private AbstractAdapter adapter;
 
   protected XMLReader reader;
@@ -77,7 +83,7 @@ public class XMLHandler implements IXMLHandler
   }
 
   /**
-   *
+   *  An empty constructor.
    */
   public XMLHandler() { }
 
@@ -569,11 +575,11 @@ public class XMLHandler implements IXMLHandler
       object.setName(attributes.getValue("name"));
       object.setScope(Parser.parseScope2(attributes.getValue("scope")));
     } catch (ParseException e) {
-      ErrorManager.newError()
-        .set(ErrorRecord.WRONG_SCOPE2_VALUE_ERROR)
-        .set(ErrorRecord.VALUE_CODE, attributes.getValue("scope"))
-        .set(ErrorRecord.WHERE_CODE,
-            ((DeclarationBase)object).getDeclarationReferenceText());
+      throw new SyntaxErrorException()
+        .setCode(ExceptionCode.PARSE)
+        .set("messsage", "Wrong scope attribute value")
+        .set("scope attr", attributes.getValue("scope"))
+        .set("location", reader.getLocation());
     }
   }
 
@@ -582,11 +588,11 @@ public class XMLHandler implements IXMLHandler
       object.setHref(attributes.getValue("href"));
       object.setScope(Parser.parseScope3(attributes.getValue("scope")));
     } catch (ParseException e) {
-      ErrorManager.newError()
-        .set(ErrorRecord.WRONG_SCOPE3_VALUE_ERROR)
-        .set(ErrorRecord.VALUE_CODE, attributes.getValue("scope"))
-        .set(ErrorRecord.WHERE_CODE,
-            ((DeclarationBase)object).getDeclarationReferenceText());
+      throw new SyntaxErrorException()
+        .setCode(ExceptionCode.PARSE)
+        .set("messsage", "Wrong scope attribute value")
+        .set("scope attr", attributes.getValue("scope"))
+        .set("location", reader.getLocation());
     }
   }
 

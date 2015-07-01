@@ -69,16 +69,21 @@ public class Loader
   public Application load(File file)
   throws IOException
   {
+    Application application = new Application();
+    Preprocessor preprocessor = new Preprocessor();
+
     control4j.application.nativelang.XMLHandler c4jHandler
         = new control4j.application.nativelang.XMLHandler();
+    c4jHandler.setDestination(preprocessor);
+
     control4j.application.gui.XMLHandler guiHandler
         = new control4j.application.gui.XMLHandler();
     control4j.application.ld.XMLHandler ldHandler
         = new control4j.application.ld.XMLHandler();
-    Application application = new Application();
-    c4jHandler.setDestination(application);
+
     guiHandler.setDestination(application);
     ldHandler.setHandler(application);
+
     XMLReader reader = new XMLReader();
     reader.addHandler(c4jHandler);
     reader.addHandler(guiHandler);

@@ -43,6 +43,13 @@ public class Sorter {
    */
   public Sorter() { }
 
+  //---------------------------------------------------------- Public Interface
+
+  void add(Module module) {
+  }
+
+
+
   /** Processed application. */
   private Application application;
 
@@ -171,18 +178,6 @@ public class Sorter {
         }
       }
     }
-  }
-
-  public static void main(String[] args) throws Exception
-  {
-    java.io.File file = new java.io.File(args[0]);
-    Loader loader = new Loader();
-    Application application = loader.load(file);
-    Preprocessor preprocessor = new Preprocessor();
-    preprocessor.process(); // TODO:
-    Sorter sorter = new Sorter();
-    sorter.process(application);
-    System.out.println(application.toString());
   }
 
 }

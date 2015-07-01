@@ -26,6 +26,17 @@ public class SyntaxErrorException extends BaseException {
     super();
   }
 
+  private ExceptionCode code;
+
+  public SyntaxErrorException setCode(ExceptionCode code) {
+    this.code = code;
+    return this;
+  }
+
+  public ExceptionCode getCode() {
+    return code;
+  }
+
   @Deprecated
   public SyntaxErrorException(String message) {
     set("message", message);

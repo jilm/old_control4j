@@ -1,4 +1,4 @@
-package control4j.application;
+package control4j;
 
 /*
  *  Copyright 2015 Jiri Lidinsky
@@ -18,22 +18,15 @@ package control4j.application;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-
-public class ErrorRecord {
-
-  private ErrorCode code;
-
-  public ErrorRecord setCode(ErrorCode code) {
-    this.code = code;
-    return this;
-  }
-
-  private Throwable cause;
-
-  public ErrorRecord setCause(Throwable cause) {
-    this.cause = cause;
-    return this;
-  }
+public enum ExceptionCode {
+  NOT_SPECIFIED,
+  ILLEGAL_ARGUMENT,
+  NULL_ARGUMENT,
+  BLANK_ARGUMENT,
+  INDEX_OUT_OF_BOUNDS,
+  DUPLICATE_ELEMENT,
+  NO_SUCH_ELEMENT,
+  ILLEGAL_STATE,
+  PARSE
 
 }

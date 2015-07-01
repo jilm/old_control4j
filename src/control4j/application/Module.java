@@ -36,6 +36,7 @@ import org.apache.commons.lang3.tuple.Triple;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 
 import control4j.SyntaxErrorException;
+import control4j.ExceptionCode;
 import control4j.tools.DeclarationReference;
 import static control4j.tools.Logger.*;
 
@@ -43,8 +44,8 @@ import cz.lidinsky.tools.ToStringBuilder;
 
 /**
  *
- *  Crate class for module definition. Contains all the information needed
- *  to create and configure an instance of the class which implements the
+ *  Crate class for a module definition. Contains all the information needed
+ *  to create and configure the instance of the class which implements the
  *  functionality of the module.
  *
  */
@@ -53,19 +54,26 @@ public class Module extends Configurable {
   /**
    *  @param className
    *             name of the class that implements the functionality
-   *             of the module. May not be null or empty string
+   *             of the module. May not be null nor empty string
    *
    *  @throws IllegalArgumentException
    *             if className is null or an empty string
    */
   public Module(String className) {
-    this.className = trim(notBlank(className,
-        getMessage("msg004", "className", getDeclarationReferenceText())));
+    if (isBlank(className)) {
+      throw new SyntaxErrorException()
+        .setCode(ExceptionCode.ILLEGAL_ARGUMENT)
+        .set("message", "Blank className")
+        .set("method", "constructor")
+        .set("class", getClass().getName());
+    } else {
+      this.className = trim(className);
+    }
   }
 
   /**
    *  Name of the class which implements functionality of that module.
-   *  It may not contain empty string or null value.
+   *  It may not contain a blank value.
    */
   private String className;
 
@@ -79,115 +87,277 @@ public class Module extends Configurable {
     return className;
   }
 
-  /**
-   *  Array of the input references with fixed index.
-   *  This array may contain null values!
-   */
-  private ArrayList<Input> inputArray = new ArrayList<Input>();
+  //--------------------------------------------------------------------- Input
 
   /**
-   *  Puts given input reference to the specified index.
+   *  Array of the input objects. Each input is placed on specifie index,
+   *  so, the array may contain null values. Indexes of some input may not
+   *  be resolved until the module instantiation. Such input objects are
+   *  stored at the end of the buffer.
+   */
+  private ArrayList<Input> inputArray;
+
+  /**
+   *  A pointer into the inputArray buffer. It contains index of the first
+   *  element of which index is not resolved yet.
+   */
+  private int variableInputIndex = 0;
+
+  /**
+   *  Adds given input reference to the specified index.
+   *
+   *  @param index
+   *             index of the input
+   *
+   *  @param input
+   *             an object to be added
    */
   public void putInput(int index, Input input) {
-    notNull(input,
-        getMessage("msg006", "input", getDeclarationReferenceText()));
-    if (index < 0) {
-      throw new IndexOutOfBoundsException(
-          "Input index may not be a negative number: " + index);
-    }
-    if (inputArray == null)
+    // lazy buffer
+    if (inputArray == null) {
       inputArray = new ArrayList<Input>();
-    // if the array list is not big enough
-    inputArray.ensureCapacity(index+1);
-    while (index >= inputArray.size())
-      inputArray.add(null);
-    // add the input into the list
-    inputArray.set(index, input);
-    // TODO input with duble indexes
+    }
+    // add input
+    try {
+      variableInputIndex = put(inputArray, index, input, variableInputIndex);
+    } catch (SyntaxErrorException se) {
+      throw new SyntaxErrorException()
+        .setCode(ExceptionCode.DUPLICATE_ELEMENT)
+        .setCause(se)
+        .set("method", "putInput")
+        .set("module", toString());
+    }
   }
 
+  /**
+   *  Adds an input reference with no index attached yet.
+   *
+   *  @param input
+   *             an object to be added
+   *
+   *  @throws SyntaxErrorException
+   *             if the input argument is null
+   */
   public void putInput(Input input) {
-    // TODO:
+    // param check
+    if (input == null) {
+      throw new SyntaxErrorException()
+        .setCode(ExceptionCode.ILLEGAL_ARGUMENT)
+        .set("message", "Null argument")
+        .set("method", "putInput")
+        .set("module", toString());
+    }
+    // lazy buffer
+    if (inputArray == null) {
+      inputArray = new ArrayList<Input>();
+    }
+    // add object
+    inputArray.add(input);
   }
 
+  /**
+   *  Shifts the variable input elements inside the buffer to start
+   *  on the given index. If there are no input elements or if there
+   *  are no variable input elements, nothig happens.
+   *
+   *  @param index
+   *             the desired index of the first variable input element
+   *
+   */
   public void setVariableInputStartIndex(int index) {
-    // TODO:
-  }
-
-  public void setVariableOutputStartIndex(int index) {
-    // TODO:
+    try {
+      if (inputArray == null) {
+        // if there is no input at all, do nothing
+      } else if (inputArray.size() == variableInputIndex) {
+        // if there is no variable input, do nothing
+      } else if (index < 0) {
+        throw new SyntaxErrorException()
+          .setCode(ExceptionCode.INDEX_OUT_OF_BOUNDS)
+          .set("message", "Negative index")
+          .set("index", index);
+      } else if (index < variableInputIndex) {
+        throw new SyntaxErrorException()
+          .set("message", "Module input index colision")
+          .set("input array size", inputArray.size())
+          .set("variable index", variableInputIndex)
+          .set("desired index", index);
+      } else {
+        shift(inputArray, variableInputIndex, index - variableInputIndex);
+        variableInputIndex = inputArray.size();
+      }
+    } catch (SyntaxErrorException se) {
+      se.set("method", "setVariableInputStartIndex")
+        .set("module", toString());
+      throw se;
+    }
   }
 
   /**
    *  Returns the highest assigned index plus one.
    */
   public int getInputSize() {
-    if (inputArray == null)
+    if (inputArray == null) {
       return 0;
-    else
+    } else {
       return inputArray.size();
+    }
   }
 
   /**
    *  Returns input with given index.
    */
   public Input getInput(int index) {
-    if (inputArray == null) {} // TODO
-    return inputArray.get(index);
+    try {
+      if (inputArray == null) {
+        throw new IndexOutOfBoundsException();
+      } else {
+        return inputArray.get(index);
+      }
+    } catch (IndexOutOfBoundsException e) {
+      throw new SyntaxErrorException()
+        .setCause(e)
+        .set("method", "getInput")
+        .set("index", index)
+        .set("module", toString());
+    }
   }
 
-  /**
-   *  An array of the output definitions.
-   */
-  private ArrayList<Output> outputArray = new ArrayList<Output>();
+  //-------------------------------------------------------------------- Output
 
   /**
-   *  Puts given output reference to the specified index.
+   *  Array of the output objects. Each output is placed on specifie index,
+   *  so, the array may contain null values. Indexes of some output may not
+   *  be resolved until the module instantiation. Such output objects are
+   *  stored at the end of the buffer.
    */
-  public void putOutput(int index, Output output)
-  {
-    if (outputArray == null)
+  private ArrayList<Output> outputArray;
+
+  /**
+   *  A pointer into the outputArray buffer. It contains index of the first
+   *  element of which index is not resolved yet.
+   */
+  private int variableOutputIndex = 0;
+
+  /**
+   *  Adds given output reference to the specified index.
+   *
+   *  @param index
+   *             index of the output
+   *
+   *  @param output
+   *             an object to be added
+   */
+  public void putOutput(int index, Output output) {
+    // lazy buffer
+    if (outputArray == null) {
       outputArray = new ArrayList<Output>();
-    // if the array list is not big enough
-    outputArray.ensureCapacity(index+1);
-    while (index >= outputArray.size())
-      outputArray.add(null);
-    // add the input into the list
-    outputArray.set(index, output);
-    // TODO output with duble indexes
+    }
+    // add output
+    try {
+      variableOutputIndex
+        = put(outputArray, index, output, variableOutputIndex);
+    } catch (SyntaxErrorException se) {
+      throw new SyntaxErrorException()
+        .setCause(se)
+        .set("method", "putOutput")
+        .set("module", toString());
+    }
   }
 
+  /**
+   *  Adds an output reference with no index attached yet.
+   *
+   *  @param output
+   *             an object to be added
+   *
+   *  @throws SyntaxErrorException
+   *             if the output argument is null
+   */
   public void putOutput(Output output) {
-    // TODO:
+    // param check
+    if (output == null) {
+      throw new SyntaxErrorException()
+        .setCode(ExceptionCode.ILLEGAL_ARGUMENT)
+        .set("message", "Null argument")
+        .set("method", "putOutput")
+        .set("module", toString());
+    }
+    // lazy buffer
+    if (outputArray == null) {
+      outputArray = new ArrayList<Output>();
+    }
+    // add object
+    outputArray.add(output);
+  }
+
+  /**
+   *  Shifts the variable output elements inside the buffer to start
+   *  on the given index. If there are no output elements or if there
+   *  are no variable output elements, nothig happens.
+   *
+   *  @param index
+   *             the desired index of the first variable output element
+   *
+   */
+  public void setVariableOutputStartIndex(int index) {
+    try {
+      if (outputArray == null) {
+        // if there is no output at all, do nothing
+      } else if (outputArray.size() == variableOutputIndex) {
+        // if there is no variable output, do nothing
+      } else if (index < 0) {
+        throw new SyntaxErrorException()
+          .setCode(ExceptionCode.INDEX_OUT_OF_BOUNDS)
+          .set("message", "Negative index")
+          .set("index", index);
+      } else if (index < variableOutputIndex) {
+        throw new SyntaxErrorException()
+          .set("message", "Module output index colision")
+          .set("output array size", outputArray.size())
+          .set("variable index", variableOutputIndex)
+          .set("desired index", index);
+      } else {
+        shift(outputArray, variableOutputIndex, index - variableOutputIndex);
+        variableOutputIndex = outputArray.size();
+      }
+    } catch (SyntaxErrorException se) {
+      se.set("method", "setVariableOutputStartIndex")
+        .set("module", toString());
+      throw se;
+    }
   }
 
   /**
    *  Returns the highest assigned index plus one.
    */
-  public int getOutputSize()
-  {
-    if (outputArray == null)
+  public int getOutputSize() {
+    if (outputArray == null) {
       return 0;
-    else
+    } else {
       return outputArray.size();
+    }
   }
 
   /**
    *  Returns output with given index.
    */
-  public Output getOutput(int index)
-  {
-    if (outputArray == null) {} // TODO
-    return outputArray.get(index);
+  public Output getOutput(int index) {
+    try {
+      if (outputArray == null) {
+        throw new IndexOutOfBoundsException();
+      } else {
+        return outputArray.get(index);
+      }
+    } catch (IndexOutOfBoundsException e) {
+      throw new SyntaxErrorException()
+        .setCause(e)
+        .set("index", index)
+        .set("method", "getOutput")
+        .set("module", toString());
+    }
   }
 
-  /*
-   *
-   *     Resource Definitions.
-   *
-   *     Each resource of the module is identified by a unique key.
-   *
-   */
+  //----------------------------------------------------------------- Resources
 
   /** Resource definitions. */
   private HashMap<String, Resource> resources
@@ -199,12 +369,32 @@ public class Module extends Configurable {
    *  Puts a resource definition.
    */
   public void putResource(String key, Resource resource) {
-    if (isBlank(key) && singleResource == null && resources.size() == 0) {
-      this.singleResource = notNull(resource);
-    } else if (!isBlank(key) && singleResource == null) {
-      resources.put(trim(key), notNull(resource));
-    } else {
-      throw new SyntaxErrorException("The Resource Key property may be blank only if it is the only resource of the module!\n"); // TODO:
+    try {
+      if (isBlank(key) && getResourceSize() == 0) {
+        // key not specified -> it is the only resource
+        singleResource = notNull(resource);
+      } else if (!isBlank(key) && singleResource == null) {
+        // key specified -> multiple resources
+        resources.put(trim(key), notNull(resource));
+      } else if (isBlank(key)) {
+        // key not specified
+        throw new SyntaxErrorException()
+          .setCode(ExceptionCode.ILLEGAL_ARGUMENT)
+          .set("message", "Module multiple resources, key not specified")
+          .set("key", key)
+          .set("resource", resource);
+      } else {
+        // key specified, but single resource has been already put
+        throw new SyntaxErrorException()
+          .setCode(ExceptionCode.ILLEGAL_ARGUMENT)
+          .set("message",
+              "Module multiple resources, there is a keylees resource");
+      }
+    } catch (SyntaxErrorException se) {
+      se.set("method", "putResource")
+        .set("class", getClass().getName())
+        .set("module", toString());
+      throw se;
     }
   }
 
@@ -225,44 +415,120 @@ public class Module extends Configurable {
     } else {
       Resource result = resources.get(key); // TODO
       if (result == null) {
-        throw new NoSuchElementException();
+        throw new SyntaxErrorException()
+          .setCode(ExceptionCode.NO_SUCH_ELEMENT)
+          .set("key", key)
+          .set("method", "getResource")
+          .set("class", getClass().getName())
+          .set("module", toString());
       } else {
         return result;
       }
     }
   }
 
+  /**
+   *  Returns total number of attached resources.
+   */
   public int getResourceSize() {
     if (singleResource != null) {
       return 1;
+    } else if (resources == null) {
+      return 0;
     } else {
       return resources.size();
     }
   }
 
+  /**
+   *  Returns an attached resource if it is the only resource.
+   */
   public Resource getResource() {
     if (singleResource != null) {
       return singleResource;
     } else if (resources.size() == 1) {
       return resources.values().iterator().next();
     } else {
-      throw new IllegalStateException(); // TODO:
+      throw new SyntaxErrorException()
+        .setCode(ExceptionCode.ILLEGAL_STATE)
+        .set("message", "Not only resource of the module")
+        .set("method", "getResource()")
+        .set("class", getClass().getName())
+        .set("module", toString());
     }
   }
 
-  /*
-   *
-   *     To String.
+  //----------------------------------------------------------- Private Methods
+
+  /**
+   *  Place given element into the given list at the specified index.
    *
    */
+  private static <T> int put(
+      ArrayList<T> list,
+      int index,
+      T element,
+      int variableIndex) {
+
+    try {
+      // argument check
+      if (element == null) {
+        throw new SyntaxErrorException()
+          .setCode(ExceptionCode.ILLEGAL_ARGUMENT)
+          .set("message", "Null argument")
+          .set("element", element);
+      }
+      if (index < 0) {
+        throw new SyntaxErrorException()
+          .setCode(ExceptionCode.INDEX_OUT_OF_BOUNDS)
+          .set("message", "Negative index")
+          .set("index", index);
+      }
+      // if the list is not big enough
+      shift(list, variableIndex, index - variableIndex + 1);
+      variableIndex = index + 1;
+      // place the element
+      list.set(index, element);
+      return variableIndex;
+    } catch (SyntaxErrorException se) {
+      se.set("method", "put")
+        .set("class", "application.Module");
+      throw se;
+    }
+  }
+
+  /**
+   *  Enlarge given list.
+   *
+   *  @param list
+   *             a list to enlarge
+   *
+   *  @param index
+   *             where the null values shoud be placed. May not be
+   *             negative number and may not be greater than size
+   *             of the list.
+   *
+   *  @param len
+   *             how many null values shoud be inserted. May be zero
+   *             or negative number, in such a case nothing happens
+   */
+  private static <T> void shift(ArrayList<T> list, int index, int len) {
+    for (int i = 0; i < len; i++) {
+      list.add(index, null);
+    }
+  }
+
+  //--------------------------------------------------------------------- Other
 
   @Override
-  public void toString(ToStringBuilder builder)
-  {
+  public void toString(ToStringBuilder builder) {
     super.toString(builder);
     builder.append("className", className)
         .append("inputArray", inputArray)
+        .append("variableInputIndex", variableInputIndex)
         .append("outputArray", outputArray)
+        .append("variableOutputIndex", variableOutputIndex)
+        .append("singleResource", singleResource)
         .append("resources", resources);
   }
 

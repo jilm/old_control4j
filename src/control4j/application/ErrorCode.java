@@ -18,22 +18,11 @@ package control4j.application;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-
-public class ErrorRecord {
-
-  private ErrorCode code;
-
-  public ErrorRecord setCode(ErrorCode code) {
-    this.code = code;
-    return this;
-  }
-
-  private Throwable cause;
-
-  public ErrorRecord setCause(Throwable cause) {
-    this.cause = cause;
-    return this;
-  }
+public enum ErrorCode {
+  DEFINITION,
+  RESOURCE_DEFINITION,
+  BLOCK_DEFINITION,
+  SIGNAL_DEFINITION,
+  BLOCK_EXPANSION
 
 }

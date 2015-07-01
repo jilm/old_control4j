@@ -311,23 +311,4 @@ public class Instantiator
         className, e.getMessage()));
   }
 
-  public static void main(String[] args) throws Exception
-  {
-    java.io.File file = new java.io.File(args[0]);
-    control4j.application.Loader loader
-        = new control4j.application.Loader();
-    control4j.application.Application application
-        = loader.load(file);
-    control4j.application.Preprocessor preprocessor
-        = new control4j.application.Preprocessor();
-    // TODO:
-    preprocessor.process();
-    control4j.application.Sorter sorter
-        = new control4j.application.Sorter();
-    sorter.process(application);
-    Instantiator instantiator = new Instantiator();
-    Application instances = instantiator.instantiate(application);
-    System.out.println(instances.toString());
-  }
-
 }
