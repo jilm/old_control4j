@@ -34,6 +34,11 @@ import java.text.MessageFormat;
 import java.util.Deque;
 import java.util.ArrayDeque;
 
+import org.jgrapht.DirectedGraph;
+import org.jgrapht.alg.CycleDetector;
+import org.jgrapht.graph.DefaultDirectedGraph;
+import org.jgrapht.graph.DefaultEdge;
+
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Triple;
@@ -48,6 +53,7 @@ import cz.lidinsky.tools.graph.IGraph;
 import static control4j.tools.Logger.*;
 
 import control4j.SyntaxErrorException;
+import control4j.ExceptionCode;
 import control4j.tools.DuplicateElementException;
 
 /**
@@ -151,6 +157,7 @@ public class Preprocessor {
     // put definition into the buffer
     try {
       blocks.put(name, scope, block);
+      blockGraph.addVertex(block);
     } catch (SyntaxErrorException e) {
       ErrorManager.newError()
         .setCause(e)
@@ -240,6 +247,15 @@ public class Preprocessor {
     notNull(use);
     notNull(scope);
     uses.add(new ImmutablePair<Use, Scope>(use, scope));
+    // cycle detection
+    try {
+      if (blockExpand != null) {
+        Block block = blocks.get(use.getHref(), use.getScope());
+        blockGraph.addEdge(blockExpand, block);
+      }
+    } catch (SyntaxErrorException e) {
+      // block missing, but this will be detected later.
+    }
   }
 
   public void addPropertyReference(
@@ -294,6 +310,10 @@ public class Preprocessor {
 
   /** Block definitions */
   private ScopeMap<Block> blocks = new ScopeMap<Block>();
+
+  /** A graph that is used to detect cycles between blocks. */
+  private DirectedGraph<Block, DefaultEdge> blockGraph
+    = new DefaultDirectedGraph<Block, DefaultEdge>(DefaultEdge.class);
 
   /** A data structure for name and scope signal look up. */
   private ScopeMap<Signal> signals;
@@ -413,6 +433,12 @@ public class Preprocessor {
   //---------------------------------------------------------------- Processing
 
   /**
+   *  A block which is currently expanded or null.
+   *  It is for cycle detection.
+   */
+  private Block blockExpand;
+
+  /**
    *  Entry point of the preprocessor. Given application
    *  serves as the input and output of this method.
    */
@@ -429,9 +455,17 @@ public class Preprocessor {
         // set appropriate scope
         scopePointer = new Scope(use.getRight());
         // set appropriate field for cycle detection
-        // TODO:
+        blockExpand = block;
         // expand block
         block.expand(use.getLeft(), this);
+        // detect cycles
+        CycleDetector<Block, DefaultEdge> cycleDetector
+          = new CycleDetector<Block, DefaultEdge>(blockGraph);
+        if (cycleDetector.detectCycles()) {
+          throw new SyntaxErrorException()
+            .setCode(ExceptionCode.CYCLIC_DEFINITION)
+            .set("block", block);
+        }
       } catch (SyntaxErrorException e) {
         // block definition for given use is missing
         ErrorManager.newError()

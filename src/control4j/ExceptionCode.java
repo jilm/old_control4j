@@ -27,6 +27,7 @@ public enum ExceptionCode {
   DUPLICATE_ELEMENT,
   NO_SUCH_ELEMENT,
   ILLEGAL_STATE,
-  PARSE
+  PARSE,
+  CYCLIC_DEFINITION
 
 }
