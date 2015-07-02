@@ -39,17 +39,13 @@ import cz.lidinsky.scorpio.OMDA;
  *  A class which is responsible for modules instantiation.
  *
  */
-public class Instantiator
-{
+public class Instantiator {
 
-  /**
-   *  An empty constructor.
-   */
-  public Instantiator() {}
+  private ControlLoop handler;
 
-  control4j.application.Application applicationDef;
-
-  Application result;
+  public Instantiator(ControlLoop handler) {
+    this.handler = handler;
+  }
 
   /**
    *  Creates instances of all of the modules. The sequence is as
@@ -64,180 +60,40 @@ public class Instantiator
    *    <li>Register as a ICycleListener.
    *  </ol>
    */
-  public Application instantiate(
-      control4j.application.Application application)
-  {
+  public void instantiate(control4j.application.Module moduleDef) {
 
-    OMDA omda = new OMDA();
-    // preparation
-    applicationDef = application;
-    ArrayList<Pair<InputModule, int[]>> inputModules
-        = new ArrayList<Pair<InputModule, int[]>>();
-    ArrayList<Triple<ProcessModule, int[], int[]>> processModules
-        = new ArrayList<Triple<ProcessModule, int[], int[]>>();
-    ArrayList<Pair<OutputModule, int[]>> outputModules
-        = new ArrayList<Pair<OutputModule, int[]>>();
-    // result
-    Application result = new Application();
-
-    // Create instances of all of the modules
-    int modules = application.getModulesSize();
-    for (int i = 0; i < modules; i++)
-    {
-      // get module definition
-      control4j.application.Module moduleDef = application.getModule(i);
-      // get module class
-      String className = moduleDef.getClassName();
-      try
-      {
-        Class<Module> moduleClass
-            = (Class<Module>)Class.forName(className);
-            //= (Class<Module>)ClassLoader.getSystemClassLoader().loadClass(className);
-        // create instance
-        Module moduleInstance = moduleClass.newInstance();
-        // create input map
-        int[] inputMap = getInputMap(moduleDef, moduleInstance);
-        // create output map
-        int[] outputMap = getOutputMap(moduleDef, moduleInstance);
-        // method initialization
-        //moduleInstance.initialize(moduleDef.getConfiguration());
-        moduleInstance.initialize(moduleDef);
-        // resource assignment
-        ResourceManager resourceManager = ResourceManager.getInstance();
-        Set<String> resourceKeys = moduleDef.getResourceKeys();
-        for (String key : resourceKeys)
-        {
-          control4j.application.Resource resourceDef
-              = moduleDef.getResource(key);
-          Class<Resource> resourceClass
-              = (Class<Resource>)Class.forName(resourceDef.getClassName());
-          Resource resource = resourceManager.getResource(resourceDef);
-          moduleInstance.putResource(key, resource);
-        }
-        // TODO: check that all of the resources are assigned
-        if (moduleInstance instanceof InputModule)
-        {
-          if (outputMap != null) {} // TODO: outputs for input module !
-          InputModule inputModule = (InputModule)moduleInstance;
-          initializeInputModule(moduleDef, inputModule, inputMap);
-          inputModules.add(
-              new ImmutablePair<InputModule, int[]>(inputModule, inputMap));
-        }
-        else if (moduleInstance instanceof ProcessModule)
-        {
-          ProcessModule processModule = (ProcessModule)moduleInstance;
-          initializeProcessModule(
-              moduleDef, processModule, inputMap, outputMap);
-          processModules.add(
-              new ImmutableTriple<ProcessModule, int[], int[]>(
-              processModule, inputMap, outputMap));
-        }
-        else if (moduleInstance instanceof OutputModule)
-        {
-          if (inputMap != null) {} // TODO: inputs for output module !
-          OutputModule outputModule = (OutputModule)moduleInstance;
-          initializeOutputModule(
-              moduleDef, outputModule, outputMap);
-          outputModules.add(
-              new ImmutablePair<OutputModule, int[]>(outputModule, outputMap));
-        }
-        else
-        {
-          // TODO: Not a module
-        }
-        // TODO: Register as an ICycleListener
-        if (moduleInstance instanceof ICycleEventListener) {
-          result.addCycleEventListener((ICycleEventListener)moduleInstance);
-        }
+    String className = moduleDef.getClassName();
+    try {
+      Class<Module> moduleClass
+        = (Class<Module>)Class.forName(className);
+      // create instance
+      Module moduleInstance = moduleClass.newInstance();
+      // create input map
+      int[] inputMap = getInputMap(moduleDef, moduleInstance);
+      // create output map
+      int[] outputMap = getOutputMap(moduleDef, moduleInstance);
+      // method initialization
+      moduleInstance.initialize(moduleDef);
+      // specific
+      ModuleCrate moduleCrate
+        = ModuleCrate.create(moduleInstance, inputMap, outputMap);
+      handler.add(moduleCrate);
+      // TODO: Register as an ICycleListener
+      if (moduleInstance instanceof ICycleEventListener) {
+        handler.addCycleEventListener((ICycleEventListener)moduleInstance);
       }
-      catch (ClassNotFoundException e)
-      {
-        reportModuleClassNotFound(e, className);
-      }
-      catch (InstantiationException e)
-      {
-        reportModuleInstantiationException(e, className);
-      }
-      catch (IllegalAccessException e)
-      {
-        reportModuleIllegalAccessException(e, className);
-      }
-      //catch (Exception e)
-      //{
-        // TODO:
-        //catched(getClass().getName(), "instantiate", e);
-      //}
+    } catch (ClassNotFoundException e) {
+      reportModuleClassNotFound(e, className);
+    } catch (InstantiationException e) {
+      reportModuleInstantiationException(e, className);
+    } catch (IllegalAccessException e) {
+      reportModuleIllegalAccessException(e, className);
     }
 
-    // store modules
-    result.inputModules
-        = (Pair<InputModule, int[]>[])java.lang.reflect.Array.newInstance(
-        Pair.class, inputModules.size());
-    inputModules.toArray(result.inputModules);
-    result.processModules
-        = (Triple<ProcessModule, int[], int[]>[])
-        java.lang.reflect.Array.newInstance(
-        Triple.class, processModules.size());
-    processModules.toArray(result.processModules);
-    result.outputModules
-        = (Pair<OutputModule, int[]>[])java.lang.reflect.Array.newInstance(
-        Pair.class, outputModules.size());
-    outputModules.toArray(result.outputModules);
-    // data buffer size
-    result.dataBufferSize = applicationDef.getSignalsSize();
-    return result;
   }
 
-  /**
-   *  Provides configuration of the given module that is specific
-   *  for input modules.
-   */
-  protected void initializeInputModule(
-      control4j.application.Module moduleDef, InputModule module, int[] map)
-  {
-    for (int j = 0; j < map.length; j++)
-      if (map[j] >= 0)
-      {
-        module.setInputConfiguration(
-            j, moduleDef.getInput(j).getConfiguration());
-      }
-  }
-
-  /**
-   *  Provides configuration of the given module that is specific
-   *  for process modules.
-   */
-  protected void initializeProcessModule(
-      control4j.application.Module moduleDef, ProcessModule module,
-      int[] inputMap, int[] outputMap)
-  {
-    for (int j = 0; j < inputMap.length; j++)
-      if (inputMap[j] >= 0)
-      {
-        module.setInputConfiguration(
-            j, moduleDef.getInput(j).getConfiguration());
-      }
-    for (int j = 0; j < outputMap.length; j++)
-      if (outputMap[j] >= 0)
-      {
-        module.setOutputConfiguration(
-            j, moduleDef.getOutput(j).getConfiguration());
-      }
-  }
-
-  /**
-   *  Provides configuration of the given module that is specific
-   *  for output modules.
-   */
-  protected void initializeOutputModule(
-      control4j.application.Module moduleDef, OutputModule module, int[] map)
-  {
-    for (int j = 0; j < map.length; j++)
-      if (map[j] >= 0)
-      {
-        module.setOutputConfiguration(
-            j, moduleDef.getOutput(j).getConfiguration());
-      }
+  public void set(String key, String value) {
+    handler.set(key, value);
   }
 
   /**

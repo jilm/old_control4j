@@ -551,6 +551,11 @@ public class Preprocessor {
       }
     }
 
+    // Send configuration
+    for (String key : configuration.keySet()) {
+      handler.set(key, configuration.get(key));
+    }
+
     // Sends all of the modules
     while (!modules.isEmpty()) {
       handler.add(modules.pop());

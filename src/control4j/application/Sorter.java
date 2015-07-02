@@ -18,6 +18,10 @@
 
 package control4j.application;
 
+import control4j.ExceptionCode;
+import control4j.SyntaxErrorException;
+import control4j.Instantiator;
+
 import org.apache.commons.lang3.tuple.Triple;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.jgrapht.DirectedGraph;
@@ -29,6 +33,7 @@ import org.jgrapht.traverse.TopologicalOrderIterator;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -38,35 +43,46 @@ import java.util.List;
  */
 public class Sorter {
 
+  //---------------------------------------------------------- Public Interface
+
   /**
    *  Creates an empty object.
    */
   public Sorter() { }
 
-  //---------------------------------------------------------- Public Interface
-
   void add(Module module) {
+    graph.addVertex(module);
+    addToSignalIndex(module);
   }
 
+  void setSignalSize(int size) {
+    signalIndex = new Module[size];
+  }
 
+  private HashMap<String, Property> configuration
+      = new HashMap<String, Property>();
 
-  /** Processed application. */
-  private Application application;
+  public void set(String key, Property value) {
+    configuration.put(key, value);
+    // TODO:
+  }
+
+  private DirectedAcyclicGraph<Module, DefaultEdge> graph
+        = new DirectedAcyclicGraph<Module, DefaultEdge>(DefaultEdge.class);
 
   /**
    *  Provides a topological sort of the modules.
    */
-  public void process(Application application) {
+  public void process(Instantiator handler) {
 
-    this.application = application;
-
-    // initialize internal structures
-    init();
+    // send configuration
+    for (String key : configuration.keySet()) {
+      handler.set(key, configuration.get(key).getValue());
+      // TODO:  exception handling
+    }
 
     // create graph
-    DirectedAcyclicGraph<Module, DefaultEdge> graph
-        = new DirectedAcyclicGraph<Module, DefaultEdge>(DefaultEdge.class);
-    initGraph(graph);
+    initGraph();
 
     // detect a cycle
     CycleDetector<Module, DefaultEdge> cycleDetector
@@ -76,40 +92,46 @@ public class Sorter {
     // perform sorting
     TopologicalOrderIterator<Module, DefaultEdge> topolIter
         = new TopologicalOrderIterator<Module, DefaultEdge>(graph);
-    application.removeModules();
     while (topolIter.hasNext()) {
-      application.addModule(topolIter.next());
+      handler.instantiate(topolIter.next());
     }
 
   }
 
   /** Mapping signals to modules which provides it. Indexes of the
       array corespond to the position of the signal and the element
-      of the array corespond to the position of the module which
-      provides it. This is auxiliary array. */
-  private int[] signalModuleMap;
+      of the array contains a module that provides it. */
+  private Module[] signalIndex;
 
   /**
    *  Fill-in the signal to module map.
    */
-  protected void init() {
+  protected void addToSignalIndex(Module module) {
 
-    signalModuleMap = new int[application.getSignalsSize()];
-    Arrays.fill(signalModuleMap, -1);
-
-    for (int i = 0; i < application.getModulesSize(); i++) {
-      Module module = application.getModule(i);
+    try {
       // add output with given index
-      for (int j = 0; j < module.getOutputSize(); j++) {
-        if (module.getOutput(j) != null) {
-          int out = module.getOutput(j).getPointer();
-          if (signalModuleMap[out] < 0) {
-            signalModuleMap[out] = i;
+      for (int i = 0; i < module.getOutputSize(); i++) {
+        if (module.getOutput(i) != null) {
+          int out = module.getOutput(i).getPointer();
+          if (signalIndex[out] == null) {
+            signalIndex[out] = module;
           } else {
-            // TODO more interconnected outputs
+            // more interconnected outputs
+            throw new SyntaxErrorException()
+              .setCode(ExceptionCode.DUPLICATE_ELEMENT)
+              .set("message", "Modules output interconnect")
+              .set("signal", i)
+              .set("module1", signalIndex[out].getDeclarationReferenceText())
+              .set("module2", module.getDeclarationReferenceText())
+              .set("method", "addToSignalIndex")
+              .set("class", getClass().getName());
           }
         }
       }
+    } catch (SyntaxErrorException e) {
+      ErrorManager.newError()
+        .setCause(e)
+        .setCode(ErrorCode.SIGNAL_INDEX);
     }
   }
 
@@ -119,22 +141,14 @@ public class Sorter {
    *  Creates and returns a directed graph where vertices are
    *  modules and edges represents modules connections.
    */
-  protected void initGraph(DirectedGraph<Module, DefaultEdge> graph) {
+  protected void initGraph() {
 
     delayedEdges = new ArrayList<Triple<Module, Module, Integer>>();
 
-    // add vertices into the graph
-    for (int i = 0; i < application.getModulesSize(); i++) {
-      graph.addVertex(application.getModule(i));
-    }
-
     // add edges into the graph
-    for (int i = 0; i < application.getModulesSize(); i++) {
-      Module module2 = application.getModule(i);
-      // for all of the input with given index
-      //addEdges(graph, module2, module2.getFixedInputMap()); TODO:
-      // for all of the input with variable index
-      //addEdges(graph, module2, module2.getVariableInputMap()); TODO:
+    for (Module module : graph.vertexSet()) {
+      // add edges for all of the module input
+      addEdges(module);
     }
 
     // add edges with default value
@@ -154,27 +168,18 @@ public class Sorter {
   /**
    *
    */
-  protected void addEdges(
-      DirectedGraph graph, Module module2, List<Integer> inputMap) {
+  protected void addEdges(Module module) {
 
-    // for all of the input signals of the module2
-    for (int in : inputMap) {
-      if (in >= 0) {
-        if (signalModuleMap[in] >= 0) {
-
-          Module module1 = application.getModule(signalModuleMap[in]);
-
-          if (application.getSignal(in).getRight().isValueT_1Specified()) {
-            // if the signal has default value specified
-            // postphone the edge
-            delayedEdges.add(new ImmutableTriple<Module, Module, Integer>(
-                module1, module2, in));
-          } else { // else insert it into the graph
-            graph.addEdge(module1, module2);
-          }
-
+    // for all of the input signals of the module
+    for (int i = 0; i < module.getInputSize(); i++) {
+      Input input = module.getInput(i);
+      if (input != null) {
+        Module sourceModule = signalIndex[input.getPointer()];
+        if (sourceModule != null) {
+          // TODO: if the signal has default value specified  postphone the edge
+          graph.addEdge(sourceModule, module);
         } else {
-          // TODO missing output for this signal
+          // TODO: there is no output for the input !
         }
       }
     }

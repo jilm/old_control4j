@@ -18,7 +18,7 @@ package control4j;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
@@ -41,8 +41,7 @@ import cz.lidinsky.tools.ToStringMultilineStyle;
  *  cycle is longer than specified the warnig is logged.
  *
  */
-public class ControlLoop
-{
+public class ControlLoop {
 
   /** The buffer for signals which serves as interchange point between
       outputs and inputs of the modules. */
@@ -67,7 +66,57 @@ public class ControlLoop
   ControlLoop()
   { }
 
-  private Application application;
+  private ArrayList<ModuleCrate> modules = new ArrayList<ModuleCrate>();
+
+  private int dataBufferSize;
+
+  void add(ModuleCrate module) {
+    // Add module into the buffer
+    modules.add(module);
+    // Estimate total size of data buffer
+    dataBufferSize = Math.max(dataBufferSize, module.getMaxSignalPointer());
+  }
+
+  private long cyclePeriod;
+
+  private long cycleDelay;
+
+  void set(String key, String value) {
+    try {
+      if (key == null || value == null) {
+        throw new AssertionError(); // should not happen
+      } else if (key.equals("cycle-period")) {
+        cyclePeriod = Long.parseLong(value);
+        if (cyclePeriod < 0) {
+          throw new SyntaxErrorException()
+            .setCode(ExceptionCode.ILLEGAL_ARGUMENT)
+            .set("message", "Positive number expected")
+            .set("key", key)
+            .set("value", value);
+        }
+      } else if (key.equals("cycle-delay")) {
+        cycleDelay = Long.parseLong(value);
+        if (cycleDelay < 0) {
+          throw new SyntaxErrorException()
+            .setCode(ExceptionCode.ILLEGAL_ARGUMENT)
+            .set("message", "Positive number expected")
+            .set("key", key)
+            .set("value", value);
+        }
+      } else {
+        throw new SyntaxErrorException()
+          .setCode(ExceptionCode.ILLEGAL_ARGUMENT)
+          .set("message", "Unsupported config item")
+          .set("key", key);
+      }
+    } catch (NumberFormatException e) {
+      throw new SyntaxErrorException()
+        .setCode(ExceptionCode.PARSE)
+        .set("message", "Number expected")
+        .set("key", key)
+        .set("value", value);
+    }
+  }
 
   /**
    *  Runs the infinite control loop. Following steps are performed:
@@ -95,16 +144,16 @@ public class ControlLoop
    *
    *  @see control4j.ICycleEventListener
    */
-  void run(Application application)
-  {
+  void run() {
 
-    this.application = application;
     info("Runnig control loop...");
-    dataBuffer = new DataBuffer(application.dataBufferSize);
+    dataBuffer = new DataBuffer(dataBufferSize);
     // prepare for execution
     try {
       ResourceManager.getInstance().prepare();
-      application.prepare();
+      for (ModuleCrate module : modules) {
+        module.prepare();
+      }
     } catch (Exception e) {
       dump(e);
       throw e;
@@ -112,32 +161,27 @@ public class ControlLoop
 
     // The control loop !
     while (true)
-      try
-      {
+      try {
         cycleStartTime = System.currentTimeMillis();
         // erase data buffer
         dataBuffer.clear();
-        application.fireCycleStartEvent();
+        fireCycleStartEvent();
         // start cycle delay
-        Tools.sleep(application.getStartCycleDelay());
-        application.fireProcessingStartEvent();
+        Tools.sleep(cycleDelay);
+        fireProcessingStartEvent();
         // module execution
         fine("Start of module processing");
-        for (Pair<OutputModule, int[]> module : application.outputModules)
-          execute(module.getLeft(), module.getRight());
-        for (Triple<ProcessModule, int[], int[]> module
-            : application.processModules)
-          execute(module.getLeft(), module.getMiddle(), module.getRight());
-        for (Pair<InputModule, int[]> module : application.inputModules)
-          execute(module.getLeft(), module.getRight());
-        application.fireCycleEndEvent();
+        for (ModuleCrate module : modules) {
+          module.execute(dataBuffer);
+        }
+        fireCycleEndEvent();
         // terminate the program, if requst was received
         if (exit) System.exit(0);
         // wait for next turn
         while (true)
         {
           long cycleDuration = System.currentTimeMillis() - cycleStartTime;
-          long sleepTime = application.getCyclePeriod() - cycleDuration;
+          long sleepTime = cyclePeriod - cycleDuration;
           if (sleepTime > 0)
             Tools.sleep(sleepTime);
           else if (sleepTime < -100)
@@ -165,58 +209,14 @@ public class ControlLoop
       }
   }
 
-  protected void execute(OutputModule module, int[] map)
-  {
-    Signal[] output = getOutputArray(map.length);
-    module.get(output, map.length);
-    dataBuffer.put(output, map);
-  }
-
-  protected void execute(ProcessModule module, int[] inputMap, int[] outputMap)
-  {
-    Signal[] input = dataBuffer.get(inputMap);
-    Signal[] output = getOutputArray(outputMap.length);
-    module.process(input, inputMap.length, output, outputMap.length);
-    dataBuffer.put(output, outputMap);
-  }
-
-  protected void execute(InputModule module, int[] map)
-  {
-    Signal[] input = dataBuffer.get(map);
-    module.put(input, map.length);
-  }
-
-  private Signal[] inputArray;
-
-  protected Signal[] getInputArray(int size)
-  {
-    if (inputArray == null)
-      inputArray = new Signal[size];
-    else if (inputArray.length < size)
-      inputArray = new Signal[size];
-    return inputArray;
-  }
-
-  private Signal[] outputArray;
-
-  protected Signal[] getOutputArray(int size)
-  {
-    if (outputArray == null)
-      outputArray = new Signal[size];
-    else if (outputArray.length < size)
-      outputArray = new Signal[size];
-    return outputArray;
-  }
-
   /**
    *  Returns required cycle period in ms. This value is taken
    *  from global configuration, item "cycle-period".
    *
    *  @return required cycle period in ms
    */
-  int getCyclePeriod()
-  {
-    return application.getCyclePeriod();
+  int getCyclePeriod() {
+    return (int)cyclePeriod;
   }
 
   /**
@@ -224,8 +224,7 @@ public class ControlLoop
    *
    *  @return a system time in ms when the last cycle was started
    */
-  long getCycleBeginningTime()
-  {
+  long getCycleBeginningTime() {
     return cycleStartTime;
   }
 
@@ -234,8 +233,7 @@ public class ControlLoop
    *  is not terminated immediately. It is terminated after the current
    *  loop is finished. This method is not thread safe.
    */
-  void exit()
-  {
+  void exit() {
     exit = true;
   }
 
@@ -245,10 +243,40 @@ public class ControlLoop
    *
    *  @return duration of the last cycle in ms
    */
-  public long getLastCycleDuration()
-  {
+  public long getLastCycleDuration() {
     return lastCycleDuration;
   }
+
+  //-------------------------------------------------------------- Cycle Events
+
+  private ArrayList<ICycleEventListener> cycleListeners
+    = new ArrayList<ICycleEventListener>();
+
+  void addCycleEventListener(ICycleEventListener listener) {
+    if (listener != null) {
+      cycleListeners.add(listener);
+    }
+  }
+
+  private void fireCycleStartEvent() {
+    for (ICycleEventListener listener : cycleListeners) {
+      listener.cycleStart();
+    }
+  }
+
+  private void fireCycleEndEvent() {
+    for (ICycleEventListener listener : cycleListeners) {
+      listener.cycleEnd();
+    }
+  }
+
+  private void fireProcessingStartEvent() {
+    for (ICycleEventListener listener : cycleListeners) {
+      listener.processingStart();
+    }
+  }
+
+  //---------------------------------------------------------------------- Dump
 
   /** True, if the dump file should be created, false otherwise. */
   protected boolean dump = true;
@@ -301,9 +329,8 @@ public class ControlLoop
       //ModuleManager.getInstance().dump(writer);
       //
       writer.println(
-	  new ToStringMultilineStyle()
-	      .append(application)
-	      .toString());
+          new ToStringMultilineStyle()
+              .toString());
       info("The dump file was created: " + dumpFile.getAbsolutePath());
       dump = false;
     }

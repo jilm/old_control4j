@@ -162,10 +162,9 @@ public class Control
     control4j.application.Sorter sorter
         = new control4j.application.Sorter();
     preprocessor.process(sorter);
-    sorter.process(application);
-    Instantiator instantiator = new Instantiator();
-    Application instances = instantiator.instantiate(application);
-    controlLoop.run(instances);
+    Instantiator instantiator = new Instantiator(controlLoop);
+    sorter.process(instantiator);
+    controlLoop.run();
   }
 
   /**
