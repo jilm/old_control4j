@@ -77,9 +77,9 @@ public class ControlLoop {
     dataBufferSize = Math.max(dataBufferSize, module.getMaxSignalPointer());
   }
 
-  private long cyclePeriod;
+  private long cyclePeriod = 1000;
 
-  private long cycleDelay;
+  private long cycleDelay = 200;
 
   void set(String key, String value) {
     try {
@@ -147,7 +147,7 @@ public class ControlLoop {
   void run() {
 
     info("Runnig control loop...");
-    dataBuffer = new DataBuffer(dataBufferSize);
+    dataBuffer = new DataBuffer(dataBufferSize + 1);
     // prepare for execution
     try {
       ResourceManager.getInstance().prepare();
