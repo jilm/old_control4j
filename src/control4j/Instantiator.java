@@ -22,6 +22,8 @@ import static control4j.tools.Logger.catched;
 import static control4j.tools.Logger.severe;
 import control4j.application.Input;
 import control4j.application.Output;
+import control4j.application.ErrorManager;
+import control4j.application.ErrorCode;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
@@ -102,9 +104,22 @@ public class Instantiator {
   protected int[] getInputMap(
       control4j.application.Module moduleDef, Module module) {
 
+    // resolve variable indexes
+    if (moduleDef.hasVariableInput()) {
+      try {
+        moduleDef.setVariableInputStartIndex(
+            module.getVariableInputFirstIndex());
+      } catch (UnsupportedOperationException e) {
+        // module definition contains variable input, but the module
+        // doesn't support it.
+        ErrorManager.newError()
+          .setCode(ErrorCode.INPUT_MAP)
+          .setCause(e);
+        return null;
+      }
+    }
+
     // calculate required size of the map array
-    moduleDef.setVariableInputStartIndex(
-          module.getVariableInputFirstIndex());
     int mapSize = module.getInputSize(moduleDef.getInputSize() - 1);
     if (mapSize == 0) return null;
 
@@ -114,7 +129,10 @@ public class Instantiator {
 
     // fixed index input
     for (int i=0; i<mapSize; i++) {
-      map[i] = moduleDef.getInput(i).getPointer();
+      Input input = moduleDef.getInput(i);
+      if (input != null) {
+        map[i] = input.getPointer();
+      }
     }
 
     return map;
@@ -125,8 +143,22 @@ public class Instantiator {
    */
   protected int[] getOutputMap(
       control4j.application.Module moduleDef, Module module) {
-    moduleDef.setVariableOutputStartIndex(
-        module.getVariableOutputFirstIndex());
+
+    // resolve variable indexes
+    if (moduleDef.hasVariableOutput()) {
+      try {
+        moduleDef.setVariableOutputStartIndex(
+            module.getVariableOutputFirstIndex());
+      } catch (UnsupportedOperationException e) {
+        // module definition contains variable input, but the module
+        // doesn't support it.
+        ErrorManager.newError()
+          .setCode(ErrorCode.OUTPUT_MAP)
+          .setCause(e);
+        return null;
+      }
+    }
+
     int mapSize = module.getOutputSize(moduleDef.getOutputSize() - 1);
     if (mapSize == 0) return null;
 
@@ -136,7 +168,10 @@ public class Instantiator {
 
     // fixed index output
     for (int i = 0; i < mapSize; i++) {
-      map[i] = moduleDef.getOutput(i).getPointer();
+      Output output = moduleDef.getOutput(i);
+      if (output != null) {
+        map[i] = output.getPointer();
+      }
     }
 
     return map;

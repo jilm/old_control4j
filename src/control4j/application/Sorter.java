@@ -22,6 +22,10 @@ import control4j.ExceptionCode;
 import control4j.SyntaxErrorException;
 import control4j.Instantiator;
 
+import cz.lidinsky.tools.IToStringBuildable;
+import cz.lidinsky.tools.ToStringBuilder;
+import cz.lidinsky.tools.ToStringMultilineStyle;
+
 import org.apache.commons.lang3.tuple.Triple;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.jgrapht.DirectedGraph;
@@ -41,7 +45,7 @@ import java.util.List;
  *  Performs a toplogical sort of the modules.
  *
  */
-public class Sorter {
+public class Sorter implements IToStringBuildable {
 
   //---------------------------------------------------------- Public Interface
 
@@ -53,10 +57,6 @@ public class Sorter {
   void add(Module module) {
     graph.addVertex(module);
     addToSignalIndex(module);
-  }
-
-  void setSignalSize(int size) {
-    signalIndex = new Module[size];
   }
 
   private HashMap<String, Property> configuration
@@ -96,12 +96,36 @@ public class Sorter {
       handler.instantiate(topolIter.next());
     }
 
+    ErrorManager.print();
+
   }
 
   /** Mapping signals to modules which provides it. Indexes of the
       array corespond to the position of the signal and the element
       of the array contains a module that provides it. */
   private Module[] signalIndex;
+
+  private Module getSourceModule(int signalPointer) {
+    if (signalIndex == null) {
+      return null;
+    } else if (signalIndex.length <= signalPointer) {
+      return null;
+    } else {
+      return signalIndex[signalPointer];
+    }
+  }
+
+  private void setSourceModule(int signalPointer, Module module) {
+    if (signalIndex == null) {
+      signalIndex = new Module[signalPointer + 1];
+    }
+    if (signalIndex.length <= signalPointer) {
+      Module[] newIndex = new Module[signalPointer + 1];
+      System.arraycopy(signalIndex, 0, newIndex, 0, signalIndex.length);
+      signalIndex = newIndex;
+    }
+    signalIndex[signalPointer] = module;
+  }
 
   /**
    *  Fill-in the signal to module map.
@@ -113,15 +137,16 @@ public class Sorter {
       for (int i = 0; i < module.getOutputSize(); i++) {
         if (module.getOutput(i) != null) {
           int out = module.getOutput(i).getPointer();
-          if (signalIndex[out] == null) {
-            signalIndex[out] = module;
+          if (getSourceModule(out) == null) {
+            setSourceModule(out, module);
           } else {
             // more interconnected outputs
             throw new SyntaxErrorException()
               .setCode(ExceptionCode.DUPLICATE_ELEMENT)
               .set("message", "Modules output interconnect")
               .set("signal", i)
-              .set("module1", signalIndex[out].getDeclarationReferenceText())
+              .set("module1",
+                  getSourceModule(out).getDeclarationReferenceText())
               .set("module2", module.getDeclarationReferenceText())
               .set("method", "addToSignalIndex")
               .set("class", getClass().getName());
@@ -174,7 +199,7 @@ public class Sorter {
     for (int i = 0; i < module.getInputSize(); i++) {
       Input input = module.getInput(i);
       if (input != null) {
-        Module sourceModule = signalIndex[input.getPointer()];
+        Module sourceModule = getSourceModule(input.getPointer());
         if (sourceModule != null) {
           // TODO: if the signal has default value specified  postphone the edge
           graph.addEdge(sourceModule, module);
@@ -183,6 +208,18 @@ public class Sorter {
         }
       }
     }
+  }
+
+  @Override
+  public String toString() {
+    return new ToStringMultilineStyle()
+      .append(this)
+      .toString();
+  }
+
+  public void toString(ToStringBuilder sb) {
+    sb.append("configuration", configuration)
+      .append("graph", graph);
   }
 
 }

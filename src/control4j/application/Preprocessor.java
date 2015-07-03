@@ -45,6 +45,7 @@ import org.apache.commons.lang3.tuple.Triple;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.commons.collections4.ListUtils;
 
+import cz.lidinsky.tools.IToStringBuildable;
 import cz.lidinsky.tools.ToStringMultilineStyle;
 import cz.lidinsky.tools.ToStringBuilder;
 import cz.lidinsky.tools.graph.Graph;
@@ -61,12 +62,16 @@ import control4j.tools.DuplicateElementException;
  *  Application preprocessing.
  *
  */
-public class Preprocessor {
+public class Preprocessor implements IToStringBuildable {
+
+  private Sorter handler;
 
   /**
    *  Empty constructor
    */
-  public Preprocessor() { }
+  public Preprocessor(Sorter handler) {
+    this.handler = handler;
+  }
 
   //---------------------------------------------------------- Public Interface
 
@@ -442,7 +447,7 @@ public class Preprocessor {
    *  Entry point of the preprocessor. Given application
    *  serves as the input and output of this method.
    */
-  public void process(Sorter handler) {
+  public void process() {
 
     // Block expansion
     while (!uses.isEmpty()) {
@@ -561,6 +566,34 @@ public class Preprocessor {
       handler.add(modules.pop());
     }
 
+    // print errors
+    ErrorManager.print();
+
+  }
+
+  @Override
+  public String toString() {
+    ToStringBuilder builder = new ToStringMultilineStyle();
+    toString(builder);
+    return builder.toString();
+  }
+
+  public void toString(ToStringBuilder builder) {
+    builder.append("configuration", configuration)
+      .append("definitions", definitions)
+      .append("resources", resources)
+      .append("blocks", blocks)
+      .append("blockGraph", blockGraph)
+      .append("signals", signals)
+      .append("signalIndexes", signalIndexes)
+      .append("modules", modules)
+      .append("resourceRefs", resourceRefs)
+      .append("moduleInputs", moduleInputs)
+      .append("moduleOutputs", moduleOutputs)
+      .append("uses", uses)
+      .append("propertyRefs", propertyRefs)
+      .append("inputTags", inputTags)
+      .append("outputTags", outputTags);
   }
 
 }

@@ -72,8 +72,10 @@ public class ErrorManager {
    *  Print all of the error messages.
    */
   public void printErrors() {
-    for (ErrorRecord error : errors) {
-      //System.out.println(error.getMessage());
+    if (errors != null) {
+      for (ErrorRecord error : errors) {
+        System.out.println(error.toString());
+      }
     }
   }
 
@@ -97,11 +99,12 @@ public class ErrorManager {
   /**
    *  Print all of the warning messages.
    */
-  public void printWarnings()
-  {
-    if (warnings != null)
-      for (String message : warnings)
+  public void printWarnings() {
+    if (warnings != null) {
+      for (String message : warnings) {
         warning(message);
+      }
+    }
   }
 
   /*
@@ -112,10 +115,12 @@ public class ErrorManager {
    *  Print both the warnings and the errors. If there is at least
    *  one error in the buffer, it exits the application.
    */
-  public void print() {
-    printWarnings();
-    printErrors();
-    if (errors.size() > 0) System.exit(1);
+  public static void print() {
+    getInstance().printWarnings();
+    getInstance().printErrors();
+    if (getInstance().errors != null && getInstance().errors.size() > 0) {
+      System.exit(1);
+    }
   }
 
   public void clean()
@@ -125,6 +130,9 @@ public class ErrorManager {
   public static ErrorRecord newError() {
     ErrorRecord error = new ErrorRecord();
     ErrorManager manager = getInstance();
+    if (manager.errors == null) {
+      manager.errors = new LinkedList<ErrorRecord>();
+    }
     manager.errors.add(error);
     return error;
   }

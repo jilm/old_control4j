@@ -19,6 +19,8 @@ package control4j.application;
  */
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import control4j.ExceptionCode;
+import control4j.SyntaxErrorException;
 
 public class ErrorRecord {
 
@@ -34,6 +36,56 @@ public class ErrorRecord {
   public ErrorRecord setCause(Throwable cause) {
     this.cause = cause;
     return this;
+  }
+
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder();
+
+    switch (code) {
+
+      // problem during block expansion
+      case BLOCK_EXPANSION:
+        switch (getCauseCode()) {
+
+          // block definition missing
+          case NO_SUCH_ELEMENT:
+            sb.append("Block definition is missing!");
+            break;
+
+          // cycle definition detected
+          case CYCLIC_DEFINITION:
+            sb.append("There is cyclic dependency between blocks!");
+            break;
+
+          default:
+            return defaultMessage();
+        }
+        break;
+
+      default:
+        return defaultMessage();
+    }
+    return sb.toString();
+  }
+
+  private ExceptionCode getCauseCode() {
+    if (cause == null) {
+      return ExceptionCode.NOT_SPECIFIED;
+    } else if (cause instanceof SyntaxErrorException) {
+      return ((SyntaxErrorException)cause).getCode();
+    } else {
+      // TODO:
+      return ExceptionCode.NOT_SPECIFIED;
+    }
+  }
+
+  private String defaultMessage() {
+    if (cause == null) {
+      return "Unspecified error was detected!";
+    } else {
+      return cause.getMessage();
+    }
   }
 
 }

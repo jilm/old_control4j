@@ -39,12 +39,13 @@ import static control4j.tools.Logger.*;
  *  read from a ...
  *
  */
-public class Loader
-{
+public class Loader {
 
   private ILoader loader;
 
   private Application application = new Application();
+
+  private Preprocessor handler;
 
   /**
    *  Reads a map: loader to namespace form a ...
@@ -53,8 +54,8 @@ public class Loader
    *             if something went wrong with the configuration
    *             reading
    */
-  public Loader() throws IOException
-  {
+  public Loader(Preprocessor handler) {
+    this.handler = handler;
   }
 
   /**
@@ -66,59 +67,30 @@ public class Loader
    *  @throws IOException
    *             if something is wrong with the file
    */
-  public Application load(File file)
-  throws IOException
-  {
-    Application application = new Application();
-    Preprocessor preprocessor = new Preprocessor();
+  public void load(File file) throws IOException {
 
+    //Application application = new Application(); // TODO:  remove
+
+    // TODO:  read handlers from a config file
     control4j.application.nativelang.XMLHandler c4jHandler
         = new control4j.application.nativelang.XMLHandler();
-    c4jHandler.setDestination(preprocessor);
 
-    control4j.application.gui.XMLHandler guiHandler
-        = new control4j.application.gui.XMLHandler();
-    control4j.application.ld.XMLHandler ldHandler
-        = new control4j.application.ld.XMLHandler();
+    c4jHandler.setDestination(handler);
 
-    guiHandler.setDestination(application);
-    ldHandler.setHandler(application);
+    //control4j.application.gui.XMLHandler guiHandler
+        //= new control4j.application.gui.XMLHandler();
+    //control4j.application.ld.XMLHandler ldHandler
+        //= new control4j.application.ld.XMLHandler();
+
+    //guiHandler.setDestination(application);
+    //ldHandler.setHandler(application);
 
     XMLReader reader = new XMLReader();
     reader.addHandler(c4jHandler);
-    reader.addHandler(guiHandler);
-    reader.addHandler(ldHandler);
+    //reader.addHandler(guiHandler);
+    //reader.addHandler(ldHandler);
     reader.load(file);
-    return application;
-  }
-
-  public Application load(InputStream inputStream)
-  throws IOException
-  {
-    control4j.application.nativelang.XMLHandler c4jHandler
-        = new control4j.application.nativelang.XMLHandler();
-    control4j.application.gui.XMLHandler guiHandler
-        = new control4j.application.gui.XMLHandler();
-    control4j.application.ld.XMLHandler ldHandler
-        = new control4j.application.ld.XMLHandler();
-    Application application = new Application();
-    c4jHandler.setDestination(application);
-    guiHandler.setDestination(application);
-    ldHandler.setHandler(application);
-    XMLReader reader = new XMLReader();
-    reader.addHandler(c4jHandler);
-    reader.addHandler(guiHandler);
-    reader.addHandler(ldHandler);
-    reader.load(inputStream);
-    return application;
-  }
-
-  public static void main(String[] args) throws Exception
-  {
-    File file = new File(args[0]);
-    Loader loader = new Loader();
-    Application application = loader.load(file);
-    //System.out.println(application.toString());
+    //return application;
   }
 
 }

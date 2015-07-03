@@ -147,6 +147,9 @@ public class C4jToControlAdapter extends AbstractAdapter {
       handler.addOutputTag(destModule, tag);
     }
 
+    // send translated module
+    handler.addModule(destModule);
+
   }
 
   /**

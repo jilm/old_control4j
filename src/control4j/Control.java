@@ -22,6 +22,10 @@ import java.util.*;
 import java.io.*;
 import control4j.tools.DeclarationReference;
 import control4j.tools.Preferences;
+import control4j.application.Preprocessor;
+import control4j.application.Loader;
+import control4j.application.Sorter;
+import control4j.application.ErrorManager;
 import static control4j.tools.Logger.*;
 import static control4j.tools.LogMessages.*;
 
@@ -148,22 +152,23 @@ public class Control
   /**
    *
    */
-  private void run() throws Exception
-  {
+  private void run() throws Exception {
+
     String filename = preferences.getProject();
     java.io.File file = new java.io.File(filename);
-    control4j.application.Loader loader
-        = new control4j.application.Loader();
-    control4j.application.Application application
-        = loader.load(file);
-    control4j.application.Preprocessor preprocessor
-        = new control4j.application.Preprocessor();
-    // TODO:
-    control4j.application.Sorter sorter
-        = new control4j.application.Sorter();
-    preprocessor.process(sorter);
+
+    Sorter sorter = new Sorter();
+
+    Preprocessor preprocessor = new Preprocessor(sorter);
+
+    new Loader(preprocessor)
+      .load(file);
+
+    preprocessor.process();
+
     Instantiator instantiator = new Instantiator(controlLoop);
     sorter.process(instantiator);
+    ErrorManager.print();
     controlLoop.run();
   }
 

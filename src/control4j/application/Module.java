@@ -130,6 +130,18 @@ public class Module extends Configurable {
   }
 
   /**
+   *  Returns true if the definition contains at least one unresolved variable
+   *  input.
+   */
+  public boolean hasVariableInput() {
+    if (inputArray == null) {
+      return false;
+    } else {
+      return variableInputIndex < inputArray.size();
+    }
+  }
+
+  /**
    *  Adds an input reference with no index attached yet.
    *
    *  @param input
@@ -261,6 +273,18 @@ public class Module extends Configurable {
         .setCause(se)
         .set("method", "putOutput")
         .set("module", toString());
+    }
+  }
+
+  /**
+   *  Returns true if the definition contains at least one unresolved variable
+   *  output.
+   */
+  public boolean hasVariableOutput() {
+    if (outputArray == null) {
+      return false;
+    } else {
+      return variableOutputIndex < outputArray.size();
     }
   }
 
