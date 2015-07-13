@@ -538,7 +538,7 @@ public class Preprocessor implements IToStringBuildable {
         Signal signal = getSignal(inputRef.getHref(), inputRef.getScope());
         int pointer = getSignalIndex(signal);
         inputRef.getDecorated().setPointer(pointer);
-        // TODO: copy signal properties
+        inputRef.getDecorated().setSignal(signal);
       } catch (NoSuchElementException e) {
         // TODO: Signal was not defined!
       }

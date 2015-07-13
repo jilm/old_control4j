@@ -47,4 +47,14 @@ public class Input extends Configurable {
     builder.append("pointer", pointer);
   }
 
+  private Signal signal;
+
+  void setSignal(Signal signal) {
+    this.signal = signal;
+  }
+
+  public Signal getSignal() {
+    return signal;
+  }
+
 }
