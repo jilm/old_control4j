@@ -43,6 +43,9 @@ import cz.lidinsky.scorpio.OMDA;
  */
 public class Instantiator {
 
+  /**
+   *  An object to send module instances.
+   */
   private ControlLoop handler;
 
   public Instantiator(ControlLoop handler) {
@@ -50,17 +53,22 @@ public class Instantiator {
   }
 
   /**
-   *  Creates instances of all of the modules. The sequence is as
+   *  Creates the instance of the required module. The sequence is as
    *  follows:
    *  <ol>
-   *    <li>Creates instance of the module. The constructor of the
-   *        module is called.
+   *    <li>Creates instance of the module. The constructor without
+   *        params is called.
    *    <li>Calls {@link Module#initialize} method.
-   *    <li>Assignes the resources. For each resource calls
-   *        {@link Module#putResource} method.
-   *    <li>Calls initialization input and output methods of the Module.
-   *    <li>Register as a ICycleListener.
+   *    <li>Register as an ICycleListener, if neccessary.
    *  </ol>
+   *
+   *  <p>Created instance is passed to the handler object.
+   *
+   *  <p>Problems during the process of instantiation are reported into
+   *  the {@link control4j.application.ErrorManager} object.
+   *
+   *  @param moduleDef
+   *             object that contains definition the the requested module
    */
   public void instantiate(control4j.application.Module moduleDef) {
 
@@ -68,28 +76,31 @@ public class Instantiator {
     try {
       Class<Module> moduleClass
         = (Class<Module>)Class.forName(className);
-      // create instance
+      // create the instance
       Module moduleInstance = moduleClass.newInstance();
-      // create input map
+      // create the input map
       int[] inputMap = getInputMap(moduleDef, moduleInstance);
-      // create output map
+      // create the output map
       int[] outputMap = getOutputMap(moduleDef, moduleInstance);
       // method initialization
       moduleInstance.initialize(moduleDef);
-      // specific
+      // create the module crate
       ModuleCrate moduleCrate
         = ModuleCrate.create(moduleInstance, inputMap, outputMap);
+      // put module instance into the handler
       handler.add(moduleCrate);
-      // TODO: Register as an ICycleListener
+      // Register as an ICycleListener
       if (moduleInstance instanceof ICycleEventListener) {
         handler.addCycleEventListener((ICycleEventListener)moduleInstance);
       }
-    } catch (ClassNotFoundException e) {
-      reportModuleClassNotFound(e, className);
-    } catch (InstantiationException e) {
-      reportModuleInstantiationException(e, className);
-    } catch (IllegalAccessException e) {
-      reportModuleIllegalAccessException(e, className);
+    } catch (Exception e) {
+      ErrorManager.newError()
+        .setCode(ErrorCode.MODULE_INSTANTIATION)
+        .setCause(
+            new SyntaxErrorException()
+            .setCause(e)
+            .set("class", className)
+            .set("reference", moduleDef.getDeclarationReferenceText()));
     }
 
   }
@@ -99,7 +110,7 @@ public class Instantiator {
   }
 
   /**
-   *  Creates and returns the input map for a given module definition.
+   *  Creates and returns the input map for the given module definition.
    */
   protected int[] getInputMap(
       control4j.application.Module moduleDef, Module module) {
@@ -175,31 +186,6 @@ public class Instantiator {
     }
 
     return map;
-  }
-
-  protected void reportModuleClassNotFound(Throwable e, String className)
-  {
-    severe(java.text.MessageFormat.format(
-        "A module class: {0} was not found\n{1}", className, e.getMessage()));
-    System.exit(1);
-  }
-
-  protected void reportModuleInstantiationException(
-      Throwable e, String className)
-  {
-    severe(java.text.MessageFormat.format(
-        "It was not possible to create instance of a module with class name:"
-        + " {0}; the message of the exception:\n{1}", className,
-        e.getMessage()));
-  }
-
-  protected void reportModuleIllegalAccessException(
-      Throwable e, String className)
-  {
-    severe(java.text.MessageFormat.format(
-        "IllegalAccessException while module instance creation."
-        + " Module class name: {0}; exception message:\n{1}",
-        className, e.getMessage()));
   }
 
 }

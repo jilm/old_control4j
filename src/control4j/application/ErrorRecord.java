@@ -63,6 +63,15 @@ public class ErrorRecord {
         }
         break;
 
+      // problem during module instantiation
+      case MODULE_INSTANTIATION:
+        switch (getCauseCode()) {
+          // There is no implementation of some module
+          case CLASS_NOT_FOUND:
+            break;
+        }
+        break;
+
       default:
         return defaultMessage();
     }
