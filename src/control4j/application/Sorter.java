@@ -62,11 +62,18 @@ public class Sorter implements IToStringBuildable {
   private HashMap<String, Property> configuration
       = new HashMap<String, Property>();
 
+  /**
+   *  Sets global configuration.
+   */
   public void set(String key, Property value) {
     configuration.put(key, value);
     // TODO:
   }
 
+  /**
+   *  Graph is used to provide topological sort. Vertices are modules and
+   *  edges are signal connections between modules.
+   */
   private DirectedAcyclicGraph<Module, DefaultEdge> graph
         = new DirectedAcyclicGraph<Module, DefaultEdge>(DefaultEdge.class);
 

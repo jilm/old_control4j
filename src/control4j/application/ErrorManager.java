@@ -26,19 +26,13 @@ import java.util.LinkedList;
  *
  *  Provides a unified way to process and manage error messages.
  *
- *  <p>The main benefit is the ability to finish some process
- *  even and than write all of the errors at once.
- *
  *  <p>This class is singleton. There is only one instance of this
  *  object.
  *
  */
 public class ErrorManager {
 
-
-  /*
-   *    Singleton Implementation.
-   */
+  //-------------------------------------------------- Singleton Implementation
 
   /** Error manager instance. */
   private static ErrorManager instance;
@@ -56,9 +50,7 @@ public class ErrorManager {
     return instance;
   }
 
-  /*
-   *     Errors Handling.
-   */
+  //----------------------------------------------------------- Errors Handling
 
   /** The list of fatal errors. */
   private LinkedList<ErrorRecord> errors;
@@ -67,6 +59,16 @@ public class ErrorManager {
    *  Adds an error into the buffer.
    */
   public void addError(String message) { }
+
+  public static ErrorRecord newError() {
+    ErrorRecord error = new ErrorRecord();
+    ErrorManager manager = getInstance();
+    if (manager.errors == null) {
+      manager.errors = new LinkedList<ErrorRecord>();
+    }
+    manager.errors.add(error);
+    return error;
+  }
 
   /**
    *  Print all of the error messages.
@@ -79,9 +81,7 @@ public class ErrorManager {
     }
   }
 
-  /*
-   *     Warnings Handling.
-   */
+  //--------------------------------------------------------- Warnings Handling
 
   /** The list of warnings. */
   private LinkedList<String> warnings;
@@ -107,9 +107,7 @@ public class ErrorManager {
     }
   }
 
-  /*
-   *     Common Methods
-   */
+  //------------------------------------------------------------- Other Methods
 
   /**
    *  Print both the warnings and the errors. If there is at least
@@ -125,16 +123,6 @@ public class ErrorManager {
 
   public void clean()
   {
-  }
-
-  public static ErrorRecord newError() {
-    ErrorRecord error = new ErrorRecord();
-    ErrorManager manager = getInstance();
-    if (manager.errors == null) {
-      manager.errors = new LinkedList<ErrorRecord>();
-    }
-    manager.errors.add(error);
-    return error;
   }
 
 }

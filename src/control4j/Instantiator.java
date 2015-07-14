@@ -25,16 +25,9 @@ import control4j.application.Output;
 import control4j.application.ErrorManager;
 import control4j.application.ErrorCode;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.ImmutableTriple;
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.lang3.tuple.Triple;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Set;
-
-import cz.lidinsky.scorpio.OMDA;
 
 /**
  *
