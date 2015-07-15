@@ -40,24 +40,24 @@ public class ErrorRecord {
 
   @Override
   public String toString() {
+
     StringBuilder sb = new StringBuilder();
+    System.out.println(code);
 
     switch (code) {
 
       // problem during block expansion
       case BLOCK_EXPANSION:
         switch (getCauseCode()) {
-
           // block definition missing
           case NO_SUCH_ELEMENT:
             sb.append("Block definition is missing!");
             break;
-
           // cycle definition detected
           case CYCLIC_DEFINITION:
             sb.append("There is cyclic dependency between blocks!");
             break;
-
+          // other
           default:
             return defaultMessage();
         }
@@ -65,9 +65,15 @@ public class ErrorRecord {
 
       // problem during module instantiation
       case MODULE_INSTANTIATION:
+        System.out.println(cause.toString());
         switch (getCauseCode()) {
           // There is no implementation of some module
           case CLASS_NOT_FOUND:
+            System.out.println("class not found");
+            break;
+          // other
+          default:
+            System.out.println("other");
             break;
         }
         break;

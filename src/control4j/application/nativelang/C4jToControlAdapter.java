@@ -237,15 +237,21 @@ public class C4jToControlAdapter extends AbstractAdapter {
   }
 
   public void put(Signal signal) {
-      Scope localScope = handler.getScopePointer();
-      control4j.application.Signal translated
-          = new control4j.application.Signal();
-      translateConfiguration(signal, translated, localScope);
-      // TODO: other signal properties!
-      handler.putSignal(
-          signal.getName(),
-          resolveScope(signal.getScope(), localScope),
-          translated);
+    Scope localScope = handler.getScopePointer();
+    control4j.application.Signal translated
+      = new control4j.application.Signal();
+    translateConfiguration(signal, translated, localScope);
+    // translate tags
+    for (Tag tag : signal.getTags()) {
+      control4j.application.Tag translatedTag = new control4j.application.Tag();
+      translateConfiguration(tag, translatedTag, localScope);
+      translated.putTag(tag.getName(), translatedTag);
+    }
+    // TODO: other signal properties!
+    handler.putSignal(
+        signal.getName(),
+        resolveScope(signal.getScope(), localScope),
+        translated);
   }
 
   public void put(ResourceDef resource) {
@@ -333,6 +339,7 @@ public class C4jToControlAdapter extends AbstractAdapter {
       Configurable source,
       control4j.application.Configurable destination,
       Scope localScope) {
+
     for (Property srcProperty : source.getConfiguration()) {
       try {
         if (destination.containsKey(srcProperty.getKey())) {

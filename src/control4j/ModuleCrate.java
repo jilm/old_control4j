@@ -81,7 +81,18 @@ abstract class ModuleCrate {
 
     InputModuleCrate(InputModule module, int[] inputMap) {
       this.module = module;
-      this.inputMap = inputMap;
+      if (inputMap != null) {
+        this.inputMap = inputMap;
+      } else if (module.getMandatoryInputSize() > 0) {
+        throw new SyntaxErrorException()
+          .setCode(ExceptionCode.NULL_POINTER)
+          .set("message", "Input module without input!")
+          .set("input required", module.getMandatoryInputSize())
+          .set("input found", "0")
+          .set("reference", module.getDeclarationReference());
+      } else {
+        this.inputMap = new int[0];
+      }
     }
 
     @Override
@@ -109,7 +120,11 @@ abstract class ModuleCrate {
 
     OutputModuleCrate(OutputModule module, int[] outputMap) {
       this.module = module;
-      this.outputMap = outputMap;
+      if (outputMap != null) {
+        this.outputMap = outputMap;
+      } else {
+        this.outputMap = new int[0];
+      }
     }
 
     @Override
@@ -139,8 +154,23 @@ abstract class ModuleCrate {
 
     ProcessModuleCrate(ProcessModule module, int[] inputMap, int[] outputMap) {
       this.module = module;
-      this.inputMap = inputMap;
-      this.outputMap = outputMap;
+      if (inputMap != null) {
+        this.inputMap = inputMap;
+      } else if (module.getMandatoryInputSize() > 0) {
+        throw new SyntaxErrorException()
+          .setCode(ExceptionCode.NULL_POINTER)
+          .set("message", "Process module without input!")
+          .set("input required", module.getMandatoryInputSize())
+          .set("input found", "0")
+          .set("reference", module.getDeclarationReference());
+      } else {
+        this.inputMap = new int[0];
+      }
+      if (outputMap != null) {
+        this.outputMap = outputMap;
+      } else {
+        this.outputMap = new int[0];
+      }
     }
 
     @Override

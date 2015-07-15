@@ -24,11 +24,11 @@ import java.util.NoSuchElementException;
 /**
  *  In principle, the DataBuffer is just an array of signals, which
  *  are identified by zero based index.
- *     
+ *
  *  <p>Serves as a data exchange point between computation modules.
- *  There are two fundamental methods in this class. Call {@link #get} 
- *  method to obtain an array of signals which are needed as an 
- *  input for the module. Call {@link #put} method after a module is 
+ *  There are two fundamental methods in this class. Call {@link #get}
+ *  method to obtain an array of signals which are needed as an
+ *  input for the module. Call {@link #put} method after a module is
  *  finished to store the outputs of the module for the future use.
  *
  *  <p>Methods <code>put</code> and <code>get</code> needs an extra
@@ -43,15 +43,15 @@ import java.util.NoSuchElementException;
  *  the module should not relay on the size of the array it gets as
  *  an input!
  *
- *  <p>At the beginnig of each cycle the DataBuffer should be erased 
+ *  <p>At the beginnig of each cycle the DataBuffer should be erased
  *  so that at the beginning of each cycle, the DataBuffer is empty.
- */    
+ */
 class DataBuffer implements Iterable<Signal>
 {
 
   private Signal[] buffer;
   private Signal[] crate;
-  
+
   /**
    *  Alocates the internal store with the given size.
    *
@@ -63,18 +63,18 @@ class DataBuffer implements Iterable<Signal>
     this.buffer = new Signal[size];
     this.crate = new Signal[10];
   }
-  
+
   /**
    *  Erase all of the values from the buffer. This method should be
    *  called before each computation cycle. After it is called, the
-   *  buffer is empty.      
-   */        
+   *  buffer is empty.
+   */
   public void clear()
   {
     for (int i=0; i<buffer.length; i++)
       buffer[i] = null;
   }
-  
+
   /**
    *  Returns requested signals. Purpose of this
    *  method is to obtain input signals for the
@@ -82,7 +82,7 @@ class DataBuffer implements Iterable<Signal>
    *
    *  @return an array of signals whose indexes
    *             are given as parameter. The size of
-   *             the array may be greater than the size of parameter 
+   *             the array may be greater than the size of parameter
    *             requestedSignals.
    *
    *  @param requestedSignals must be an array of
@@ -93,7 +93,7 @@ class DataBuffer implements Iterable<Signal>
    *  @throws IndexOutOfBoundsException if requestedSignals array
    *             contains index which is out of bounds of the internal
    *             buffer.
-   */        
+   */
   public Signal[] get(int[] requestedSignals)
   {
     int length = requestedSignals.length;
@@ -107,10 +107,10 @@ class DataBuffer implements Iterable<Signal>
     }
     return crate;
   }
-  
+
   /**
    *  Stores signals into the buffer. Signals to store are passed
-   *  as an argument. 
+   *  as an argument.
    *  Purspose of this method is to store signals produced as the
    *  output of a module. Not all of the signals are to be stored.
    *
@@ -119,8 +119,8 @@ class DataBuffer implements Iterable<Signal>
    *
    *  @param map an array of indexes that identify the signal.
    *             Indexes specify where to store corresponding
-   *             signal. If the corresponding signal is not to 
-   *             be stored, the index must be -1. The map array 
+   *             signal. If the corresponding signal is not to
+   *             be stored, the index must be -1. The map array
    *             may be smaller than the signals array. Extra
    *             signals are silently ignored.
    *
@@ -130,7 +130,7 @@ class DataBuffer implements Iterable<Signal>
    *  @throws NullPointerException if some signal in signals array
    *             contain null value and the corresponding index in
    *             the map array is positive
-   */     
+   */
   public void put(Signal[] signals, int[] map)
   {
     for (int i=0; i<map.length; i++)
@@ -170,16 +170,16 @@ class DataBuffer implements Iterable<Signal>
       if (buffer[i] != null) {
         writer.println(" " + i + ": " + buffer[i].toString());
       } else {
-	writer.println(" " + i + ": null");
+        writer.println(" " + i + ": null");
       }
     }
   }
-  
+
   /*
    *
    *   Iterator class implementation
-   *   
-   */         
+   *
+   */
 
   class SignalIterator implements Iterator<Signal>
   {
@@ -194,8 +194,8 @@ class DataBuffer implements Iterable<Signal>
     {
       if (index < buffer.length)
       {
-	      index++;
-	      return buffer[index-1];
+        index++;
+        return buffer[index-1];
       }
       throw new NoSuchElementException();
     }

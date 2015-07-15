@@ -57,6 +57,7 @@ public abstract class Resource implements Closeable {
       try {
         objectMap.put(key, definition.getConfiguration().getString(key));
       } catch (ConfigItemNotFoundException e) {
+        // TODO: optional configuration
         catched(this.getClass().getName(), "initialize", e);
       }
     }

@@ -117,13 +117,15 @@ implements IToStringBuildable
     super.initialize(definition);
     // initialize input labels
     int inputs = definition.getInputSize() - 1;
-    labels = new String[inputs];
-    for (int i = 0; i < inputs; i++) {
-      try {
-        labels[i]
+    if (inputs >= 0) {
+      labels = new String[inputs];
+      for (int i = 0; i < inputs; i++) {
+        try {
+          labels[i]
             = definition.getInput(i + 1).getConfiguration().getString("label");
-      } catch (ConfigItemNotFoundException e) {
-        labels[i] = "???"; //definition.getInput(i + 1).getHref(); TODO:
+        } catch (ConfigItemNotFoundException e) {
+          labels[i] = "???"; //definition.getInput(i + 1).getHref(); TODO:
+        }
       }
     }
     //

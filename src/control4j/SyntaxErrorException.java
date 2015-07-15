@@ -26,7 +26,7 @@ public class SyntaxErrorException extends BaseException {
     super();
   }
 
-  private ExceptionCode code;
+  private ExceptionCode code = ExceptionCode.NOT_SPECIFIED;
 
   public SyntaxErrorException setCode(ExceptionCode code) {
     this.code = code;

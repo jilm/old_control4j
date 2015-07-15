@@ -21,8 +21,10 @@ package control4j.application.nativelang;
 import static org.apache.commons.lang3.Validate.notBlank;
 import static org.apache.commons.lang3.Validate.notNull;
 import static org.apache.commons.lang3.StringUtils.trim;
+import org.apache.commons.collections4.ListUtils;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import control4j.application.Scope;
 
@@ -84,11 +86,7 @@ public class Signal extends DescriptionBase implements IDefinition {
     isValueT_1Valid = true;
   }
 
-  /*
-   *
-   *     Tags
-   *
-   */
+  //---------------------------------------------------------------------- Tags
 
   private ArrayList<Tag> tags;
 
@@ -97,6 +95,10 @@ public class Signal extends DescriptionBase implements IDefinition {
       tags = new ArrayList<Tag>();
     }
     tags.add(notNull(tag));
+  }
+
+  public List<Tag> getTags() {
+    return ListUtils.emptyIfNull(tags);
   }
 
   @Override

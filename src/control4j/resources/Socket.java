@@ -67,10 +67,10 @@ public class Socket extends Resource {
     IConfigBuffer configuration = definition.getConfiguration();
     try {
       if (host.equals(configuration.getString("host"))
-	  && port == configuration.getInteger("port")) {
-	return true;
+          && port == configuration.getInteger("port")) {
+        return true;
       } else {
-	return false;
+        return false;
       }
     } catch (ConfigItemNotFoundException e) {
       return false;
