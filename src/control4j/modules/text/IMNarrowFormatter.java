@@ -113,32 +113,37 @@ implements IToStringBuildable
    *  @see java.util.Locale
    */
   @Override
-  public void initialize(control4j.application.Module definition) {
-    super.initialize(definition);
-    // initialize input labels
-    int inputs = definition.getInputSize() - 1;
-    if (inputs >= 0) {
-      labels = new String[inputs];
-      for (int i = 0; i < inputs; i++) {
-        try {
-          labels[i]
-            = definition.getInput(i + 1).getConfiguration().getString("label");
-        } catch (ConfigItemNotFoundException e) {
-          labels[i] = "???"; //definition.getInput(i + 1).getHref(); TODO:
+    public void initialize(control4j.application.Module definition) {
+      super.initialize(definition);
+      // initialize input labels
+      int inputs = definition.getInputSize() - 1;
+      if (inputs >= 0) {
+        labels = new String[inputs];
+        for (int i = 0; i < inputs; i++) {
+          try {
+            labels[i] = definition.getInput(i+1).getConfiguration()
+              .getString("label");
+          } catch (ConfigItemNotFoundException e) {
+            try {
+              labels[i] = definition.getInput(i+1).getConfiguration()
+                .getString("signal-name");
+            } catch (ConfigItemNotFoundException ex) {
+              labels[i] = "???";
+            }
+          }
         }
       }
+      //
+      Locale locale;
+      if (language == null)
+        locale = Locale.getDefault();
+      else if (country == null)
+        locale = new Locale(language);
+      else
+        locale = new Locale(language, country);
+      signalFormat = new SignalFormat(locale);
+      signalFormat.setMaximumFractionDigits(maxFractionDigits);
     }
-    //
-    Locale locale;
-    if (language == null)
-      locale = Locale.getDefault();
-    else if (country == null)
-      locale = new Locale(language);
-    else
-      locale = new Locale(language, country);
-    signalFormat = new SignalFormat(locale);
-    signalFormat.setMaximumFractionDigits(maxFractionDigits);
-  }
 
   /**
    *  Prints input signals on the text device in the human readable
