@@ -1,7 +1,7 @@
 package control4j.gui;
 
 /*
- *  Copyright 2013, 2014 Jiri Lidinsky
+ *  Copyright 2013, 2014, 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -27,15 +27,14 @@ import control4j.gui.components.Screen;
 
 /**
  *
- *  Maintains set of screens that contains the GUI components. 
+ *  Maintains a set of screens that contains the GUI components.
  *  This is the root object in the gui tree.
  *
  *  <p>The only child of Screens may be a screen or a changer.
  *
  */
 public class Screens extends VisualContainer
-implements IChangeListener
-{
+implements IChangeListener {
 
   /**
    *  The width of the area for screens.
@@ -48,7 +47,7 @@ implements IChangeListener
   private int height = 600;
 
   /**
-   *  A component that is responsible for painting. 
+   *  A component that is responsible for painting.
    *  May contain null value.
    */
   private JTabbedPane visualComponent;
@@ -58,21 +57,18 @@ implements IChangeListener
    *             if child is not instance of Screen class
    */
   @Override
-  public void add(VisualObject child)
-  {
-    if (child instanceof Screen)
-    {
+  public void add(VisualObject child) {
+    if (child instanceof Screen) {
       super.add(child);
       child.addChangeListener(this);
       // insert a tab title for the screen
-      if (visualComponent != null)
-      {
-	int index = getVisualObjectCount()-1;
-	visualComponent.setTitleAt(index, ((Screen)child).getTitle());
+      if (visualComponent != null) {
+        int index = getVisualObjectCount()-1;
+        visualComponent.setTitleAt(index, ((Screen)child).getTitle());
       }
-    }
-    else
+    } else {
       throw new IllegalArgumentException();
+    }
   }
 
   /**
@@ -80,23 +76,20 @@ implements IChangeListener
    *             if child is not an instance of Screen class
    */
   @Override
-  public void insert(VisualObject child, int index)
-  {
-    if (child instanceof Screen)
-    {
+  public void insert(VisualObject child, int index) {
+    if (child instanceof Screen) {
       super.insert(child, index);
       child.addChangeListener(this);
       // insert a tab title for the screen
       if (visualComponent != null)
-	visualComponent.setTitleAt(index, ((Screen)child).getTitle());
-    }
-    else
+        visualComponent.setTitleAt(index, ((Screen)child).getTitle());
+    } else {
       throw new IllegalArgumentException();
+    }
   }
 
   @Override
-  public GuiObject removeChild(int index)
-  {
+  public GuiObject removeChild(int index) {
     getChild(index).removeChangeListener(this);
     return super.removeChild(index);
   }
@@ -105,8 +98,7 @@ implements IChangeListener
    *  Returns width of the screens area.
    */
   @Getter(key="Width")
-  public int getWidth()
-  {
+  public int getWidth() {
     return width;
   }
 
@@ -122,8 +114,7 @@ implements IChangeListener
    *             if the width is negative number
    */
   @Setter(key="Width")
-  public void setWidth(int width)
-  {
+  public void setWidth(int width) {
     if (width < 0)
       throw new IllegalArgumentException();
     this.width = width;
@@ -135,13 +126,12 @@ implements IChangeListener
     }
     fireChangeEvent(new ChangeEvent(this, "Width", this.width));
   }
-  
+
   /**
    *  Returns height of the screens area.
    */
   @Getter(key="Height")
-  public int getHeight()
-  {
+  public int getHeight() {
     return height;
   }
 
@@ -158,13 +148,11 @@ implements IChangeListener
    *
    */
   @Setter(key="Height")
-  public void setHeight(int height)
-  {
+  public void setHeight(int height) {
     if (height < 0)
       throw new IllegalArgumentException();
     this.height = height;
-    if (visualComponent != null)
-    {
+    if (visualComponent != null) {
       visualComponent.setSize(width, height);
       visualComponent.revalidate();
       visualComponent.repaint();
@@ -176,10 +164,8 @@ implements IChangeListener
    *  Creates and returns new instance of JTabbedPane.
    */
   @Override
-  protected JComponent createSwingComponent()
-  {
-    if (visualComponent == null)
-    {
+  protected JComponent createSwingComponent() {
+    if (visualComponent == null) {
       visualComponent = new JTabbedPane();
     }
     else
@@ -197,18 +183,17 @@ implements IChangeListener
    *  even for all of the visual children.
    */
   @Override
-  public void configureVisualComponent()
-  {
+  public void configureVisualComponent() {
     if (visualComponent != null)
     {
       visualComponent.setSize(width, height);
       visualComponent.setPreferredSize(new Dimension(width, height));
       for (int i=0; i<getVisualObjectCount(); i++)
       {
-	VisualObject screen = getVisualObject(i);
-	JComponent screenComponent = screen.createVisualComponent();
-	visualComponent.addTab(((Screen)screen).getTitle(), screenComponent);
-	screen.configureVisualComponent();
+        VisualObject screen = getVisualObject(i);
+        JComponent screenComponent = screen.createVisualComponent();
+        visualComponent.addTab(((Screen)screen).getTitle(), screenComponent);
+        screen.configureVisualComponent();
       }
       visualComponent.revalidate();
       visualComponent.repaint();
@@ -221,8 +206,7 @@ implements IChangeListener
    *  Returns the visual component if exists, otherwise returns null.
    */
   @Override
-  public JComponent getVisualComponent()
-  {
+  public JComponent getVisualComponent() {
     return visualComponent;
   }
 
@@ -231,12 +215,11 @@ implements IChangeListener
    *  components of all the children.
    */
   @Override
-  public void releaseVisualComponent()
-  {
+  public void releaseVisualComponent() {
     if (visualComponent != null)
     {
       for (int i=0; i<getVisualObjectCount(); i++)
-	getVisualObject(i).releaseVisualComponent();
+        getVisualObject(i).releaseVisualComponent();
       visualComponent.removeAll();
     }
     visualComponent = null;
@@ -247,8 +230,7 @@ implements IChangeListener
    *  If the title of the screen has changed, it actualize appropriate
    *  tab title.
    */
-  public void propertyChanged(ChangeEvent e)
-  {
+  public void propertyChanged(ChangeEvent e) {
     if (visualComponent != null)
       if (e.getKey().equals("Title") || e.getKey().equals("Name"))
       {
@@ -261,8 +243,7 @@ implements IChangeListener
   /**
    *
    */
-  public void showScreen(int index)
-  {
+  public void showScreen(int index) {
     if (visualComponent != null)
       visualComponent.setSelectedIndex(index);
   }
@@ -270,8 +251,7 @@ implements IChangeListener
   /**
    *
    */
-  public void showScreen(Screen screen)
-  {
+  public void showScreen(Screen screen) {
     if (visualComponent != null)
       visualComponent.setSelectedComponent(screen.getVisualComponent());
   }

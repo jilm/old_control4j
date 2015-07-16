@@ -44,14 +44,6 @@ public abstract class VisualObject extends GuiObject
 {
 
   /**
-   *  A list of all children objects. It contains null until 
-   *  first child is added. The list is ordered. At first there
-   *  are objects which are derived from VisualObject
-   *  class and then there are objects derived from Changer.
-   */
-  protected ArrayList<GuiObject> children;
-
-  /**
    *
    */
   public static final String LINK_KEY = "facade";
@@ -75,19 +67,6 @@ public abstract class VisualObject extends GuiObject
   public void add(Changer child)
   {
     addChild(child);
-  }
-
-  /**
-   *
-   */
-  protected void addChild(GuiObject child)
-  {
-    if (child == null)
-      throw new NullPointerException();
-    if (children == null)
-      children = new ArrayList<GuiObject>();
-    children.add(child);
-    child.setParent(this);
   }
 
   /**
@@ -117,35 +96,9 @@ public abstract class VisualObject extends GuiObject
   /**
    *
    */
-  protected void insertChild(GuiObject child, int index)
-  {
-    if (child == null)
-      throw new NullPointerException();
-    if (children == null && index == 0)
-      children = new ArrayList<GuiObject>();
-    if (children == null)
-      throw new IndexOutOfBoundsException();
-    children.add(index, child);
-    child.setParent(this);
-  }
-
-  /**
-   *
-   */
   public Changer removeChanger(int index)
   {
     return (Changer)removeChild(index);
-  }
-
-  /**
-   *
-   */
-  @Override
-  public GuiObject removeChild(int index)
-  {
-    if (children == null)
-      throw new IndexOutOfBoundsException();
-    return children.remove(index);
   }
 
   /**
@@ -157,57 +110,13 @@ public abstract class VisualObject extends GuiObject
   }
 
   /**
-   *
-   */
-  @Override
-  public GuiObject getChild(int index)
-  {
-    if (children == null)
-      throw new IndexOutOfBoundsException();
-    else
-      return children.get(index);
-  }
-
-  /**
-   *
-   */
-  @Override
-  public int getIndexOfChild(GuiObject child)
-  {
-    if (child == null)
-      throw new IllegalArgumentException();
-    if (children == null)
-      throw new NoSuchElementException();
-    else
-      for (int i=0; i<children.size(); i++)
-	if (child == children.get(i))
-	  return i;
-    throw new NoSuchElementException();
-  }
-
-  /**
    *  Returns number of all changer children of this object.
    *
    *  @return number of changer childeren
    */
   public int getChangerCount()
   {
-    return size();
-  }
-
-  /**
-   *  Returns number of all the children. It means number of changers
-   *  plus number of other children.
-   *
-   *  @return number of all childeren of this object
-   */
-  @Override
-  public int size()
-  {
-    if (children == null)
-      return 0;
-    else
-      return children.size();
+    return getChildren().size();
   }
 
   /**
@@ -258,29 +167,13 @@ public abstract class VisualObject extends GuiObject
   }
 
   /**
-   *  Sets the parent object. This method is called by methods
-   *  which adds or removes children.
-   *
-   *  @param parent
-   *             a parent object. It may be null, in such a case,
-   *             this object becomes a root of isolated subtree.
-   */
-  @Override
-  protected void setParent(GuiObject parent)
-  {
-    if (parent == null)
-      releaseVisualComponent();
-    super.setParent(parent);
-  }
-
-  /**
-   *  Makes and returns a clone of this object. It creates new 
+   *  Makes and returns a clone of this object. It creates new
    *  instance of the same class and than performs copy of all
    *  the properties which are annotated by setter and getter
    *  annotations. Moreover it provides copy of all the children
    *  of this object.
    *
-   *  <p>Returned object, is not connected anywhere which means, 
+   *  <p>Returned object, is not connected anywhere which means,
    *  that getParent returns null. The whole subtree doesn't
    *  contain swing components which are responsible for painting.
    *
@@ -293,28 +186,20 @@ public abstract class VisualObject extends GuiObject
   @Override
   public GuiObject clone(boolean full)
   {
+    // TODO:
     // create new class instance and copy properties
     VisualObject clone = (VisualObject)super.clone(full);
     // create clones of all the children
-    if (size() > 0)
-    {
-      clone.children = new ArrayList<GuiObject>(size());
-      for (GuiObject child : children)
-	clone.addChild(child.clone(full));
-    }
-    else
-      clone.children = null;
+    //if (size() > 0)
+    //{
+     // clone.children = new ArrayList<GuiObject>(size());
+      //for (GuiObject child : children)
+	//clone.addChild(child.clone(full));
+    //}
+    //else
+      //clone.children = null;
     // return result
     return clone;
-  }
-
-  /**
-   *  Returns true if and only if it has at least one child.
-   */
-  @Override
-  public boolean hasChildren()
-  {
-    return children != null && children.size() > 0;
   }
 
   /**

@@ -1,7 +1,7 @@
 package control4j.gui;
 
 /*
- *  Copyright 2013, 2014 Jiri Lidinsky
+ *  Copyright 2013, 2014, 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -107,19 +107,19 @@ public abstract class VisualContainer extends VisualObject
   /**
    *
    */
-  @Override 
+  @Override
   public GuiObject removeChild(int index)
   {
     GuiObject child = getChild(index);
-    if (child.isVisual()) 
+    if (child.isVisual())
     {
       firstChangerIndex--;
       if (component != null)
       {
-	component.remove(index);
-	((VisualObject)child).releaseVisualComponent();
-	component.revalidate();
-	component.repaint();
+        component.remove(index);
+        ((VisualObject)child).releaseVisualComponent();
+        component.revalidate();
+        component.repaint();
       }
     }
     return super.removeChild(index);
@@ -131,7 +131,7 @@ public abstract class VisualContainer extends VisualObject
   @Override
   public int getChangerCount()
   {
-    return size() - firstChangerIndex;
+    return getChildren().size() - firstChangerIndex;
   }
 
   /**
@@ -182,8 +182,8 @@ public abstract class VisualContainer extends VisualObject
 
   /**
    *  Calls a releseVisualComponent for all of the visual child objects.
-   *  Moreover, it removes child visual components from this visual 
-   *  component. 
+   *  Moreover, it removes child visual components from this visual
+   *  component.
    */
   @Override
   protected void releaseVisualComponent()

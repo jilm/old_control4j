@@ -34,6 +34,8 @@ public abstract class AbstractAdapter {
 
   public void put(VisualContainer container) { }
 
+  public void goBack() { }
+
   public void put(Changer changer) { }
 
 }

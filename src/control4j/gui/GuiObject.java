@@ -1,7 +1,7 @@
 package control4j.gui;
 
 /*
- *  Copyright 2013, 2014 Jiri Lidinsky
+ *  Copyright 2013, 2014, 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -18,12 +18,16 @@ package control4j.gui;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import java.util.Map;
-import java.util.LinkedList;
 import control4j.scanner.Setter;
 import control4j.scanner.Getter;
 import control4j.scanner.Item2;
 import control4j.scanner.Scanner;
+
+import cz.lidinsky.tools.tree.AbstractNode;
+
+import java.util.Map;
+import java.util.LinkedList;
+
 
 /**
  *
@@ -37,24 +41,18 @@ import control4j.scanner.Scanner;
  *  that each object has one parent; excluding the root of
  *  course; and that objects may have zero or more children.
  *  This class provides methods to navigate through the tree.
- *  
+ *
  *  <p>This object also provides mechanism to inform subscribers
- *  about a change of some property. This object declares property 
- *  called Name. Descendants may declare another. 
+ *  about a change of some property. This object declares property
+ *  called Name. Descendants may declare another.
  *
  */
-public abstract class GuiObject
-{
+public abstract class GuiObject extends AbstractNode<GuiObject> {
 
   /**
    *  Name of the component. May contain null value.
    */
   private String name;
-
-  /**
-   *  Parent of the component, may contain null value.
-   */
-  private GuiObject parent;
 
   /**
    *  Number of all instances that were created during the application
@@ -113,39 +111,12 @@ public abstract class GuiObject
   }
 
   /**
-   *  Returns a parent object. If this object is the root of the
-   *  tree or temporary subtree, it returns null value.
-   *
-   *  @return a parent object, may return a null value
-   *
-   *  @see #setParent
-   */
-  public GuiObject getParent()
-  {
-    return parent;
-  }
-
-  /**
-   *  Sets a parent of this object. This method shoud be called
-   *  by insert or add method of this object descendats.
-   *
-   *  @param parent
-   *             a new parent of this object. May be null.
-   *
-   *  @see #getParent
-   */
-  protected void setParent(GuiObject parent)
-  {
-    this.parent = parent;
-  }
-
-  /**
    *  Creates a new object of the same class and makes a copy of all
    *  the properties which are annotated by Setter and Getter
    *  annotations. This method doesn't copy parent which is set to
    *  null value. Moreover you can specify not to copy name and
    *  number properties.
-   *  
+   *
    *  @param full
    *             if false, it doesn't copy name and number property.
    *
@@ -169,14 +140,14 @@ public abstract class GuiObject
       // copy all of the getters
       Map<String, Item2> properties = Scanner.scanClass(_class);
       for (Item2 property : properties.values())
-	if (property.isReadable() && property.isWritable())
-	  property.setValue(clone, property.getValue(this));
+        if (property.isReadable() && property.isWritable())
+          property.setValue(clone, property.getValue(this));
       clone.parent = null;
       // if full copy is not required
       if (full)
-	clone.number = this.number;
+        clone.number = this.number;
       else
-	clone.name = null;
+        clone.name = null;
       // return result
       return clone;
     }
@@ -190,7 +161,7 @@ public abstract class GuiObject
     {
     }
     return null;
-    
+
   }
 
   /**
@@ -234,17 +205,11 @@ public abstract class GuiObject
    */
   protected void fireChangeEvent(ChangeEvent e)
   {
-    if (changeListeners == null) 
+    if (changeListeners == null)
       return;
     for (IChangeListener listener : changeListeners)
       listener.propertyChanged(e);
   }
-
-  /**
-   *  Returns true if and only if the object has at least one child.
-   *  Otherwise it returns false.
-   */
-  public abstract boolean hasChildren();
 
   /**
    *  Returns true if and only if the object has visual representation.
@@ -258,45 +223,6 @@ public abstract class GuiObject
    *  object, otherwise, it returns false.
    */
   public abstract boolean isVisualContainer();
-
-  /**
-   *  Returns a child with given index.
-   *
-   *  @param index
-   *
-   *  @return a child object at given index
-   *
-   *  @throws IndexOutOfBoundsException
-   */
-  public abstract GuiObject getChild(int index);
-
-  /**
-   *  Returns number of all children.
-   */
-  public abstract int size();
-
-  /**
-   *  Removes a child object at given index.
-   *
-   *  @param index
-   *
-   *  @return removed child
-   *
-   *  @throws IndexOutOfBoundsException
-   */
-  public abstract GuiObject removeChild(int index);
-
-  /**
-   *  Returns index of given child object.
-   *
-   *  @param child
-   *             a child object 
-   *
-   *  @return index of the given child object
-   *
-   *  @throws NoSuchElementException
-   */
-  public abstract int getIndexOfChild(GuiObject child);
 
   /**
    *  Returns a value of the property annotated with Getter annotation

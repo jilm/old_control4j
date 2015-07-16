@@ -40,7 +40,7 @@ public abstract class Changer<T> extends GuiObject
    */
   private int signalIndex;
 
-  /** 
+  /**
    *  Name of the signal that will influence the gui behaviour.
    *  May be null if no signal is assigned.
    */
@@ -82,7 +82,7 @@ public abstract class Changer<T> extends GuiObject
 
   /**
    *  @return the name of the signal that will influence the behaviour
-   *             of parent gui element. May return null if the signal 
+   *             of parent gui element. May return null if the signal
    *             was not specified.
    */
   @Getter(key="Signal")
@@ -164,16 +164,6 @@ public abstract class Changer<T> extends GuiObject
   }
 
   /**
-   *  Changers doesn't have any children, this method always returns
-   *  false.
-   */
-  @Override
-  public boolean hasChildren()
-  {
-    return false;
-  }
-
-  /**
    *  Returns false.
    */
   @Override
@@ -186,30 +176,6 @@ public abstract class Changer<T> extends GuiObject
   public boolean isVisualContainer()
   {
     return false;
-  }
-
-  @Override
-  public GuiObject getChild(int index)
-  {
-    throw new IndexOutOfBoundsException();
-  }
-
-  @Override
-  public int size()
-  {
-    return 0;
-  }
-
-  @Override
-  public GuiObject removeChild(int index)
-  {
-    throw new java.util.NoSuchElementException();
-  }
-
-  @Override
-  public int getIndexOfChild(GuiObject child)
-  {
-    throw new java.util.NoSuchElementException();
   }
 
 }
