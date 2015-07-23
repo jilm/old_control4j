@@ -24,6 +24,7 @@ import control4j.scanner.Item2;
 import control4j.scanner.Scanner;
 
 import cz.lidinsky.tools.tree.AbstractNode;
+import cz.lidinsky.tools.tree.INode;
 
 import java.util.Map;
 import java.util.LinkedList;
@@ -47,7 +48,7 @@ import java.util.LinkedList;
  *  called Name. Descendants may declare another.
  *
  */
-public abstract class GuiObject extends AbstractNode<GuiObject> {
+public abstract class GuiObject {
 
   /**
    *  Name of the component. May contain null value.

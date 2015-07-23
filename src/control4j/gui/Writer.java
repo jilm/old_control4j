@@ -1,7 +1,7 @@
 package control4j.gui;
 
 /*
- *  Copyright 2013, 2014 Jiri Lidinsky
+ *  Copyright 2013, 2014, 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -39,7 +39,7 @@ public class Writer
   /**
    *
    */
-  public static final String NS = "http://gui.control4j.cz";
+  public static final String NS = "http://control4j.lidinsky.cz/gui";
 
   private XMLStreamWriter writer;
 
@@ -53,7 +53,7 @@ public class Writer
     {
       // create XML strem writer
       writer = javax.xml.stream.XMLOutputFactory.newFactory()
-	.createXMLStreamWriter(outputStream);
+        .createXMLStreamWriter(outputStream);
 
       // insert root element
       writer.writeStartDocument();
@@ -63,7 +63,7 @@ public class Writer
 
       // write children
       for (int i=0; i<gui.getVisualObjectCount(); i++)
-	writeChild((Screen)gui.getVisualObject(i));
+        writeChild((Screen)gui.getVisualObject(i));
       for (int i=0; i<gui.getChangerCount(); i++)
         writeChild(gui.getChanger(i));
 
@@ -88,7 +88,7 @@ public class Writer
     writePreferences(screen);
     for (int i=0; i<screen.getVisualObjectCount(); i++)
       if (screen.getVisualObject(i).isVisualContainer())
-	writeChild((VisualContainer)screen.getVisualObject(i));
+        writeChild((VisualContainer)screen.getVisualObject(i));
       else
         writeChild(screen.getVisualObject(i));
     for (int i=0; i<screen.getChangerCount(); i++)
@@ -133,7 +133,7 @@ public class Writer
     writePreferences(container);
     for (int i=0; i<container.getVisualObjectCount(); i++)
       if (container.getVisualObject(i).isVisualContainer())
-	writeChild((VisualContainer)container.getVisualObject(i));
+        writeChild((VisualContainer)container.getVisualObject(i));
       else
         writeChild(container.getVisualObject(i));
     for (int i=0; i<container.getChangerCount(); i++)
@@ -155,15 +155,15 @@ public class Writer
         // get key and value
         String key = preference.getKey();
         Object value = preference.getValue(object);
-	if (value == null) continue;
-	// convert value into string
-	String strValue = null;
-	if (value instanceof control4j.gui.Color)
-	  strValue = ((control4j.gui.Color)value).getKey();
-	else if (value instanceof java.awt.Color)
-	  strValue = Integer.toString(((Color)value).getRGB());
-	else
-	  strValue = value.toString();
+        if (value == null) continue;
+        // convert value into string
+        String strValue = null;
+        if (value instanceof control4j.gui.Color)
+          strValue = ((control4j.gui.Color)value).getKey();
+        else if (value instanceof java.awt.Color)
+          strValue = Integer.toString(((Color)value).getRGB());
+        else
+          strValue = value.toString();
         // write preference
         writePreference(key, strValue);
       }
@@ -178,7 +178,7 @@ public class Writer
   /**
    *
    */
-  private void writePreference(String key, String value) 
+  private void writePreference(String key, String value)
   throws XMLStreamException
   {
     writer.writeEmptyElement("gui", "preference", NS);

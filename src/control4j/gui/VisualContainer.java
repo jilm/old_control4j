@@ -170,7 +170,7 @@ public abstract class VisualContainer extends VisualObject
    *  VisualObject child.
    */
   @Override
-  protected void configureVisualComponent()
+  public void configureVisualComponent()
   {
     for (int i=0; i<getVisualObjectCount(); i++)
     {
@@ -186,7 +186,7 @@ public abstract class VisualContainer extends VisualObject
    *  component.
    */
   @Override
-  protected void releaseVisualComponent()
+  public void releaseVisualComponent()
   {
     if (component != null)
     {

@@ -187,7 +187,7 @@ public class Rectangle extends VisualObjectBase
    *
    */
   @Override
-  protected void configureVisualComponent()
+  public void configureVisualComponent()
   {
     super.configureVisualComponent();
     component.setPreferredSize(new Dimension(width, height));

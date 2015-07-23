@@ -71,7 +71,7 @@ public class Quantity extends VisualObjectBase
   {
     format.setMaximumFractionDigits(digits);
     format.setMinimumFractionDigits(digits);
-    if (component != null) 
+    if (component != null)
     {
       update();
       Dimension size = computeSize();
@@ -94,7 +94,7 @@ public class Quantity extends VisualObjectBase
   {
     format.setMaximumIntegerDigits(digits);
     this.digits = digits;
-    if (component != null) 
+    if (component != null)
     {
       update();
       Dimension size = computeSize();
@@ -149,7 +149,7 @@ public class Quantity extends VisualObjectBase
   }
 
   @Override
-  protected void configureVisualComponent()
+  public void configureVisualComponent()
   {
     super.configureVisualComponent();
     ((JLabel)component).setHorizontalAlignment(JLabel.RIGHT);

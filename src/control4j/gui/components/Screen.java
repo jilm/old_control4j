@@ -23,7 +23,8 @@ import java.awt.Dimension;
 import java.awt.Component;
 import javax.swing.JPanel;
 import javax.swing.JComponent;
-import control4j.scanner.Getter; 
+import javax.swing.JTabbedPane;
+import control4j.scanner.Getter;
 import control4j.scanner.Setter;
 import control4j.gui.ChangeEvent;
 
@@ -45,6 +46,12 @@ public class Screen extends control4j.gui.VisualContainer
    */
   private Color background = null;
 
+  @Override
+  public void setName(String name) {
+    super.setName(name);
+    setTabTitle();
+  }
+
   /**
    *
    */
@@ -61,15 +68,25 @@ public class Screen extends control4j.gui.VisualContainer
    *
    */
   @Setter(key="Title")
-  public void setTitle(String title)
-  {
+  public void setTitle(String title) {
     // set internal field
-    if (title != null)
+    if (title != null) {
       this.title = title.trim();
-    else
+    } else {
       this.title = null;
+    }
+    setTabTitle();
+  }
+
+  protected void setTabTitle() {
     // if there is a visual component, set the title !
-    fireChangeEvent(new ChangeEvent(this, "Title", getTitle()));
+    if (component != null) {
+      JTabbedPane parent = (JTabbedPane)component.getParent();
+      int index = parent.indexOfComponent(component);
+      if (index >= 0) {
+        parent.setTitleAt(index, getTitle());
+      }
+    }
   }
 
   /**
@@ -114,11 +131,11 @@ public class Screen extends control4j.gui.VisualContainer
    *
    */
   @Override
-  protected void configureVisualComponent()
-  {
+  public void configureVisualComponent() {
     if (background != null)
       component.setBackground(background);
     super.configureVisualComponent();
+    setTabTitle();
     component.revalidate();
     component.repaint();
   }

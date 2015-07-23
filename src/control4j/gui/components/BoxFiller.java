@@ -36,7 +36,7 @@ import control4j.scanner.Setter;
 public class BoxFiller extends control4j.gui.VisualObject
 {
 
-  /** 
+  /**
    *  Size of the box. It depends on the axis of parent box if size
    *  represents width or height.
    */
@@ -83,7 +83,7 @@ public class BoxFiller extends control4j.gui.VisualObject
   }
 
   @Override
-  protected void configureVisualComponent()
+  public void configureVisualComponent()
   {
   }
 

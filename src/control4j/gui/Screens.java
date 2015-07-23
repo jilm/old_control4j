@@ -244,16 +244,18 @@ implements IChangeListener {
    *
    */
   public void showScreen(int index) {
-    if (visualComponent != null)
+    if (visualComponent != null) {
       visualComponent.setSelectedIndex(index);
+    }
   }
 
   /**
    *
    */
   public void showScreen(Screen screen) {
-    if (visualComponent != null)
+    if (visualComponent != null) {
       visualComponent.setSelectedComponent(screen.getVisualComponent());
+    }
   }
 
 }

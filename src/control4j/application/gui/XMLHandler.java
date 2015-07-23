@@ -71,6 +71,10 @@ public class XMLHandler implements IXMLHandler
 
   public XMLHandler() {}
 
+  public XMLHandler(AbstractAdapter adapter) {
+    this.adapter = adapter;
+  }
+
   public void endProcessing() {}
 
   public void startProcessing() { }
@@ -95,8 +99,7 @@ public class XMLHandler implements IXMLHandler
    *  XML document. The output is available, after the load method
    *  was successfuly called (no exception was thrown).
    */
-  public Screens getScreens()
-  {
+  public Screens getScreens() {
     return (Screens)gui;
   }
 
@@ -121,8 +124,21 @@ public class XMLHandler implements IXMLHandler
   @AXMLStartElement("gui/screen")
   public boolean screen(Attributes attributes) {
     Screen screen = new Screen();
-    ((Screens)gui).add(screen);
+    //((Screens)gui).add(screen);
     gui = screen;
+    return true;
+  }
+
+  /**
+   *
+   */
+  @AXMLEndElement("screen")
+  public boolean endScreen() {
+    finest("/screen");
+    if (adapter != null) {
+      adapter.put((VisualContainer)gui);
+    }
+    gui = null;
     return true;
   }
 
@@ -131,19 +147,30 @@ public class XMLHandler implements IXMLHandler
    */
   @AXMLStartElement("panel")
   public boolean panel(Attributes attributes) {
-    try
-    {
+    try {
       String className = attributes.getValue("class");
       VisualContainer panel = (VisualContainer)createInstance(className);
-      ((VisualContainer)gui).add(panel);
+      //((VisualContainer)gui).add(panel);
       gui = panel;
+    } catch (ClassNotFoundException e) {
+      //MissingComponent missingComponent = new MissingComponent();
+      //((VisualContainer)gui).add(missingComponent);
+      //gui = missingComponent;
+      // TODO:
     }
-    catch (ClassNotFoundException e)
-    {
-      MissingComponent missingComponent = new MissingComponent();
-      ((VisualContainer)gui).add(missingComponent);
-      gui = missingComponent;
+    return true;
+  }
+
+  /**
+   *
+   */
+  @AXMLEndElement("panel")
+  public boolean endPanel() {
+    finest("/panel");
+    if (adapter != null) {
+      adapter.put((VisualContainer)gui);
     }
+    gui = null;
     return true;
   }
 
@@ -152,19 +179,30 @@ public class XMLHandler implements IXMLHandler
    */
   @AXMLStartElement("component")
   public boolean component(Attributes attributes) {
-    try
-    {
+    try {
       String className = attributes.getValue("class");
       VisualObject component = (VisualObject)createInstance(className);
-      ((VisualContainer)gui).add(component);
+      //((VisualContainer)gui).add(component);
       gui = component;
+    } catch (ClassNotFoundException e) {
+      //MissingComponent missingComponent = new MissingComponent();
+      //((VisualContainer)gui).add(missingComponent);
+      //gui = missingComponent;
+      // TODO:
     }
-    catch (ClassNotFoundException e)
-    {
-      MissingComponent missingComponent = new MissingComponent();
-      ((VisualContainer)gui).add(missingComponent);
-      gui = missingComponent;
+    return true;
+  }
+
+  /**
+   *
+   */
+  @AXMLEndElement("component")
+  public boolean endComponent() {
+    finest("/component");
+    if (adapter != null) {
+      adapter.put((VisualObject)gui);
     }
+    gui = null;
     return true;
   }
 
@@ -173,19 +211,30 @@ public class XMLHandler implements IXMLHandler
    */
   @AXMLStartElement("changer")
   public boolean changer(Attributes attributes) {
-    try
-    {
+    try {
       String className = attributes.getValue("class");
       Changer changer = (Changer)createInstance(className);
       ((VisualObject)gui).add(changer);
       gui = changer;
+    } catch (ClassNotFoundException e) {
+      //MissingComponent missingComponent = new MissingComponent();
+      //((VisualContainer)gui).add(missingComponent);
+      //gui = missingComponent;
+      // TODO:
     }
-    catch (ClassNotFoundException e)
-    {
-      MissingComponent missingComponent = new MissingComponent();
-      ((VisualContainer)gui).add(missingComponent);
-      gui = missingComponent;
+    return true;
+  }
+
+  /**
+   *
+   */
+  @AXMLEndElement("changer")
+  public boolean endChanger() {
+    finest("/changer");
+    if (adapter != null) {
+      adapter.put((Changer)gui);
     }
+    gui = null;
     return true;
   }
 
@@ -201,6 +250,11 @@ public class XMLHandler implements IXMLHandler
     return true;
   }
 
+  @AXMLEndElement("preference")
+  public boolean endPreference() {
+    return true;
+  }
+
   /**
    *
    */
@@ -209,58 +263,6 @@ public class XMLHandler implements IXMLHandler
     if (adapter != null) {
       adapter.put((Screens)gui);
     }
-    return true;
-  }
-
-  /**
-   *
-   */
-  @AXMLEndElement("screen")
-  public boolean endScreen() {
-    finest("/screen");
-    if (adapter != null) {
-      adapter.put((VisualContainer)gui);
-    }
-    gui = gui.getParent();
-    return true;
-  }
-
-  /**
-   *
-   */
-  @AXMLEndElement("panel")
-  public boolean endPanel() {
-    finest("/panel");
-    if (adapter != null) {
-      adapter.put((VisualContainer)gui);
-    }
-    gui = gui.getParent();
-    return true;
-  }
-
-  /**
-   *
-   */
-  @AXMLEndElement("component")
-  public boolean endComponent() {
-    finest("/component");
-    if (adapter != null) {
-      adapter.put((VisualObject)gui);
-    }
-    gui = gui.getParent();
-    return true;
-  }
-
-  /**
-   *
-   */
-  @AXMLEndElement("changer")
-  public boolean endChanger() {
-    finest("/changer");
-    if (adapter != null) {
-      adapter.put((Changer)gui);
-    }
-    gui = gui.getParent();
     return true;
   }
 

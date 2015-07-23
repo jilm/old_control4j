@@ -99,7 +99,7 @@ public class Label extends VisualObjectBase
   }
 
   @Override
-  protected void configureVisualComponent()
+  public void configureVisualComponent()
   {
     super.configureVisualComponent();
     ((JLabel)component).setText(text);

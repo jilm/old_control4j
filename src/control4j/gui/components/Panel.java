@@ -128,7 +128,7 @@ public class Panel extends VisualContainer
   }
 
   @Override
-  protected void configureVisualComponent()
+  public void configureVisualComponent()
   {
     component.setBounds(x, y, width, height);
     component.setPreferredSize(new Dimension(width, height));

@@ -121,7 +121,7 @@ public class Triangle extends VisualObjectBase
    *
    */
   @Override
-  protected void configureVisualComponent()
+  public void configureVisualComponent()
   {
     super.configureVisualComponent();
     calculatePoints();

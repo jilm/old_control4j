@@ -147,7 +147,7 @@ public class Box extends VisualContainer
    *
    */
   @Override
-  protected void configureVisualComponent()
+  public void configureVisualComponent()
   {
     JComponent parent = (JComponent)component.getParent();
     Insets insets = parent.getInsets();

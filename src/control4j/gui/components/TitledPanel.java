@@ -63,7 +63,7 @@ public class TitledPanel extends Panel
    *
    */
   @Override
-  protected void configureVisualComponent()
+  public void configureVisualComponent()
   {
     component.setBorder(BorderFactory.createTitledBorder(title));
     super.configureVisualComponent();

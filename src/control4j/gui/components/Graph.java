@@ -448,7 +448,7 @@ implements control4j.ICycleEventListener
   }
 
   /**
-   *  Add new data into the internal buffer. 
+   *  Add new data into the internal buffer.
    */
   private void newData(float data, int channel)
   {
@@ -479,7 +479,7 @@ implements control4j.ICycleEventListener
   }
 
   @Override
-  protected void configureVisualComponent()
+  public void configureVisualComponent()
   {
     super.configureVisualComponent();
     component.setSize(width, height);
@@ -505,14 +505,14 @@ implements control4j.ICycleEventListener
       // calculate the average
       for (int i=0; i<channels; i++)
       {
-	if (count[i] == 0) 
+	if (count[i] == 0)
 	  sum[i] = Float.NaN;
         else
 	  sum[i] /= count[i];
       }
       for (int i=0; i<pixels; i++) addToBuffer(sum);
       // initialize the average calculator
-      for (int i=0; i<channels; i++) 
+      for (int i=0; i<channels; i++)
       {
         sum[i] = 0.0f;
         count[i] = 0;
@@ -556,7 +556,7 @@ implements control4j.ICycleEventListener
 
       // paint horizontal lines
       //g.setColor(getForeground());
-      BasicStroke dashed = new BasicStroke(1.0f, BasicStroke.CAP_BUTT, 
+      BasicStroke dashed = new BasicStroke(1.0f, BasicStroke.CAP_BUTT,
 	  BasicStroke.JOIN_ROUND, 1.0f, new float[] { 10.0f }, 0.0f);
       Graphics2D g2 = (Graphics2D)g;
       Stroke solid = g2.getStroke();
@@ -569,11 +569,11 @@ implements control4j.ICycleEventListener
 	{
 	  if (horizontalLineArea[i] > 0.0f)
 	  {
-            int y1 = height 
-	        - Math.round((value - yMin - horizontalLineArea[i]) 
+            int y1 = height
+	        - Math.round((value - yMin - horizontalLineArea[i])
 		/ (yMax - yMin) * (float)height);
 	    int y2 = height
-	        - Math.round((value - yMin + horizontalLineArea[i]) 
+	        - Math.round((value - yMin + horizontalLineArea[i])
 		/ (yMax - yMin) * (float)height);
 	    g2.setColor(horizontalLineColors[i].darker().darker());
 	    g2.fillRect(0, Math.min(y1, y2), width, Math.abs(y2-y1));
@@ -583,7 +583,7 @@ implements control4j.ICycleEventListener
 	  }
 	  else
 	  {
-            int y = height 
+            int y = height
 	        - Math.round((value - yMin) / (yMax - yMin) * (float)height);
 	    g2.drawLine(0, y, width, y);
 	  }

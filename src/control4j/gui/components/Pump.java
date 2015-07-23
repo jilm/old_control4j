@@ -106,7 +106,7 @@ public class Pump extends VisualObjectBase
   }
 
   @Override
-  protected void configureVisualComponent()
+  public void configureVisualComponent()
   {
     super.configureVisualComponent();
     component.setSize(size, size);

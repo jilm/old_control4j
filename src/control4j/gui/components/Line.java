@@ -168,7 +168,7 @@ public class Line extends VisualObject
   }
 
   @Override
-  protected void configureVisualComponent()
+  public void configureVisualComponent()
   {
     setSize();
     component.setForeground(foreground);

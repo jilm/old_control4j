@@ -156,12 +156,12 @@ public abstract class VisualObject extends GuiObject
    *  This method shoudl configure visual component to be
    *  in accordance with this object settings.
    */
-  protected abstract void configureVisualComponent();
+  public abstract void configureVisualComponent();
 
   /**
    *
    */
-  protected void releaseVisualComponent()
+  public void releaseVisualComponent()
   {
     component = null;
   }
