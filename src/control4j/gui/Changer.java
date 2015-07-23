@@ -188,4 +188,8 @@ public abstract class Changer<T> extends GuiObject
     return false;
   }
 
+  public boolean isAssignable(GuiObject object) {
+    return false;
+  }
+
 }

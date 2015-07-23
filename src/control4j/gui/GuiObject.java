@@ -226,6 +226,12 @@ public abstract class GuiObject {
   public abstract boolean isVisualContainer();
 
   /**
+   *  Returns true if and only if the given object could be a child
+   *  of this object.
+   */
+  public abstract boolean isAssignable(GuiObject object);
+
+  /**
    *  Returns a value of the property annotated with Getter annotation
    *  with key key.
    *

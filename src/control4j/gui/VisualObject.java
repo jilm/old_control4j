@@ -155,4 +155,9 @@ public abstract class VisualObject extends GuiObject
     return false;
   }
 
+  @Override
+  public boolean isAssignable(GuiObject object) {
+    return !object.isVisual();
+  }
+
 }

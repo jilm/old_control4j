@@ -72,4 +72,9 @@ public abstract class VisualContainer extends VisualObject
     return clone;
   }
 
+  @Override
+  public boolean isAssignable(GuiObject object) {
+    return true;
+  }
+
 }
