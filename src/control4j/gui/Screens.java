@@ -208,4 +208,19 @@ implements IChangeListener {
     }
   }
 
+  /**
+   *  Only a Screen object or a Changer object may be a child of
+   *  this object.
+   */
+  @Override
+  public boolean isAssignable(GuiObject object) {
+    if (!object.isVisual()) {
+      return true;
+    } else if (object instanceof Screen) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
 }
