@@ -34,136 +34,6 @@ public abstract class VisualContainer extends VisualObject
   private int firstChangerIndex = 0;
 
   /**
-   *  Adds a given child at the end of visual children list. If this
-   *  object has a visual component, visual component is created even
-   *  for the child. Created component is added at the end of this
-   *  visual component children list. And finally configureVisualComponent
-   *  is called for the child.
-   *
-   *  @param child
-   *             object to be added as a child
-   */
-  public void add(VisualObject child)
-  {
-    insertChild(child, firstChangerIndex);
-    firstChangerIndex++;
-    if (component != null)
-    {
-      JComponent childComponent = child.createVisualComponent();
-      component.add(childComponent);
-      child.configureVisualComponent();
-      component.revalidate();
-      component.repaint();
-    }
-  }
-
-  /**
-   *
-   */
-  @Override
-  public void insert(Changer child, int index)
-  {
-    insertChild(child, index + firstChangerIndex);
-  }
-
-  /**
-   *
-   */
-  public void insert(VisualObject child, int index)
-  {
-    insertChild(child, index);
-    firstChangerIndex++;
-    if (component != null)
-    {
-      JComponent childComponent = child.createVisualComponent();
-      component.add(childComponent, index);
-      child.configureVisualComponent();
-      component.revalidate();
-      component.repaint();
-    }
-  }
-
-  /**
-   *
-   */
-  @Override
-  public Changer removeChanger(int index)
-  {
-    if (index < 0)
-      throw new IndexOutOfBoundsException();
-    return (Changer)removeChild(index + firstChangerIndex);
-  }
-
-  /**
-   *
-   */
-  public VisualObject removeVisualObject(int index)
-  {
-    if (index >= firstChangerIndex)
-      throw new IndexOutOfBoundsException();
-    return (VisualObject)removeChild(index);
-  }
-
-  /**
-   *
-   */
-  @Override
-  public GuiObject removeChild(int index)
-  {
-    GuiObject child = getChild(index);
-    if (child.isVisual())
-    {
-      firstChangerIndex--;
-      if (component != null)
-      {
-        component.remove(index);
-        ((VisualObject)child).releaseVisualComponent();
-        component.revalidate();
-        component.repaint();
-      }
-    }
-    return super.removeChild(index);
-  }
-
-  /**
-   *
-   */
-  @Override
-  public int getChangerCount()
-  {
-    return getChildren().size() - firstChangerIndex;
-  }
-
-  /**
-   *
-   */
-  public int getVisualObjectCount()
-  {
-    return firstChangerIndex;
-  }
-
-  /**
-   *
-   */
-  @Override
-  public Changer getChanger(int index)
-  {
-    if (index < 0)
-      throw new IndexOutOfBoundsException();
-    return (Changer)getChild(index + firstChangerIndex);
-  }
-
-  /**
-   *
-   */
-  public VisualObject getVisualObject(int index)
-  {
-    if (index >= firstChangerIndex)
-      throw new IndexOutOfBoundsException();
-    return (VisualObject)getChild(index);
-  }
-
-  /**
    *  Creates a visual component for each VisualObject child.
    *  Child visual component is than added to this visual component
    *  and finally, configureVisualComponent is called for each
@@ -172,12 +42,6 @@ public abstract class VisualContainer extends VisualObject
   @Override
   public void configureVisualComponent()
   {
-    for (int i=0; i<getVisualObjectCount(); i++)
-    {
-      JComponent childComponent = getVisualObject(i).createVisualComponent();
-      component.add(childComponent);
-      getVisualObject(i).configureVisualComponent();
-    }
   }
 
   /**
@@ -188,12 +52,6 @@ public abstract class VisualContainer extends VisualObject
   @Override
   public void releaseVisualComponent()
   {
-    if (component != null)
-    {
-      for (int i=0; i<getVisualObjectCount(); i++)
-        getVisualObject(i).releaseVisualComponent();
-      component.removeAll();
-    }
     super.releaseVisualComponent();
   }
 

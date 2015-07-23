@@ -51,8 +51,7 @@ public abstract class VisualObjectBase extends VisualObject
     this.x = x;
     if (component != null)
     {
-      Insets insets
-	  = ((VisualObject)getParent()).getVisualComponent().getInsets();
+      Insets insets = component.getParent().getInsets();
       component.setLocation(x + insets.left, y + insets.top);
       component.revalidate();
       component.repaint();
@@ -71,8 +70,7 @@ public abstract class VisualObjectBase extends VisualObject
     this.y = y;
     if (component != null)
     {
-      Insets insets
-	  = ((VisualObject)getParent()).getVisualComponent().getInsets();
+      Insets insets = component.getParent().getInsets();
       component.setLocation(x + insets.left, y + insets.top);
       component.revalidate();
       component.repaint();

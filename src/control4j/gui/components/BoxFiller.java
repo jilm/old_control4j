@@ -1,7 +1,7 @@
 package control4j.gui.components;
 
 /*
- *  Copyright 2013, 2014 Jiri Lidinsky
+ *  Copyright 2013, 2014, 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -20,6 +20,7 @@ package control4j.gui.components;
 
 import java.awt.Dimension;
 import javax.swing.JComponent;
+import javax.swing.BoxLayout;
 
 import control4j.scanner.Getter;
 import control4j.scanner.Setter;
@@ -87,31 +88,43 @@ public class BoxFiller extends control4j.gui.VisualObject
   {
   }
 
-  private Dimension getMinSize()
-  {
-    boolean isLineAxis = ((Box)getParent()).isLineAxis();
-    int size = glue ? 0 : this.size;
-    int width = isLineAxis ? size : 0;
-    int height = isLineAxis ? 0 : size;
-    return new Dimension(width, height);
+  private Dimension getMinSize() {
+    if (component != null) {
+      boolean isLineAxis
+        = ((BoxLayout)component.getParent().getLayout()).getAxis()
+        == BoxLayout.LINE_AXIS;
+      int size = glue ? 0 : this.size;
+      int width = isLineAxis ? size : 0;
+      int height = isLineAxis ? 0 : size;
+      return new Dimension(width, height);
+    }
+    return null;
   }
 
-  private Dimension getMaxSize()
-  {
-    boolean isLineAxis = ((Box)getParent()).isLineAxis();
-    int size = glue ? Integer.MAX_VALUE : this.size;
-    int width = isLineAxis ? size : 0;
-    int height = isLineAxis ? 0 : size;
-    return new Dimension(width, height);
+  private Dimension getMaxSize() {
+    if (component != null) {
+      boolean isLineAxis
+        = ((BoxLayout)component.getParent().getLayout()).getAxis()
+        == BoxLayout.LINE_AXIS;
+      int size = glue ? Integer.MAX_VALUE : this.size;
+      int width = isLineAxis ? size : 0;
+      int height = isLineAxis ? 0 : size;
+      return new Dimension(width, height);
+    }
+    return null;
   }
 
-  private Dimension getPreffSize()
-  {
-    boolean isLineAxis = ((Box)getParent()).isLineAxis();
-    int size = glue ? 0 : this.size;
-    int width = isLineAxis ? size : 0;
-    int height = isLineAxis ? 0 : size;
-    return new Dimension(width, height);
+  private Dimension getPreffSize() {
+    if (component != null) {
+      boolean isLineAxis
+        = ((BoxLayout)component.getParent().getLayout()).getAxis()
+        == BoxLayout.LINE_AXIS;
+      int size = glue ? 0 : this.size;
+      int width = isLineAxis ? size : 0;
+      int height = isLineAxis ? 0 : size;
+      return new Dimension(width, height);
+    }
+    return null;
   }
 
 }

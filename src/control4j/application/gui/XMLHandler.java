@@ -214,7 +214,7 @@ public class XMLHandler implements IXMLHandler
     try {
       String className = attributes.getValue("class");
       Changer changer = (Changer)createInstance(className);
-      ((VisualObject)gui).add(changer);
+      //((VisualObject)gui).add(changer);
       gui = changer;
     } catch (ClassNotFoundException e) {
       //MissingComponent missingComponent = new MissingComponent();

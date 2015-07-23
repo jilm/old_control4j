@@ -1,7 +1,7 @@
 package control4j.gui;
 
 /*
- *  Copyright 2013, 2014 Jiri Lidinsky
+ *  Copyright 2013, 2014, 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -53,71 +53,6 @@ public abstract class VisualObject extends GuiObject
    *  field may contain null value.
    */
   protected JComponent component;
-
-  /**
-   *  Appends given changer at the end of the list of all changers.
-   *  Moreover it sets a parent of the given changer to this object.
-   *
-   *  @param child
-   *             a changer to be appended to the list of changers
-   *
-   *  @throws NullPointerException
-   *             if the parameter is null
-   */
-  public void add(Changer child)
-  {
-    addChild(child);
-  }
-
-  /**
-   *  Inserts the given changer at the given position in the list
-   *  of changers. Shifts the element currently at that position
-   *  and subsequent elements to the right. Sets the parent of the
-   *  inserted object to this object.
-   *
-   *  @param child
-   *             a changer object to be inserted
-   *
-   *  @param index
-   *             an index at which the given object is to be inserted
-   *
-   *  @throws NullPointerException
-   *             if the child object is null
-   *
-   *  @throws IndexOutOfBoundsException
-   *             if index is negative number or greater than number
-   *             of all the changers.
-   */
-  public void insert(Changer child, int index)
-  {
-    insertChild(child, index);
-  }
-
-  /**
-   *
-   */
-  public Changer removeChanger(int index)
-  {
-    return (Changer)removeChild(index);
-  }
-
-  /**
-   *
-   */
-  public Changer getChanger(int index)
-  {
-    return (Changer)getChild(index);
-  }
-
-  /**
-   *  Returns number of all changer children of this object.
-   *
-   *  @return number of changer childeren
-   */
-  public int getChangerCount()
-  {
-    return getChildren().size();
-  }
 
   /**
    *

@@ -143,7 +143,7 @@ public abstract class GuiObject {
       for (Item2 property : properties.values())
         if (property.isReadable() && property.isWritable())
           property.setValue(clone, property.getValue(this));
-      clone.parent = null;
+      //clone.parent = null;
       // if full copy is not required
       if (full)
         clone.number = this.number;

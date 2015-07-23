@@ -53,48 +53,6 @@ implements IChangeListener {
   private JTabbedPane visualComponent;
 
   /**
-   *  @throws IllegalArgumentException
-   *             if child is not instance of Screen class
-   */
-  @Override
-  public void add(VisualObject child) {
-    if (child instanceof Screen) {
-      super.add(child);
-      child.addChangeListener(this);
-      // insert a tab title for the screen
-      if (visualComponent != null) {
-        int index = getVisualObjectCount()-1;
-        visualComponent.setTitleAt(index, ((Screen)child).getTitle());
-      }
-    } else {
-      throw new IllegalArgumentException();
-    }
-  }
-
-  /**
-   *  @throws IllegalArgumentException
-   *             if child is not an instance of Screen class
-   */
-  @Override
-  public void insert(VisualObject child, int index) {
-    if (child instanceof Screen) {
-      super.insert(child, index);
-      child.addChangeListener(this);
-      // insert a tab title for the screen
-      if (visualComponent != null)
-        visualComponent.setTitleAt(index, ((Screen)child).getTitle());
-    } else {
-      throw new IllegalArgumentException();
-    }
-  }
-
-  @Override
-  public GuiObject removeChild(int index) {
-    getChild(index).removeChangeListener(this);
-    return super.removeChild(index);
-  }
-
-  /**
    *  Returns width of the screens area.
    */
   @Getter(key="Width")
@@ -188,13 +146,14 @@ implements IChangeListener {
     {
       visualComponent.setSize(width, height);
       visualComponent.setPreferredSize(new Dimension(width, height));
-      for (int i=0; i<getVisualObjectCount(); i++)
-      {
-        VisualObject screen = getVisualObject(i);
-        JComponent screenComponent = screen.createVisualComponent();
-        visualComponent.addTab(((Screen)screen).getTitle(), screenComponent);
-        screen.configureVisualComponent();
-      }
+      //for (int i=0; i<getVisualObjectCount(); i++)
+      //{
+        //VisualObject screen = getVisualObject(i);
+        //JComponent screenComponent = screen.createVisualComponent();
+        //visualComponent.addTab(((Screen)screen).getTitle(), screenComponent);
+        //screen.configureVisualComponent();
+      //}
+      super.configureVisualComponent();
       visualComponent.revalidate();
       visualComponent.repaint();
     }
@@ -218,11 +177,9 @@ implements IChangeListener {
   public void releaseVisualComponent() {
     if (visualComponent != null)
     {
-      for (int i=0; i<getVisualObjectCount(); i++)
-        getVisualObject(i).releaseVisualComponent();
       visualComponent.removeAll();
+      visualComponent = null;
     }
-    visualComponent = null;
   }
 
   /**
@@ -231,13 +188,6 @@ implements IChangeListener {
    *  tab title.
    */
   public void propertyChanged(ChangeEvent e) {
-    if (visualComponent != null)
-      if (e.getKey().equals("Title") || e.getKey().equals("Name"))
-      {
-        int index = children.indexOf(e.getSource());
-        String title = ((Screen)getVisualObject(index)).getTitle();
-        visualComponent.setTitleAt(index, title);
-      }
   }
 
   /**

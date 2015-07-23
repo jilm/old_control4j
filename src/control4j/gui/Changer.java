@@ -1,7 +1,7 @@
 package control4j.gui;
 
 /*
- *  Copyright 2013, 2014 Jiri Lidinsky
+ *  Copyright 2013, 2014, 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -52,6 +52,16 @@ public abstract class Changer<T> extends GuiObject
    */
   private String property;
   private Method propertyMethod;
+
+  private VisualObject parent;
+
+  public void setParent(VisualObject parent) {
+    this.parent = parent;
+  }
+
+  public VisualObject getParent() {
+    return parent;
+  }
 
   /**
    *  This method is called regulary by the runtime machine.
