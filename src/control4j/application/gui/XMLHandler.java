@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.awt.Color;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Deque;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
@@ -107,7 +108,7 @@ public class XMLHandler implements IXMLHandler
    *  the root object. If no XML file was successfuly loaded yet, it
    *  contains null value.
    */
-  private GuiObject gui = null;
+  private Deque<GuiObject> guiStack = new java.util.ArrayDeque<GuiObject>();
 
   /**
    *  Returns object structure which was reconstructed from the given
@@ -115,7 +116,7 @@ public class XMLHandler implements IXMLHandler
    *  was successfuly called (no exception was thrown).
    */
   public Screens getScreens() {
-    return (Screens)gui;
+    return (Screens)guiStack.peekLast();
   }
 
   /**
@@ -123,13 +124,13 @@ public class XMLHandler implements IXMLHandler
    */
   @AXMLStartElement("{http://control4j.lidinsky.cz/application}application/gui")
   public boolean applicationGui(Attributes attributes) {
-    gui = new Screens();
+    guiStack.push(new Screens());
     return true;
   }
 
   @AXMLStartElement("/gui")
   public boolean gui(Attributes attributes) {
-    gui = new Screens();
+    guiStack.push(new Screens());
     return true;
   }
 
@@ -138,9 +139,8 @@ public class XMLHandler implements IXMLHandler
    */
   @AXMLStartElement("gui/screen")
   public boolean screen(Attributes attributes) {
-    Screen screen = new Screen();
+    guiStack.push(new Screen());
     //((Screens)gui).add(screen);
-    gui = screen;
     return true;
   }
 
@@ -151,9 +151,8 @@ public class XMLHandler implements IXMLHandler
   public boolean endScreen() {
     finest("/screen");
     if (adapter != null) {
-      adapter.put((VisualContainer)gui);
+      adapter.put((Screen)guiStack.pop());
     }
-    gui = null;
     return true;
   }
 
@@ -165,7 +164,7 @@ public class XMLHandler implements IXMLHandler
       String className = attributes.getValue("class");
       VisualContainer panel = (VisualContainer)createInstance(className);
       //((VisualContainer)gui).add(panel);
-      gui = panel;
+      guiStack.push(panel);
       return true;
     }
 
@@ -176,9 +175,8 @@ public class XMLHandler implements IXMLHandler
   public boolean endPanel() {
     finest("/panel");
     if (adapter != null) {
-      adapter.put((VisualContainer)gui);
+      adapter.put((VisualContainer)guiStack.pop());
     }
-    gui = null;
     return true;
   }
 
@@ -190,7 +188,7 @@ public class XMLHandler implements IXMLHandler
       String className = attributes.getValue("class");
       VisualObject component = (VisualObject)createInstance(className);
       //((VisualContainer)gui).add(component);
-      gui = component;
+      guiStack.push(component);
       return true;
     }
 
@@ -201,9 +199,8 @@ public class XMLHandler implements IXMLHandler
   public boolean endComponent() {
     finest("/component");
     if (adapter != null) {
-      adapter.put((VisualObject)gui);
+      adapter.put((VisualObject)guiStack.pop());
     }
-    gui = null;
     return true;
   }
 
@@ -215,7 +212,7 @@ public class XMLHandler implements IXMLHandler
       String className = attributes.getValue("class");
       Changer changer = (Changer)createInstance(className);
       //((VisualObject)gui).add(changer);
-      gui = changer;
+      guiStack.push(changer);
       return true;
     }
 
@@ -226,9 +223,8 @@ public class XMLHandler implements IXMLHandler
   public boolean endChanger() {
     finest("/changer");
     if (adapter != null) {
-      adapter.put((Changer)gui);
+      adapter.put((Changer)guiStack.pop());
     }
-    gui = null;
     return true;
   }
 
@@ -255,7 +251,7 @@ public class XMLHandler implements IXMLHandler
   @AXMLEndElement("gui")
   public boolean endGui() {
     if (adapter != null) {
-      adapter.put((Screens)gui);
+      adapter.put((Screens)guiStack.pop());
     }
     return true;
   }
@@ -276,7 +272,7 @@ public class XMLHandler implements IXMLHandler
       Class _class = Class.forName(className);
       return (GuiObject)_class.newInstance();
     } catch (Exception e) {
-      throw new SyntaxErrorException()
+      throw new CommonException()
         .setCause(e)
         .set("message", "An exception while instantiation a gui object!")
         .set("class name", className);
@@ -290,10 +286,12 @@ public class XMLHandler implements IXMLHandler
    */
   private void setPreference(String key, String value) {
     try {
-      objectMap.setDecorated(gui);
+      objectMap.setDecorated(guiStack.peek());
       objectMap.put(key, value);
-    } catch (CommonException e) {
-      e.set("phase", "Gui loading, set preference")
+    } catch (Exception e) {
+      throw new CommonException()
+        .setCause(e)
+        .set("message", "Exception while setting object preference!")
         .set("key", key)
         .set("value", value);
     }
