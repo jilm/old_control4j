@@ -27,6 +27,7 @@ import java.lang.reflect.AccessibleObject;
 import cz.lidinsky.tools.IToStringBuildable;
 import cz.lidinsky.tools.ToStringBuilder;
 import cz.lidinsky.tools.reflect.ObjectMapDecorator;
+import cz.lidinsky.tools.reflect.ObjectMapUtils;
 import cz.lidinsky.tools.reflect.Setter;
 
 import org.apache.commons.lang3.reflect.FieldUtils;
@@ -116,11 +117,12 @@ public abstract class Module implements IToStringBuildable
     ObjectMapDecorator<String> objectMap
         = new ObjectMapDecorator<String>(String.class);
     objectMap.setSetterFilter(PredicateUtils.allPredicate(
-        ObjectMapDecorator.getSetterSignatureCheckPredicate(),
-        ObjectMapDecorator.getHasAnnotationPredicate(Setter.class)));
+        ObjectMapUtils.getSetterSignatureCheckPredicate(),
+        ObjectMapUtils.getHasAnnotationPredicate(Setter.class)));
     objectMap.setGetterFilter(PredicateUtils.falsePredicate());
-    objectMap.setDecorated(
-        this, ObjectMapDecorator.getStringSetterClosureFactory(this, true));
+    objectMap.setSetterFactory(
+        ObjectMapUtils.stringSetterClosureFactory(true));
+    objectMap.setDecorated(this);
     Set<String> keys = objectMap.keySet();
     for (String key : keys) {
       try {
@@ -139,8 +141,8 @@ public abstract class Module implements IToStringBuildable
     ObjectMapDecorator<Object> objectMap
         = new ObjectMapDecorator<Object>(Object.class);
     objectMap.setSetterFilter(PredicateUtils.allPredicate(
-        ObjectMapDecorator.getSetterSignatureCheckPredicate(),
-        ObjectMapDecorator.getHasAnnotationPredicate(AResource.class)));
+        ObjectMapUtils.getSetterSignatureCheckPredicate(),
+        ObjectMapUtils.hasAnnotationPredicate(AResource.class)));
     objectMap.setGetterFilter(PredicateUtils.falsePredicate());
     objectMap.setDecorated(this);
     Set<String> keys = objectMap.keySet();

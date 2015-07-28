@@ -108,7 +108,7 @@ public abstract class GuiObject {
     else
       this.name = name;
     //
-    fireChangeEvent(new ChangeEvent(this, "Name", getName()));
+    //fireChangeEvent(new ChangeEvent(this, "Name", getName()));
   }
 
   /**

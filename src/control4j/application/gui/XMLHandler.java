@@ -30,16 +30,14 @@ import java.util.ArrayList;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
-//import control4j.tools.SaxReader;
 import control4j.application.ILoader;
-import control4j.scanner.Scanner;
 import control4j.gui.components.Screen;
-
 import control4j.gui.Screens;
 import control4j.gui.Changer;
 import control4j.gui.VisualObject;
 import control4j.gui.GuiObject;
 import control4j.gui.VisualContainer;
+import control4j.SyntaxErrorException;
 
 import org.apache.commons.collections4.Transformer;
 import org.apache.commons.collections4.Predicate;
@@ -50,6 +48,11 @@ import cz.lidinsky.tools.xml.AXMLStartElement;
 import cz.lidinsky.tools.xml.AXMLEndElement;
 import cz.lidinsky.tools.xml.AXMLDefaultUri;
 import cz.lidinsky.tools.chain.Factory;
+import cz.lidinsky.tools.CommonException;
+import cz.lidinsky.tools.reflect.ObjectMapDecorator;
+import cz.lidinsky.tools.reflect.ObjectMapUtils;
+import cz.lidinsky.tools.reflect.Setter;
+import cz.lidinsky.tools.reflect.Getter;
 
 import static control4j.tools.Logger.*;
 
@@ -73,6 +76,18 @@ public class XMLHandler implements IXMLHandler
 
   public XMLHandler(AbstractAdapter adapter) {
     this.adapter = adapter;
+    // set object map decorator
+    objectMap = new ObjectMapDecorator<String>(String.class)
+      .setGetterFilter(
+          ObjectMapUtils.hasAnnotationPredicate(Getter.class))
+      .setSetterFilter(
+          ObjectMapUtils.hasAnnotationPredicate(Setter.class))
+      .setGetterKeyTransformer(
+          ObjectMapUtils.getGetterValueTransformer())
+      .setSetterKeyTransformer(
+          ObjectMapUtils.getSetterValueTransformer())
+      .setSetterFactory(
+          ObjectMapUtils.stringSetterClosureFactory(false));
   }
 
   public void endProcessing() {}
@@ -146,20 +161,13 @@ public class XMLHandler implements IXMLHandler
    *
    */
   @AXMLStartElement("panel")
-  public boolean panel(Attributes attributes) {
-    try {
+    public boolean panel(Attributes attributes) {
       String className = attributes.getValue("class");
       VisualContainer panel = (VisualContainer)createInstance(className);
       //((VisualContainer)gui).add(panel);
       gui = panel;
-    } catch (ClassNotFoundException e) {
-      //MissingComponent missingComponent = new MissingComponent();
-      //((VisualContainer)gui).add(missingComponent);
-      //gui = missingComponent;
-      // TODO:
+      return true;
     }
-    return true;
-  }
 
   /**
    *
@@ -178,20 +186,13 @@ public class XMLHandler implements IXMLHandler
    *
    */
   @AXMLStartElement("component")
-  public boolean component(Attributes attributes) {
-    try {
+    public boolean component(Attributes attributes) {
       String className = attributes.getValue("class");
       VisualObject component = (VisualObject)createInstance(className);
       //((VisualContainer)gui).add(component);
       gui = component;
-    } catch (ClassNotFoundException e) {
-      //MissingComponent missingComponent = new MissingComponent();
-      //((VisualContainer)gui).add(missingComponent);
-      //gui = missingComponent;
-      // TODO:
+      return true;
     }
-    return true;
-  }
 
   /**
    *
@@ -210,20 +211,13 @@ public class XMLHandler implements IXMLHandler
    *
    */
   @AXMLStartElement("changer")
-  public boolean changer(Attributes attributes) {
-    try {
+    public boolean changer(Attributes attributes) {
       String className = attributes.getValue("class");
       Changer changer = (Changer)createInstance(className);
       //((VisualObject)gui).add(changer);
       gui = changer;
-    } catch (ClassNotFoundException e) {
-      //MissingComponent missingComponent = new MissingComponent();
-      //((VisualContainer)gui).add(missingComponent);
-      //gui = missingComponent;
-      // TODO:
+      return true;
     }
-    return true;
-  }
 
   /**
    *
@@ -277,66 +271,31 @@ public class XMLHandler implements IXMLHandler
    *  @throws ClassNotFoundException
    *             if class with given name was not found
    */
-  private GuiObject createInstance(String className)
-  throws ClassNotFoundException
-  {
-    try
-    {
+  private GuiObject createInstance(String className) {
+    try {
       Class _class = Class.forName(className);
       return (GuiObject)_class.newInstance();
+    } catch (Exception e) {
+      throw new SyntaxErrorException()
+        .setCause(e)
+        .set("message", "An exception while instantiation a gui object!")
+        .set("class name", className);
     }
-    catch (ClassNotFoundException e)
-    {
-      catched(getClass().getName(), "createInstance", e);
-      throw e;
-    }
-    catch (java.lang.InstantiationException e)
-    {
-      // TODO:
-      catched(getClass().getName(), "createInstance", e);
-    }
-    catch (java.lang.IllegalAccessException e)
-    {
-      // TODO:
-      catched(getClass().getName(), "createInstance", e);
-    }
-    return null;
   }
+
+  private ObjectMapDecorator<String> objectMap;
 
   /**
    *
    */
-  private void setPreference(String key, String value)
-  {
-    try
-    {
-      Method setter = Scanner.getSetter(gui, key);
-      Class[] parameters = setter.getParameterTypes();
-      if (parameters[0] == String.class)
-        setter.invoke(gui, value);
-      else if (parameters[0] == java.awt.Color.class)
-        try
-        {
-          setter.invoke(gui, new Color(Integer.parseInt(value)));
-        }
-        catch (NumberFormatException e)
-        {
-          setter.invoke(gui, control4j.gui.Color.getColor(value));
-        }
-      else if (parameters[0] == int.class)
-        setter.invoke(gui, Integer.parseInt(value));
-      else if (parameters[0] == double.class)
-        setter.invoke(gui, Double.parseDouble(value));
-      else if (parameters[0] == boolean.class)
-        setter.invoke(gui, Boolean.parseBoolean(value));
-      else
-        control4j.tools.Logger.warning("undefined type");
-    }
-    catch (IllegalAccessException e)
-    {
-    }
-    catch (java.lang.reflect.InvocationTargetException e)
-    {
+  private void setPreference(String key, String value) {
+    try {
+      objectMap.setDecorated(gui);
+      objectMap.put(key, value);
+    } catch (CommonException e) {
+      e.set("phase", "Gui loading, set preference")
+        .set("key", key)
+        .set("value", value);
     }
   }
 
