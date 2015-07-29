@@ -22,8 +22,8 @@ import java.awt.Dimension;
 import javax.swing.JComponent;
 import javax.swing.BoxLayout;
 
-import control4j.scanner.Getter;
-import control4j.scanner.Setter;
+import cz.lidinsky.tools.reflect.Getter;
+import cz.lidinsky.tools.reflect.Setter;
 
 /**
  *
@@ -45,13 +45,13 @@ public class BoxFiller extends control4j.gui.VisualObject
 
   private boolean glue = false;
 
-  @Getter(key="Size")
+  @Getter("Size")
   public int getSize()
   {
     return size;
   }
 
-  @Setter(key="Size")
+  @Setter("Size")
   public void setSize(int size)
   {
     this.size = size;
@@ -61,13 +61,13 @@ public class BoxFiller extends control4j.gui.VisualObject
     }
   }
 
-  @Getter(key="Is Glue")
+  @Getter("Is Glue")
   public boolean isGlue()
   {
     return glue;
   }
 
-  @Setter(key="Is Glue")
+  @Setter("Is Glue")
   public void setGlue(boolean isGlue)
   {
     glue = isGlue;

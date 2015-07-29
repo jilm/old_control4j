@@ -18,8 +18,8 @@ package control4j.gui.components;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import control4j.scanner.Getter;
-import control4j.scanner.Setter;
+import cz.lidinsky.tools.reflect.Getter;
+import cz.lidinsky.tools.reflect.Setter;
 import control4j.tools.Preferences;
 import control4j.gui.ColorParser;
 import control4j.gui.VisualObject;
@@ -51,13 +51,13 @@ public class Circle extends VisualObjectBase
     super();
   }
 
-  @Getter(key="Size")
+  @Getter("Size")
   public int getSize()
   {
     return this.size;
   }
 
-  @Setter(key="Size")
+  @Setter("Size")
   public void setSize(int size)
   {
     this.size = size;
@@ -70,13 +70,13 @@ public class Circle extends VisualObjectBase
     }
   }
 
-  @Getter(key="Fill")
+  @Getter("Fill")
   public boolean getFill()
   {
     return fill;
   }
 
-  @Setter(key="Fill")
+  @Setter("Fill")
   public void setFill(boolean fill)
   {
     this.fill = fill;

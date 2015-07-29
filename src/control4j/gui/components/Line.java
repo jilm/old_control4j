@@ -27,8 +27,8 @@ import javax.swing.JComponent;
 import control4j.annotations.AGuiObject;
 import control4j.gui.ColorParser;
 import control4j.gui.VisualObject;
-import control4j.scanner.Getter;
-import control4j.scanner.Setter;
+import cz.lidinsky.tools.reflect.Getter;
+import cz.lidinsky.tools.reflect.Setter;
 import control4j.tools.Preferences;
 
 /**
@@ -46,13 +46,13 @@ public class Line extends VisualObject
   private int y2;
   private Color foreground;
 
-  @Getter(key="X1")
+  @Getter("X1")
   public int getX1()
   {
     return x1;
   }
 
-  @Setter(key="X1")
+  @Setter("X1")
   public void setX1(int x1)
   {
     this.x1 = x1;
@@ -64,13 +64,13 @@ public class Line extends VisualObject
     }
   }
 
-  @Getter(key="Y1")
+  @Getter("Y1")
   public int getY1()
   {
     return y1;
   }
 
-  @Setter(key="Y1")
+  @Setter("Y1")
   public void setY1(int y1)
   {
     this.y1 = y1;
@@ -82,13 +82,13 @@ public class Line extends VisualObject
     }
   }
 
-  @Getter(key="X2")
+  @Getter("X2")
   public int getX2()
   {
     return x2;
   }
 
-  @Setter(key="X2")
+  @Setter("X2")
   public void setX2(int x2)
   {
     this.x2 = x2;
@@ -100,13 +100,13 @@ public class Line extends VisualObject
     }
   }
 
-  @Getter(key="Y2")
+  @Getter("Y2")
   public int getY2()
   {
     return y2;
   }
 
-  @Setter(key="Y2")
+  @Setter("Y2")
   public void setY2(int y2)
   {
     this.y2 = y2;
@@ -118,13 +118,13 @@ public class Line extends VisualObject
     }
   }
 
-  @Getter(key="Foreground Color")
+  @Getter("Foreground Color")
   public Color getForeground()
   {
     return foreground;
   }
 
-  @Setter(key="Foreground Color")
+  @Setter("Foreground Color")
   public void setForeground(Color color)
   {
     foreground = color;

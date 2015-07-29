@@ -34,8 +34,8 @@ import java.awt.Color;
 import java.awt.FontMetrics;
 import java.awt.Dimension;
 import java.awt.geom.Rectangle2D;
-import control4j.scanner.Setter;
-import control4j.scanner.Getter;
+import cz.lidinsky.tools.reflect.Getter;
+import cz.lidinsky.tools.reflect.Setter;
 import java.text.DecimalFormat;
 
 /**
@@ -60,13 +60,13 @@ public class Quantity extends VisualObjectBase
     //setHorizontalAlignment(1.0);
   }
 
-  @Getter(key="Fraction Digits")
+  @Getter("Fraction Digits")
   public int getFractionDigits()
   {
     return format.getMaximumFractionDigits();
   }
 
-  @Setter(key="Fraction Digits")
+  @Setter("Fraction Digits")
   public void setFractionDigits(int digits)
   {
     format.setMaximumFractionDigits(digits);
@@ -83,13 +83,13 @@ public class Quantity extends VisualObjectBase
     }
   }
 
-  @Getter(key="Digits")
+  @Getter("Digits")
   public int getDigits()
   {
     return format.getMaximumIntegerDigits();
   }
 
-  @Setter(key="Digits")
+  @Setter("Digits")
   public void setDigits(int digits)
   {
     format.setMaximumIntegerDigits(digits);
@@ -106,13 +106,13 @@ public class Quantity extends VisualObjectBase
     }
   }
 
-  @Getter(key="Value")
+  @Getter("Value")
   public double getValue()
   {
     return value;
   }
 
-  @Setter(key="Value")
+  @Setter("Value")
   public void setValue(double value)
   {
     this.value = value;
@@ -122,13 +122,13 @@ public class Quantity extends VisualObjectBase
     }
   }
 
-  @Getter(key="Font Size")
+  @Getter("Font Size")
   public double getFontSize()
   {
     return fontSize;
   }
 
-  @Setter(key="Font Size")
+  @Setter("Font Size")
   public void setFontSize(double fontSize)
   {
     this.fontSize = (float)fontSize;

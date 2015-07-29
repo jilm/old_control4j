@@ -22,8 +22,8 @@ import java.awt.Font;
 import java.awt.Color;
 import javax.swing.JLabel;
 import javax.swing.JComponent;
-import control4j.scanner.Setter;
-import control4j.scanner.Getter;
+import cz.lidinsky.tools.reflect.Getter;
+import cz.lidinsky.tools.reflect.Setter;
 
 /**
  *
@@ -40,7 +40,7 @@ public class Label extends VisualObjectBase
   /** The text that will be displayed */
   protected String text = "";
 
-  @Setter(key="Text")
+  @Setter("Text")
   public void setText(String text)
   {
     if (text == null)
@@ -51,13 +51,13 @@ public class Label extends VisualObjectBase
       ((JLabel)component).setText(this.text);
   }
 
-  @Getter(key="Text")
+  @Getter("Text")
   public String getText()
   {
     return text;
   }
 
-  @Setter(key="Font Size")
+  @Setter("Font Size")
   public void setFontSize(double size)
   {
     fontSize = (float)size;
@@ -68,13 +68,13 @@ public class Label extends VisualObjectBase
     }
   }
 
-  @Getter(key="Font Size")
+  @Getter("Font Size")
   public double getFontSize()
   {
     return fontSize;
   }
 
-  @Getter(key="Width")
+  @Getter("Width")
   public int getWidth()
   {
     if (component != null)
@@ -83,7 +83,7 @@ public class Label extends VisualObjectBase
       return 0;
   }
 
-  @Getter(key="Height")
+  @Getter("Height")
   public int getHeight()
   {
     if (component != null)

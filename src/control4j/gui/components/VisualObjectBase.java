@@ -21,8 +21,8 @@ package control4j.gui.components;
 import java.awt.Color;
 import java.awt.Insets;
 import control4j.gui.VisualObject;
-import control4j.scanner.Setter;
-import control4j.scanner.Getter;
+import cz.lidinsky.tools.reflect.Getter;
+import cz.lidinsky.tools.reflect.Setter;
 
 /**
  *
@@ -39,13 +39,13 @@ public abstract class VisualObjectBase extends VisualObject
   private boolean isOpaque;
   private boolean isVisible = true;
 
-  @Getter(key="X")
+  @Getter("X")
   public int getX()
   {
     return x;
   }
 
-  @Setter(key="X")
+  @Setter("X")
   public void setX(int x)
   {
     this.x = x;
@@ -58,13 +58,13 @@ public abstract class VisualObjectBase extends VisualObject
     }
   }
 
-  @Getter(key="Y")
+  @Getter("Y")
   public int getY()
   {
     return y;
   }
 
-  @Setter(key="Y")
+  @Setter("Y")
   public void setY(int y)
   {
     this.y = y;
@@ -77,13 +77,13 @@ public abstract class VisualObjectBase extends VisualObject
     }
   }
 
-  @Getter(key="Foreground Color")
+  @Getter("Foreground Color")
   public Color getForeground()
   {
     return foreground;
   }
 
-  @Setter(key="Foreground Color")
+  @Setter("Foreground Color")
   public void setForeground(Color color)
   {
     foreground = color;
@@ -94,13 +94,13 @@ public abstract class VisualObjectBase extends VisualObject
     }
   }
 
-  @Getter(key="Background Color")
+  @Getter("Background Color")
   public Color getBackground()
   {
     return background;
   }
 
-  @Setter(key="Background Color")
+  @Setter("Background Color")
   public void setBackground(Color color)
   {
     background = color;
@@ -111,13 +111,13 @@ public abstract class VisualObjectBase extends VisualObject
     }
   }
 
-  @Getter(key="Is Opaque")
+  @Getter("Is Opaque")
   public boolean isOpaque()
   {
     return isOpaque;
   }
 
-  @Setter(key="Is Opaque")
+  @Setter("Is Opaque")
   public void setOpaque(boolean isOpaque)
   {
     this.isOpaque = isOpaque;
@@ -128,13 +128,13 @@ public abstract class VisualObjectBase extends VisualObject
     }
   }
 
-  @Getter(key="Is Visible")
+  @Getter("Is Visible")
   public boolean isVisible()
   {
     return isVisible;
   }
 
-  @Setter(key="Is Visible")
+  @Setter("Is Visible")
   public void setVisibility(boolean isVisible)
   {
     this.isVisible = isVisible;

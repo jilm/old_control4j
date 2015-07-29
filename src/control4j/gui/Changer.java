@@ -19,8 +19,8 @@ package control4j.gui;
  */
 
 import control4j.Signal;
-import control4j.scanner.Setter;
-import control4j.scanner.Getter;
+import cz.lidinsky.tools.reflect.Setter;
+import cz.lidinsky.tools.reflect.Getter;
 import control4j.scanner.Scanner;
 import java.lang.reflect.Method;
 
@@ -95,7 +95,7 @@ public abstract class Changer<T> extends GuiObject
    *             of parent gui element. May return null if the signal
    *             was not specified.
    */
-  @Getter(key="Signal")
+  @Getter("Signal")
   public String getSignalName()
   {
     return signalName;
@@ -104,7 +104,7 @@ public abstract class Changer<T> extends GuiObject
   /**
    *
    */
-  @Setter(key="Signal")
+  @Setter("Signal")
   public void setSignalName(String signal)
   {
     this.signalName = signal;
@@ -129,7 +129,7 @@ public abstract class Changer<T> extends GuiObject
   /**
    *
    */
-  @Getter(key="Property")
+  @Getter("Property")
   public String getProperty()
   {
     return property;
@@ -138,7 +138,7 @@ public abstract class Changer<T> extends GuiObject
   /**
    *
    */
-  @Setter(key="Property")
+  @Setter("Property")
   public void setProperty(String property)
   {
     this.property = property;

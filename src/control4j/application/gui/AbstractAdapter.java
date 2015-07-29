@@ -22,6 +22,7 @@ import control4j.gui.Screens;
 import control4j.gui.VisualObject;
 import control4j.gui.VisualContainer;
 import control4j.gui.Changer;
+import control4j.gui.GuiObject;
 import control4j.application.Application;
 import control4j.application.Module;
 import control4j.application.Resource;
@@ -37,5 +38,9 @@ public abstract class AbstractAdapter {
   public void goBack() { }
 
   public void put(Changer changer) { }
+
+  public void open() {}
+
+  public void close(GuiObject object) {}
 
 }

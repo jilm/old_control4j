@@ -24,9 +24,9 @@ import java.awt.Dimension;
 import java.awt.Component;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
-import control4j.scanner.Setter;
-import control4j.scanner.Getter;
 import control4j.gui.VisualContainer;
+import cz.lidinsky.tools.reflect.Getter;
+import cz.lidinsky.tools.reflect.Setter;
 
 /**
  *
@@ -45,13 +45,13 @@ public class Panel extends VisualContainer
     super();
   }
 
-  @Getter(key="X")
+  @Getter("X")
   public int getX()
   {
     return x;
   }
 
-  @Setter(key="X")
+  @Setter("X")
   public void setX(int x)
   {
     this.x = x;
@@ -63,13 +63,13 @@ public class Panel extends VisualContainer
     }
   }
 
-  @Getter(key="Y")
+  @Getter("Y")
   public int getY()
   {
     return y;
   }
 
-  @Setter(key="Y")
+  @Setter("Y")
   public void setY(int y)
   {
     this.y = y;
@@ -81,13 +81,13 @@ public class Panel extends VisualContainer
     }
   }
 
-  @Getter(key="Width")
+  @Getter("Width")
   public int getWidth()
   {
     return width;
   }
 
-  @Setter(key="Width")
+  @Setter("Width")
   public void setWidth(int width)
   {
     this.width = width;
@@ -100,13 +100,13 @@ public class Panel extends VisualContainer
     }
   }
 
-  @Getter(key="Height")
+  @Getter("Height")
   public int getHeight()
   {
     return height;
   }
 
-  @Setter(key="Height")
+  @Setter("Height")
   public void setHeight(int height)
   {
     this.height = height;

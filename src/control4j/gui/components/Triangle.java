@@ -18,8 +18,8 @@ package control4j.gui.components;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import control4j.scanner.Getter;
-import control4j.scanner.Setter;
+import cz.lidinsky.tools.reflect.Getter;
+import cz.lidinsky.tools.reflect.Setter;
 import java.awt.Point;
 import java.awt.Graphics;
 import java.awt.Color;
@@ -59,7 +59,7 @@ public class Triangle extends VisualObjectBase
   /**
    *
    */
-  @Getter(key="Size")
+  @Getter("Size")
   public double getTriangleSize()
   {
     return size;
@@ -68,7 +68,7 @@ public class Triangle extends VisualObjectBase
   /**
    *
    */
-  @Setter(key="Size")
+  @Setter("Size")
   public void setTriangleSize(double size)
   {
     this.size = size;
@@ -85,7 +85,7 @@ public class Triangle extends VisualObjectBase
   /**
    *
    */
-  @Getter(key="Rotation")
+  @Getter("Rotation")
   public double getRotation()
   {
     return rotation / Math.PI * 180.0;
@@ -94,7 +94,7 @@ public class Triangle extends VisualObjectBase
   /**
    *
    */
-  @Setter(key="Rotation")
+  @Setter("Rotation")
   public void setRotation(double rotation)
   {
     this.rotation = rotation / 180.0 * Math.PI;

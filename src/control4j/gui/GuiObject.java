@@ -18,8 +18,8 @@ package control4j.gui;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import control4j.scanner.Setter;
-import control4j.scanner.Getter;
+import cz.lidinsky.tools.reflect.Setter;
+import cz.lidinsky.tools.reflect.Getter;
 import control4j.scanner.Item2;
 import control4j.scanner.Scanner;
 
@@ -82,7 +82,7 @@ public abstract class GuiObject {
    *
    *  @see #setName
    */
-  @Getter(key="Name")
+  @Getter("Name")
   public String getName()
   {
     if (name != null && name.length() > 0)
@@ -100,7 +100,7 @@ public abstract class GuiObject {
    *
    *  @see #getName
    */
-  @Setter(key="Name")
+  @Setter("Name")
   public void setName(String name)
   {
     if (name != null)

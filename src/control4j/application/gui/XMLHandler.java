@@ -38,6 +38,7 @@ import control4j.gui.Changer;
 import control4j.gui.VisualObject;
 import control4j.gui.GuiObject;
 import control4j.gui.VisualContainer;
+import control4j.gui.ColorParser;
 import control4j.SyntaxErrorException;
 
 import org.apache.commons.collections4.Transformer;
@@ -50,6 +51,7 @@ import cz.lidinsky.tools.xml.AXMLEndElement;
 import cz.lidinsky.tools.xml.AXMLDefaultUri;
 import cz.lidinsky.tools.chain.Factory;
 import cz.lidinsky.tools.CommonException;
+import cz.lidinsky.tools.FunctorUtils;
 import cz.lidinsky.tools.reflect.ObjectMapDecorator;
 import cz.lidinsky.tools.reflect.ObjectMapUtils;
 import cz.lidinsky.tools.reflect.Setter;
@@ -88,12 +90,14 @@ public class XMLHandler implements IXMLHandler
       .setSetterKeyTransformer(
           ObjectMapUtils.getSetterValueTransformer())
       .setSetterFactory(
-          ObjectMapUtils.stringSetterClosureFactory(false));
+          FunctorUtils.chainedTransformer(
+            ColorParser.string2ColorClosureFactory(false),
+            ObjectMapUtils.stringSetterClosureFactory(false)));
   }
 
   public void endProcessing() {}
 
-  public void startProcessing() { }
+  public void startProcessing() {}
 
   protected AbstractAdapter adapter;
 
@@ -125,12 +129,18 @@ public class XMLHandler implements IXMLHandler
   @AXMLStartElement("{http://control4j.lidinsky.cz/application}application/gui")
   public boolean applicationGui(Attributes attributes) {
     guiStack.push(new Screens());
+    if (adapter != null) {
+      adapter.open();
+    }
     return true;
   }
 
   @AXMLStartElement("/gui")
   public boolean gui(Attributes attributes) {
     guiStack.push(new Screens());
+    if (adapter != null) {
+      adapter.open();
+    }
     return true;
   }
 
@@ -140,6 +150,9 @@ public class XMLHandler implements IXMLHandler
   @AXMLStartElement("gui/screen")
   public boolean screen(Attributes attributes) {
     guiStack.push(new Screen());
+    if (adapter != null) {
+      adapter.open();
+    }
     //((Screens)gui).add(screen);
     return true;
   }
@@ -151,7 +164,8 @@ public class XMLHandler implements IXMLHandler
   public boolean endScreen() {
     finest("/screen");
     if (adapter != null) {
-      adapter.put((Screen)guiStack.pop());
+      //adapter.put((Screen)guiStack.pop());
+      adapter.close(guiStack.pop());
     }
     return true;
   }
@@ -165,6 +179,9 @@ public class XMLHandler implements IXMLHandler
       VisualContainer panel = (VisualContainer)createInstance(className);
       //((VisualContainer)gui).add(panel);
       guiStack.push(panel);
+      if (adapter != null) {
+        adapter.open();
+      }
       return true;
     }
 
@@ -175,7 +192,8 @@ public class XMLHandler implements IXMLHandler
   public boolean endPanel() {
     finest("/panel");
     if (adapter != null) {
-      adapter.put((VisualContainer)guiStack.pop());
+      //adapter.put((VisualContainer)guiStack.pop());
+      adapter.close(guiStack.pop());
     }
     return true;
   }
@@ -189,6 +207,9 @@ public class XMLHandler implements IXMLHandler
       VisualObject component = (VisualObject)createInstance(className);
       //((VisualContainer)gui).add(component);
       guiStack.push(component);
+      if (adapter != null) {
+        adapter.open();
+      }
       return true;
     }
 
@@ -199,7 +220,8 @@ public class XMLHandler implements IXMLHandler
   public boolean endComponent() {
     finest("/component");
     if (adapter != null) {
-      adapter.put((VisualObject)guiStack.pop());
+      //adapter.put((VisualObject)guiStack.pop());
+      adapter.close(guiStack.pop());
     }
     return true;
   }
@@ -213,6 +235,9 @@ public class XMLHandler implements IXMLHandler
       Changer changer = (Changer)createInstance(className);
       //((VisualObject)gui).add(changer);
       guiStack.push(changer);
+      if (adapter != null) {
+        adapter.open();
+      }
       return true;
     }
 
@@ -223,7 +248,8 @@ public class XMLHandler implements IXMLHandler
   public boolean endChanger() {
     finest("/changer");
     if (adapter != null) {
-      adapter.put((Changer)guiStack.pop());
+      //adapter.put((Changer)guiStack.pop());
+      adapter.close(guiStack.pop());
     }
     return true;
   }
@@ -251,7 +277,8 @@ public class XMLHandler implements IXMLHandler
   @AXMLEndElement("gui")
   public boolean endGui() {
     if (adapter != null) {
-      adapter.put((Screens)guiStack.pop());
+      //adapter.put((Screens)guiStack.pop());
+      adapter.close(guiStack.pop());
     }
     return true;
   }

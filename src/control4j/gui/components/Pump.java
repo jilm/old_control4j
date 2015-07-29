@@ -27,8 +27,8 @@ import javax.swing.JComponent;
 import control4j.annotations.AGuiObject;
 import control4j.gui.ColorParser;
 import control4j.gui.VisualObject;
-import control4j.scanner.Getter;
-import control4j.scanner.Setter;
+import cz.lidinsky.tools.reflect.Getter;
+import cz.lidinsky.tools.reflect.Setter;
 import control4j.tools.Preferences;
 
 /**
@@ -52,13 +52,13 @@ public class Pump extends VisualObjectBase
     super();
   }
 
-  @Getter(key="Size")
+  @Getter("Size")
   public int getSize()
   {
     return this.size;
   }
 
-  @Setter(key="Size")
+  @Setter("Size")
   public void setSize(int size)
   {
     this.size = size;
@@ -71,13 +71,13 @@ public class Pump extends VisualObjectBase
     }
   }
 
-  @Getter(key="Fill")
+  @Getter("Fill")
   public boolean getFill()
   {
     return fill;
   }
 
-  @Setter(key="Fill")
+  @Setter("Fill")
   public void setFill(boolean fill)
   {
     this.fill = fill;
@@ -85,13 +85,13 @@ public class Pump extends VisualObjectBase
       component.repaint();
   }
 
-  @Getter(key="Rotation")
+  @Getter("Rotation")
   public double getRotation()
   {
     return rotation / Math.PI * 180d;
   }
 
-  @Setter(key="Rotation")
+  @Setter("Rotation")
   public void setRotation(double rotation)
   {
     this.rotation = rotation / 180d * Math.PI;

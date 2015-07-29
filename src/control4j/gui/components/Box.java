@@ -25,9 +25,9 @@ import java.awt.Rectangle;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.BoxLayout;
-import control4j.scanner.Setter;
-import control4j.scanner.Getter;
 import control4j.gui.VisualContainer;
+import cz.lidinsky.tools.reflect.Getter;
+import cz.lidinsky.tools.reflect.Setter;
 
 /**
  *
@@ -50,7 +50,7 @@ public class Box extends VisualContainer
   /**
    *
    */
-  @Setter(key="Alignment Point")
+  @Setter("Alignment Point")
   public void setAlignmentPoint(int index)
   {
     alignmentPoint = index;
@@ -59,19 +59,19 @@ public class Box extends VisualContainer
   /**
    *
    */
-  @Getter(key="Alignment Point")
+  @Getter("Alignment Point")
   public int getAlignmentPoint()
   {
     return alignmentPoint;
   }
 
-  @Getter(key="X")
+  @Getter("X")
   public int getX()
   {
     return x;
   }
 
-  @Setter(key="X")
+  @Setter("X")
   public void setX(int x)
   {
     this.x = x;
@@ -83,13 +83,13 @@ public class Box extends VisualContainer
     }
   }
 
-  @Getter(key="Y")
+  @Getter("Y")
   public int getY()
   {
     return y;
   }
 
-  @Setter(key="Y")
+  @Setter("Y")
   public void setY(int y)
   {
     this.y = y;
@@ -101,13 +101,13 @@ public class Box extends VisualContainer
     }
   }
 
-  @Getter(key="Line Axis")
+  @Getter("Line Axis")
   public boolean isLineAxis()
   {
     return isLineAxis;
   }
 
-  @Setter(key="Line Axis")
+  @Setter("Line Axis")
   public void setAxis(boolean isLineAxis)
   {
     if (component != null && this.isLineAxis != isLineAxis)
@@ -121,13 +121,13 @@ public class Box extends VisualContainer
     this.isLineAxis = isLineAxis;
   }
 
-  @Getter(key="Space")
+  @Getter("Space")
   public int getSpace()
   {
     return space;
   }
 
-  @Setter(key="Space")
+  @Setter("Space")
   public void setSpace(int space)
   {
     this.space = space;

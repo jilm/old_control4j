@@ -25,8 +25,8 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Stroke;
 import javax.swing.JComponent;
-import control4j.scanner.Getter;
-import control4j.scanner.Setter;
+import cz.lidinsky.tools.reflect.Getter;
+import cz.lidinsky.tools.reflect.Setter;
 
 /**
  *
@@ -112,13 +112,13 @@ implements control4j.ICycleEventListener
     }
   }
 
-  @Getter(key="Width")
+  @Getter("Width")
   public int getWidth()
   {
     return width;
   }
 
-  @Setter(key="Width")
+  @Setter("Width")
   public void setWidth(int width)
   {
     this.width = width;
@@ -135,13 +135,13 @@ implements control4j.ICycleEventListener
     }
   }
 
-  @Getter(key="Height")
+  @Getter("Height")
   public int getHeight()
   {
     return height;
   }
 
-  @Setter(key="Height")
+  @Setter("Height")
   public void setHeight(int height)
   {
     this.height = height;
@@ -154,13 +154,13 @@ implements control4j.ICycleEventListener
     }
   }
 
-  @Getter(key="Y Axis Min")
+  @Getter("Y Axis Min")
   public double getYMin()
   {
     return yMin;
   }
 
-  @Setter(key="Y Axis Min")
+  @Setter("Y Axis Min")
   public void setYMin(double yMin)
   {
     this.yMin = (float)yMin;
@@ -168,13 +168,13 @@ implements control4j.ICycleEventListener
       component.repaint();
   }
 
-  @Getter(key="Y Axis Max")
+  @Getter("Y Axis Max")
   public double getYMax()
   {
     return yMax;
   }
 
-  @Setter(key="Y Axis Max")
+  @Setter("Y Axis Max")
   public void setYMax(double yMax)
   {
     this.yMax = (float)yMax;
@@ -182,13 +182,13 @@ implements control4j.ICycleEventListener
       component.repaint();
   }
 
-  @Getter(key="X Axis")
+  @Getter("X Axis")
   public int getDuration()
   {
     return duration;
   }
 
-  @Setter(key="X Axis")
+  @Setter("X Axis")
   public void setDuration(int duration)
   {
     this.duration = duration;
@@ -196,251 +196,251 @@ implements control4j.ICycleEventListener
       component.repaint();
   }
 
-  @Setter(key="Value 1")
+  @Setter("Value 1")
   public void setValue1(double value)
   {
     newData((float)value, 0);
   }
 
-  @Setter(key="Value 2")
+  @Setter("Value 2")
   public void setValue2(double value)
   {
     newData((float)value, 1);
   }
 
-  @Setter(key="Value 3")
+  @Setter("Value 3")
   public void setValue3(double value)
   {
     newData((float)value, 2);
   }
 
-  @Setter(key="Value 4")
+  @Setter("Value 4")
   public void setValue4(double value)
   {
     newData((float)value, 3);
   }
 
-  @Setter(key="Value 5")
+  @Setter("Value 5")
   public void setValue5(double value)
   {
     newData((float)value, 4);
   }
 
-  @Getter(key="Curve Color 1")
+  @Getter("Curve Color 1")
   public Color getCurveColor1()
   {
     return curveColors[0];
   }
 
-  @Setter(key="Curve Color 1")
+  @Setter("Curve Color 1")
   public void setCurveColor1(Color color)
   {
     curveColors[0] = color;
     if (component != null) component.repaint();
   }
 
-  @Getter(key="Curve Color 2")
+  @Getter("Curve Color 2")
   public Color getCurveColor2()
   {
     return curveColors[1];
   }
 
-  @Setter(key="Curve Color 2")
+  @Setter("Curve Color 2")
   public void setCurveColor2(Color color)
   {
     curveColors[1] = color;
     if (component != null) component.repaint();
   }
 
-  @Getter(key="Curve Color 3")
+  @Getter("Curve Color 3")
   public Color getCurveColor3()
   {
     return curveColors[2];
   }
 
-  @Setter(key="Curve Color 3")
+  @Setter("Curve Color 3")
   public void setCurveColor3(Color color)
   {
     curveColors[2] = color;
     if (component != null) component.repaint();
   }
 
-  @Getter(key="Curve Color 4")
+  @Getter("Curve Color 4")
   public Color getCurveColor4()
   {
     return curveColors[3];
   }
 
-  @Setter(key="Curve Color 4")
+  @Setter("Curve Color 4")
   public void setCurveColor4(Color color)
   {
     curveColors[3] = color;
     if (component != null) component.repaint();
   }
 
-  @Getter(key="Curve Color 5")
+  @Getter("Curve Color 5")
   public Color getCurveColor5()
   {
     return curveColors[4];
   }
 
-  @Setter(key="Curve Color 5")
+  @Setter("Curve Color 5")
   public void setCurveColor5(Color color)
   {
     curveColors[4] = color;
     if (component != null) component.repaint();
   }
 
-  @Getter(key="Horizonal Line 1")
+  @Getter("Horizonal Line 1")
   public double getHorizontalLine1Value()
   {
     return horizontalLineValues[0];
   }
 
-  @Setter(key="Horizonal Line 1")
+  @Setter("Horizonal Line 1")
   public void setHorizontalLine1Value(double value)
   {
     horizontalLineValues[0] = (float)value;
     if (component != null) component.repaint();
   }
 
-  @Getter(key="Horizonal Line 2")
+  @Getter("Horizonal Line 2")
   public double getHorizontalLine2Value()
   {
     return horizontalLineValues[1];
   }
 
-  @Setter(key="Horizonal Line 2")
+  @Setter("Horizonal Line 2")
   public void setHorizontalLine2Value(double value)
   {
     horizontalLineValues[1] = (float)value;
     if (component != null) component.repaint();
   }
 
-  @Getter(key="Horizonal Line 3")
+  @Getter("Horizonal Line 3")
   public double getHorizontalLine3Value()
   {
     return horizontalLineValues[2];
   }
 
-  @Setter(key="Horizonal Line 3")
+  @Setter("Horizonal Line 3")
   public void setHorizontalLine3Value(double value)
   {
     horizontalLineValues[2] = (float)value;
     if (component != null) component.repaint();
   }
 
-  @Getter(key="Horizonal Line 4")
+  @Getter("Horizonal Line 4")
   public double getHorizontalLine4Value()
   {
     return horizontalLineValues[3];
   }
 
-  @Setter(key="Horizonal Line 4")
+  @Setter("Horizonal Line 4")
   public void setHorizontalLine4Value(double value)
   {
     horizontalLineValues[3] = (float)value;
     if (component != null) component.repaint();
   }
 
-  @Getter(key="Horizontal Line 1 Color")
+  @Getter("Horizontal Line 1 Color")
   public Color getHorizontal1Color()
   {
     return horizontalLineColors[0];
   }
 
-  @Setter(key="Horizontal Line 1 Color")
+  @Setter("Horizontal Line 1 Color")
   public void setHorzontal1Color(Color color)
   {
     horizontalLineColors[0] = color;
     if (component != null) component.repaint();
   }
 
-  @Getter(key="Horizontal Line 2 Color")
+  @Getter("Horizontal Line 2 Color")
   public Color getHorizontal2Color()
   {
     return horizontalLineColors[1];
   }
 
-  @Setter(key="Horizontal Line 2 Color")
+  @Setter("Horizontal Line 2 Color")
   public void setHorzontal2Color(Color color)
   {
     horizontalLineColors[1] = color;
     if (component != null) component.repaint();
   }
 
-  @Getter(key="Horizontal Line 3 Color")
+  @Getter("Horizontal Line 3 Color")
   public Color getHorizontal3Color()
   {
     return horizontalLineColors[2];
   }
 
-  @Setter(key="Horizontal Line 3 Color")
+  @Setter("Horizontal Line 3 Color")
   public void setHorzontal3Color(Color color)
   {
     horizontalLineColors[2] = color;
     if (component != null) component.repaint();
   }
 
-  @Getter(key="Horizontal Line 4 Color")
+  @Getter("Horizontal Line 4 Color")
   public Color getHorizontal4Color()
   {
     return horizontalLineColors[3];
   }
 
-  @Setter(key="Horizontal Line 4 Color")
+  @Setter("Horizontal Line 4 Color")
   public void setHorzontal4Color(Color color)
   {
     horizontalLineColors[3] = color;
     if (component != null) component.repaint();
   }
 
-  @Getter(key="Horizontal Line 1 Area")
+  @Getter("Horizontal Line 1 Area")
   public double getHorzontal1Area()
   {
     return horizontalLineArea[0];
   }
 
-  @Setter(key="Horizontal Line 1 Area")
+  @Setter("Horizontal Line 1 Area")
   public void setHorizontal1Area(double area)
   {
     horizontalLineArea[0] = (float)area;
     if (component != null) component.repaint();
   }
 
-  @Getter(key="Horizontal Line 2 Area")
+  @Getter("Horizontal Line 2 Area")
   public double getHorzontal2Area()
   {
     return horizontalLineArea[1];
   }
 
-  @Setter(key="Horizontal Line 2 Area")
+  @Setter("Horizontal Line 2 Area")
   public void setHorizontal2Area(double area)
   {
     horizontalLineArea[1] = (float)area;
     if (component != null) component.repaint();
   }
 
-  @Getter(key="Horizontal Line 3 Area")
+  @Getter("Horizontal Line 3 Area")
   public double getHorzontal3Area()
   {
     return horizontalLineArea[2];
   }
 
-  @Setter(key="Horizontal Line 3 Area")
+  @Setter("Horizontal Line 3 Area")
   public void setHorizontal3Area(double area)
   {
     horizontalLineArea[2] = (float)area;
     if (component != null) component.repaint();
   }
 
-  @Getter(key="Horizontal Line 4 Area")
+  @Getter("Horizontal Line 4 Area")
   public double getHorzontal4Area()
   {
     return horizontalLineArea[3];
   }
 
-  @Setter(key="Horizontal Line 4 Area")
+  @Setter("Horizontal Line 4 Area")
   public void setHorizontal4Area(double area)
   {
     horizontalLineArea[3] = (float)area;

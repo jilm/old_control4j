@@ -24,8 +24,8 @@ import java.awt.Component;
 import javax.swing.JPanel;
 import javax.swing.JComponent;
 import javax.swing.JTabbedPane;
-import control4j.scanner.Getter;
-import control4j.scanner.Setter;
+import cz.lidinsky.tools.reflect.Getter;
+import cz.lidinsky.tools.reflect.Setter;
 import control4j.gui.ChangeEvent;
 
 /**
@@ -55,7 +55,7 @@ public class Screen extends control4j.gui.VisualContainer
   /**
    *
    */
-  @Getter(key="Title")
+  @Getter("Title")
   public String getTitle()
   {
     if (title != null && title.length() > 0)
@@ -67,7 +67,7 @@ public class Screen extends control4j.gui.VisualContainer
   /**
    *
    */
-  @Setter(key="Title")
+  @Setter("Title")
   public void setTitle(String title) {
     // set internal field
     if (title != null) {
@@ -92,7 +92,7 @@ public class Screen extends control4j.gui.VisualContainer
   /**
    *
    */
-  @Getter(key="Background Color")
+  @Getter("Background Color")
   public Color getBackground()
   {
     if (background != null)
@@ -106,7 +106,7 @@ public class Screen extends control4j.gui.VisualContainer
   /**
    *
    */
-  @Setter(key="Background Color")
+  @Setter("Background Color")
   public void setBackground(Color color)
   {
     this.background = color;

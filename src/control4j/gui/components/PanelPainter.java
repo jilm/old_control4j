@@ -24,8 +24,8 @@ import java.awt.Dimension;
 import java.awt.Component;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
-import control4j.scanner.Setter;
-import control4j.scanner.Getter;
+import cz.lidinsky.tools.reflect.Getter;
+import cz.lidinsky.tools.reflect.Setter;
 import control4j.gui.VisualContainer;
 
 public class PanelPainter extends JPanel

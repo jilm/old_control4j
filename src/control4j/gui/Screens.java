@@ -21,8 +21,8 @@ package control4j.gui;
 import javax.swing.JComponent;
 import javax.swing.JTabbedPane;
 import java.awt.Dimension;
-import control4j.scanner.Getter;
-import control4j.scanner.Setter;
+import cz.lidinsky.tools.reflect.Getter;
+import cz.lidinsky.tools.reflect.Setter;
 import control4j.gui.components.Screen;
 
 /**
@@ -55,7 +55,7 @@ implements IChangeListener {
   /**
    *  Returns width of the screens area.
    */
-  @Getter(key="Width")
+  @Getter("Width")
   public int getWidth() {
     return width;
   }
@@ -71,7 +71,7 @@ implements IChangeListener {
    *  @throws IllegalArgumentException
    *             if the width is negative number
    */
-  @Setter(key="Width")
+  @Setter("Width")
   public void setWidth(int width) {
     if (width < 0)
       throw new IllegalArgumentException();
@@ -88,7 +88,7 @@ implements IChangeListener {
   /**
    *  Returns height of the screens area.
    */
-  @Getter(key="Height")
+  @Getter("Height")
   public int getHeight() {
     return height;
   }
@@ -105,7 +105,7 @@ implements IChangeListener {
    *             if the height is negative number
    *
    */
-  @Setter(key="Height")
+  @Setter("Height")
   public void setHeight(int height) {
     if (height < 0)
       throw new IllegalArgumentException();

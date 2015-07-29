@@ -24,8 +24,8 @@ import javax.swing.BorderFactory;
 import javax.swing.border.TitledBorder;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
-import control4j.scanner.Setter;
-import control4j.scanner.Getter;
+import cz.lidinsky.tools.reflect.Getter;
+import cz.lidinsky.tools.reflect.Setter;
 import control4j.gui.VisualContainer;
 
 /**
@@ -42,7 +42,7 @@ public class TitledPanel extends Panel
     super();
   }
 
-  @Setter(key="Title")
+  @Setter("Title")
   public void setTitle(String title)
   {
     this.title = title;
@@ -53,7 +53,7 @@ public class TitledPanel extends Panel
     }
   }
 
-  @Getter(key="Title")
+  @Getter("Title")
   public String getTitle()
   {
     return title;

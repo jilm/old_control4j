@@ -18,8 +18,8 @@ package control4j.gui.components;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import control4j.scanner.Getter;
-import control4j.scanner.Setter;
+import cz.lidinsky.tools.reflect.Getter;
+import cz.lidinsky.tools.reflect.Setter;
 import control4j.ConfigItem;
 import control4j.Signal;
 import control4j.SignalFormat;
@@ -61,7 +61,7 @@ public class Rectangle extends VisualObjectBase
   /**
    *
    */
-  @Getter(key="Width")
+  @Getter("Width")
   public int getWidth()
   {
     return width;
@@ -70,7 +70,7 @@ public class Rectangle extends VisualObjectBase
   /**
    *
    */
-  @Setter(key="Width")
+  @Setter("Width")
   public void setWidth(int width)
   {
     this.width = width;
@@ -86,7 +86,7 @@ public class Rectangle extends VisualObjectBase
   /**
    *
    */
-  @Getter(key="Height")
+  @Getter("Height")
   public int getHeight()
   {
     return height;
@@ -95,7 +95,7 @@ public class Rectangle extends VisualObjectBase
   /**
    *
    */
-  @Setter(key="Height")
+  @Setter("Height")
   public void setHeight(int height)
   {
     this.height = height;
@@ -111,7 +111,7 @@ public class Rectangle extends VisualObjectBase
   /**
    *
    */
-  @Getter(key="Border")
+  @Getter("Border")
   public boolean hasBorder()
   {
     return hasBorder;
@@ -120,7 +120,7 @@ public class Rectangle extends VisualObjectBase
   /**
    *
    */
-  @Setter(key="Border")
+  @Setter("Border")
   public void setBorder(boolean border)
   {
     this.hasBorder = border;
@@ -133,7 +133,7 @@ public class Rectangle extends VisualObjectBase
   /**
    *
    */
-  @Getter(key="Border Color")
+  @Getter("Border Color")
   public Color getBorderColor()
   {
     return borderColor;
@@ -142,7 +142,7 @@ public class Rectangle extends VisualObjectBase
   /**
    *
    */
-  @Setter(key="Border Color")
+  @Setter("Border Color")
   public void setBorderColor(Color color)
   {
     borderColor = color;
@@ -155,7 +155,7 @@ public class Rectangle extends VisualObjectBase
   /**
    *
    */
-  @Getter(key="Border Thickness")
+  @Getter("Border Thickness")
   public int getBorderThickness()
   {
     return borderThickness;
@@ -164,7 +164,7 @@ public class Rectangle extends VisualObjectBase
   /**
    *
    */
-  @Setter(key="Border Thickness")
+  @Setter("Border Thickness")
   public void setBorderThickness(int thickness)
   {
     borderThickness = thickness;
