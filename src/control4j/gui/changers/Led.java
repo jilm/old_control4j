@@ -21,9 +21,8 @@ package control4j.gui.changers;
 import java.awt.Color;
 import java.lang.reflect.Method;
 import control4j.Signal;
-import control4j.scanner.Setter;
-import control4j.scanner.Getter;
-import control4j.scanner.Scanner;
+import cz.lidinsky.tools.reflect.Setter;
+import cz.lidinsky.tools.reflect.Getter;
 import control4j.gui.Changer;
 import static control4j.tools.Logger.*;
 
@@ -39,37 +38,37 @@ public class Led extends Changer<Color>
   private Color falseColor = trueColor.darker();
   private Color invalidColor = Color.yellow;
 
-  @Getter(key="True Color")
+  @Getter("True Color")
   public Color getTrueColor()
   {
     return trueColor;
   }
 
-  @Setter(key="True Color")
+  @Setter("True Color")
   public void setTrueColor(Color trueColor)
   {
     this.trueColor = trueColor;
   }
 
-  @Getter(key="False Color")
+  @Getter("False Color")
   public Color getFalseColor()
   {
     return falseColor;
   }
 
-  @Setter(key="False Color")
+  @Setter("False Color")
   public void setFalseColor(Color falseColor)
   {
     this.falseColor = falseColor;
   }
 
-  @Getter(key="Invalid Color")
+  @Getter("Invalid Color")
   public Color getInvalidColor()
   {
     return invalidColor;
   }
 
-  @Setter(key="Invalid Color")
+  @Setter("Invalid Color")
   public void setInvalidColor(Color invalidColor)
   {
     this.invalidColor = invalidColor;
@@ -91,7 +90,7 @@ public class Led extends Changer<Color>
   {
     return Color.class;
   }
-  
+
   @Override
   public Object clone() throws CloneNotSupportedException
   {

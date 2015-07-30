@@ -20,8 +20,8 @@ package control4j.gui.changers;
 
 import java.lang.reflect.Method;
 import control4j.Signal;
-import control4j.scanner.Setter;
-import control4j.scanner.Getter;
+import cz.lidinsky.tools.reflect.Getter;
+import cz.lidinsky.tools.reflect.Setter;
 import control4j.scanner.Scanner;
 import control4j.gui.Changer;
 import static control4j.tools.Logger.*;
@@ -33,29 +33,29 @@ import static control4j.tools.Logger.*;
 @control4j.annotations.AGuiObject(name="Move", tags={"integer"})
 public class Move extends Changer<Integer>
 {
-  
+
   private int min;
   private int max;
 
-  @Getter(key="Min")
+  @Getter("Min")
   public int getMin()
   {
     return min;
   }
 
-  @Setter(key="Min")
+  @Setter("Min")
   public void setMin(int min)
   {
     this.min = min;
   }
 
-  @Getter(key="Max")
+  @Getter("Max")
   public int getMax()
   {
     return max;
   }
 
-  @Setter(key="Max")
+  @Setter("Max")
   public void setMax(int max)
   {
     this.max = max;

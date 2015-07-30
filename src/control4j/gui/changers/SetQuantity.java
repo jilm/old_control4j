@@ -20,8 +20,8 @@ package control4j.gui.changers;
 
 import java.lang.reflect.Method;
 import control4j.Signal;
-import control4j.scanner.Setter;
-import control4j.scanner.Getter;
+import cz.lidinsky.tools.reflect.Getter;
+import cz.lidinsky.tools.reflect.Setter;
 import control4j.scanner.Scanner;
 import control4j.gui.Changer;
 import static control4j.tools.Logger.*;

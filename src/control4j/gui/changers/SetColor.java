@@ -21,8 +21,8 @@ package control4j.gui.changers;
 import java.awt.Color;
 import java.lang.reflect.Method;
 import control4j.Signal;
-import control4j.scanner.Setter;
-import control4j.scanner.Getter;
+import cz.lidinsky.tools.reflect.Getter;
+import cz.lidinsky.tools.reflect.Setter;
 import control4j.scanner.Scanner;
 import control4j.gui.Changer;
 import static control4j.tools.Logger.*;
@@ -37,13 +37,13 @@ public class SetColor extends Changer<Color>
 
   private Color color = Color.green;
 
-  @Getter(key="Color")
+  @Getter("Color")
   public Color getColor()
   {
     return color;
   }
 
-  @Setter(key="Color")
+  @Setter("Color")
   public void setColor(Color color)
   {
     this.color = color;
@@ -61,5 +61,5 @@ public class SetColor extends Changer<Color>
   {
     return Color.class;
   }
-  
+
 }
