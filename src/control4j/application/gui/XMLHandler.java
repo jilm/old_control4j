@@ -320,7 +320,8 @@ public class XMLHandler implements IXMLHandler
         .setCause(e)
         .set("message", "Exception while setting object preference!")
         .set("key", key)
-        .set("value", value);
+        .set("value", value)
+        .set("object", objectMap.getDecorated());
     }
   }
 

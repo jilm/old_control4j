@@ -79,8 +79,19 @@ public class ColorParser {
           return new Closure<String>() {
 
             public void execute(String value) {
-              ObjectMapUtils.set(
-                  object, member, getColor(value), setAccessible);
+              try {
+                ObjectMapUtils.set(
+                    object, member, getColor(value), setAccessible);
+              } catch (Exception e) {
+                throw new CommonException()
+                  .setCause(e)
+                  .set("message",
+                      "Exception while invoking a color setter method!")
+                  .set("value", value)
+                  .set("object", object)
+                  .set("member", member)
+                  .set("accessibility", setAccessible);
+              }
             }
           };
 
