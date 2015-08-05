@@ -19,9 +19,15 @@ package control4j.gui;
  */
 
 import control4j.Signal;
-import cz.lidinsky.tools.reflect.Setter;
+//import control4j.scanner.Scanner;
+
 import cz.lidinsky.tools.reflect.Getter;
-import control4j.scanner.Scanner;
+import cz.lidinsky.tools.reflect.ObjectMapDecorator;
+import cz.lidinsky.tools.reflect.ObjectMapUtils;
+import cz.lidinsky.tools.reflect.Setter;
+
+import org.apache.commons.collections4.Closure;
+
 import java.lang.reflect.Method;
 
 /**
@@ -31,14 +37,13 @@ import java.lang.reflect.Method;
  *  one property of one gui element to modify.
  *
  */
-public abstract class Changer<T> extends GuiObject
-{
+public abstract class Changer<T> extends GuiObject {
 
   /**
    *  Index of the signal attached to this changer. It is the
    *  index into the buffer of all signals.
    */
-  private int signalIndex;
+  //private int signalIndex;
 
   /**
    *  Name of the signal that will influence the gui behaviour.
@@ -51,7 +56,7 @@ public abstract class Changer<T> extends GuiObject
    *  to the state of the signal.
    */
   private String property;
-  private Method propertyMethod;
+  private Closure<T> propertyMethod;
 
   private VisualObject parent;
 
@@ -71,19 +76,17 @@ public abstract class Changer<T> extends GuiObject
    *
    *  @see #update(Signal)
    */
-  public final void update(Signal[] input)
-  {
-    if (signalIndex >= 0 && signalIndex < input.length)
-    {
-      update(input[signalIndex]);
-    }
-  }
+  //public final void update(Signal input) {
+    //if (signalIndex >= 0 && signalIndex < input.length) {
+      //update(input[signalIndex]);
+    //}
+  //}
 
   /**
    *  This method should be overridden and should implement
    *  the functionality of the changer.
    */
-  protected abstract void update(Signal input);
+  public abstract void update(Signal input);
 
   /**
    *
@@ -96,8 +99,7 @@ public abstract class Changer<T> extends GuiObject
    *             was not specified.
    */
   @Getter("Signal")
-  public String getSignalName()
-  {
+  public String getSignalName() {
     return signalName;
   }
 
@@ -105,26 +107,24 @@ public abstract class Changer<T> extends GuiObject
    *
    */
   @Setter("Signal")
-  public void setSignalName(String signal)
-  {
+  public void setSignalName(String signal) {
     this.signalName = signal;
   }
 
   /**
    *
    */
-  public void setSignalIndex(int index)
-  {
-    this.signalIndex = index;
-  }
+  //public void setSignalIndex(int index) {
+    //this.signalIndex = index;
+  //}
 
   /**
    *
    */
-  protected int getSignalIndex()
-  {
-    return signalIndex;
-  }
+  //protected int getSignalIndex()
+  //{
+   // return signalIndex;
+  //}
 
   /**
    *
@@ -147,30 +147,32 @@ public abstract class Changer<T> extends GuiObject
   /**
    *
    */
-  protected Method getPropertyMethod()
-  {
-    if (propertyMethod == null)
-      propertyMethod = Scanner.getSetter(getParent(), property);
+  protected Closure<T> getPropertyMethod() {
+    if (propertyMethod == null) {
+      ObjectMapDecorator<T> map
+        = new ObjectMapDecorator<T>(getPropertyClass())
+        .setSetterFilter(
+            ObjectMapUtils.hasAnnotationPredicate(Setter.class))
+        .setGetterFilter(null)
+        .setSetterKeyTransformer(
+            ObjectMapUtils.getSetterValueTransformer())
+        .setSetterFactory(
+            ObjectMapUtils.setterClosureFactory(true));
+      map.setDecorated(parent);
+      propertyMethod = map.getSetter(property);
+    }
     return propertyMethod;
   }
 
   /**
    *  Sets the property value of the parent.
    */
-  protected void setPropertyValue(T value)
-  {
-    Method propertyMethod = getPropertyMethod();
+  protected void setPropertyValue(T value) {
+    Closure<T> propertyMethod = getPropertyMethod();
     if (propertyMethod != null)
-      try
-      {
-        propertyMethod.invoke(getParent(), value);
-      }
-      catch (IllegalAccessException e)
-      {
-      }
-      catch (java.lang.reflect.InvocationTargetException e)
-      {
-      }
+      try {
+        propertyMethod.execute(value);
+      } catch (Exception e) { }
   }
 
   /**

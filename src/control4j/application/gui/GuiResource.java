@@ -18,21 +18,27 @@ package control4j.application.gui;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import control4j.gui.GuiObject;
 import control4j.gui.Screens;
 
-public class GuiResource extends control4j.application.Resource
-{
+import cz.lidinsky.tools.tree.ChangeableNode;
+import cz.lidinsky.tools.tree.Node;
 
-  private Screens gui;
+public class GuiResource extends control4j.application.Resource {
 
-  public GuiResource(Screens gui)
-  {
+  private ChangeableNode<GuiObject> gui;
+
+  public GuiResource() {
     super("control4j.application.gui.Gui");
-    this.gui = gui;
+    this.gui = new ChangeableNode<GuiObject>();
+    gui.setDecorated(new Screens());
   }
 
-  public Screens getGui()
-  {
+  public void addScreenNode(Node<GuiObject> node) {
+    gui.addChild(node);
+  }
+
+  public Node<GuiObject> getGui() {
     return gui;
   }
 

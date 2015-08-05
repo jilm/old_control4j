@@ -75,7 +75,7 @@ public class Led extends Changer<Color>
   }
 
   @Override
-  protected void update(Signal input)
+  public void update(Signal input)
   {
     Color color;
     if (!input.isValid())

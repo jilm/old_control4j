@@ -31,7 +31,7 @@ public class SetUnit extends Changer<String>
 {
 
   @Override
-  protected void update(Signal input)
+  public void update(Signal input)
   {
     setPropertyValue(input.getUnit());
   }

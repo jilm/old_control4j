@@ -18,26 +18,29 @@ package control4j.application.gui;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import control4j.AResource;
 import control4j.InputModule;
 import control4j.Signal;
 import control4j.gui.Changer;
 import control4j.application.Module;
+import control4j.application.gui.Gui;
 
-public class IMGuiChanger extends InputModule
-{
+public class IMGuiChanger extends InputModule {
 
   protected Changer changer;
 
+  @AResource
+  public Gui gui;
+
   @Override
-  public void initialize(Module definition)
-  {
+  public void initialize(Module definition) {
+    super.initialize(definition);
     this.changer = ((ChangerModule)definition).getChanger();
   }
 
   @Override
-  public void put(Signal[] input, int inputSize)
-  {
-    changer.update(input); // TODO:
+  public void put(Signal[] input, int inputSize) {
+    changer.update(input[0]); // TODO:
   }
 
 }

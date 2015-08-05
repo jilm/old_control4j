@@ -117,7 +117,7 @@ public abstract class Module implements IToStringBuildable
     ObjectMapDecorator<String> objectMap
         = new ObjectMapDecorator<String>(String.class);
     objectMap.setSetterFilter(PredicateUtils.allPredicate(
-        ObjectMapUtils.getSetterSignatureCheckPredicate(),
+        //ObjectMapUtils.getSetterSignatureCheckPredicate(),
         ObjectMapUtils.getHasAnnotationPredicate(Setter.class)));
     objectMap.setGetterFilter(PredicateUtils.falsePredicate());
     objectMap.setSetterFactory(

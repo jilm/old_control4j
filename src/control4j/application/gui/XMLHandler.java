@@ -95,7 +95,11 @@ public class XMLHandler implements IXMLHandler
             ObjectMapUtils.stringSetterClosureFactory(false)));
   }
 
-  public void endProcessing() {}
+  public void endProcessing() {
+    if (adapter != null) {
+      adapter.close();
+    }
+  }
 
   public void startProcessing() {}
 

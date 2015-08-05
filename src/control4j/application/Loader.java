@@ -77,8 +77,10 @@ public class Loader {
 
     c4jHandler.setDestination(handler);
 
-    //control4j.application.gui.XMLHandler guiHandler
-        //= new control4j.application.gui.XMLHandler();
+    control4j.application.gui.XMLHandler guiHandler
+        = new control4j.application.gui.XMLHandler(
+            new control4j.application.gui.GuiToControlAdapter(
+              handler));
     //control4j.application.ld.XMLHandler ldHandler
         //= new control4j.application.ld.XMLHandler();
 
@@ -87,7 +89,7 @@ public class Loader {
 
     XMLReader reader = new XMLReader();
     reader.addHandler(c4jHandler);
-    //reader.addHandler(guiHandler);
+    reader.addHandler(guiHandler);
     //reader.addHandler(ldHandler);
     reader.load(file);
     //return application;

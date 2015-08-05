@@ -22,44 +22,104 @@ import control4j.gui.Screens;
 import control4j.gui.VisualObject;
 import control4j.gui.VisualContainer;
 import control4j.gui.Changer;
-import control4j.application.Application;
+import control4j.gui.GuiObject;
+import control4j.gui.components.Screen;
+import control4j.application.Preprocessor;
 import control4j.application.Module;
 import control4j.application.Resource;
 import control4j.application.Input;
 
-public class GuiToControlAdapter extends AbstractAdapter
-{
+import cz.lidinsky.tools.tree.Builder;
+import cz.lidinsky.tools.tree.Node;
 
-  public GuiToControlAdapter(control4j.application.Application destination) {
-    if (destination instanceof control4j.application.Application) {
-    } else {
-      throw new UnsupportedOperationException();
+public class GuiToControlAdapter extends AbstractAdapter {
+
+  private Preprocessor handler;
+
+  private GuiResource resource;
+
+  public GuiToControlAdapter(Preprocessor handler) {
+    this.handler = handler;
+    resource = new GuiResource();
+  }
+
+  @Override
+  public void close() {
+    if (!isEmpty) {
+      handler.putResource(
+          "_Gui_", handler.getScopePointer().getGlobal(), resource);
     }
   }
 
-  protected Application destination;
+  //---------------------------------------------------------- Building a Tree.
 
+  private Builder<GuiObject> treeBuilder = new Builder<GuiObject>();
 
-  public void put(Screens screens)
-  {
-    Resource resource = new GuiResource(screens);
-    //destination.addResource(resource);
+  private boolean isEmpty = true;
+
+  @Override
+  public void open() {
+    treeBuilder.open();
   }
 
-  public void put(VisualObject object)
-  {
+  @Override
+  public void close(GuiObject object) {
+    Node<GuiObject> node = treeBuilder.close(object);
+    setParents(node);
+    if (object instanceof Screen) {
+      resource.addScreenNode(node);
+      isEmpty = false;
+    } else if (object instanceof Changer) {
+      Changer changer = (Changer)object;
+      Module module = new ChangerModule(changer, handler.getScopePointer());
+      Input input = new Input();
+      module.putInput(0, input);
+      module.putResource(null, resource);
+      handler.addModule(module);
+      handler.addModuleInput(
+          changer.getSignalName(), handler.getScopePointer(), input);
+    }
   }
 
-  public void put(VisualContainer container)
-  {
+  private void setParents(Node<GuiObject> node) {
+    for (Node<GuiObject> child : node.getChildren()) {
+      if (isChanger(child)) {
+        getChanger(child).setParent(getVO(node));
+      }
+    }
   }
+
+  private boolean isChanger(Node<GuiObject> node) {
+    if (node == null) {
+      return false;
+    } else {
+      return node.getDecorated() instanceof Changer;
+    }
+  }
+
+  private Changer getChanger(Node<GuiObject> node) {
+    if (node == null) {
+      return null; // TODO:
+    } else {
+      return (Changer)node.getDecorated(); // TODO:
+    }
+  }
+
+  private VisualObject getVO(Node<GuiObject> node) {
+    if (node == null) {
+      return null; // TODO:
+    } else {
+      return (VisualObject)node.getDecorated(); // TODO:
+    }
+  }
+
 
   public void put(Changer changer)
   {
-    Module module = new ChangerModule(changer, destination.getScopePointer());
-    Input input = new Input();
+    //Module module = new ChangerModule(changer, destination.getScopePointer());
+    //Input input = new Input();
     // TODO:  place input
-    destination.addModule(module);
+    //destination.addModule(module);
   }
 
 }

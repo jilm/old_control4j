@@ -50,7 +50,7 @@ public class SetColor extends Changer<Color>
   }
 
   @Override
-  protected void update(Signal input)
+  public void update(Signal input)
   {
     if (input.isValid() && input.getBoolean())
       setPropertyValue(color);

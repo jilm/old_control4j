@@ -47,6 +47,7 @@ public class Screen extends control4j.gui.VisualContainer
   private Color background = null;
 
   @Override
+  @Setter("Name")
   public void setName(String name) {
     super.setName(name);
     setTabTitle();

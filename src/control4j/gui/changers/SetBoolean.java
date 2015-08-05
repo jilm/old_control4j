@@ -34,7 +34,7 @@ public class SetBoolean extends Changer<Boolean>
 {
 
   @Override
-  protected void update(Signal input)
+  public void update(Signal input)
   {
     boolean value;
     if (input.isValid())

@@ -43,4 +43,6 @@ public abstract class AbstractAdapter {
 
   public void close(GuiObject object) {}
 
+  public void close() {}
+
 }

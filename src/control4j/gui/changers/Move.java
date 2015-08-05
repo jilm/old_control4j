@@ -62,7 +62,7 @@ public class Move extends Changer<Integer>
   }
 
   @Override
-  protected void update(Signal input)
+  public void update(Signal input)
   {
     if (input.isValid())
     {

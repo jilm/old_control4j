@@ -34,7 +34,7 @@ public class SetQuantity extends Changer<Double>
 {
 
   @Override
-  protected void update(Signal input)
+  public void update(Signal input)
   {
     double value;
     if (input.isValid())

@@ -37,7 +37,7 @@ public class SetText extends Changer<String>
   private String text;
 
   @Override
-  protected void update(Signal input)
+  public void update(Signal input)
   {
     if (input.isValid())
     {

@@ -18,53 +18,48 @@ package control4j.application.gui;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import control4j.IConfigBuffer;
+import control4j.InputModule;
+import control4j.Resource;
+import control4j.Signal;
+import control4j.gui.Changer;
+import control4j.gui.GuiObject;
+import control4j.gui.Screens;
+import control4j.gui.VisualBuilder;
+import control4j.gui.VisualObject;
+
+import cz.lidinsky.tools.tree.Node;
+
 import java.util.LinkedList;
 import javax.swing.JFrame;
 import javax.swing.JComponent;
-import control4j.IConfigBuffer;
-import control4j.Signal;
-import control4j.InputModule;
-import control4j.gui.Changer;
-import control4j.gui.Screens;
-import control4j.Resource;
 
-public class Gui extends Resource
-{
+public class Gui extends Resource {
 
   private JFrame mainFrame;
 
-  private Screens gui;
+  private Node<GuiObject> gui;
 
   @Override
   public void initialize(control4j.application.Resource definition) {
     gui = ((GuiResource)definition).getGui();
   }
 
-  public void setGui(Screens gui)
-  {
-    this.gui = gui;
-  }
-
   /**
    *  Show gui
    */
   @Override
-  public void prepare()
-  {
+  public void prepare() {
     super.prepare();
-    //buffer = new Signal[getNumberOfAssignedInputs()];
     // Create and set up the window
     mainFrame = new JFrame("Top level demo");
     mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    JComponent screensComponent = gui.createVisualComponent();
-    mainFrame.add(screensComponent);
-    gui.configureVisualComponent();
+    mainFrame.add(VisualBuilder.createVisualComponent(gui));
+    VisualBuilder.configureVisualComponent(gui);
     // Show the main window
     javax.swing.SwingUtilities.invokeLater(
-      new Runnable()
-      {
-        public void run()
-        {
+      new Runnable() {
+        public void run() {
           mainFrame.pack();
           mainFrame.setVisible(true);
         }
