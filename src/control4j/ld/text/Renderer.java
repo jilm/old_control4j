@@ -22,7 +22,7 @@ import java.util.List;
 import control4j.ld.LadderDiagram;
 import java.io.InputStream;
 import java.io.FileInputStream;
-import control4j.ld.xml.Loader;
+//import control4j.ld.xml.Loader;
 
 /**
  *  Responsible for rendering the whole ladder diagram.
@@ -41,15 +41,15 @@ public class Renderer
   {
     String filename = args[0];
     InputStream is = new FileInputStream(filename);
-    LadderDiagram ld = Loader.load(is);
+    //LadderDiagram ld = Loader.load(is);
     is.close();
     RungRenderer renderer = new RungRenderer();
-    for (int i=0; i<ld.size(); i++)
-    {
-      List<StringBuilder> ascii = renderer.render(ld.get(i));
-      for (int j=0; j<ascii.size(); j++)
-        System.out.println(ascii.get(j).toString());
-    }
+    //for (int i=0; i<ld.size(); i++)
+    //{
+      //List<StringBuilder> ascii = renderer.render(ld.get(i));
+      //for (int j=0; j<ascii.size(); j++)
+        //System.out.println(ascii.get(j).toString());
+    //}
   }
 
 }
