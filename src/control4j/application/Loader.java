@@ -81,16 +81,14 @@ public class Loader {
         = new control4j.application.gui.XMLHandler(
             new control4j.application.gui.GuiToControlAdapter(
               handler));
-    //control4j.application.ld.XMLHandler ldHandler
-        //= new control4j.application.ld.XMLHandler();
-
-    //guiHandler.setDestination(application);
-    //ldHandler.setHandler(application);
+    control4j.application.ld.XMLHandler ldHandler
+      = new control4j.application.ld.XMLHandler();
+    ldHandler.setHandler(new control4j.application.ld.Ld2ControlAdapter(handler));
 
     XMLReader reader = new XMLReader();
     reader.addHandler(c4jHandler);
     reader.addHandler(guiHandler);
-    //reader.addHandler(ldHandler);
+    reader.addHandler(ldHandler);
     reader.load(file);
     //return application;
   }

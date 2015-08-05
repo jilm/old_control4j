@@ -73,9 +73,8 @@ public class XMLHandler implements IXMLHandler
   {
   }
 
-  public void setHandler(Object handler) {
-    Predicate<AbstractAdapter> filter = notNullPredicate();
-    adapter = adapterFactory.findFirst(handler, filter);
+  public void setHandler(AbstractAdapter handler) {
+    adapter = handler;
   }
 
   /*
@@ -145,6 +144,7 @@ public class XMLHandler implements IXMLHandler
 
   protected ArrayDeque<ContactBlock> contactStack
                                            = new ArrayDeque<ContactBlock>();
+
   @AXMLStartElement("rung/serial")
   public boolean startRungSerial(Attributes attributes) {
     // TODO: contact stack should be empty

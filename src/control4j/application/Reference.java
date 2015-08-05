@@ -26,7 +26,7 @@ import cz.lidinsky.tools.ToStringBuilder;
  *  Represents a reference to some declaration. It consists of a pair:
  *  href and scope.
  */
-class Reference implements IToStringBuildable
+public class Reference implements IToStringBuildable
 {
 
   private String href;

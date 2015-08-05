@@ -28,9 +28,8 @@ import java.util.NoSuchElementException;
 
 import control4j.tools.DuplicateElementException;
 
-import control4j.SyntaxErrorException;
-import control4j.ExceptionCode;
-
+import cz.lidinsky.tools.CommonException;
+import cz.lidinsky.tools.ExceptionCode;
 import cz.lidinsky.tools.IToStringBuildable;
 import cz.lidinsky.tools.ToStringBuilder;
 import cz.lidinsky.tools.ToStringStyle;
@@ -65,13 +64,11 @@ public class ScopeMap<E extends ObjectBase> implements IToStringBuildable {
     Key(String name, Scope scope) {
       // param check
       if (isBlank(name) || scope == null) {
-        throw new SyntaxErrorException()
+        throw new CommonException()
           .setCode(ExceptionCode.ILLEGAL_ARGUMENT)
-          .set("message", "Ellegal argument")
+          .set("message", "Given name is blank or given scope is null!")
           .set("name", name)
-          .set("scope", scope)
-          .set("method", "constructor")
-          .set("class", getClass().getName());
+          .set("scope", scope);
       }
       // store param
       this.name = name;
@@ -127,33 +124,30 @@ public class ScopeMap<E extends ObjectBase> implements IToStringBuildable {
    *             and scope inside the buffer
    */
   public void put(String name, Scope scope, E value) {
-    try {
-      // param check
-      if (value == null) {
-        throw new SyntaxErrorException()
-          .setCode(ExceptionCode.ILLEGAL_ARGUMENT)
-          .set("message", "Null argument")
-          .set("value", value);
-      }
-      // combined key
-      Key key = new Key(name, scope);
-      // lazy buffer
-      if (buffer == null) {
-        buffer = new HashMap<Key, E>();
-      }
-      // put the value
-      E result = buffer.put(key, value);
-      if (result != null) {
-        throw new SyntaxErrorException()
-          .setCode(ExceptionCode.DUPLICATE_ELEMENT)
-          .set("message", "Duplicate value")
-          .set("name", name)
-          .set("scope", scope);
-      }
-    } catch (SyntaxErrorException se) {
-      se.set("method", "put")
-        .set("class", getClass().getName());
-      throw se;
+    // param check
+    if (value == null) {
+      throw new CommonException()
+        .setCode(ExceptionCode.ILLEGAL_ARGUMENT)
+        .set("message", "The value may not be null!")
+        .set("value", value)
+        .set("name", name)
+        .set("scope", scope);
+    }
+    // combined key
+    Key key = new Key(name, scope);
+    // lazy buffer
+    if (buffer == null) {
+      buffer = new HashMap<Key, E>();
+    }
+    // put the value
+    E result = buffer.put(key, value);
+    if (result != null) {
+      throw new CommonException()
+        .setCode(ExceptionCode.DUPLICATE_ELEMENT)
+        .set("message", "Duplicate value")
+        .set("name", name)
+        .set("scope", scope)
+        .set("value", value);
     }
   }
 
@@ -173,11 +167,12 @@ public class ScopeMap<E extends ObjectBase> implements IToStringBuildable {
    *             if there is no such value in the internal buffer
    */
   public E get(String name, Scope scope) {
-    try {
     if (buffer == null) {
-      throw new SyntaxErrorException()
+      throw new CommonException()
         .setCode(ExceptionCode.NO_SUCH_ELEMENT)
-        .set("message", "Buffer is empty");
+        .set("message", "The buffer is empty")
+        .set("name", name)
+        .set("scope", scope);
     }
     Key tempKey = new Key(name, scope);
     while (tempKey.scope != null) {
@@ -185,14 +180,11 @@ public class ScopeMap<E extends ObjectBase> implements IToStringBuildable {
       if (result != null) return result;
       tempKey.scope = tempKey.scope.getParent();
     }
-    throw new SyntaxErrorException()
+    throw new CommonException()
       .setCode(ExceptionCode.NO_SUCH_ELEMENT)
-      .set("message", "Missing element");
-    } catch (SyntaxErrorException se) {
-      se.set("method", "get")
-        .set("class", getClass().getName());
-      throw se;
-    }
+      .set("message", "Missing element!")
+      .set("name", name)
+      .set("scope", scope);
   }
 
   public boolean isEmpty() {
