@@ -1,7 +1,7 @@
 package control4j.ld;
 
 /*
- *  Copyright 2013 Jiri Lidinsky
+ *  Copyright 2013, 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -18,12 +18,16 @@ package control4j.ld;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import cz.lidinsky.tools.IToStringBuildable;
+import cz.lidinsky.tools.ToStringBuilder;
+
 import java.util.LinkedList;
 
 /**
  *
  */
 public class SerialContactBlock extends ContactBlock
+implements IToStringBuildable
 {
   private LinkedList<ContactBlock> contacts = new LinkedList<ContactBlock>();
 
@@ -50,5 +54,9 @@ public class SerialContactBlock extends ContactBlock
   public void insert(ContactBlock contactBlock, int position)
   {
     contacts.add(position, contactBlock);
+  }
+
+  public void toString(ToStringBuilder sb) {
+    sb.append("contacts", contacts);
   }
 }

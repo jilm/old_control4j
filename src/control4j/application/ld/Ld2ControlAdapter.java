@@ -54,10 +54,12 @@ public class Ld2ControlAdapter extends AbstractAdapter {
 
   protected int tempSignalCounter = 0;
 
+  @Override
   public void startLd() {
     handler.startScope();
   }
 
+  @Override
   public void endLd() {
     handler.endScope();
   }
@@ -65,6 +67,7 @@ public class Ld2ControlAdapter extends AbstractAdapter {
   /**
    *  Translate the rung into the modules.
    */
+  @Override
   public void put(Rung rung) {
     // translate contact blocks
     Reference inputRef = translateContactBlock(rung.getContactBlock());
@@ -82,8 +85,6 @@ public class Ld2ControlAdapter extends AbstractAdapter {
     }
     handler.addModule(adapter);
   }
-
-  public void put(LadderDiagram ld) {}
 
   protected Reference translateContactBlock(ContactBlock contactBlock) {
     if (contactBlock instanceof SerialContactBlock) {

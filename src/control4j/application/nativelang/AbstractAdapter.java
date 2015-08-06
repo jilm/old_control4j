@@ -18,7 +18,7 @@ package control4j.application.nativelang;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-abstract class AbstractAdapter
+public class AbstractAdapter
 {
 
   public void startLevel() {}

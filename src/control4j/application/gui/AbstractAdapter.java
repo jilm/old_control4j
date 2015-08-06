@@ -27,7 +27,7 @@ import control4j.application.Application;
 import control4j.application.Module;
 import control4j.application.Resource;
 
-public abstract class AbstractAdapter {
+public class AbstractAdapter {
 
   public void put(Screens screens) { }
 

@@ -36,6 +36,8 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
 import control4j.tools.DuplicateElementException;
+import cz.lidinsky.tools.CommonException;
+import cz.lidinsky.tools.ExceptionCode;
 import cz.lidinsky.tools.xml.IXMLHandler;
 import cz.lidinsky.tools.xml.XMLReader;
 import cz.lidinsky.tools.xml.AXMLStartElement;
@@ -84,8 +86,12 @@ public class XMLHandler implements IXMLHandler
    */
 
 
-  public void startProcessing()
-  {
+  public void startProcessing() {
+    if (adapter == null) {
+      throw new CommonException()
+        .setCode(ExceptionCode.NULL_POINTER)
+        .set("message", "Adapter missing!");
+    }
   }
 
   /**

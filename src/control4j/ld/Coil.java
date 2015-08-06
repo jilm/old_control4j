@@ -1,7 +1,7 @@
 package control4j.ld;
 
 /*
- *  Copyright 2013 Jiri Lidinsky
+ *  Copyright 2013, 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -17,6 +17,8 @@ package control4j.ld;
  *  You should have received a copy of the GNU General Public License
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+import static cz.lidinsky.tools.Validate.notBlank;
 
 /**
  *
@@ -34,8 +36,7 @@ public class Coil
   public Coil(String type, String name)
   {
     this.name = name;
-    if (type != null && type.length() > 0)
-      this.type = type;
+    setType(type);
   }
 
   public String getName()
@@ -55,6 +56,6 @@ public class Coil
 
   public void setType(String type)
   {
-    this.type = type;
+    this.type = notBlank(type, "OTE");
   }
 }

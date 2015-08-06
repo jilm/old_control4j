@@ -22,17 +22,41 @@ import control4j.ld.Rung;
 import control4j.ld.LadderDiagram;
 
 /**
- *
+ *  Empty template for LD handlers. Object descendans are used as handlers
+ *  for the XMLHandler object.
  *
  */
-abstract class AbstractAdapter {
+public class AbstractAdapter {
 
+  /**
+   *  It is called whenever the XML parser finds a ld element. May be called
+   *  more than onece within the application. The default implementation does
+   *  nothing
+   */
   public void startLd() {}
 
+  /**
+   *  It is called when the XML parser hit ld end element. The default
+   *  implementation does nothing.
+   */
   public void endLd() {}
 
+  /**
+   *  It is called when the rung was loaded. The default implementation does
+   *  nothing.
+   *
+   *  @param rung
+   *             loaded rung. The object is complete
+   */
   public void put(Rung rung) {}
 
+  /**
+   *  It is called when the whole ld was loaded. The default implementation
+   *  does nothing.
+   *
+   *  @param ld
+   *             loaded ld
+   */
   public void put(LadderDiagram ld) {}
 
 }

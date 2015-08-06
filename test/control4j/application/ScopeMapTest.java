@@ -27,14 +27,8 @@ public class ScopeMapTest
   public void initialize()
   {
     map = new ScopeMap<Tag>();
-    try
-    {
     map.put(name4, root, value2);
     map.put(name3, scope3, value1);
-    }
-    catch (DuplicateElementException e)
-    {
-    }
   }
 
   @Test
@@ -58,6 +52,7 @@ public class ScopeMapTest
     assertTrue(value1 == result);
   }
 
+  @Ignore
   @Test(expected=java.util.NoSuchElementException.class)
   public void test4()
   {

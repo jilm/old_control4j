@@ -69,13 +69,12 @@ public class Loader {
    */
   public void load(File file) throws IOException {
 
-    //Application application = new Application(); // TODO:  remove
-
     // TODO:  read handlers from a config file
     control4j.application.nativelang.XMLHandler c4jHandler
         = new control4j.application.nativelang.XMLHandler();
 
-    c4jHandler.setDestination(handler);
+    c4jHandler.setDestination(
+        new control4j.application.nativelang.C4jToControlAdapter(handler));
 
     control4j.application.gui.XMLHandler guiHandler
         = new control4j.application.gui.XMLHandler(

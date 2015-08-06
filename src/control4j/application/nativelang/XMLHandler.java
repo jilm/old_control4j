@@ -87,9 +87,10 @@ public class XMLHandler implements IXMLHandler
    */
   public XMLHandler() { }
 
-  public void setDestination(Object destination) {
-    Predicate<AbstractAdapter> filter = notNullPredicate();
-    adapter = adapterFactory.findFirst(destination, filter);
+  public void setDestination(AbstractAdapter destination) {
+    this.adapter = destination;
+    //Predicate<AbstractAdapter> filter = notNullPredicate();
+    //adapter = adapterFactory.findFirst(destination, filter);
   }
 
   /*

@@ -1,7 +1,7 @@
 package control4j.ld;
 
 /*
- *  Copyright 2013 Jiri Lidinsky
+ *  Copyright 2013, 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -18,13 +18,17 @@ package control4j.ld;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import cz.lidinsky.tools.IToStringBuildable;
+import cz.lidinsky.tools.ToStringBuilder;
+import cz.lidinsky.tools.ToStringMultilineStyle;
+
 import java.util.LinkedList;
 
 /**
  *  One rung of the ladder diagram. It contains one ContactBlock object
  *  and a collection of parallel interconnected coils.
  */
-public class Rung
+public class Rung implements IToStringBuildable
 {
   /** A contact block */
   private ContactBlock contactBlock = null;
@@ -64,4 +68,17 @@ public class Rung
   {
     coilBlock.remove(index);
   }
+
+  @Override
+  public String toString() {
+    return new ToStringMultilineStyle()
+      .append(this)
+      .toString();
+  }
+
+  public void toString(ToStringBuilder sb) {
+    sb.append("contactBlock", contactBlock)
+      .append("coilBlock", coilBlock);
+  }
+
 }

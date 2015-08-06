@@ -18,9 +18,18 @@ package control4j.ld;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import cz.lidinsky.tools.IToStringBuildable;
+import cz.lidinsky.tools.ToStringMultilineStyle;
+
 /**
  *
  */
-public abstract class ContactBlock
+public abstract class ContactBlock implements IToStringBuildable
 {
+  @Override
+  public String toString() {
+    return new ToStringMultilineStyle()
+      .append(this)
+      .toString();
+  }
 }
