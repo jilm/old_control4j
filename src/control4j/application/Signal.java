@@ -68,6 +68,14 @@ public class Signal extends Configurable
     return isValueT_1;
   }
 
+  public boolean isValueT_1Valid() {
+    return isValueT_1Valid;
+  }
+
+  public double getValueT_1() {
+    return Double.parseDouble(valueT_1);
+  }
+
   /*
    *
    *    Tags

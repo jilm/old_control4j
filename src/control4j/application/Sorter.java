@@ -18,27 +18,40 @@
 
 package control4j.application;
 
-import control4j.ExceptionCode;
-import control4j.SyntaxErrorException;
+import static cz.lidinsky.tools.Validate.notNull;
+
+import cz.lidinsky.tools.ExceptionCode;
+import cz.lidinsky.tools.CommonException;
 import control4j.Instantiator;
 
 import cz.lidinsky.tools.IToStringBuildable;
 import cz.lidinsky.tools.ToStringBuilder;
 import cz.lidinsky.tools.ToStringMultilineStyle;
 
+import org.apache.commons.lang3.mutable.MutableObject;
 import org.apache.commons.lang3.tuple.Triple;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
+import org.apache.commons.collections4.CollectionUtils;
+
 import org.jgrapht.DirectedGraph;
+import org.jgrapht.Graphs;
 import org.jgrapht.alg.CycleDetector;
+import org.jgrapht.alg.cycle.DirectedSimpleCycles;
+import org.jgrapht.alg.cycle.TarjanSimpleCycles;
 import org.jgrapht.experimental.dag.DirectedAcyclicGraph;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.graph.DirectedSubgraph;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  *
@@ -47,18 +60,23 @@ import java.util.List;
  */
 public class Sorter implements IToStringBuildable {
 
-  //---------------------------------------------------------- Public Interface
-
   /**
    *  Creates an empty object.
    */
   public Sorter() { }
 
+  //---------------------------------------------------------- Public Interface
+
+  /**
+   *  Adds a module.
+   */
   void add(Module module) {
+    dirty = true;
     graph.addVertex(module);
-    addToSignalIndex(module);
+    addEdges(module);
   }
 
+  /** Global configuration. */
   private HashMap<String, Property> configuration
       = new HashMap<String, Property>();
 
@@ -70,31 +88,23 @@ public class Sorter implements IToStringBuildable {
     // TODO:
   }
 
-  /**
-   *  Graph is used to provide topological sort. Vertices are modules and
-   *  edges are signal connections between modules.
-   */
-  private DirectedAcyclicGraph<Module, DefaultEdge> graph
-        = new DirectedAcyclicGraph<Module, DefaultEdge>(DefaultEdge.class);
+  private boolean dirty = false;
 
   /**
    *  Provides a topological sort of the modules.
    */
   public void process(Instantiator handler) {
 
-    // send configuration
-    for (String key : configuration.keySet()) {
-      handler.set(key, configuration.get(key).getValue());
-      // TODO:  exception handling
+    if (!isResolved()) {
+      throw new CommonException()
+        .setCode(ExceptionCode.ILLEGAL_STATE)
+        .set("message", "The graph is still not complete!");
     }
 
-    // create graph
-    initGraph();
-
-    // detect a cycle
-    CycleDetector<Module, DefaultEdge> cycleDetector
-        = new CycleDetector<Module, DefaultEdge>(graph);
-    System.out.println(cycleDetector.findCycles());
+    while (dirty) {
+      // break cycles
+      breakFeedback();
+    }
 
     // perform sorting
     TopologicalOrderIterator<Module, DefaultEdge> topolIter
@@ -107,31 +117,119 @@ public class Sorter implements IToStringBuildable {
 
   }
 
-  /** Mapping signals to modules which provides it. Indexes of the
-      array corespond to the position of the signal and the element
-      of the array contains a module that provides it. */
-  private Module[] signalIndex;
+  //--------------------------------------------------- The Graph Manipulation.
 
-  private Module getSourceModule(int signalPointer) {
-    if (signalIndex == null) {
-      return null;
-    } else if (signalIndex.length <= signalPointer) {
-      return null;
-    } else {
-      return signalIndex[signalPointer];
+  /**
+   *  Graph is used to provide topological sort. Vertices are modules and
+   *  edges are signal connections between modules.
+   */
+  private DefaultDirectedGraph<Module, DefaultEdge> graph
+        = new DefaultDirectedGraph<Module, DefaultEdge>(DefaultEdge.class);
+
+  /**
+   *  A set that contains vertices that are still not resolved. Because
+   *  of missing source module.
+   */
+  private Set<Module> unresolved = new HashSet<Module>();
+
+  private boolean isResolved() {
+    return unresolved.isEmpty();
+  }
+
+  /**
+   *  Adds all of the incoming and otgoing edges of that module. If there
+   *  is some input unresolved (the source module is not in the graph yet)
+   *  than this module is temporarily stored in the unresolved set.
+   */
+  private void addEdges(Module module) {
+    // place the module into the output index
+    for (Output output : module.getOutput()) {
+      if (output.isConnected()) {
+        setSourceModule(output.getPointer(), module);
+      }
+    }
+    // place the module into the unresolved set
+    unresolved.add(module);
+    // try to resolve all of the unresolved modules
+    Set<Module> temp = unresolved;
+    unresolved = new HashSet<Module>();
+    for (Module target : temp) {
+      for (Input input : target.getInput()) {
+        // add edge into the graph
+        if (input.isConnected()) {
+          try {
+            Module source = getSourceModule(input.getPointer());
+            graph.addEdge(source, target);
+          } catch (Exception e) {
+            // the source module is still not available
+            unresolved.add(target);
+          }
+        }
+      }
     }
   }
 
+  //------------------------------------------------------------- Signal Index.
+
+  /**
+   *  Map signal pointers to modules which provides it. Indexes of the
+   *  array corespond to the position of the signal and the element
+   *  of the array contains a module that provides it.
+   */
+  private Module[] signalIndex;
+
+  /**
+   *  Returns a module which is the source of the signal with the given
+   *  pointer number.
+   *
+   *  @throws CommonException
+   *              if there is no module for given pointer in the index
+   *
+   *  @throws CommonException
+   *              if the module under the requested index is null
+   *
+   *  @throws IndexOutOfBoundsException
+   *              if the given index is not within internal index buffer bounds
+   */
+  private Module getSourceModule(int signalPointer) {
+    if (signalIndex == null) {
+      throw new CommonException()
+        .setCode(ExceptionCode.INDEX_OUT_OF_BOUNDS)
+        .set("message", "Signal index has not been created yet!")
+        .set("signalPointer", signalPointer);
+    } else {
+      return notNull(signalIndex[signalPointer]);
+    }
+  }
+
+  /**
+   *  Place given module into the signal index buffer under the given position.
+   *  The buffer is realocated automaticaly to be large enough.
+   *
+   *  @throws CommonException
+   *             if there already is a module under the given position
+   *
+   */
   private void setSourceModule(int signalPointer, Module module) {
+    // create buffer is necessary
     if (signalIndex == null) {
       signalIndex = new Module[signalPointer + 1];
     }
+    // realocate buffer if necessary
     if (signalIndex.length <= signalPointer) {
       Module[] newIndex = new Module[signalPointer + 1];
       System.arraycopy(signalIndex, 0, newIndex, 0, signalIndex.length);
       signalIndex = newIndex;
     }
+    // store the module
     signalIndex[signalPointer] = module;
+  }
+
+  /**
+   *  Returns total number of signals.
+   */
+  private int getSignalCount() {
+    return signalIndex == null ? 0 : signalIndex.length;
   }
 
   /**
@@ -148,7 +246,7 @@ public class Sorter implements IToStringBuildable {
             setSourceModule(out, module);
           } else {
             // more interconnected outputs
-            throw new SyntaxErrorException()
+            throw new CommonException()
               .setCode(ExceptionCode.DUPLICATE_ELEMENT)
               .set("message", "Modules output interconnect")
               .set("signal", i)
@@ -167,55 +265,106 @@ public class Sorter implements IToStringBuildable {
     }
   }
 
-  private ArrayList<Triple<Module, Module, Integer>> delayedEdges;
+  //------------------------------------------------------- Feedback Treatment.
 
   /**
-   *  Creates and returns a directed graph where vertices are
-   *  modules and edges represents modules connections.
+   *  Breaks a feedback, cycle in the directed graph, which contain a
+   *  particular vertex, module.
    */
-  protected void initGraph() {
+  private void breakFeedback() {
 
-    delayedEdges = new ArrayList<Triple<Module, Module, Integer>>();
-
-    // add edges into the graph
-    for (Module module : graph.vertexSet()) {
-      // add edges for all of the module input
-      addEdges(module);
-    }
-
-    // add edges with default value
-    for (Triple<Module, Module, Integer> edge : delayedEdges) {
-      try {
-        // try to add it to the graph
-        graph.addEdge(edge.getLeft(), edge.getMiddle());
-      } catch (IllegalArgumentException e) {
-        // treated cycle detected
-        // TODO
-        System.out.println("treated cycle detected");
+    CycleDetector<Module, DefaultEdge> cycleDetector
+      = new CycleDetector<Module, DefaultEdge>(graph);
+    while (cycleDetector.detectCycles()) {
+      // find cycles
+      DirectedSimpleCycles<Module, DefaultEdge> cycleFinder
+        = new TarjanSimpleCycles<Module, DefaultEdge>(graph);
+      List<List<Module>> cycles = cycleFinder.findSimpleCycles();
+      // go through all of the cycles a break them
+      for (List<Module> cycle : cycles) {
+        for (Module srcModule : cycle) {
+          Collection<Module> destModules
+            = Graphs.successorListOf(graph, srcModule);
+          destModules = CollectionUtils.intersection(cycle, destModules);
+          for (Module destModule : destModules) {
+            if (hasEdgeDefaultValue(srcModule, destModule)) {
+              breakEdge(srcModule, destModule);
+              return;
+            }
+          }
+        }
+        // The cycle is not breakable
+        throw new CommonException()
+          .setCode(ExceptionCode.CYCLIC_DEFINITION)
+          .set("message", "The graph contains unbreakable cycle!");
       }
     }
 
   }
 
   /**
-   *
+   *  Returns true if and only if all of the signals that are connected
+   *  from source module to the target module has default values defined.
+   *  If there is no such connection between the given modules, it returns
+   *  false.
    */
-  protected void addEdges(Module module) {
+  private boolean hasEdgeDefaultValue(Module source, Module target) {
+    boolean connected = false; // if there is connection between modules
+    for (Output output : source.getOutput()) {
+      for (Input input : target.getInput()) {
+        if (output.isConnected() && input.isConnected()
+            && output.getPointer() == input.getPointer()) {
+          connected = true;
+          if (!input.getSignal().isValueT_1Specified()) {
+            return false;
+          }
+        }
+      }
+    }
+    return connected ? true : false;
+  }
 
-    // for all of the input signals of the module
-    for (int i = 0; i < module.getInputSize(); i++) {
-      Input input = module.getInput(i);
-      if (input != null) {
-        Module sourceModule = getSourceModule(input.getPointer());
-        if (sourceModule != null) {
-          // TODO: if the signal has default value specified  postphone the edge
-          graph.addEdge(sourceModule, module);
-        } else {
-          // TODO: there is no output for the input !
+  /**
+   *  Breaks the direct connection between two modules.
+   */
+  private void breakEdge(Module source, Module target) {
+    // remove the broken edge from the graph
+    graph.removeEdge(source, target);
+    for (Output output : source.getOutput()) {
+      for (Input input : target.getInput()) {
+        if (output.isConnected() && input.isConnected()
+            && output.getPointer() == input.getPointer()) {
+          // if the signal connects the given modules, break it
+          // Create a shared handover place.
+          MutableObject<control4j.Signal> sharedSignal
+            = new MutableObject<control4j.Signal>();
+          sharedSignal.setValue(
+              input.getSignal().isValueT_1Valid()
+              ? control4j.Signal.getSignal(input.getSignal().getValueT_1())
+              : control4j.Signal.getSignal());
+          // Create new signal place for the source module
+          int brokenPointer = getSignalCount();
+          output.setPointer(brokenPointer);
+          // Create new output module.
+          FeedbackModule outModule = new FeedbackModule(
+              FeedbackModule.OUTPUT_CLASSNAME, sharedSignal);
+          Output brokenOutput = new Output();
+          brokenOutput.setPointer(input.getPointer());
+          outModule.putOutput(0, brokenOutput);
+          add(outModule);
+          // Create new input module
+          FeedbackModule inModule = new FeedbackModule(
+              FeedbackModule.INPUT_CLASSNAME, sharedSignal);
+          Input brokenInput = new Input();
+          brokenInput.setPointer(brokenPointer);
+          brokenInput.setSignal(input.getSignal());
+          add(inModule);
         }
       }
     }
   }
+
+  //-------------------------------------------------------------------- Other.
 
   @Override
   public String toString() {

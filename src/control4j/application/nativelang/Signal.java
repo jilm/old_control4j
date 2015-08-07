@@ -23,6 +23,9 @@ import static org.apache.commons.lang3.Validate.notNull;
 import static org.apache.commons.lang3.StringUtils.trim;
 import org.apache.commons.collections4.ListUtils;
 
+import cz.lidinsky.tools.CommonException;
+import cz.lidinsky.tools.ExceptionCode;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -84,6 +87,39 @@ public class Signal extends DescriptionBase implements IDefinition {
         + getDeclarationReference()));
     isValueT_1Specified = true;
     isValueT_1Valid = true;
+  }
+
+  /**
+   *  Returns true if and only if the default value is specified for this
+   *  signal.
+   */
+  boolean isDefaultValueSpecified() {
+    return isValueT_1Specified;
+  }
+
+  /**
+   *  Returns true if the specified default value should be valid.
+   */
+  boolean isDefaultValueValid() {
+    return isValueT_1Valid;
+  }
+
+  String getDefaultValue() {
+    if (!isValueT_1Specified) {
+      throw new CommonException()
+        .setCode(ExceptionCode.ILLEGAL_STATE)
+        .set("message", "Default value for this signal was not specified!")
+        .set("name", name)
+        .set("scope", scope);
+    } else if (!isValueT_1Valid) {
+      throw new CommonException()
+        .setCode(ExceptionCode.ILLEGAL_STATE)
+        .set("message", "Default value for this signal is not valid!")
+        .set("name", name)
+        .set("scope", scope);
+    } else {
+      return valueT_1;
+    }
   }
 
   //---------------------------------------------------------------------- Tags

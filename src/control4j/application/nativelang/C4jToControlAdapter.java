@@ -248,6 +248,14 @@ public class C4jToControlAdapter extends AbstractAdapter {
       translated.putTag(tag.getName(), translatedTag);
     }
     // TODO: other signal properties!
+    if (signal.isDefaultValueSpecified()) {
+      if (signal.isDefaultValueValid()) {
+        translated.setValueT_1(signal.getDefaultValue());
+      } else {
+        translated.setValueT_1Invalid();
+      }
+    }
+    // put signal further
     handler.putSignal(
         signal.getName(),
         resolveScope(signal.getScope(), localScope),

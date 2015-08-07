@@ -23,22 +23,23 @@ import static org.apache.commons.lang3.Validate.notBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static control4j.tools.LogMessages.getMessage;
+import static control4j.tools.Logger.*;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 import java.util.NoSuchElementException;
+import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Triple;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 
-import control4j.SyntaxErrorException;
-import control4j.ExceptionCode;
+import cz.lidinsky.tools.CommonException;
+import cz.lidinsky.tools.ExceptionCode;
 import control4j.tools.DeclarationReference;
-import static control4j.tools.Logger.*;
 
 import cz.lidinsky.tools.ToStringBuilder;
 
@@ -61,11 +62,9 @@ public class Module extends Configurable {
    */
   public Module(String className) {
     if (isBlank(className)) {
-      throw new SyntaxErrorException()
+      throw new CommonException()
         .setCode(ExceptionCode.ILLEGAL_ARGUMENT)
-        .set("message", "Blank className")
-        .set("method", "constructor")
-        .set("class", getClass().getName());
+        .set("message", "Module class name may not be blank!");
     } else {
       this.className = trim(className);
     }
@@ -90,8 +89,10 @@ public class Module extends Configurable {
   //--------------------------------------------------------------------- Input
 
   /**
-   *  Array of the input objects. Each input is placed on specifie index,
-   *  so, the array may contain null values. Indexes of some input may not
+   *  Array of the input objects. Index of each input is significant.
+   *  It coresponds with the order in which the module receives the
+   *  input signals to process.
+   *  Indexes of some input may not
    *  be resolved until the module instantiation. Such input objects are
    *  stored at the end of the buffer.
    */
@@ -118,15 +119,12 @@ public class Module extends Configurable {
       inputArray = new ArrayList<Input>();
     }
     // add input
-    try {
-      variableInputIndex = put(inputArray, index, input, variableInputIndex);
-    } catch (SyntaxErrorException se) {
-      throw new SyntaxErrorException()
-        .setCode(ExceptionCode.DUPLICATE_ELEMENT)
-        .setCause(se)
-        .set("method", "putInput")
-        .set("module", toString());
-    }
+    variableInputIndex = put(
+        inputArray,
+        index,
+        input == null ? immutableDisconnectedInput : input,
+        variableInputIndex,
+        immutableDisconnectedInput);
   }
 
   /**
@@ -147,13 +145,13 @@ public class Module extends Configurable {
    *  @param input
    *             an object to be added
    *
-   *  @throws SyntaxErrorException
+   *  @throws CommonException
    *             if the input argument is null
    */
   public void putInput(Input input) {
     // param check
     if (input == null) {
-      throw new SyntaxErrorException()
+      throw new CommonException()
         .setCode(ExceptionCode.ILLEGAL_ARGUMENT)
         .set("message", "Null argument")
         .set("method", "putInput")
@@ -177,30 +175,26 @@ public class Module extends Configurable {
    *
    */
   public void setVariableInputStartIndex(int index) {
-    try {
-      if (inputArray == null) {
-        // if there is no input at all, do nothing
-      } else if (inputArray.size() == variableInputIndex) {
-        // if there is no variable input, do nothing
-      } else if (index < 0) {
-        throw new SyntaxErrorException()
-          .setCode(ExceptionCode.INDEX_OUT_OF_BOUNDS)
-          .set("message", "Negative index")
-          .set("index", index);
-      } else if (index < variableInputIndex) {
-        throw new SyntaxErrorException()
-          .set("message", "Module input index colision")
-          .set("input array size", inputArray.size())
-          .set("variable index", variableInputIndex)
-          .set("desired index", index);
-      } else {
-        shift(inputArray, variableInputIndex, index - variableInputIndex);
-        variableInputIndex = inputArray.size();
-      }
-    } catch (SyntaxErrorException se) {
-      se.set("method", "setVariableInputStartIndex")
-        .set("module", toString());
-      throw se;
+    if (inputArray == null) {
+      // if there is no input at all, do nothing
+    } else if (inputArray.size() == variableInputIndex) {
+      // if there is no variable input, do nothing
+    } else if (index < 0) {
+      throw new CommonException()
+        .setCode(ExceptionCode.INDEX_OUT_OF_BOUNDS)
+        .set("message", "Negative index")
+        .set("index", index);
+    } else if (index < variableInputIndex) {
+      throw new CommonException()
+        .set("message", "Module input index colision")
+        .set("input array size", inputArray.size())
+        .set("variable index", variableInputIndex)
+        .set("desired index", index);
+    } else {
+      shift(inputArray,
+          variableInputIndex, index - variableInputIndex,
+          immutableDisconnectedInput);
+      variableInputIndex = inputArray.size();
     }
   }
 
@@ -218,6 +212,7 @@ public class Module extends Configurable {
   /**
    *  Returns input with given index.
    */
+  @Deprecated
   public Input getInput(int index) {
     try {
       if (inputArray == null) {
@@ -226,13 +221,50 @@ public class Module extends Configurable {
         return inputArray.get(index);
       }
     } catch (IndexOutOfBoundsException e) {
-      throw new SyntaxErrorException()
+      throw new CommonException()
         .setCause(e)
         .set("method", "getInput")
         .set("index", index)
         .set("module", toString());
     }
   }
+
+  /**
+   *  Returns a list with all of the input of this module. The return list
+   *  is unmodifiable.
+   *  Array of the input objects. Index of each input is significant.
+   *  It coresponds with the order in which the module receives the
+   *  input signals to process.
+   *  Indexes of some input may not
+   *  be resolved until the module instantiation. Such input objects are
+   *  stored at the end of the buffer.
+   */
+  public List<Input> getInput() {
+    return inputArray == null
+      ? Collections.<Input>emptyList()
+      : Collections.unmodifiableList(inputArray);
+  }
+
+  /**
+   *  This object is placed on the unassigned places in the inputArray.
+   */
+  private static final Input immutableDisconnectedInput = new Input() {
+    @Override public int getPointer() {
+      return -1;
+    }
+    @Override public Signal getSignal() {
+      return null;
+    }
+    @Override public void setPointer(int pointer) {
+      throw new UnsupportedOperationException();
+    }
+    @Override public void setSignal(Signal signal) {
+      throw new UnsupportedOperationException();
+    }
+    @Override public boolean isConnected() {
+      return false;
+    }
+  };
 
   //-------------------------------------------------------------------- Output
 
@@ -265,15 +297,12 @@ public class Module extends Configurable {
       outputArray = new ArrayList<Output>();
     }
     // add output
-    try {
-      variableOutputIndex
-        = put(outputArray, index, output, variableOutputIndex);
-    } catch (SyntaxErrorException se) {
-      throw new SyntaxErrorException()
-        .setCause(se)
-        .set("method", "putOutput")
-        .set("module", toString());
-    }
+    variableOutputIndex
+      = put(outputArray,
+          index,
+          output == null ? immutableDisconnectedOutput : output,
+          variableOutputIndex,
+          immutableDisconnectedOutput);
   }
 
   /**
@@ -294,16 +323,15 @@ public class Module extends Configurable {
    *  @param output
    *             an object to be added
    *
-   *  @throws SyntaxErrorException
+   *  @throws CommonException
    *             if the output argument is null
    */
   public void putOutput(Output output) {
     // param check
     if (output == null) {
-      throw new SyntaxErrorException()
+      throw new CommonException()
         .setCode(ExceptionCode.ILLEGAL_ARGUMENT)
         .set("message", "Null argument")
-        .set("method", "putOutput")
         .set("module", toString());
     }
     // lazy buffer
@@ -330,21 +358,22 @@ public class Module extends Configurable {
       } else if (outputArray.size() == variableOutputIndex) {
         // if there is no variable output, do nothing
       } else if (index < 0) {
-        throw new SyntaxErrorException()
+        throw new CommonException()
           .setCode(ExceptionCode.INDEX_OUT_OF_BOUNDS)
           .set("message", "Negative index")
           .set("index", index);
       } else if (index < variableOutputIndex) {
-        throw new SyntaxErrorException()
+        throw new CommonException()
           .set("message", "Module output index colision")
           .set("output array size", outputArray.size())
           .set("variable index", variableOutputIndex)
           .set("desired index", index);
       } else {
-        shift(outputArray, variableOutputIndex, index - variableOutputIndex);
+        shift(outputArray, variableOutputIndex, index - variableOutputIndex,
+            immutableDisconnectedOutput);
         variableOutputIndex = outputArray.size();
       }
-    } catch (SyntaxErrorException se) {
+    } catch (CommonException se) {
       se.set("method", "setVariableOutputStartIndex")
         .set("module", toString());
       throw se;
@@ -373,13 +402,44 @@ public class Module extends Configurable {
         return outputArray.get(index);
       }
     } catch (IndexOutOfBoundsException e) {
-      throw new SyntaxErrorException()
+      throw new CommonException()
         .setCause(e)
         .set("index", index)
         .set("method", "getOutput")
         .set("module", toString());
     }
   }
+
+  /**
+   *  Returns a list with all of the output of this module. The return list
+   *  is unmodifiable. Each output is placed on specified index,
+   *  so, the list may contain null values. Indexes of some output may not
+   *  be resolved until the module instantiation. Such output objects are
+   *  stored at the end of the buffer.
+   */
+  public List<Output> getOutput() {
+    return outputArray == null
+      ? Collections.<Output>emptyList()
+      : Collections.unmodifiableList(outputArray);
+  }
+
+  private static final Output immutableDisconnectedOutput = new Output() {
+    @Override public int getPointer() {
+      return -1;
+    }
+    public Signal getSignal() {
+      return null;
+    }
+    @Override public void setPointer(int pointer) {
+      throw new UnsupportedOperationException();
+    }
+    public void setSignal(Signal signal) {
+      throw new UnsupportedOperationException();
+    }
+    @Override public boolean isConnected() {
+      return false;
+    }
+  };
 
   //----------------------------------------------------------------- Resources
 
@@ -402,19 +462,19 @@ public class Module extends Configurable {
         resources.put(trim(key), notNull(resource));
       } else if (isBlank(key)) {
         // key not specified
-        throw new SyntaxErrorException()
+        throw new CommonException()
           .setCode(ExceptionCode.ILLEGAL_ARGUMENT)
           .set("message", "Module multiple resources, key not specified")
           .set("key", key)
           .set("resource", resource);
       } else {
         // key specified, but single resource has been already put
-        throw new SyntaxErrorException()
+        throw new CommonException()
           .setCode(ExceptionCode.ILLEGAL_ARGUMENT)
           .set("message",
               "Module multiple resources, there is a keylees resource");
       }
-    } catch (SyntaxErrorException se) {
+    } catch (CommonException se) {
       se.set("method", "putResource")
         .set("class", getClass().getName())
         .set("module", toString());
@@ -439,7 +499,7 @@ public class Module extends Configurable {
     } else {
       Resource result = resources.get(key); // TODO
       if (result == null) {
-        throw new SyntaxErrorException()
+        throw new CommonException()
           .setCode(ExceptionCode.NO_SUCH_ELEMENT)
           .set("key", key)
           .set("method", "getResource")
@@ -473,7 +533,7 @@ public class Module extends Configurable {
     } else if (resources.size() == 1) {
       return resources.values().iterator().next();
     } else {
-      throw new SyntaxErrorException()
+      throw new CommonException()
         .setCode(ExceptionCode.ILLEGAL_STATE)
         .set("message", "Not only resource of the module")
         .set("method", "getResource()")
@@ -482,63 +542,74 @@ public class Module extends Configurable {
     }
   }
 
-  //----------------------------------------------------------- Private Methods
+  //-------------------------------------------------------- Auxiliary Methods.
 
   /**
    *  Place given element into the given list at the specified index.
+   *  The given List is enlarged if necessary.
    *
+   *  @param list
+   *             a list where the element should be placed
+   *
+   *  @param index
+   *             an index in the list where the element should be placed
+   *
+   *  @param element
+   *             an object which will be put into the given list at the
+   *             given index.
+   *
+   *  @param variableIndex
+   *             if the index is greather than this value, the elements
+   *             on the position variableIndex to the end of the list will
+   *             be shifted to start at the index index + 1
+   *
+   *  @param fill
+   *             a value that will be placed on empty positions which may
+   *             arise during the list enlargement
    */
   private static <T> int put(
       ArrayList<T> list,
       int index,
       T element,
-      int variableIndex) {
+      int variableIndex,
+      T fill) {
 
-    try {
-      // argument check
-      if (element == null) {
-        throw new SyntaxErrorException()
-          .setCode(ExceptionCode.ILLEGAL_ARGUMENT)
-          .set("message", "Null argument")
-          .set("element", element);
-      }
-      if (index < 0) {
-        throw new SyntaxErrorException()
-          .setCode(ExceptionCode.INDEX_OUT_OF_BOUNDS)
-          .set("message", "Negative index")
-          .set("index", index);
-      }
-      // if the list is not big enough
-      shift(list, variableIndex, index - variableIndex + 1);
-      variableIndex = index + 1;
-      // place the element
-      list.set(index, element);
-      return variableIndex;
-    } catch (SyntaxErrorException se) {
-      se.set("method", "put")
-        .set("class", "application.Module");
-      throw se;
+    if (index < 0) {
+      throw new CommonException()
+        .setCode(ExceptionCode.INDEX_OUT_OF_BOUNDS)
+        .set("message", "Negative index")
+        .set("index", index);
     }
+    // if the list is not big enough
+    shift(list, variableIndex, index - variableIndex + 1, fill);
+    variableIndex = index + 1;
+    // place the element
+    list.set(index, element);
+    return variableIndex;
   }
 
   /**
-   *  Enlarge given list.
+   *  Enlarge given list. It will insert new positions to the list.
    *
    *  @param list
    *             a list to enlarge
    *
    *  @param index
-   *             where the null values shoud be placed. May not be
+   *             where the new values shoud be placed. May not be
    *             negative number and may not be greater than size
    *             of the list.
    *
    *  @param len
-   *             how many null values shoud be inserted. May be zero
+   *             how many new values shoud be inserted. May be zero
    *             or negative number, in such a case nothing happens
+   *
+   *  @param fill
+   *             a value that will be placed on the new positions
    */
-  private static <T> void shift(ArrayList<T> list, int index, int len) {
+  private static <T> void shift(
+      ArrayList<T> list, int index, int len, T fill) {
     for (int i = 0; i < len; i++) {
-      list.add(index, null);
+      list.add(index, fill);
     }
   }
 

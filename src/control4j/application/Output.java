@@ -35,6 +35,13 @@ public class Output extends Configurable
     return pointer;
   }
 
+  /**
+   *  Returns true if and only if this output is connected to some signal.
+   */
+  public boolean isConnected() {
+    return pointer >= 0;
+  }
+
   @Override
   public void toString(ToStringBuilder builder) {
     super.toString(builder);

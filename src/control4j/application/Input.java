@@ -57,4 +57,11 @@ public class Input extends Configurable {
     return signal;
   }
 
+  /**
+   *  Returns true if and only if this input is connected to some signal.
+   */
+  public boolean isConnected() {
+    return pointer >= 0;
+  }
+
 }
