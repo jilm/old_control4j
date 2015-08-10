@@ -1,5 +1,3 @@
-package control4j;
-
 /*
  *  Copyright 2013, 2014, 2015 Jiri Lidinsky
  *
@@ -18,40 +16,45 @@ package control4j;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import java.util.*;
-import java.io.*;
-import control4j.tools.DeclarationReference;
-import control4j.tools.Preferences;
-import control4j.application.Preprocessor;
-import control4j.application.Loader;
-import control4j.application.Sorter;
-import control4j.application.ErrorManager;
+package control4j;
+
 import static control4j.tools.Logger.*;
 import static control4j.tools.LogMessages.*;
 
-public class Control
-{
-  private static ControlLoop controlLoop = new ControlLoop();
-  private static Preferences preferences;
+import control4j.application.ErrorManager;
+import control4j.application.Loader;
+import control4j.application.Preprocessor;
+import control4j.application.Sorter;
+import control4j.tools.DeclarationReference;
+import control4j.tools.Preferences;
 
-  private Control()
-  { }
+import org.apache.commons.collections4.IteratorUtils;
+
+/**
+ *
+ *  Entry point of the application.
+ *
+ *  <p>This object is a singleton.
+ *
+ */
+public class Control {
 
   /**
-   *  Expects the name of the project filename as the last
-   *  argument.
+   *  The entry point of the application.
+   *  Expects the project filename as the last command-line argument.
    */
-  public static void main(String[] args) throws Exception
-  {
+  public static void main(String[] args) throws Exception {
+
     info(getMessage("core01"));
     preferences = Preferences.getInstance();
-
     // process command line arguments
     preferences.parseCommandLineArgs(args);
-
+    // runs the application
     Control control = new Control();
     control.run();
   }
+
+  //---------------------------------------------------- Facade Access Methods.
 
   /**
    *  Returns required cycle period in ms. Returned value is taken
@@ -59,19 +62,30 @@ public class Control
    *
    *  @return required cycle period in ms
    */
-  public static int getCyclePeriod()
-  {
+  public static int getCyclePeriod() {
     return controlLoop.getCyclePeriod();
   }
 
   /**
-   *  Returns a time in ms when the last cycle was started.
+   *  Returns a time in ms when the last loop has been started.
    *
-   *  @return a time in ms when the last cycle was started
+   *  @return a time in ms when the last loop has been started
    */
-  public static long getCycleBeginningTime()
-  {
+  public static long getCycleBeginningTime() {
     return controlLoop.getCycleBeginningTime();
+  }
+
+  /**
+   *  Returns duration of the last loop in ms. During the first loop it
+   *  returns zero. This method is only a facade for method
+   *  {@link control4j.ControlLoop#getLastCycleDuration}
+   *
+   *  @return duration of the last cycle in ms
+   *
+   *  @see control4j.ControlLoop#getLastCycleDuration
+   */
+  public static long getLastCycleDuration() {
+    return controlLoop.getLastCycleDuration();
   }
 
   /**
@@ -81,73 +95,26 @@ public class Control
    *
    *  @see control4j.ControlLoop#exit
    */
-  public static void exit()
-  {
+  public static void exit() {
     controlLoop.exit();
   }
 
-  /**
-   *  Returns duration of the last cycle in ms. During the first cycle it
-   *  returns zero. This method is only a facade for method
-   *  {@link control4j.ControlLoop#getLastCycleDuration}
-   *
-   *  @return duration of the last cycle in ms
-   *
-   *  @see control4j.ControlLoop#getLastCycleDuration
-   */
-  public static long getLastCycleDuration()
-  {
-    return controlLoop.getLastCycleDuration();
-  }
-
-  /*--------------------------------------------------------------
-     Private methods
-  --------------------------------------------------------------*/
+  //------------------------------------------------------------------ Private.
 
   /**
-   *
-  private Application loadApplication(Project project, File parentPath)
-  {
-    int fatalErrors = 0;
-    fine(getMessage("core06"));
-    ReaderFactory factory = ReaderFactory.getInstance();
-    Application application = new Application();
-    for (ApplicationFilename file : project.getFilenames())
-    {
-      // create file object
-      File applicationFile = new File(file.getFilename());
-      if (!applicationFile.isAbsolute())
-        applicationFile = new File(parentPath, file.getFilename());
-      try
-      {
-        // get an appropriate reader for the application file
-        IApplicationReader reader = factory.getReader(file.getType());
-        // create an input stream
-        InputStream inputStream = new FileInputStream(applicationFile);
-        DeclarationReference fileReference = new DeclarationReference();
-        fileReference.setFile(applicationFile.getAbsolutePath());
-        reader.load(inputStream, application, fileReference);
-        inputStream.close();
-      }
-      catch (FileNotFoundException e)
-      {
-        severe(getMessage("core07", applicationFile.getAbsolutePath()));
-        fatalErrors ++;
-      }
-      catch (IOException e)
-      {
-        StringBuilder message = new StringBuilder();
-        message.append(getMessage("core08"))
-               .append('n')
-               .append(e.getMessage());
-        severe(message.toString());
-        fatalErrors ++;
-      }
-    }
-    if (fatalErrors > 0) exit(1);
-    return application;
-  }
+   *  The control loop object.
    */
+  private static ControlLoop controlLoop = new ControlLoop();
+
+  /**
+   *  Preferences.
+   */
+  private static Preferences preferences;
+
+  /**
+   *  Prevents instantiation of the object.
+   */
+  private Control() { }
 
   /**
    *
@@ -157,73 +124,30 @@ public class Control
     String filename = preferences.getProject();
     java.io.File file = new java.io.File(filename);
 
-    Sorter sorter = new Sorter();
+    Preprocessor preprocessor = new Preprocessor();
 
-    Preprocessor preprocessor = new Preprocessor(sorter);
+    new Loader(preprocessor).load(file);
 
-    new Loader(preprocessor)
-      .load(file);
+    controlLoop
+      .addAll(
+          IteratorUtils.asIterable(
+            IteratorUtils.transformedIterator(
+              new Sorter().addAll(preprocessor).iterator(),
+              new Instantiator())))
+      .setAll(preprocessor.getConfiguration());
 
-    preprocessor.process();
-
-    Instantiator instantiator = new Instantiator(controlLoop);
-    sorter.process(instantiator);
-    ErrorManager.print();
+    // cleen-up
+    file = null;
+    preprocessor = null;
+    // run the control loop
     controlLoop.run();
   }
 
   /**
-   *
+   *  Thread to cleen up when exiting
    */
-  /*
-  private Project loadProject(File projectFile)
-  {
-    info(getMessage("core02", projectFile.getAbsolutePath()));
-    try
-    {
-      InputStream inputStream = new FileInputStream(projectFile);
-      control4j.project.Reader reader = new control4j.project.Reader();
-      Project project = reader.load(inputStream);
-      inputStream.close();
-      fine(getMessage("core05"));
-      return project;
-    }
-    catch (FileNotFoundException e)
-    {
-      severe(getMessage("core03", projectFile.getAbsolutePath()));
-      exit(1);
-      return null;
-    }
-    catch (IOException e)
-    {
-      StringBuilder message = new StringBuilder();
-      message.append(getMessage("core04"));
-      message.append('\n');
-      message.append(e.getMessage());
-      severe(message.toString());
-      exit(1);
-      return null;
-    }
-  }
-  */
-
-  /**
-   *
-   */
-  private void exit(int param)
-  {
-    System.exit(param);
-  }
-
-  /**
-   *
-   *      Thread to cleen up when exiting
-   *
-   */
-  class CleenUp extends Thread
-  {
-    public void run()
-    {
+  class CleenUp extends Thread {
+    public void run() {
       info("Exitting the JControl application");
     }
   }

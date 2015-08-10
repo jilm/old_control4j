@@ -26,6 +26,7 @@ import static control4j.tools.LogMessages.getMessage;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.NoSuchElementException;
 import java.util.Map;
@@ -62,18 +63,23 @@ import control4j.tools.DuplicateElementException;
  *  Application preprocessing.
  *
  */
-public class Preprocessor implements IToStringBuildable {
-
-  private Sorter handler;
+public class Preprocessor implements Iterable<Module>, IToStringBuildable {
 
   /**
    *  Empty constructor
    */
-  public Preprocessor(Sorter handler) {
-    this.handler = handler;
-  }
+  public Preprocessor() { }
 
   //---------------------------------------------------------- Public Interface
+
+  public Iterator<Module> iterator() {
+    process();
+    return modules.iterator();
+  }
+
+  public Map<String, Property> getConfiguration() {
+    return configuration;
+  }
 
   /** Holds actual scope during the process of translation. */
   private Scope scopePointer = Scope.getGlobal();
@@ -559,13 +565,13 @@ public class Preprocessor implements IToStringBuildable {
 
     // Send configuration
     for (String key : configuration.keySet()) {
-      handler.set(key, configuration.get(key));
+      //handler.set(key, configuration.get(key));
     }
 
     // Sends all of the modules
-    while (!modules.isEmpty()) {
-      handler.add(modules.pop());
-    }
+    //while (!modules.isEmpty()) {
+      //handler.add(modules.pop());
+    //}
 
     // print errors
     ErrorManager.print();

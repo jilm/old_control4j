@@ -20,18 +20,12 @@ package control4j.application;
 
 import static cz.lidinsky.tools.Validate.notNull;
 
-import cz.lidinsky.tools.ExceptionCode;
 import cz.lidinsky.tools.CommonException;
-import control4j.Instantiator;
-
+import cz.lidinsky.tools.ExceptionCode;
 import cz.lidinsky.tools.IToStringBuildable;
 import cz.lidinsky.tools.ToStringBuilder;
 import cz.lidinsky.tools.ToStringMultilineStyle;
-
-import org.apache.commons.lang3.mutable.MutableObject;
-import org.apache.commons.lang3.tuple.Triple;
-import org.apache.commons.lang3.tuple.ImmutableTriple;
-import org.apache.commons.collections4.CollectionUtils;
+//import control4j.Instantiator;
 
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.Graphs;
@@ -44,12 +38,18 @@ import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.DirectedSubgraph;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Arrays;
+import org.apache.commons.lang3.mutable.MutableObject;
+//import org.apache.commons.lang3.tuple.Triple;
+//import org.apache.commons.lang3.tuple.ImmutableTriple;
+import org.apache.commons.collections4.CollectionUtils;
+
+//import java.util.ArrayDeque;
+//import java.util.ArrayList;
+//import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
+//import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -57,64 +57,101 @@ import java.util.Set;
  *
  *  Performs a toplogical sort of the modules.
  *
+ *  <p>At first, use method add or addAll to add all of the application
+ *  modules. Than use the iterator to get the topological order.
+ *
  */
-public class Sorter implements IToStringBuildable {
+public class Sorter implements Iterable<Module>, IToStringBuildable {
 
   /**
    *  Creates an empty object.
    */
   public Sorter() { }
 
-  //---------------------------------------------------------- Public Interface
+  //--------------------------------------------------------- Public Interface.
 
   /**
-   *  Adds a module.
+   *  Adds a module into the internal graph. All of the modules must be
+   *  added to get the toplogical order. If the module is already present
+   *  in the internal graph, nothing happens.
+   *
+   *  @param module
+   *             a module to add into the internal graph
+   *
+   *  @throws CommonException
+   *             if the parameter contains <code>null</code> value
+   *
+   *  @throws CommonException
+   *             with code <code>DUPLICATE_ELEMENT</code> if there already
+   *             is a module with output into the same signal as this one
    */
-  void add(Module module) {
-    dirty = true;
-    graph.addVertex(module);
-    addEdges(module);
+  public Sorter add(Module module) {
+    if (!graph.addVertex(notNull(module))) {
+      // mark the graph as dirty
+      dirty = true;
+      unresolved.add(module);
+      addToSignalIndex(module);
+    }
+    return this;
   }
-
-  /** Global configuration. */
-  private HashMap<String, Property> configuration
-      = new HashMap<String, Property>();
 
   /**
-   *  Sets global configuration.
+   *  Adds all of the given modules.
    */
-  public void set(String key, Property value) {
-    configuration.put(key, value);
-    // TODO:
+  public Sorter addAll(Iterable<Module> modules) {
+    for (Module module : modules) {
+      add(module);
+    }
+    return this;
   }
 
+  /**
+   *  Returns the topological order iterator.
+   *
+   *  @throws CommonException
+   *             with code <code>NO_SUCH_ELEMENT</code> if there is no
+   *             source module for some input of some target module
+   *
+   *  @throws CommonException
+   *             with code <code>CYCLIC_DEFINITION</code> if there is an
+   *             unbreakable feedback within the graph
+   */
+  public Iterator<Module> iterator() {
+    // prepare graph
+    process();
+    // create iterator
+    return new TopologicalOrderIterator<Module, DefaultEdge>(graph);
+  }
+
+  //--------------------------------------------------------------- Processing.
+
+  /**
+   *  Signalize that sice last processing, the change in the graph occured
+   *  and that the new processing is necessary to get uptodate results.
+   */
   private boolean dirty = false;
 
   /**
-   *  Provides a topological sort of the modules.
+   *  Provides preprocessing before the results may be obtained.
+   *
+   *  @throws CommonException
+   *             with code <code>NO_SUCH_ELEMENT</code> if there is no
+   *             source module for some input of some target module
+   *
+   *  @throws CommonException
+   *             with code <code>CYCLIC_DEFINITION</code> if there is an
+   *             unbreakable feedback within the graph
    */
-  public void process(Instantiator handler) {
+  protected void process() {
 
-    if (!isResolved()) {
-      throw new CommonException()
-        .setCode(ExceptionCode.ILLEGAL_STATE)
-        .set("message", "The graph is still not complete!");
-    }
+    addEdges();
 
+    // break all of the feedbacks
     while (dirty) {
+      dirty = false;
       // break cycles
       breakFeedback();
     }
-
-    // perform sorting
-    TopologicalOrderIterator<Module, DefaultEdge> topolIter
-        = new TopologicalOrderIterator<Module, DefaultEdge>(graph);
-    while (topolIter.hasNext()) {
-      handler.instantiate(topolIter.next());
-    }
-
-    ErrorManager.print();
-
   }
 
   //--------------------------------------------------- The Graph Manipulation.
@@ -137,23 +174,15 @@ public class Sorter implements IToStringBuildable {
   }
 
   /**
-   *  Adds all of the incoming and otgoing edges of that module. If there
-   *  is some input unresolved (the source module is not in the graph yet)
-   *  than this module is temporarily stored in the unresolved set.
+   *  Adds edges to the graph for all of the modules in the unresolved set.
+   *
+   *  @throws CommonException
+   *             with code <code>NO_SUCH_ELEMENT</code> if there is no
+   *             source module for some input of some target module
    */
-  private void addEdges(Module module) {
-    // place the module into the output index
-    for (Output output : module.getOutput()) {
-      if (output.isConnected()) {
-        setSourceModule(output.getPointer(), module);
-      }
-    }
-    // place the module into the unresolved set
-    unresolved.add(module);
+  private void addEdges() {
     // try to resolve all of the unresolved modules
-    Set<Module> temp = unresolved;
-    unresolved = new HashSet<Module>();
-    for (Module target : temp) {
+    for (Module target : unresolved) {
       for (Input input : target.getInput()) {
         // add edge into the graph
         if (input.isConnected()) {
@@ -161,12 +190,17 @@ public class Sorter implements IToStringBuildable {
             Module source = getSourceModule(input.getPointer());
             graph.addEdge(source, target);
           } catch (Exception e) {
-            // the source module is still not available
-            unresolved.add(target);
+            throw new CommonException()
+              .setCode(ExceptionCode.NO_SUCH_ELEMENT)
+              .setCause(e)
+              .set("message", "There is no source module for some input!")
+              .set("target module", target.getDeclarationReferenceText())
+              .set("input", input.getDeclarationReferenceText());
           }
         }
       }
     }
+    unresolved.clear();
   }
 
   //------------------------------------------------------------- Signal Index.
@@ -211,7 +245,7 @@ public class Sorter implements IToStringBuildable {
    *
    */
   private void setSourceModule(int signalPointer, Module module) {
-    // create buffer is necessary
+    // create buffer if necessary
     if (signalIndex == null) {
       signalIndex = new Module[signalPointer + 1];
     }
@@ -222,7 +256,17 @@ public class Sorter implements IToStringBuildable {
       signalIndex = newIndex;
     }
     // store the module
-    signalIndex[signalPointer] = module;
+    if (signalIndex[signalPointer] != null) {
+      throw new CommonException()
+        .setCode(ExceptionCode.DUPLICATE_ELEMENT)
+        .set("message", "Two or more module outputs are interconnected!")
+        .set("signal pointer", signalPointer)
+        .set("module1",
+            signalIndex[signalPointer].getDeclarationReferenceText())
+        .set("module2", module.getDeclarationReferenceText());
+    } else {
+      signalIndex[signalPointer] = module;
+    }
   }
 
   /**
@@ -234,34 +278,17 @@ public class Sorter implements IToStringBuildable {
 
   /**
    *  Fill-in the signal to module map.
+   *
+   *  @throws CommonException
+   *             with code <code>DUPLICATE_ELEMENT</code> if there already
+   *             is a module with output into the same signal as this one
    */
   protected void addToSignalIndex(Module module) {
-
-    try {
-      // add output with given index
-      for (int i = 0; i < module.getOutputSize(); i++) {
-        if (module.getOutput(i) != null) {
-          int out = module.getOutput(i).getPointer();
-          if (getSourceModule(out) == null) {
-            setSourceModule(out, module);
-          } else {
-            // more interconnected outputs
-            throw new CommonException()
-              .setCode(ExceptionCode.DUPLICATE_ELEMENT)
-              .set("message", "Modules output interconnect")
-              .set("signal", i)
-              .set("module1",
-                  getSourceModule(out).getDeclarationReferenceText())
-              .set("module2", module.getDeclarationReferenceText())
-              .set("method", "addToSignalIndex")
-              .set("class", getClass().getName());
-          }
-        }
+    // add output with given index
+    for (Output output : module.getOutput()) {
+      if (output.isConnected()) {
+          setSourceModule(output.getPointer(), module);
       }
-    } catch (SyntaxErrorException e) {
-      ErrorManager.newError()
-        .setCause(e)
-        .setCode(ErrorCode.SIGNAL_INDEX);
     }
   }
 
@@ -270,6 +297,10 @@ public class Sorter implements IToStringBuildable {
   /**
    *  Breaks a feedback, cycle in the directed graph, which contain a
    *  particular vertex, module.
+   *
+   *  @throws CommonException
+   *             with code <code>CYCLIC_DEFINITION</code> if there is an
+   *             unbreakable feedback within the graph
    */
   private void breakFeedback() {
 
@@ -369,13 +400,12 @@ public class Sorter implements IToStringBuildable {
   @Override
   public String toString() {
     return new ToStringMultilineStyle()
-      .append(this)
+      .append((IToStringBuildable)this)
       .toString();
   }
 
   public void toString(ToStringBuilder sb) {
-    sb.append("configuration", configuration)
-      .append("graph", graph);
+    sb.append("graph", graph);
   }
 
 }

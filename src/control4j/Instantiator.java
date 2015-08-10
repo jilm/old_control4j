@@ -25,6 +25,11 @@ import control4j.application.Output;
 import control4j.application.ErrorManager;
 import control4j.application.ErrorCode;
 
+import cz.lidinsky.tools.CommonException;
+import cz.lidinsky.tools.ExceptionCode;
+
+import org.apache.commons.collections4.Transformer;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Set;
@@ -34,16 +39,10 @@ import java.util.Set;
  *  A class which is responsible for modules instantiation.
  *
  */
-public class Instantiator {
+public class Instantiator
+implements Transformer<control4j.application.Module, ModuleCrate> {
 
-  /**
-   *  An object to send module instances.
-   */
-  private ControlLoop handler;
-
-  public Instantiator(ControlLoop handler) {
-    this.handler = handler;
-  }
+  public Instantiator() { }
 
   /**
    *  Creates the instance of the required module. The sequence is as
@@ -63,7 +62,7 @@ public class Instantiator {
    *  @param moduleDef
    *             object that contains definition the the requested module
    */
-  public void instantiate(control4j.application.Module moduleDef) {
+  public ModuleCrate transform(control4j.application.Module moduleDef) {
 
     String className = moduleDef.getClassName();
     try {
@@ -81,11 +80,12 @@ public class Instantiator {
       ModuleCrate moduleCrate
         = ModuleCrate.create(moduleInstance, inputMap, outputMap);
       // put module instance into the handler
-      handler.add(moduleCrate);
+      //handler.add(moduleCrate);
       // Register as an ICycleListener
-      if (moduleInstance instanceof ICycleEventListener) {
-        handler.addCycleEventListener((ICycleEventListener)moduleInstance);
-      }
+      //if (moduleInstance instanceof ICycleEventListener) {
+        //handler.addCycleEventListener((ICycleEventListener)moduleInstance);
+      //}
+      return moduleCrate;
     } catch (Exception e) {
       ErrorManager.newError()
         .setCode(ErrorCode.MODULE_INSTANTIATION)
@@ -94,13 +94,15 @@ public class Instantiator {
             .setCause(e)
             .set("class", className)
             .set("reference", moduleDef.getDeclarationReferenceText()));
+      throw new CommonException()
+        .setCause(e);
     }
 
   }
 
-  public void set(String key, String value) {
-    handler.set(key, value);
-  }
+  //public void set(String key, String value) {
+    //handler.set(key, value);
+  //}
 
   /**
    *  Creates and returns the input map for the given module definition.

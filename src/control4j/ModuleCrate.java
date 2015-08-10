@@ -43,6 +43,8 @@ abstract class ModuleCrate {
 
   abstract int getMaxSignalPointer();
 
+  abstract Module getModule();
+
   private static Signal[] inputArray;
 
   protected static Signal[] getInputArray(int size) {
@@ -96,6 +98,11 @@ abstract class ModuleCrate {
     }
 
     @Override
+      Module getModule() {
+        return module;
+      }
+
+    @Override
     void execute(DataBuffer buffer) {
       Signal[] input = buffer.get(inputMap);
       module.put(input, inputMap.length);
@@ -126,6 +133,11 @@ abstract class ModuleCrate {
         this.outputMap = new int[0];
       }
     }
+
+    @Override
+      Module getModule() {
+        return module;
+      }
 
     @Override
     void execute(DataBuffer buffer) {
@@ -172,6 +184,11 @@ abstract class ModuleCrate {
         this.outputMap = new int[0];
       }
     }
+
+    @Override
+      Module getModule() {
+        return module;
+      }
 
     @Override
     void execute(DataBuffer buffer) {

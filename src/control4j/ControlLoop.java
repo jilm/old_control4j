@@ -19,11 +19,14 @@ package control4j;
  */
 
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 
 import control4j.tools.Tools;
+import control4j.application.Property;
 
 import static control4j.tools.Logger.*;
 import static control4j.tools.LogMessages.*;
@@ -63,25 +66,36 @@ public class ControlLoop {
   /**
    *  It does nothing.
    */
-  ControlLoop()
-  { }
+  ControlLoop() { }
 
   private ArrayList<ModuleCrate> modules = new ArrayList<ModuleCrate>();
 
   private int dataBufferSize;
 
-  void add(ModuleCrate module) {
+  ControlLoop add(ModuleCrate module) {
     // Add module into the buffer
     modules.add(module);
+    // Register as cycle listener
+    if (module.getModule() instanceof ICycleEventListener) {
+      addCycleEventListener((ICycleEventListener)module.getModule());
+    }
     // Estimate total size of data buffer
     dataBufferSize = Math.max(dataBufferSize, module.getMaxSignalPointer());
+    return this;
+  }
+
+  ControlLoop addAll(Iterable<ModuleCrate> modules) {
+    for (ModuleCrate module : modules) {
+      add(module);
+    }
+    return this;
   }
 
   private long cyclePeriod = 1000;
 
   private long cycleDelay = 200;
 
-  void set(String key, String value) {
+  ControlLoop set(String key, String value) {
     try {
       if (key == null || value == null) {
         throw new AssertionError(); // should not happen
@@ -116,6 +130,14 @@ public class ControlLoop {
         .set("key", key)
         .set("value", value);
     }
+    return this;
+  }
+
+  ControlLoop setAll(Map<String, Property> configuration) {
+    for (Map.Entry<String, Property> entry : configuration.entrySet()) {
+      set(entry.getKey(), entry.getValue().getValue());
+    }
+    return this;
   }
 
   /**
