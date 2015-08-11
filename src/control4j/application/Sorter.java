@@ -80,7 +80,7 @@ public class Sorter implements Iterable<Module>, IToStringBuildable {
    *             is a module with output into the same signal as this one
    */
   public Sorter add(Module module) {
-    if (!graph.addVertex(notNull(module))) {
+    if (graph.addVertex(notNull(module))) {
       // mark the graph as dirty
       dirty = true;
       unresolved.add(module);
@@ -414,7 +414,9 @@ public class Sorter implements Iterable<Module>, IToStringBuildable {
   }
 
   public void toString(ToStringBuilder sb) {
-    sb.append("graph", graph);
+    sb.append("graph", graph)
+      .append("unresolved", unresolved)
+      .append("signal index", signalIndex);
   }
 
 }

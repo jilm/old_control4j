@@ -170,6 +170,7 @@ public class ControlLoop {
 
     info("Runnig control loop...");
     dataBuffer = new DataBuffer(dataBufferSize + 1);
+    ModuleCrate executedModule = null; // for dump purposes
     // prepare for execution
     try {
       ResourceManager.getInstance().prepare();
@@ -177,7 +178,7 @@ public class ControlLoop {
         module.prepare();
       }
     } catch (Exception e) {
-      dump(e);
+      dump(e, null);
       throw e;
     }
 
@@ -194,6 +195,7 @@ public class ControlLoop {
         // module execution
         fine("Start of module processing");
         for (ModuleCrate module : modules) {
+          executedModule = module;
           module.execute(dataBuffer);
         }
         fireCycleEndEvent();
@@ -227,7 +229,7 @@ public class ControlLoop {
         String message = getMessage("BrokenCycle");
         message = String.format(message, e.getMessage());
         warning(message);
-        dump(e);
+        dump(e, executedModule.getModule());
       }
   }
 
@@ -315,7 +317,7 @@ public class ControlLoop {
    *             an exception which interrupted control loop, may be
    *             null
    */
-  protected void dump(Exception cause)
+  protected void dump(Exception cause, Module module)
   {
     java.io.PrintWriter writer = null;
     if (dump)
@@ -348,8 +350,15 @@ public class ControlLoop {
       // write the resources
       ResourceManager.getInstance().dump(writer);
       // write the modules
+      writer.println("----- Modules ------");
+      for (ModuleCrate crate : modules) {
+        writer.println(crate.getModule().toString());
+      }
       //ModuleManager.getInstance().dump(writer);
-      //
+      writer.println("----- Executed module ------");
+      if (module != null) {
+        writer.println(module.toString());
+      }
       writer.println(
           new ToStringMultilineStyle()
               .toString());
