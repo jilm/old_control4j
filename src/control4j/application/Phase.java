@@ -19,6 +19,16 @@
 package control4j.application;
 
 public enum Phase {
+
+  NOT_SPECIFIED,
+
+  //------------------------------------------------------------- Preprocessor.
+
+  PREPROCESSOR,
   BLOCK_EXPANSION,
+  INPUT_RESOLVING,
+
+  //------------------------------------------------------------- Instantiator.
+
   MODULE_INSTANTIATION
 }

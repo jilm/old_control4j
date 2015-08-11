@@ -23,6 +23,8 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import cz.lidinsky.tools.CommonException;
 import cz.lidinsky.tools.ExceptionCode;
 
+import java.text.MessageFormat;
+
 /**
  *
  *  Represents one error.
@@ -53,10 +55,12 @@ public class ErrorRecord {
 
   //------------------------------------------------------------ Print Message.
 
+  private StringBuilder sb;
+
   @Override
   public String toString() {
 
-    StringBuilder sb = new StringBuilder();
+    sb = new StringBuilder();
 
     switch (phase) {
 
@@ -76,6 +80,18 @@ public class ErrorRecord {
             return defaultMessage();
         }
         break;
+
+      // problem during module input resolving
+      case INPUT_RESOLVING:
+        switch (getCauseCode()) {
+          case NO_SUCH_ELEMENT:
+            sb.append("Signal declaration for some module input is missing!\n");
+            append("Signal name: {0}\n", "name");
+            append("Signal scope: {0}\n", "scope");
+            break;
+          default:
+            return defaultMessage();
+        }
 
       // problem during module instantiation
       case MODULE_INSTANTIATION:
@@ -109,6 +125,32 @@ public class ErrorRecord {
       return "Unspecified error was detected!";
     } else {
       return cause.getMessage();
+    }
+  }
+
+  private void append(String text) {
+    if (text != null) {
+      sb.append(text);
+    }
+  }
+
+  private void append(String text, String key) {
+    if (text != null && key != null) {
+      sb.append(MessageFormat.format(text, getValue(key)));
+    }
+  }
+
+  private String getValue(String key) {
+    if (cause != null && key != null) {
+      if (cause instanceof CommonException) {
+        return ((CommonException)cause).get(key);
+      } else if ("message".equals(key)) {
+        return cause.getMessage();
+      } else {
+        return null;
+      }
+    } else {
+      return null;
     }
   }
 

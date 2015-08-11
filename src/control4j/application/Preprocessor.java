@@ -46,6 +46,8 @@ import org.apache.commons.lang3.tuple.Triple;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.commons.collections4.ListUtils;
 
+import cz.lidinsky.tools.CommonException;
+import cz.lidinsky.tools.ExceptionCode;
 import cz.lidinsky.tools.IToStringBuildable;
 import cz.lidinsky.tools.ToStringMultilineStyle;
 import cz.lidinsky.tools.ToStringBuilder;
@@ -55,7 +57,6 @@ import cz.lidinsky.tools.graph.IGraph;
 import static control4j.tools.Logger.*;
 
 import control4j.SyntaxErrorException;
-import control4j.ExceptionCode;
 import control4j.tools.DuplicateElementException;
 
 /**
@@ -406,13 +407,25 @@ public class Preprocessor implements Iterable<Module>, IToStringBuildable {
    *
    *  @throws NoSuchElementException
    */
-  protected Signal getSignal(String name, Scope scope)
-  {
-    notNull(name);
-    notNull(scope);
-    if (signals == null)  // TODO:
-      throw new NoSuchElementException();
-    return signals.get(name, scope);
+  protected Signal getSignal(String name, Scope scope) {
+    try {
+      if (signals == null) {
+        throw new CommonException()
+          .setCode(ExceptionCode.NO_SUCH_ELEMENT)
+          .set("message", "The signal scope map is empty")
+          .set("name", name)
+          .set("scope", scope);
+      } else {
+        return signals.get(name, scope);
+      }
+    } catch (Exception e) {
+      throw new CommonException()
+        .setCause(e)
+        .set("message", "Failed to get a signal declaration!")
+        .set("name", name)
+        .set("scope", scope)
+        .set("type", "signal");
+    }
   }
 
   /**
@@ -469,7 +482,7 @@ public class Preprocessor implements Iterable<Module>, IToStringBuildable {
         CycleDetector<Block, DefaultEdge> cycleDetector
           = new CycleDetector<Block, DefaultEdge>(blockGraph);
         if (cycleDetector.detectCycles()) {
-          throw new SyntaxErrorException()
+          throw new CommonException()
             .setCode(ExceptionCode.CYCLIC_DEFINITION)
             .set("block", block);
         }
@@ -539,8 +552,10 @@ public class Preprocessor implements Iterable<Module>, IToStringBuildable {
         inputRef.getDecorated().setPointer(pointer);
         inputRef.getDecorated().setSignal(signal);
         inputRef.getDecorated().putProperty("signal-name", inputRef.getHref());
-      } catch (NoSuchElementException e) {
-        // TODO: Signal was not defined!
+      } catch (Exception e) {
+        ErrorManager.newError()
+          .setPhase(Phase.INPUT_RESOLVING)
+          .setCause(e);
       }
     }
 
