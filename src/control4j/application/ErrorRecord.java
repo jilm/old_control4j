@@ -1,5 +1,3 @@
-package control4j.application;
-
 /*
  *  Copyright 2015 Jiri Lidinsky
  *
@@ -18,16 +16,31 @@ package control4j.application;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import control4j.ExceptionCode;
-import control4j.SyntaxErrorException;
+package control4j.application;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
+import cz.lidinsky.tools.CommonException;
+import cz.lidinsky.tools.ExceptionCode;
+
+/**
+ *
+ *  Represents one error.
+ *
+ */
 public class ErrorRecord {
 
-  private ErrorCode code;
+  /**
+   *  An empty constructor.
+   */
+  public ErrorRecord() {}
 
-  public ErrorRecord setCode(ErrorCode code) {
-    this.code = code;
+  //---------------------------------------------------------------- Modifiers.
+
+  private Phase phase;
+
+  public ErrorRecord setPhase(Phase phase) {
+    this.phase = phase;
     return this;
   }
 
@@ -38,13 +51,14 @@ public class ErrorRecord {
     return this;
   }
 
+  //------------------------------------------------------------ Print Message.
+
   @Override
   public String toString() {
 
     StringBuilder sb = new StringBuilder();
-    System.out.println(code);
 
-    switch (code) {
+    switch (phase) {
 
       // problem during block expansion
       case BLOCK_EXPANSION:
@@ -84,15 +98,10 @@ public class ErrorRecord {
     return sb.toString();
   }
 
+  //------------------------------------------------------------------ Private.
+
   private ExceptionCode getCauseCode() {
-    if (cause == null) {
-      return ExceptionCode.NOT_SPECIFIED;
-    } else if (cause instanceof SyntaxErrorException) {
-      return ((SyntaxErrorException)cause).getCode();
-    } else {
-      // TODO:
-      return ExceptionCode.NOT_SPECIFIED;
-    }
+    return CommonException.getCode(cause);
   }
 
   private String defaultMessage() {

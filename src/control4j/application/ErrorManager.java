@@ -1,5 +1,3 @@
-package control4j.application;
-
 /*
  *  Copyright 2015 Jiri Lidinsky
  *
@@ -18,21 +16,31 @@ package control4j.application;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import control4j.tools.DeclarationReference;
+package control4j.application;
+
 import static control4j.tools.Logger.*;
-import java.util.LinkedList;
+
+import control4j.tools.DeclarationReference;
+
+import cz.lidinsky.tools.CommonException;
+import cz.lidinsky.tools.ExceptionCode;
+
+import org.apache.commons.collections4.Closure;
+
+import java.util.ArrayDeque;
+import java.util.Iterator;
 
 /**
  *
- *  Provides a unified way to process and manage error messages.
+ *  Provides a unified way to process and manage error messages that
+ *  arise during the application loading and preprocessing.
  *
- *  <p>This class is singleton. There is only one instance of this
- *  object.
+ *  <p>This object is a singleton.
  *
  */
 public class ErrorManager {
 
-  //-------------------------------------------------- Singleton Implementation
+  //------------------------------------------------- Singleton Implementation.
 
   /** Error manager instance. */
   private static ErrorManager instance;
@@ -50,79 +58,62 @@ public class ErrorManager {
     return instance;
   }
 
-  //----------------------------------------------------------- Errors Handling
-
-  /** The list of fatal errors. */
-  private LinkedList<ErrorRecord> errors;
+  //--------------------------------------------------------- Public Interface.
 
   /**
-   *  Adds an error into the buffer.
+   *  Stores the error into the internal buffer. To report such postphoned
+   *  errors use method printErrorsAndExit.
    */
-  public void addError(String message) { }
-
   public static ErrorRecord newError() {
     ErrorRecord error = new ErrorRecord();
     ErrorManager manager = getInstance();
     if (manager.errors == null) {
-      manager.errors = new LinkedList<ErrorRecord>();
+      manager.errors = new ArrayDeque<ErrorRecord>();
     }
-    manager.errors.add(error);
+    manager.errors.push(error);
     return error;
   }
 
-  /**
-   *  Print all of the error messages.
-   */
-  public void printErrors() {
-    if (errors != null) {
-      for (ErrorRecord error : errors) {
-        System.out.println(error.toString());
-      }
-    }
-  }
-
-  //--------------------------------------------------------- Warnings Handling
-
-  /** The list of warnings. */
-  private LinkedList<String> warnings;
-
-  /**
-   *  Adds a warning into the buffer.
-   */
-  public void addWarning(String message)
-  {
-    if (warnings == null)
-      warnings = new LinkedList<String>();
-    warnings.add(message);
-  }
-
-  /**
-   *  Print all of the warning messages.
-   */
-  public void printWarnings() {
-    if (warnings != null) {
-      for (String message : warnings) {
-        warning(message);
-      }
-    }
-  }
-
-  //------------------------------------------------------------- Other Methods
-
-  /**
-   *  Print both the warnings and the errors. If there is at least
-   *  one error in the buffer, it exits the application.
-   */
-  public static void print() {
-    getInstance().printWarnings();
-    getInstance().printErrors();
-    if (getInstance().errors != null && getInstance().errors.size() > 0) {
+  public static void printAndExit() {
+    if (getInstance().printErrors()) {
       System.exit(1);
     }
   }
 
-  public void clean()
-  {
+  public static <T> ErrorManager forAllDo(
+      Iterator<T> collection, Closure<T> closure) {
+    if (collection != null && closure != null) {
+      while (collection.hasNext()) {
+        try {
+          T element = collection.next();
+          closure.execute(element);
+        } catch (Exception e) {
+          newError().setCause(e);
+        }
+      }
+    }
+    return getInstance();
+  }
+
+  //------------------------------------------------------------------ Private.
+
+  /** The list of fatal errors. */
+  private ArrayDeque<ErrorRecord> errors;
+
+  /**
+   *  Print all of the error messages.
+   *
+   *  @return true if there was at least one error in the buffer
+   */
+  private boolean printErrors() {
+    boolean nonEmpty = false;
+    if (errors != null) {
+      while (!errors.isEmpty()) {
+        System.out.println(errors.pop().toString());
+        nonEmpty = true;
+      }
+    }
+    return nonEmpty;
   }
 
 }

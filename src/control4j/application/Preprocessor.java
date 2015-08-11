@@ -124,8 +124,7 @@ public class Preprocessor implements Iterable<Module>, IToStringBuildable {
       definitions.put(name, scope, new ValueObject(value));
     } catch (SyntaxErrorException e) {
       ErrorManager.newError()
-        .setCause(e)
-        .setCode(ErrorCode.DEFINITION);
+        .setCause(e);
     }
   }
 
@@ -154,8 +153,7 @@ public class Preprocessor implements Iterable<Module>, IToStringBuildable {
       resources.put(name, scope, resource);
     } catch (SyntaxErrorException e) {
       ErrorManager.newError()
-        .setCause(e)
-        .setCode(ErrorCode.RESOURCE_DEFINITION);
+        .setCause(e);
     }
   }
 
@@ -171,8 +169,7 @@ public class Preprocessor implements Iterable<Module>, IToStringBuildable {
       blockGraph.addVertex(block);
     } catch (SyntaxErrorException e) {
       ErrorManager.newError()
-        .setCause(e)
-        .setCode(ErrorCode.BLOCK_DEFINITION);
+        .setCause(e);
     }
   }
 
@@ -214,8 +211,7 @@ public class Preprocessor implements Iterable<Module>, IToStringBuildable {
           new ImmutableTriple<String, Scope, Signal>(name, scope, signal));
     } catch (SyntaxErrorException e) {
       ErrorManager.newError()
-        .setCause(e)
-        .setCode(ErrorCode.SIGNAL_DEFINITION);
+        .setCause(e);
     }
   }
 
@@ -480,8 +476,7 @@ public class Preprocessor implements Iterable<Module>, IToStringBuildable {
       } catch (SyntaxErrorException e) {
         // block definition for given use is missing
         ErrorManager.newError()
-          .setCause(e)
-          .setCode(ErrorCode.BLOCK_EXPANSION);
+          .setCause(e);
       }
     }
 
@@ -496,8 +491,7 @@ public class Preprocessor implements Iterable<Module>, IToStringBuildable {
         reference.getDecorated().putConfiguration(resource);
       } catch (SyntaxErrorException e) {
         ErrorManager.newError()
-          .setCause(e)
-          .setCode(ErrorCode.RESOURCE_SUBSTITUTION);
+          .setCause(e);
       }
     }
 
@@ -509,8 +503,7 @@ public class Preprocessor implements Iterable<Module>, IToStringBuildable {
         reference.getDecorated().setValue(value);
       } catch (SyntaxErrorException e) {
         ErrorManager.newError()
-          .setCause(e)
-          .setCode(ErrorCode.PROPERTY_SUBSTITUTION);
+          .setCause(e);
       }
     }
 
@@ -574,7 +567,7 @@ public class Preprocessor implements Iterable<Module>, IToStringBuildable {
     //}
 
     // print errors
-    ErrorManager.print();
+    ErrorManager.printAndExit();
 
   }
 

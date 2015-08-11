@@ -25,7 +25,6 @@ import cz.lidinsky.tools.ExceptionCode;
 import cz.lidinsky.tools.IToStringBuildable;
 import cz.lidinsky.tools.ToStringBuilder;
 import cz.lidinsky.tools.ToStringMultilineStyle;
-//import control4j.Instantiator;
 
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.Graphs;
@@ -39,15 +38,10 @@ import org.jgrapht.graph.DirectedSubgraph;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 
 import org.apache.commons.lang3.mutable.MutableObject;
-//import org.apache.commons.lang3.tuple.Triple;
-//import org.apache.commons.lang3.tuple.ImmutableTriple;
+import org.apache.commons.collections4.Closure;
 import org.apache.commons.collections4.CollectionUtils;
 
-//import java.util.ArrayDeque;
-//import java.util.ArrayList;
-//import java.util.Arrays;
 import java.util.Collection;
-//import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -132,6 +126,12 @@ public class Sorter implements Iterable<Module>, IToStringBuildable {
   private boolean dirty = false;
 
   /**
+   *  A set that contains vertices that are still not resolved. Because
+   *  of missing source module.
+   */
+  private Set<Module> unresolved = new HashSet<Module>();
+
+  /**
    *  Provides preprocessing before the results may be obtained.
    *
    *  @throws CommonException
@@ -144,13 +144,28 @@ public class Sorter implements Iterable<Module>, IToStringBuildable {
    */
   protected void process() {
 
-    addEdges();
+    // add adges for all of the modules
+    ErrorManager
+      .forAllDo(
+          unresolved.iterator(),
+          new Closure<Module>() {
+            public void execute(Module target) {
+              addEdges(target);
+            }
+          })
+      .printAndExit();
+    unresolved.clear();
 
-    // break all of the feedbacks
-    while (dirty) {
-      dirty = false;
-      // break cycles
-      breakFeedback();
+    try {
+      // break feedbacks
+      while (dirty) {
+        dirty = false;
+        // break cycles
+        breakFeedback();
+      }
+    } catch (Exception e) {
+      ErrorManager.newError()
+        .setCause(e);
     }
   }
 
@@ -163,12 +178,6 @@ public class Sorter implements Iterable<Module>, IToStringBuildable {
   private DefaultDirectedGraph<Module, DefaultEdge> graph
         = new DefaultDirectedGraph<Module, DefaultEdge>(DefaultEdge.class);
 
-  /**
-   *  A set that contains vertices that are still not resolved. Because
-   *  of missing source module.
-   */
-  private Set<Module> unresolved = new HashSet<Module>();
-
   private boolean isResolved() {
     return unresolved.isEmpty();
   }
@@ -180,9 +189,9 @@ public class Sorter implements Iterable<Module>, IToStringBuildable {
    *             with code <code>NO_SUCH_ELEMENT</code> if there is no
    *             source module for some input of some target module
    */
-  private void addEdges() {
+  private void addEdges(Module target) {
     // try to resolve all of the unresolved modules
-    for (Module target : unresolved) {
+    //for (Module target : unresolved) {
       for (Input input : target.getInput()) {
         // add edge into the graph
         if (input.isConnected()) {
@@ -199,8 +208,8 @@ public class Sorter implements Iterable<Module>, IToStringBuildable {
           }
         }
       }
-    }
-    unresolved.clear();
+    //}
+    //unresolved.clear();
   }
 
   //------------------------------------------------------------- Signal Index.

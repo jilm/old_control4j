@@ -20,10 +20,12 @@ package control4j;
 
 import static control4j.tools.Logger.catched;
 import static control4j.tools.Logger.severe;
+
+import control4j.application.ErrorCode;
+import control4j.application.ErrorManager;
 import control4j.application.Input;
 import control4j.application.Output;
-import control4j.application.ErrorManager;
-import control4j.application.ErrorCode;
+import control4j.application.Phase;
 
 import cz.lidinsky.tools.CommonException;
 import cz.lidinsky.tools.ExceptionCode;
@@ -88,9 +90,9 @@ implements Transformer<control4j.application.Module, ModuleCrate> {
       return moduleCrate;
     } catch (Exception e) {
       ErrorManager.newError()
-        .setCode(ErrorCode.MODULE_INSTANTIATION)
+        .setPhase(Phase.MODULE_INSTANTIATION)
         .setCause(
-            new SyntaxErrorException()
+            new CommonException()
             .setCause(e)
             .set("class", className)
             .set("reference", moduleDef.getDeclarationReferenceText()));
@@ -119,7 +121,6 @@ implements Transformer<control4j.application.Module, ModuleCrate> {
         // module definition contains variable input, but the module
         // doesn't support it.
         ErrorManager.newError()
-          .setCode(ErrorCode.INPUT_MAP)
           .setCause(e);
         return null;
       }
@@ -159,7 +160,6 @@ implements Transformer<control4j.application.Module, ModuleCrate> {
         // module definition contains variable input, but the module
         // doesn't support it.
         ErrorManager.newError()
-          .setCode(ErrorCode.OUTPUT_MAP)
           .setCause(e);
         return null;
       }
