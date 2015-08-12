@@ -117,7 +117,7 @@ public class Control {
   private Control() { }
 
   /**
-   *
+   *  Loads an application from a file, builds the application, and runs it.
    */
   private void run() throws Exception {
 
@@ -128,14 +128,22 @@ public class Control {
 
     new Loader(preprocessor).load(file);
 
-    controlLoop
-      .addAll(
-          IteratorUtils.asIterable(
-            IteratorUtils.transformedIterator(
-              new Sorter().addAll(preprocessor).iterator(),
-              new Instantiator())))
-      .setAll(preprocessor.getConfiguration());
+    try {
 
+      controlLoop
+        .addAll(
+            IteratorUtils.asIterable(
+              IteratorUtils.transformedIterator(
+                new Sorter().addAll(preprocessor).iterator(),
+                new Instantiator())))
+        .setAll(preprocessor.getConfiguration());
+
+    } catch (Exception e) {
+      ErrorManager.newError().setCause(e);
+    }
+
+    // print errors
+    ErrorManager.printAndExit();
     // cleen-up
     file = null;
     preprocessor = null;

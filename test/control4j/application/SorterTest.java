@@ -27,6 +27,8 @@ public class SorterTest {
       .add(module2);
   }
 
+  //--------------------------------------------------- Topological Sort Tests.
+
   @Test
   public void test1() {
     System.out.println(sorter1.toString());

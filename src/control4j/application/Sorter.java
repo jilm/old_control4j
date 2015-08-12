@@ -144,23 +144,23 @@ public class Sorter implements Iterable<Module>, IToStringBuildable {
    */
   protected void process() {
 
-    // add adges for all of the modules
-    ErrorManager
-      .forAllDo(
-          unresolved.iterator(),
-          new Closure<Module>() {
-            public void execute(Module target) {
-              addEdges(target);
-            }
-          })
-      .printAndExit();
-    unresolved.clear();
-
     try {
-      // break feedbacks
       while (dirty) {
+
+        // add adges for all of the modules
+        ErrorManager
+          .forAllDo(
+              unresolved.iterator(),
+              new Closure<Module>() {
+                public void execute(Module target) {
+                  addEdges(target);
+                }
+              })
+          .printAndExit();
+        unresolved.clear();
         dirty = false;
-        // break cycles
+
+        // break feedbacks
         breakFeedback();
       }
     } catch (Exception e) {
@@ -265,7 +265,8 @@ public class Sorter implements Iterable<Module>, IToStringBuildable {
       signalIndex = newIndex;
     }
     // store the module
-    if (signalIndex[signalPointer] != null) {
+    if (signalIndex[signalPointer] != null
+        && signalIndex[signalPointer] != module) {
       throw new CommonException()
         .setCode(ExceptionCode.DUPLICATE_ELEMENT)
         .set("message", "Two or more module outputs are interconnected!")
@@ -320,7 +321,7 @@ public class Sorter implements Iterable<Module>, IToStringBuildable {
       DirectedSimpleCycles<Module, DefaultEdge> cycleFinder
         = new TarjanSimpleCycles<Module, DefaultEdge>(graph);
       List<List<Module>> cycles = cycleFinder.findSimpleCycles();
-      // go through all of the cycles a break them
+      // go through all of the cycles and break them
       for (List<Module> cycle : cycles) {
         for (Module srcModule : cycle) {
           Collection<Module> destModules
@@ -384,7 +385,9 @@ public class Sorter implements Iterable<Module>, IToStringBuildable {
               : control4j.Signal.getSignal());
           // Create new signal place for the source module
           int brokenPointer = getSignalCount();
+          signalIndex[output.getPointer()] = null;
           output.setPointer(brokenPointer);
+          setSourceModule(brokenPointer, source);
           // Create new output module.
           FeedbackModule outModule = new FeedbackModule(
               FeedbackModule.OUTPUT_CLASSNAME, sharedSignal);
@@ -398,7 +401,9 @@ public class Sorter implements Iterable<Module>, IToStringBuildable {
           Input brokenInput = new Input();
           brokenInput.setPointer(brokenPointer);
           brokenInput.setSignal(input.getSignal());
+          inModule.putInput(0, brokenInput);
           add(inModule);
+          unresolved.add(target);
         }
       }
     }

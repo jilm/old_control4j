@@ -39,7 +39,7 @@ public class ErrorRecord {
 
   //---------------------------------------------------------------- Modifiers.
 
-  private Phase phase;
+  private Phase phase = Phase.NOT_SPECIFIED;
 
   public ErrorRecord setPhase(Phase phase) {
     this.phase = phase;
@@ -62,7 +62,7 @@ public class ErrorRecord {
 
     sb = new StringBuilder();
 
-    switch (phase) {
+    switch (getPhase()) {
 
       // problem during block expansion
       case BLOCK_EXPANSION:
@@ -99,7 +99,9 @@ public class ErrorRecord {
         switch (getCauseCode()) {
           // There is no implementation of some module
           case CLASS_NOT_FOUND:
-            System.out.println("class not found");
+            append("The implementation class of some module was not found!\n");
+            append("The class name: {0}\n", "class");
+            append("The module was declared here: {0}\n", "reference");
             break;
           // other
           default:
@@ -152,6 +154,20 @@ public class ErrorRecord {
     } else {
       return null;
     }
+  }
+
+  private Phase getPhase() {
+    if (phase != Phase.NOT_SPECIFIED) {
+      return phase;
+    } else if (cause != null) {
+      // try to infere the phase from the class name where the cause
+      // exception was thrown
+      String sourceClassName = cause.getStackTrace()[0].getClassName();
+      if (sourceClassName.equals(control4j.Instantiator.class.getName())) {
+        return Phase.MODULE_INSTANTIATION;
+      }
+    }
+    return Phase.NOT_SPECIFIED;
   }
 
 }
