@@ -28,6 +28,7 @@ import control4j.gui.Screens;
 import control4j.gui.VisualBuilder;
 import control4j.gui.VisualObject;
 
+import cz.lidinsky.tools.tree.ChangeableNode;
 import cz.lidinsky.tools.tree.Node;
 
 import java.util.LinkedList;
@@ -43,6 +44,15 @@ public class Gui extends Resource {
   @Override
   public void initialize(control4j.application.Resource definition) {
     gui = ((GuiResource)definition).getGui();
+  }
+
+  public Gui add(Node<GuiObject> screenNode) {
+    if (gui == null) {
+      gui = new ChangeableNode<GuiObject>();
+      gui.setDecorated(new Screens());
+    }
+    ((ChangeableNode<GuiObject>)gui).addChild(screenNode);
+    return this;
   }
 
   /**

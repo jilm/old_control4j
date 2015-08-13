@@ -72,7 +72,6 @@ public class Loader {
     // TODO:  read handlers from a config file
     control4j.application.nativelang.XMLHandler c4jHandler
         = new control4j.application.nativelang.XMLHandler();
-
     c4jHandler.setDestination(
         new control4j.application.nativelang.C4jToControlAdapter(handler));
 
@@ -82,12 +81,19 @@ public class Loader {
               handler));
     control4j.application.ld.XMLHandler ldHandler
       = new control4j.application.ld.XMLHandler();
-    ldHandler.setHandler(new control4j.application.ld.Ld2ControlAdapter(handler));
+    ldHandler.setHandler(
+        new control4j.application.ld.Ld2ControlAdapter(handler));
+
+    control4j.application.macro.XMLHandler macroHandler
+      = new control4j.application.macro.XMLHandler(
+          new control4j.application.macro.Macro2ControlAdapter(
+            handler));
 
     XMLReader reader = new XMLReader();
     reader.addHandler(c4jHandler);
     reader.addHandler(guiHandler);
     reader.addHandler(ldHandler);
+    reader.addHandler(macroHandler);
     reader.load(file);
     //return application;
   }

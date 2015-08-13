@@ -138,6 +138,7 @@ public abstract class Module implements IToStringBuildable
    *
    */
   protected void assignResources(control4j.application.Module definition) {
+    // initialize the object map decorator
     ObjectMapDecorator<Object> objectMap
         = new ObjectMapDecorator<Object>(Object.class);
     objectMap.setSetterFilter(PredicateUtils.allPredicate(
@@ -146,6 +147,7 @@ public abstract class Module implements IToStringBuildable
     objectMap.setGetterFilter(PredicateUtils.falsePredicate());
     objectMap.setDecorated(this);
     Set<String> keys = objectMap.keySet();
+    // get resource manager
     ResourceManager resourceManager = ResourceManager.getInstance();
     try {
       if (keys.size() == 1) {
@@ -159,6 +161,7 @@ public abstract class Module implements IToStringBuildable
         }
       }
     } catch (Exception e) {
+      // TODO:
       throw new SyntaxErrorException(e);
     }
   }
