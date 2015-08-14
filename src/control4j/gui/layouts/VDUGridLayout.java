@@ -36,6 +36,12 @@ public class VDUGridLayout implements LayoutManager {
 
   public VDUGridLayout() {}
 
+  //--------------------------------------------------------------- Properties.
+
+  private int hgap = 5;
+
+  private int vgap = 5;
+
   //--------------------------------------------- LayoutManager Implementation.
 
   public void addLayoutComponent(String name, Component component) {
@@ -48,8 +54,8 @@ public class VDUGridLayout implements LayoutManager {
     synchronized (parent.getTreeLock()) {
 
       Insets insets = parent.getInsets();
-      int width = parent.getWidth() - insets.left - insets.right;
-      int height = parent.getHeight() - insets.top - insets.bottom;
+      int width = parent.getWidth() - insets.left - insets.right - 2 * hgap;
+      int height = parent.getHeight() - insets.top - insets.bottom - 2 * vgap;
       int x = 0;  // actual position
       int y = 0;
 
@@ -67,30 +73,32 @@ public class VDUGridLayout implements LayoutManager {
       }
 
       // Calculate number of rows and colums
-      int cols = Math.max(width / maxWidth, 1);
-      int rows = Math.max(height / maxHeight, 1);
-      float factX;
-      float factY;
-      while ((cols * rows) < count) {
-        // The area is smaller than needed.
-        factX = ((float)width / (float)cols) / (float)maxWidth;
-        factY = ((float)height / (float)rows) / (float)maxHeight;
-        if (factX > factY) {
-          cols++;
-        } else {
-          rows++;
+      float elementRatio = (float)maxWidth / (float)maxHeight;
+      float min = Float.MAX_VALUE;
+      int optRows = 1;
+      int optCols = count;
+      for (int rows = 1; rows <= count; rows++) {
+        int cols = count / rows + ((count % rows) > 0 ? 1 : 0);
+        float ratio = ((float)width / (float)cols)
+          / ((float)height / (float)rows);
+        float metrics = Math.abs(ratio - elementRatio);
+        if (metrics < min) {
+          min = metrics;
+          optRows = rows;
+          optCols = cols;
         }
       }
 
       // layout components
-      maxWidth = width / cols;
-      maxHeight = height / rows;
+      maxWidth = (width - ((optCols - 1) * hgap)) / optCols;
+      maxHeight = (height - ((optRows - 1) * vgap)) / optRows;
       count = 0;
       for (Component component :
           IteratorUtils.asIterable(getComponentIterator(parent))) {
         component.setSize(maxWidth, maxHeight);
         component.setLocation(
-            (count % cols) * maxWidth, (count / cols) * maxHeight);
+            (count % optCols) * maxWidth + (count % optCols) * hgap + hgap,
+            (count / optCols) * maxHeight + (count / optCols) * vgap + vgap);
         count++;
       }
     }
@@ -119,6 +127,7 @@ public class VDUGridLayout implements LayoutManager {
 
   //------------------------------------------------------------------ Private.
 
+  // TODO:  only visible components!!!
   public static Iterator<Component> getComponentIterator(
       final Container parent) {
 

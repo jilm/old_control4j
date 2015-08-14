@@ -36,6 +36,8 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Rectangle;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.awt.geom.Rectangle2D;
 import java.text.DecimalFormat;
 import javax.swing.JComponent;
@@ -48,7 +50,7 @@ import javax.swing.JPanel;
  *
  */
 @control4j.annotations.AGuiObject(name="VDU")
-public class VDU extends VisualObjectBase {
+public class VDU extends VisualObjectBase implements ComponentListener {
 
   /** The number which will be displayed */
   private double value = Double.NaN;
@@ -74,9 +76,9 @@ public class VDU extends VisualObjectBase {
     if (component != null) {
       update();
       Dimension size = computeSize();
-      valueLabel.setPreferredSize(doubleDimension(size));
-      valueLabel.setMaximumSize(doubleDimension(size));
-      valueLabel.setMinimumSize(size);
+      valueComponent.setPreferredSize(doubleDimension(size));
+      valueComponent.setMaximumSize(doubleDimension(size));
+      valueComponent.setMinimumSize(size);
       component.revalidate();
       component.repaint();
     }
@@ -94,9 +96,9 @@ public class VDU extends VisualObjectBase {
     if (component != null) {
       update();
       Dimension size = computeSize();
-      valueLabel.setPreferredSize(doubleDimension(size));
-      valueLabel.setMaximumSize(doubleDimension(size));
-      valueLabel.setMinimumSize(size);
+      valueComponent.setPreferredSize(doubleDimension(size));
+      valueComponent.setMaximumSize(doubleDimension(size));
+      valueComponent.setMinimumSize(size);
       component.revalidate();
       component.repaint();
     }
@@ -126,9 +128,9 @@ public class VDU extends VisualObjectBase {
     if (component != null) {
       component.setFont(component.getFont().deriveFont(this.fontSize));
       Dimension size = computeSize();
-      valueLabel.setPreferredSize(doubleDimension(size));
-      valueLabel.setMaximumSize(doubleDimension(size));
-      valueLabel.setMinimumSize(size);
+      valueComponent.setPreferredSize(doubleDimension(size));
+      valueComponent.setMaximumSize(doubleDimension(size));
+      valueComponent.setMinimumSize(size);
     }
   }
 
@@ -143,14 +145,15 @@ public class VDU extends VisualObjectBase {
   }
 
   private JLabel labelComponent;
-  private JLabel valueLabel;
+  private JLabel valueComponent;
   private JLabel unit;
 
   @Override
   protected JComponent createSwingComponent() {
-    JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+    JPanel panel = new JPanel(null);
+    panel.addComponentListener(this);
     labelComponent = (JLabel)panel.add(new JLabel(label));
-    valueLabel = (JLabel)panel.add(new JLabel());
+    valueComponent = (JLabel)panel.add(new JLabel());
     unit = (JLabel)panel.add(new JLabel("V"));
     return panel;
   }
@@ -158,12 +161,16 @@ public class VDU extends VisualObjectBase {
   @Override
   public void configureVisualComponent() {
     super.configureVisualComponent();
-    valueLabel.setHorizontalAlignment(JLabel.RIGHT);
-    valueLabel.setFont(component.getFont().deriveFont(fontSize));
+    component.setToolTipText(label);
+    valueComponent.setHorizontalAlignment(JLabel.RIGHT);
+    valueComponent.setFont(component.getFont().deriveFont(fontSize));
+    valueComponent.setForeground(Color.GREEN);
+    valueComponent.setBackground(Color.BLACK);
+    valueComponent.setOpaque(true);
     Dimension size = computeSize();
-    valueLabel.setPreferredSize(doubleDimension(size));
-    valueLabel.setMaximumSize(doubleDimension(size));
-    valueLabel.setMinimumSize(size);
+    valueComponent.setPreferredSize(doubleDimension(size));
+    valueComponent.setMaximumSize(doubleDimension(size));
+    valueComponent.setMinimumSize(size);
     update();
     component.revalidate();
     component.repaint();
@@ -171,9 +178,9 @@ public class VDU extends VisualObjectBase {
 
   private void update() {
     if (Double.isNaN(value))
-      valueLabel.setText("?");
+      valueComponent.setText("?");
     else
-      valueLabel.setText(format.format(value));
+      valueComponent.setText(format.format(value));
   }
 
   private Dimension computeSize() {
@@ -189,8 +196,52 @@ public class VDU extends VisualObjectBase {
     return new Dimension(width, height);
   }
 
+  //------------------------------------------------- Component Event Listener.
+
   private static Dimension doubleDimension(Dimension in) {
     return new Dimension(in.width * 2, in.height * 2);
+  }
+
+  public void componentHidden(ComponentEvent e) {
+  }
+
+  public void componentMoved(ComponentEvent e) {
+  }
+
+  public void componentResized(ComponentEvent e) {
+    float fontSize = computeFontSize(
+        e.getComponent().getWidth(), e.getComponent().getHeight());
+    //valueComponent.setFont(valueComponent.getFont().deriveFont(fontSize));
+    //valueComponent.setSize(e.getComponent().getSize());
+  }
+
+  public void componentShown(ComponentEvent e) {
+  }
+
+  //------------------------------------------------------------------ Private.
+
+  private float computeFontSize(int reqWidth, int reqHeight) {
+    // get the metrics of the font
+    FontMetrics metrics = component.getFontMetrics(component.getFont());
+    // create the text of the appropriate size
+    int digits = getDigits();
+    double number = (Math.pow(10.0d, digits) - 1) * -1;
+    String text = format.format(number);
+    // get rectangles for particular text
+    int width = metrics.stringWidth(text);
+    int height = metrics.getHeight();
+    // compute new font size to fit given dimension
+    float ratioX = (float)reqWidth / (float)width;
+    float ratioY = (float)reqHeight / (float)height;
+    float ratio = Math.min(ratioX, ratioY);
+    float fontSize = ratio * metrics.getFont().getSize();
+    valueComponent.setFont(
+        valueComponent.getFont().deriveFont(fontSize));
+    metrics = valueComponent.getFontMetrics(valueComponent.getFont());
+    width = metrics.stringWidth(text);
+    height = metrics.getHeight();
+    valueComponent.setSize(width, height);
+    return metrics.getFont().getSize() * ratio;
   }
 
 }
