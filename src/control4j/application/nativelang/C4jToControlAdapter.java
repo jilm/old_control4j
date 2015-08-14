@@ -239,7 +239,7 @@ public class C4jToControlAdapter extends AbstractAdapter {
   public void put(Signal signal) {
     Scope localScope = handler.getScopePointer();
     control4j.application.Signal translated
-      = new control4j.application.Signal();
+      = new control4j.application.Signal(signal.getName());
     translateConfiguration(signal, translated, localScope);
     // translate tags
     for (Tag tag : signal.getTags()) {

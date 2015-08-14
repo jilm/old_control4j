@@ -81,7 +81,9 @@ public class Ld2ControlAdapter extends AbstractAdapter {
       Output output = new Output();
       adapter.putOutput(output);
       handler.addModuleOutput(coil.getName(), Scope.getGlobal(), output);
-      handler.putSignal(coil.getName(), Scope.getGlobal(), new Signal());
+      handler.putSignal(coil.getName(),
+          Scope.getGlobal(),
+          new Signal(coil.getName()));
     }
     handler.addModule(adapter);
   }
@@ -121,7 +123,9 @@ public class Ld2ControlAdapter extends AbstractAdapter {
         outputSignalName, handler.getScopePointer(), output);
     handler.addModule(module);
     handler.putSignal(
-        outputSignalName, handler.getScopePointer(), new Signal());
+        outputSignalName,
+        handler.getScopePointer(),
+        new Signal(outputSignalName));
     // Return reference to the output
     return new Reference(outputSignalName, handler.getScopePointer());
   }
@@ -148,7 +152,9 @@ public class Ld2ControlAdapter extends AbstractAdapter {
         outputSignalName, handler.getScopePointer(), output);
     handler.addModule(module);
     handler.putSignal(
-        outputSignalName, handler.getScopePointer(), new Signal());
+        outputSignalName,
+        handler.getScopePointer(),
+        new Signal(outputSignalName));
     // Return reference to the output
     return new Reference(outputSignalName, handler.getScopePointer());
   }

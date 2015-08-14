@@ -27,6 +27,7 @@ import javax.swing.JTabbedPane;
 import cz.lidinsky.tools.reflect.Getter;
 import cz.lidinsky.tools.reflect.Setter;
 import control4j.gui.ChangeEvent;
+import control4j.gui.layouts.SingleLayout;
 
 /**
  *
@@ -125,7 +126,8 @@ public class Screen extends control4j.gui.VisualContainer
   @Override
   protected JComponent createSwingComponent()
   {
-    return new PanelPainter();
+    //return new PanelPainter();
+    return new JPanel(new SingleLayout());
   }
 
   /**

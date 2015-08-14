@@ -18,16 +18,22 @@ package control4j.gui.components;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import java.awt.Color;
-import java.awt.Insets;
-import java.awt.Rectangle;
-//import java.awt.FlowLayout;
-import javax.swing.JComponent;
-import javax.swing.JPanel;
-import javax.swing.BoxLayout;
 import control4j.gui.VisualContainer;
+import control4j.gui.layouts.VDUGridLayout;
+
 import cz.lidinsky.tools.reflect.Getter;
 import cz.lidinsky.tools.reflect.Setter;
+
+import java.awt.Color;
+import java.awt.FlowLayout;
+import java.awt.GridLayout;
+import java.awt.Insets;
+import java.awt.Rectangle;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
+import javax.swing.BoxLayout;
+import javax.swing.JComponent;
+import javax.swing.JPanel;
 
 /**
  *
@@ -35,7 +41,7 @@ import cz.lidinsky.tools.reflect.Setter;
  *
  */
 @control4j.annotations.AGuiObject(name="Box", tags={"box layout"})
-public class Box extends VisualContainer
+public class Box extends VisualContainer implements ComponentListener
 {
 
   /**
@@ -112,9 +118,9 @@ public class Box extends VisualContainer
   {
     if (component != null && this.isLineAxis != isLineAxis)
     {
-      int axis = isLineAxis ? BoxLayout.LINE_AXIS : BoxLayout.PAGE_AXIS;
-      BoxLayout layout = new BoxLayout(component, axis);
-      component.setLayout(layout);
+      //int axis = isLineAxis ? BoxLayout.LINE_AXIS : BoxLayout.PAGE_AXIS;
+      //BoxLayout layout = new BoxLayout(component, axis);
+      //component.setLayout(layout);
       component.revalidate();
       component.repaint();
     }
@@ -150,14 +156,28 @@ public class Box extends VisualContainer
   public void configureVisualComponent()
   {
     JComponent parent = (JComponent)component.getParent();
+    parent.addComponentListener(this);
     Insets insets = parent.getInsets();
     component.setLocation(x + insets.left, y + insets.top);
-    int axis = isLineAxis ? BoxLayout.LINE_AXIS : BoxLayout.PAGE_AXIS;
-    BoxLayout layout = new BoxLayout(component, axis);
-    component.setLayout(layout);
+    //int axis = isLineAxis ? BoxLayout.LINE_AXIS : BoxLayout.PAGE_AXIS;
+    //BoxLayout layout = new BoxLayout(component, axis);
+    component.setLayout(new VDUGridLayout());
     super.configureVisualComponent();
     component.revalidate();
     component.repaint();
+  }
+
+  public void componentHidden(ComponentEvent event) {
+  }
+
+  public void componentMoved(ComponentEvent event) {
+  }
+
+  public void componentResized(ComponentEvent event) {
+    JComponent parent = (JComponent)component.getParent();
+  }
+
+  public void componentShown(ComponentEvent event) {
   }
 
 }

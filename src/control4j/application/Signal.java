@@ -33,11 +33,14 @@ import cz.lidinsky.tools.ToStringBuilder;
 public class Signal extends Configurable
 {
 
+  private String name;
+
   /**
    *  Crate a new empty signal definition object.
    */
-  public Signal()
-  { }
+  public Signal(String name) {
+    this.name = name;
+  }
 
   /*
    *
@@ -97,6 +100,17 @@ public class Signal extends Configurable
   public Tag getTag(String name)
   {
     return tags.get(name);
+  }
+
+  private String label;
+
+  public String getLabel() {
+    // TODO:
+    return label == null ? name : label;
+  }
+
+  public void setLabel(String label) {
+    this.label = label;
   }
 
   @Override

@@ -30,25 +30,33 @@ import control4j.application.gui.Gui;
 import control4j.application.gui.GuiResource;
 import control4j.gui.GuiObject;
 import control4j.gui.components.Box;
+import control4j.gui.components.Empty;
 import control4j.gui.components.Screen;
-import control4j.gui.components.Quantity;
+import control4j.gui.components.VDU;
 
 import cz.lidinsky.tools.CommonException;
 import cz.lidinsky.tools.ExceptionCode;
 import cz.lidinsky.tools.tree.ChangeableNode;
 import cz.lidinsky.tools.tree.Node;
 
+import org.apache.commons.collections4.Factory;
+
+import java.awt.GridLayout;
+import javax.swing.JComponent;
+import javax.swing.JPanel;
+
 @AVariableInput
-public class IMSignalScreen extends InputModule {
+public class IMSignalScreen extends InputModule
+implements Factory<JComponent> {
 
   private ChangeableNode<GuiObject> screen;
 
-  private Quantity[] quantities;
+  private VDU[] quantities;
 
   @Override
   public void initialize(Module definition) {
     try {
-      quantities = new Quantity[definition.getInput().size()];
+      quantities = new VDU[definition.getInput().size()];
       // create visual containers
       screen = new ChangeableNode<GuiObject>();
       screen.setDecorated(new Screen());
@@ -61,7 +69,7 @@ public class IMSignalScreen extends InputModule {
       for (Input input : definition.getInput()) {
         Node<GuiObject> quantityNode = createQuantity(input);
         box.addChild(quantityNode);
-        quantities[index] = (Quantity)quantityNode.getDecorated();
+        quantities[index] = (VDU)quantityNode.getDecorated();
         index++;
       }
       // add the screen into the gui
@@ -73,6 +81,10 @@ public class IMSignalScreen extends InputModule {
       System.exit(1);
       // TODO:
     }
+  }
+
+  public JComponent create() {
+    return new JPanel();
   }
 
   @Override
@@ -87,8 +99,9 @@ public class IMSignalScreen extends InputModule {
   }
 
   private Node<GuiObject> createQuantity(Input input) {
-    Quantity quantity = new Quantity();
+    VDU quantity = new VDU();
     quantity.setDigits(5); // TODO:
+    quantity.setLabel(input.getSignal().getLabel());
     Node<GuiObject> quantityNode = new ChangeableNode<GuiObject>();
     quantityNode.setDecorated(quantity);
     return quantityNode;

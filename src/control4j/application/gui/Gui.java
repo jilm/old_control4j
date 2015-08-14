@@ -31,6 +31,7 @@ import control4j.gui.VisualObject;
 import cz.lidinsky.tools.tree.ChangeableNode;
 import cz.lidinsky.tools.tree.Node;
 
+import java.awt.BorderLayout;
 import java.util.LinkedList;
 import javax.swing.JFrame;
 import javax.swing.JComponent;
@@ -64,7 +65,9 @@ public class Gui extends Resource {
     // Create and set up the window
     mainFrame = new JFrame("Top level demo");
     mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    mainFrame.add(VisualBuilder.createVisualComponent(gui));
+    mainFrame
+      .getContentPane()
+        .add(VisualBuilder.createVisualComponent(gui), BorderLayout.CENTER);
     VisualBuilder.configureVisualComponent(gui);
     // Show the main window
     javax.swing.SwingUtilities.invokeLater(

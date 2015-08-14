@@ -49,4 +49,3 @@ public class PanelPainter extends JPanel
   }
 
 }
-

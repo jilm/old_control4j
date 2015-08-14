@@ -28,7 +28,7 @@
     </target>
 
     <target name="compile" 
-            depends="init,ap" 
+            depends="init"
             description="Compiles the application">
         <mkdir dir="${bindir}" />
         <depend srcdir="${srcdir}" destdir="${bindir}" />
@@ -40,7 +40,7 @@
         <concat destfile="${bindir}/control4j/messages.properties" >
             <fileset dir="${srcdir}" includes="**/messages.properties" />
         </concat>
-        <move file="guicomponents.csv" todir="${bindir}/control4j/gui/edit" />
+        <!--<move file="guicomponents.csv" todir="${bindir}/control4j/gui/edit" />-->
         <copy file="${srcdir}/control4j/application/namespaceloadermap.conf"
               todir="${bindir}/control4j/application" />
         <copy file="${srcdir}/control4j/application/xmlhandlers.conf"
