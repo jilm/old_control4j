@@ -18,30 +18,40 @@ package control4j;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.lang.reflect.Field;
-import java.lang.reflect.AccessibleObject;
+import static control4j.tools.LogMessages.*;
+import static control4j.tools.Logger.*;
 
+import control4j.tools.DeclarationReference;
+
+import cz.lidinsky.tools.CommonException;
+import cz.lidinsky.tools.ExceptionCode;
 import cz.lidinsky.tools.IToStringBuildable;
 import cz.lidinsky.tools.ToStringBuilder;
 import cz.lidinsky.tools.reflect.ObjectMapDecorator;
 import cz.lidinsky.tools.reflect.ObjectMapUtils;
 import cz.lidinsky.tools.reflect.Setter;
 
-import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.commons.collections4.Predicate;
 import org.apache.commons.collections4.PredicateUtils;
 import org.apache.commons.collections4.iterators.FilterIterator;
+import org.apache.commons.lang3.reflect.FieldUtils;
 
-import control4j.tools.DeclarationReference;
-import static control4j.tools.LogMessages.*;
-import static control4j.tools.Logger.*;
+import java.util.Set;
 
 /**
  *  Module is one of the main building blocks of the application.
- *  A module gets input and provides output.
+ *  Modules reads data from technology and provides them for the further
+ *  processing, performs processing, and writes results back to the
+ *  technology.
+ *
+ *  <p>The modules can be divided, according to inputs and outputs, into
+ *  three categories. Modules that provides only output for further processing,
+ *  modules that take input provide same processing and returns output and
+ *  the modules that only takes input and does not provide any output.
+ *
+ *  <p>To implement some functionality, do not override diretly this class.
+ *  Override one of the {@link InputModule}, {@link ProcessModule} or
+ *  {@link OutputModule} instead.
  *
  *  <p>Number of input signals (terminals) and input terminal
  *  meaning depends entirely on the module implementation. Each
@@ -53,28 +63,31 @@ import static control4j.tools.Logger.*;
  *  the input terminals must be organized inside the input array
  *  as follows:
  *  <ol>
+ *
  *    <li>Indexes from zero to some <em>n</em> are dedicated to
- *        terminals which are mandatory. Elements inside the
- *        input array may not contain <code>null</code> value.
- *        In other words, these input terminals must be connected.
- *        Concrete module implementation must eiter override
- *        a method <code>getMandatoryInputSize</code> to return
- *        the proper number of mandatory input terminals or the
- *        <code>AMinInput</code> annotation my be used to achive
- *        the correct functionality.
+ *  terminals which are mandatory. Elements inside the
+ *  input array may not contain <code>null</code> value.
+ *  In other words, these input terminals must be connected.
+ *  Concrete module implementation must eiter override
+ *  a method <code>getMandatoryInputSize</code> to return
+ *  the proper number of mandatory input terminals or the
+ *  <code>AMinInput</code> annotation my be used to achive
+ *  the correct functionality.
+ *
  *    <li>Indexes from <em>n</em> to some <em>m</em> are used
- *        by terminals which are optional. Moreover, the <em>m</em>
- *        may not be known by the time of module creation, it
- *        means, that in such a case, it depends entirely on the
- *        application definition, how many input signals will be
- *        connected. Nevertheless the terminals which span into
- *        this category may left disconnected. In other words,
- *        the corresponding element in the input array may contain
- *        <code>null</code> value. Module implementation must
- *        either override the method <code>getIndexedInputSize</code>
- *        to return the proper number of totally supported indexed
- *        input terminals, or it may use <code>AMaxInput</code>
- *        for the same purpose.
+ *  by terminals which are optional. Moreover, the <em>m</em>
+ *  may not be known by the time of module creation, it
+ *  means, that in such a case, it depends entirely on the
+ *  application definition, how many input signals will be
+ *  connected. Nevertheless the terminals which span into
+ *  this category may left disconnected. In other words,
+ *  the corresponding element in the input array may contain
+ *  <code>null</code> value. Module implementation must
+ *  either override the method <code>getIndexedInputSize</code>
+ *  to return the proper number of totally supported indexed
+ *  input terminals, or it may use <code>AMaxInput</code>
+ *  for the same purpose.
+ *
  *    <li>The third category of input is index-less input. If
  *        this kind of input is supported by the module, than the
  *        method <code>isVariableInputSupported</code> must return
@@ -90,27 +103,25 @@ import static control4j.tools.Logger.*;
  *  @see AMinInput
  *  @see AMaxInput
  */
-public abstract class Module implements IToStringBuildable
-{
+public abstract class Module implements IToStringBuildable {
+
+  //------------------------------------------------------------ Configuration.
 
   /**
-   *  Reference to the place where the module was declared in
-   *  human readable form.
-   */
-  private DeclarationReference declarationReference;
-
-  /**
-   *  Initialize a module. This method assign configuration items
-   *  from the configuration parameter to the properties that are
-   *  annotated by ConfigItem. If you don't want this functionality
-   *  just override this method. Or you can override it, do some
-   *  custom initialization and than call this to finish the
-   *  initialization.
+   *  Should be used to configure the module after the instance has
+   *  been created. It is called by the
+   *  {@link #initialize(control4j.application.Module)} method.
+   *
+   *  <p>The default implementation takes module configuration from
+   *  the parameter and use annotated methods and fields of the
+   *  module implementation to assign appropriate configuration values.
+   *  If different behaviour is needed, override this method.
    *
    *  @param configuration
-   *             the configuration of the module.
+   *             configuration of the module.
    *
-   *  @see ConfigurationHelper
+   *  @see Setter
+   *  @see ObjectMapDecorator
    */
   protected void initialize(IConfigBuffer configuration) {
     // assign configuration items
@@ -124,6 +135,7 @@ public abstract class Module implements IToStringBuildable
         ObjectMapUtils.stringSetterClosureFactory(true));
     objectMap.setDecorated(this);
     Set<String> keys = objectMap.keySet();
+    // TODO:
     for (String key : keys) {
       try {
         objectMap.put(key, configuration.getString(key));
@@ -134,8 +146,19 @@ public abstract class Module implements IToStringBuildable
   }
 
   /**
+   *  Should be used to assign resources to the module after the instance
+   *  has been created. It is called by the
+   *  {@link #initialize(control4j.application.Module)} method.
    *
+   *  <p>The default implementation uses {@link AResource} annotation
+   *  to recognize the module field or method where to assign required
+   *  resource. If different behaviour is necessary, override this method.
    *
+   *  @param definition
+   *             declaration informations of the module
+   *
+   *  @see AResource
+   *  @see ObjectMapDecorator
    */
   protected void assignResources(control4j.application.Module definition) {
     // initialize the object map decorator
@@ -167,46 +190,29 @@ public abstract class Module implements IToStringBuildable
   }
 
   /**
-   *  Assign values into the configuration fields, calls configuration
-   *  methods and assign resources. This method calls an
-   *  {@link #initialize(IConfigBuffer)} method to assign configuration
-   *  items. If you need different behaviour, override this method.
+   *  It should be used to configure module instance after it has been
+   *  created. This method is called by the {@link Instantiator}.
+   *
+   *  <p>The default implementation calls methods
+   *  {@link #initialize(IConfigBuffer)} to assign configuration and
+   *  {@link #assignResources} to set appropriate resources. Moreover
+   *  the declaration reference is taken from the definition. If
+   *  different behaviour is needed, try to override these two
+   *  methods first.
+   *
+   *  @param definition
+   *             declaration informations of the module
    */
   public void initialize(control4j.application.Module definition) {
+    // Take the declaration reference
+    declarationReference = definition.getDeclarationReferenceText();
     // Assign all of the configuration items
     initialize(definition.getConfiguration());
     // Assign all of the resources
     assignResources(definition);
   }
 
-  /**
-   *  Checks that it is possible to connect a signal into
-   *  the input with given index.
-   *
-   *  <p>Implicite implementation uses annotations to determine
-   *  which index may be used to connect a signal.
-   *
-   *  @param index
-   *
-   *  @param inputSize
-   *
-   *  @throws
-   *
-   *  @see AMaxInput
-   *  @see AMinInput
-   *  @see AVariableInput
-   */
-  protected void checkConnectedInput(int index, int inputSize)
-  {
-    if (index >= inputSize)
-      throw new IllegalArgumentException();  // TODO:
-  }
-
-  protected void checkDisconnectedInput(int index, int inputSize)
-  {
-    if (index < getMandatoryInputSize())
-      throw new IllegalArgumentException(); // TODO:
-  }
+  //---------------------------------------------------------- Input Treatment.
 
   /**
    *  Returns number of input terminals which belongs to the
@@ -215,7 +221,7 @@ public abstract class Module implements IToStringBuildable
    *  module functionality. This number is entirely the property
    *  of the module implementation.
    *
-   *  <p>This implementation returns a value that is specified
+   *  <p>Default implementation returns a value that is specified
    *  by a <code>AMinInput</code> annotation. If not declared
    *  it returns zero.
    *
@@ -224,13 +230,13 @@ public abstract class Module implements IToStringBuildable
    *
    *  @see AMinInput
    */
-  public int getMandatoryInputSize()
-  {
+  public int getMandatoryInputSize() {
     AMinInput minInputAnno = getClass().getAnnotation(AMinInput.class);
-    if (minInputAnno == null)
+    if (minInputAnno == null) {
       return 0;
-    else
+    } else {
       return minInputAnno.value(); // TODO: check that the value is positive
+    }
   }
 
   /**
@@ -246,60 +252,49 @@ public abstract class Module implements IToStringBuildable
    *
    *  @see AMaxInput
    */
-  public int getIndexedInputSize()
-  {
+  public int getIndexedInputSize() {
     AMaxInput maxInputAnno = getClass().getAnnotation(AMaxInput.class);
-    if (maxInputAnno == null)
+    if (maxInputAnno == null) {
       return getMandatoryInputSize();
-    else
+    } else {
       return maxInputAnno.value(); // TODO: check that the value is positive
-  }
-
-  public int getIndexedOutputSize()
-  {
-    AOutputSize outputSizeAnno = getClass().getAnnotation(AOutputSize.class);
-    if (outputSizeAnno == null)
-      return 0;
-    else
-      return outputSizeAnno.value(); // TODO: check that the value is positive
+    }
   }
 
   /**
    *  Returns true iff this module supports a variable input.
    *  It means input where signal order is meaningless.
+   *
+   *  <p>The default implementation returns true iff the
+   *  <code>AVariableInput</code> annotation is presented, otherwise
+   *  it returns false.
    */
-  public boolean isVariableInputSupported()
-  {
+  public boolean isVariableInputSupported() {
     return getClass().getAnnotation(AVariableInput.class) != null;
-  }
-
-  public boolean isVariableOutputSupported()
-  {
-    return getClass().getAnnotation(AVariableOutput.class) != null;
   }
 
   /**
    *  Returns index of the first possible variable input.
+   *
+   *  @throws CommonException
+   *             with code <code>UNSUPPORTED_OPERATION</code> if the module
+   *             implementation doesn't support variable input
    */
-  public int getVariableInputFirstIndex()
-  {
-    if (!isVariableInputSupported())
-      throw new UnsupportedOperationException();
+  public int getVariableInputFirstIndex() {
+    if (!isVariableInputSupported()) {
+      throw new CommonException()
+        .setCode(ExceptionCode.UNSUPPORTED_OPERATION)
+        .set("message", "This module doesn't support variable input!")
+        .set("module class", getClass().getName())
+        .set("reference", getDeclarationReference());
+    }
     return getIndexedInputSize();
-  }
-
-  public int getVariableOutputFirstIndex()
-  {
-    if (!isVariableOutputSupported())
-      throw new UnsupportedOperationException();
-    return getIndexedOutputSize();
   }
 
   /**
    *
    */
-  public int getInputSize(int lastDeclaredIndex)
-  {
+  public int getInputSize(int lastDeclaredIndex) {
     int mandatorySize = getMandatoryInputSize();
     if (lastDeclaredIndex < mandatorySize - 1)
       return mandatorySize;
@@ -307,81 +302,100 @@ public abstract class Module implements IToStringBuildable
       return lastDeclaredIndex + 1;
   }
 
-  public int getOutputSize(int lastDeclaredIndex)
-  {
+  //--------------------------------------------------------- Output Treatment.
+
+  public int getIndexedOutputSize() {
+    AOutputSize outputSizeAnno = getClass().getAnnotation(AOutputSize.class);
+    if (outputSizeAnno == null)
+      return 0;
+    else
+      return outputSizeAnno.value(); // TODO: check that the value is positive
+  }
+
+  public boolean isVariableOutputSupported() {
+    return getClass().getAnnotation(AVariableOutput.class) != null;
+  }
+
+  /**
+   *  Returns index of the first possible variable input.
+   *
+   *  @throws CommonException
+   *             with code <code>UNSUPPORTED_OPERATION</code> if the module
+   *             implementation doesn't support variable input
+   */
+  public int getVariableOutputFirstIndex() {
+    if (!isVariableOutputSupported()) {
+      throw new CommonException()
+        .setCode(ExceptionCode.UNSUPPORTED_OPERATION)
+        .set("message", "This module doesn't support variable output!")
+        .set("module class", getClass().getName())
+        .set("reference", getDeclarationReference());
+    }
+    return getIndexedOutputSize();
+  }
+
+  public int getOutputSize(int lastDeclaredIndex) {
     return Math.max(lastDeclaredIndex + 1, getIndexedOutputSize());
   }
 
-  public void prepare() { }
+  //----------------------------------------------------------- Initialization.
 
   /**
-   *  Returns a reference to the config file
+   *  This method is called by the {@link ControlLoop} instantly before
+   *  the control loop is run. It is determined to the final initialization.
+   *  The whole application is built and prepared for the execution.
+   *
+   *  <p>The default implementation do nothing.
+   */
+  public void prepare() { }
+
+  //-------------------------------------------------------------------- Other.
+
+  /**
+   *  Reference to the place where the module was declared in the
+   *  human readable form. It is mainly used in the error and warning
+   *  messages to inform a user where to look for the source of a
+   *  potential problem. This field is filled during the application
+   *  document loading or processing.
+   */
+  private String declarationReference;
+
+  /**
+   *  Returns a reference to the place
    *  where the module was declared. The reference
    *  is in the human readable form and play a role in
-   *  the exception and log messages.
+   *  the error and log messages.
    *
    *  @return the declaration reference, if not specified, returns an
    *       empty string
    */
-  public String getDeclarationReference()
-  {
-    if (declarationReference != null)
-      return declarationReference.toString();
-    else
+  public String getDeclarationReference() {
+    if (declarationReference != null) {
+      return declarationReference;
+    } else {
       return "";
+    }
   }
 
   /**
    *  Prints information about the module into the given writer.
-   *  It serves mainly for debug purposes. This method writes only
-   *  the declaration reference, if you thing that it would be useful
-   *  to have more info about a particular module in the case of
-   *  failure to find out what is going on, simply override this
-   *  method.
+   *  This method is called if some exception is catched while
+   *  the control loop is runing, to write all of the available
+   *  information that could be useful for debugging.
+   *
+   *  <p>The default implementation writes the string that is
+   *  returned by the {@link #toString} method.
    *
    *  @param writer
    *             a writer on which the dump will be printed
    */
-  public void dump(java.io.PrintWriter writer)
-  {
-    writer.println("== MODULE ==");
-    writer.println("Class: " + getClass().getName());
-    writer.println(declarationReference.toString());
-  }
-
-  public void putResource(final String key, Resource resource)
-  {
-    List<Field> resourceFields
-        = FieldUtils.getFieldsListWithAnnotation(
-        getClass(), AResource.class);
-    Iterator<Field> resourceFieldsIter
-        = new FilterIterator(resourceFields.iterator(),
-        new Predicate<Field>()
-        {
-          public boolean evaluate(Field field)
-          {
-            return field.getAnnotation(AResource.class).key().equals(key);
-          }
-        }
-    );
-    boolean assigned = false;
-    while (resourceFieldsIter.hasNext())
-    {
-      try
-      {
-        Field resourceField = resourceFieldsIter.next();
-        FieldUtils.writeField(resourceField, this, resource, true);
-        assigned = true;
-      }
-      catch (IllegalAccessException e)
-      {
-        // TODO:
-        catched(getClass().getName(), "putResource", e);
-      }
+  public void dump(java.io.PrintWriter writer) {
+    try {
+      writer.println("== MODULE ==");
+      writer.println(toString());
+    } catch (Exception e) {
+      // this is OK, the debug information will be just missing.
     }
-    // TODO: Non existent key field
-    if (!assigned)
-      warning("The resource was not assigned, key: " + key);
   }
 
   @Override

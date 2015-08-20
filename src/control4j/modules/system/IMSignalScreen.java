@@ -30,7 +30,6 @@ import control4j.application.gui.Gui;
 import control4j.application.gui.GuiResource;
 import control4j.gui.GuiObject;
 import control4j.gui.components.Box;
-import control4j.gui.components.Empty;
 import control4j.gui.components.Screen;
 import control4j.gui.components.VDU;
 
@@ -51,34 +50,33 @@ implements Factory<JComponent> {
 
   private ChangeableNode<GuiObject> screen;
 
-  private VDU[] quantities;
+  private VDU vdu;
 
   @Override
   public void initialize(Module definition) {
     try {
-      quantities = new VDU[definition.getInput().size()];
-      // create visual containers
+      // create and configure VDU component
+      vdu = new VDU();
+      for (Input input : definition.getInput()) {
+        if (input.isConnected()) {
+          vdu.addCell();
+          vdu.setLabel(vdu.getCellCount() - 1, input.getSignal().getLabel());
+        }
+      }
+      // wrap the VDU component into some scereen
       screen = new ChangeableNode<GuiObject>();
       screen.setDecorated(new Screen());
-      ChangeableNode<GuiObject> box
-        = (ChangeableNode<GuiObject>)screen.addChild(
-            new ChangeableNode<GuiObject>());
-      box.setDecorated(new Box());
-      // create quantity objects
-      int index = 0;
-      for (Input input : definition.getInput()) {
-        Node<GuiObject> quantityNode = createQuantity(input);
-        box.addChild(quantityNode);
-        quantities[index] = (VDU)quantityNode.getDecorated();
-        index++;
-      }
+      ChangeableNode<GuiObject> vduNode = new ChangeableNode<GuiObject>();
+      vduNode.setDecorated(vdu);
+      screen.addChild(vduNode);
       // add the screen into the gui
       Gui root = (Gui)ResourceManager.getInstance().getResource(
           new GuiResource());
       root.add(screen);
     } catch (Exception e) {
       System.out.println(e.getMessage());
-      System.exit(1);
+      throw new CommonException()
+        .setCause(e);
       // TODO:
     }
   }
@@ -91,20 +89,12 @@ implements Factory<JComponent> {
   public void put(Signal[] input, int inputLength) {
     for (int i = 0; i < inputLength; i++) {
       if (input[i].isValid()) {
-        quantities[i].setValue(input[i].getValue());
+        vdu.setValue(i, input[i].getValue());
       } else {
-        quantities[i].setValue(Double.NaN);
+        vdu.setValue(i, Double.NaN);
       }
     }
-  }
-
-  private Node<GuiObject> createQuantity(Input input) {
-    VDU quantity = new VDU();
-    quantity.setDigits(5); // TODO:
-    quantity.setLabel(input.getSignal().getLabel());
-    Node<GuiObject> quantityNode = new ChangeableNode<GuiObject>();
-    quantityNode.setDecorated(quantity);
-    return quantityNode;
+    vdu.update();
   }
 
 }

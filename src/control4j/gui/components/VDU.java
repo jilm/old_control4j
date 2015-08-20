@@ -24,8 +24,10 @@ import control4j.SignalFormat;
 import control4j.gui.VisualObject;
 import control4j.modules.IGuiUpdateListener;
 
+import cz.lidinsky.tools.CollectionUtils;
 import cz.lidinsky.tools.CommonException;
 import cz.lidinsky.tools.ExceptionCode;
+import cz.lidinsky.tools.Validate;
 import cz.lidinsky.tools.reflect.Getter;
 import cz.lidinsky.tools.reflect.Setter;
 
@@ -39,10 +41,12 @@ import java.awt.Rectangle;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.geom.Rectangle2D;
-import java.text.DecimalFormat;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -50,7 +54,7 @@ import javax.swing.JPanel;
  *
  */
 @control4j.annotations.AGuiObject(name="VDU")
-public class VDU extends VisualObjectBase implements ComponentListener {
+public class VDU extends VisualObjectBase {
 
   /** The number which will be displayed */
   private double value = Double.NaN;
@@ -59,9 +63,10 @@ public class VDU extends VisualObjectBase implements ComponentListener {
 
   public int digits = 5;
 
+  private boolean dirty;
+
   public VDU() {
     super();
-    //setHorizontalAlignment(1.0);
   }
 
   @Getter("Fraction Digits")
@@ -75,10 +80,10 @@ public class VDU extends VisualObjectBase implements ComponentListener {
     format.setMinimumFractionDigits(digits);
     if (component != null) {
       update();
-      Dimension size = computeSize();
-      valueComponent.setPreferredSize(doubleDimension(size));
-      valueComponent.setMaximumSize(doubleDimension(size));
-      valueComponent.setMinimumSize(size);
+      //Dimension size = computeSize();
+      //valueComponent.setPreferredSize(doubleDimension(size));
+      //valueComponent.setMaximumSize(doubleDimension(size));
+      //valueComponent.setMinimumSize(size);
       component.revalidate();
       component.repaint();
     }
@@ -95,153 +100,67 @@ public class VDU extends VisualObjectBase implements ComponentListener {
     this.digits = digits;
     if (component != null) {
       update();
-      Dimension size = computeSize();
-      valueComponent.setPreferredSize(doubleDimension(size));
-      valueComponent.setMaximumSize(doubleDimension(size));
-      valueComponent.setMinimumSize(size);
+      //Dimension size = computeSize();
+      //valueComponent.setPreferredSize(doubleDimension(size));
+      //valueComponent.setMaximumSize(doubleDimension(size));
+      //valueComponent.setMinimumSize(size);
       component.revalidate();
       component.repaint();
     }
   }
 
-  @Getter("Value")
-  public double getValue() {
-    return value;
+  private int cells;
+
+  public void setCellCount(int cells) {
+    dirty = this.cells != cells;
+    this.cells = cells;
   }
 
-  @Setter("Value")
-  public void setValue(double value) {
-    this.value = value;
-    if (component != null) {
-      update();
-    }
+  public int getCellCount() {
+    return cells;
   }
 
-  @Getter("Font Size")
-  public double getFontSize() {
-    return fontSize;
+  public void addCell() {
+    dirty = true;
+    cells++;
   }
 
-  @Setter("Font Size")
-  public void setFontSize(double fontSize) {
-    this.fontSize = (float)fontSize;
-    if (component != null) {
-      component.setFont(component.getFont().deriveFont(this.fontSize));
-      Dimension size = computeSize();
-      valueComponent.setPreferredSize(doubleDimension(size));
-      valueComponent.setMaximumSize(doubleDimension(size));
-      valueComponent.setMinimumSize(size);
-    }
+  public void setValue(int index, double value) {
+    getVDU().setValue(index, value);
   }
 
-  String label;
+  private ArrayList<String> labels = new ArrayList<String>();
 
-  public void setLabel(String label) {
-    this.label = label;
+  public void setLabel(int index, String label) {
+    Validate.checkIndex(cells, index);
+    CollectionUtils.add(labels, index, label);
   }
-
-  public String getLabel() {
-    return label;
-  }
-
-  private JLabel labelComponent;
-  private JLabel valueComponent;
-  private JLabel unit;
 
   @Override
   protected JComponent createSwingComponent() {
-    JPanel panel = new JPanel(null);
-    panel.addComponentListener(this);
-    labelComponent = (JLabel)panel.add(new JLabel(label));
-    valueComponent = (JLabel)panel.add(new JLabel());
-    unit = (JLabel)panel.add(new JLabel("V"));
-    return panel;
+    return new control4j.gui.swing.VDU();
   }
 
   @Override
   public void configureVisualComponent() {
     super.configureVisualComponent();
-    component.setToolTipText(label);
-    valueComponent.setHorizontalAlignment(JLabel.RIGHT);
-    valueComponent.setFont(component.getFont().deriveFont(fontSize));
-    valueComponent.setForeground(Color.GREEN);
-    valueComponent.setBackground(Color.BLACK);
-    valueComponent.setOpaque(true);
-    Dimension size = computeSize();
-    valueComponent.setPreferredSize(doubleDimension(size));
-    valueComponent.setMaximumSize(doubleDimension(size));
-    valueComponent.setMinimumSize(size);
+    getVDU().addCells(cells);
+    for (int i = 0; i < labels.size(); i++) {
+      getVDU().setLabel(i, labels.get(i));
+    }
+    dirty = true;
     update();
-    component.revalidate();
-    component.repaint();
   }
 
-  private void update() {
-    if (Double.isNaN(value))
-      valueComponent.setText("?");
-    else
-      valueComponent.setText(format.format(value));
+  public void update() {
+    if (component != null) {
+      component.revalidate();
+      component.repaint();
+    }
   }
 
-  private Dimension computeSize() {
-    // get the metrics of the font
-    FontMetrics metrics = component.getFontMetrics(component.getFont());
-    // create the text of the appropriate size
-    int digits = getDigits();
-    double number = (Math.pow(10.0d, digits) - 1) * -1;
-    String text = format.format(number);
-    // get rectangles for particular text
-    int width = metrics.stringWidth(text);
-    int height = metrics.getHeight();
-    return new Dimension(width, height);
-  }
-
-  //------------------------------------------------- Component Event Listener.
-
-  private static Dimension doubleDimension(Dimension in) {
-    return new Dimension(in.width * 2, in.height * 2);
-  }
-
-  public void componentHidden(ComponentEvent e) {
-  }
-
-  public void componentMoved(ComponentEvent e) {
-  }
-
-  public void componentResized(ComponentEvent e) {
-    float fontSize = computeFontSize(
-        e.getComponent().getWidth(), e.getComponent().getHeight());
-    //valueComponent.setFont(valueComponent.getFont().deriveFont(fontSize));
-    //valueComponent.setSize(e.getComponent().getSize());
-  }
-
-  public void componentShown(ComponentEvent e) {
-  }
-
-  //------------------------------------------------------------------ Private.
-
-  private float computeFontSize(int reqWidth, int reqHeight) {
-    // get the metrics of the font
-    FontMetrics metrics = component.getFontMetrics(component.getFont());
-    // create the text of the appropriate size
-    int digits = getDigits();
-    double number = (Math.pow(10.0d, digits) - 1) * -1;
-    String text = format.format(number);
-    // get rectangles for particular text
-    int width = metrics.stringWidth(text);
-    int height = metrics.getHeight();
-    // compute new font size to fit given dimension
-    float ratioX = (float)reqWidth / (float)width;
-    float ratioY = (float)reqHeight / (float)height;
-    float ratio = Math.min(ratioX, ratioY);
-    float fontSize = ratio * metrics.getFont().getSize();
-    valueComponent.setFont(
-        valueComponent.getFont().deriveFont(fontSize));
-    metrics = valueComponent.getFontMetrics(valueComponent.getFont());
-    width = metrics.stringWidth(text);
-    height = metrics.getHeight();
-    valueComponent.setSize(width, height);
-    return metrics.getFont().getSize() * ratio;
+  private control4j.gui.swing.VDU getVDU() {
+    return (control4j.gui.swing.VDU)component;
   }
 
 }

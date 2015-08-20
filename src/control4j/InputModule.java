@@ -23,19 +23,21 @@ import java.util.NoSuchElementException;
 import control4j.application.Input;
 
 /**
- *
- *  Represents an input module, it is the module which takes input but 
- *  doesn't provide any output for further processing. Typicaly it may 
- *  be a module which writes values into the output hardware. Abstract 
+ *  Represents an input module, it is the module which takes input but
+ *  doesn't provide any output for further processing. Typicaly it may
+ *  be a module which writes values into the output hardware. Abstract
  *  class which must be extended by each input module.
  *
+ *  <p>The {@link #put} method is dedicated for module functionality.
+ *  Override this method and put the algorithm of the module there.
  */
 public abstract class InputModule extends Module
 {
 
   /**
    *  Method, that must implement module functionality. This method
-   *  must be overwritten.
+   *  must be overwritten. It is regularily colled by the
+   *  {@link ControlLoop} during the loop processing.
    *
    *  @param input
    *             input signal values. Inputs that were not assigned
@@ -50,25 +52,10 @@ public abstract class InputModule extends Module
   protected abstract void put(Signal[] input, int inputLength);
 
   /**
-   *  This method may be used to get configuration of the input
-   *  if neccessary. This method is called during the instantiation
-   *  phase of the application loading. It is called for each 
-   *  assigned input. Method does nothing, override it method, 
-   *  to get the input configuration.
-   *
-   *  @param index
-   *             input index of the input
-   *
-   *  @param configuration
-   *             configuration of the input with given index
+   *  Returns false.
    */
-  public void setInputConfiguration(int index, IConfigBuffer configuration)
-  { }
-
   @Override
-  public void dump(java.io.PrintWriter writer)
-  {
-    super.dump(writer);
+  public final boolean isVariableOutputSupported() {
+    return false;
   }
-
 }
