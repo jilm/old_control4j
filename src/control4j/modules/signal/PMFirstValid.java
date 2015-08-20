@@ -26,6 +26,14 @@ import control4j.ProcessModule;
 public class PMFirstValid extends ProcessModule {
 
   @Override
+  public void initialize(control4j.application.Module moduleDef) {
+    super.initialize(moduleDef);
+    // TODO:  check, that all of the input has the same unit
+    moduleDef.getOutput().get(0).getSignal().setUnit(
+        moduleDef.getInput().get(0).getSignal().getUnit());
+  }
+
+  @Override
   public void process(Signal[] input, int inputLength,
         Signal[] output, int outputLength) {
 

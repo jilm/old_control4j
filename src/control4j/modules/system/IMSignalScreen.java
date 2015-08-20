@@ -60,7 +60,7 @@ implements Factory<JComponent> {
       for (Input input : definition.getInput()) {
         if (input.isConnected()) {
           vdu.addCell();
-          vdu.setLabel(vdu.getCellCount() - 1, input.getSignal().getLabel());
+          vdu.setLabel(vdu.getCellCount() - 1, input.getSignal().getLabel() + input.getSignal().getUnit());
         }
       }
       // wrap the VDU component into some scereen

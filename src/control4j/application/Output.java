@@ -18,21 +18,46 @@ package control4j.application;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import cz.lidinsky.tools.CommonException;
+import cz.lidinsky.tools.ExceptionCode;
 import cz.lidinsky.tools.ToStringBuilder;
 
-public class Output extends Configurable
-{
+/**
+ *  Contains a module output definition. The output may be connected (bind with
+ *  some signal) or it may be disconnected.  Each module output, which is
+ *  connected, is bind to exactly one signal.  The signal is unambiguously
+ *  identified by the <em>pointer</em> number.
+ */
+public class Output extends Configurable {
 
+  /**
+   *  An empty constructor.
+   */
   public Output() {}
+
+  //------------------------------------------------------------------ Pointer.
 
   private int pointer = -1;
 
-  public void setPointer(int pointer) {
+  /**
+   *  Sets the pointer, which is identification of the signal. The pointer is
+   *  set by the <code>Preprocessor</code>.
+   */
+  void setPointer(int pointer) {
     this.pointer = pointer;
   }
 
+  /**
+   *  Returns the pointer, which is identification of the signal to which this
+   *  output is connected to.
+   *
+   *  @throws CommonException
+   *             with code <code>ILLEGAL_STATE</code>;
+   *             if this output is not connected to any signal
+   */
   public int getPointer() {
     return pointer;
+    // TODO:  throw exception if disconnected
   }
 
   /**
@@ -41,6 +66,38 @@ public class Output extends Configurable
   public boolean isConnected() {
     return pointer >= 0;
   }
+
+  //------------------------------------------------------------------- Signal.
+
+  private Signal signal;
+
+  /**
+   *  Sets the signal to which this output is bind to. This method is called by
+   *  the Preprocessor.
+   */
+  void setSignal(Signal signal) {
+    this.signal = signal;
+  }
+
+  /**
+   *  Returns the signal with which this output is bind to.
+   *
+   *  @throws CommonException
+   *             with code <code>ILLEGAL_STATE</code>; if this output is not
+   *             connected
+   */
+  public Signal getSignal() {
+    if (isConnected()) {
+      return signal;
+    } else {
+      throw new CommonException()
+        .setCode(ExceptionCode.ILLEGAL_STATE)
+        .set("message", "The output is not connected!")
+        .set("reference", getDeclarationReferenceText());
+    }
+  }
+
+  //-------------------------------------------------------------------- Other.
 
   @Override
   public void toString(ToStringBuilder builder) {

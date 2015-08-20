@@ -39,6 +39,13 @@ public class PMRTD2Temp extends ProcessModule {
   public static final double c7 = -1.3601e-6d;
 
   @Override
+  public void initialize(control4j.application.Module moduleDef) {
+    super.initialize(moduleDef);
+    // set the unit of the output signal to celsius degree
+    moduleDef.getOutput().get(0).getSignal().setUnit('\u0167' + "C");
+  }
+
+  @Override
   public void process(Signal[] input, int inputLength,
       Signal[] output, int outputLength) {
 

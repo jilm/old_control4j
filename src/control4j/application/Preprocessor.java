@@ -565,6 +565,7 @@ public class Preprocessor implements Iterable<Module>, IToStringBuildable {
         Signal signal = getSignal(outputRef.getHref(), outputRef.getScope());
         int pointer = getSignalIndex(signal);
         outputRef.getDecorated().setPointer(pointer);
+        outputRef.getDecorated().setSignal(signal);
         // TODO: copy signal properties
       } catch (NoSuchElementException e) {
         // TODO: Signal was not defined!
