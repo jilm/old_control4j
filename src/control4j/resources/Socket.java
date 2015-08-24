@@ -33,6 +33,7 @@ import org.apache.commons.collections4.Transformer;
 
 import java.io.InputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 
 public class Socket extends Resource {
 
@@ -50,7 +51,7 @@ public class Socket extends Resource {
   @Override
   public void prepare() {
     socket = new RobustSocket(host, port, timeout);
-    socket.start();
+    //socket.start();
   }
 
   @Override
@@ -79,11 +80,19 @@ public class Socket extends Resource {
     }
   }
 
-  public IResponseCrate write(byte[] request,
+  /*public IResponseCrate write(byte[] request,
       Transformer<InputStream, Object> reader)
       throws IOException {
 
     return socket.write(request, reader);
+  }*/
+
+  public InputStream getInputStream() {
+    return socket.getInputStream();
+  }
+
+  public OutputStream getOutputStream() {
+    return socket.getOutputStream();
   }
 
 }
