@@ -231,6 +231,7 @@ implements Runnable, java.io.Closeable
       // estabilish a connection
       try
       {
+        fine("Going to estabilish connection ...");
         InetAddress address = InetAddress.getByName(host);
         socket = new Socket(address, port);
         socket.setSoTimeout(timeout);
@@ -276,14 +277,12 @@ implements Runnable, java.io.Closeable
       }
       catch (UnknownHostException e)
       {
-        if (logFlag)
-	  catched(identification, "run", e);
+	catched(identification, "run", e);
         logFlag = false;
       }
       catch (IOException e)
       {
-        if (logFlag)
-	  catched(identification, "run", e);
+	catched(identification, "run", e);
         logFlag = false;
       }
       finally   // close all resources

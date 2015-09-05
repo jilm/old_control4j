@@ -89,6 +89,7 @@ public class SignalClient extends Resource implements ICycleEventListener
       }
       catch (java.io.IOException e)
       {
+        catched(getClass().getName(), "cycleEnd", e);
       }
   }
 
