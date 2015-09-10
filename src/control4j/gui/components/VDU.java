@@ -136,6 +136,13 @@ public class VDU extends VisualObjectBase {
     CollectionUtils.add(labels, index, label);
   }
 
+  private ArrayList<String> units = new ArrayList<String>();
+
+  public void setUnit(int index, String unit) {
+    Validate.checkIndex(cells, index);
+    CollectionUtils.add(units, index, unit);
+  }
+
   @Override
   protected JComponent createSwingComponent() {
     return new control4j.gui.swing.VDU();
@@ -147,6 +154,7 @@ public class VDU extends VisualObjectBase {
     getVDU().addCells(cells);
     for (int i = 0; i < labels.size(); i++) {
       getVDU().setLabel(i, labels.get(i));
+      getVDU().setUnit(i, units.get(i));
     }
     dirty = true;
     update();

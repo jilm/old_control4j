@@ -36,6 +36,7 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
+import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -76,7 +77,7 @@ public class VDU extends JComponent implements MouseListener, ActionListener {
     labelComponent = new JLabel();
     labelComponent.setHorizontalAlignment(SwingConstants.RIGHT);
     unitComponent = new JLabel();
-    //addMouseListener(this);
+    // Popup menu
     setComponentPopupMenu(new JPopupMenu()
         .addItem(new JMenuItem()
           .setFText("Show penalty matrix")
@@ -106,6 +107,9 @@ public class VDU extends JComponent implements MouseListener, ActionListener {
     }
   }
 
+  /**
+   *  Adds one cell.
+   */
   public void addCell() {
     cells.add(new Cell());
     dirty = true;
@@ -132,11 +136,40 @@ public class VDU extends JComponent implements MouseListener, ActionListener {
       .setLabel(Validate.notNull(label));
   }
 
+  /**
+   *  Sets the value for a particular cell.
+   *
+   *  @param index
+   *             which cell will be affected
+   *
+   *  @param value
+   *             new value for a cell with given index. If the value should be
+   *             presented as unknown or invalid, write <code>NaN</code>
+   *
+   *  @throws CommonException
+   *             if the index is out of bounds
+   */
   public void setValue(int index, double value) {
     cells.get(index).setValue(value);
   }
 
+  /**
+   *  Sets the unit for a cell.
+   *
+   *  @param index
+   *             which cell will be affected
+   *
+   *  @param unit
+   *             new unit for a cell with given index, may be <code>null</code>
+   *             value
+   *
+   *  @throws CommonException
+   *             if the index is out of bounds
+   */
   public void setUnit(int index, String unit) {
+    cells
+      .get(Validate.checkIndex(cells, index))
+      .setUnit(unit);
   }
 
   public void hide(int index) {
@@ -147,6 +180,7 @@ public class VDU extends JComponent implements MouseListener, ActionListener {
 
   //--------------------------------------------------------- Cell Information.
 
+  /** List of all cells inside the grid. */
   private List<Cell> cells = new ArrayList<Cell>();
 
   /**
@@ -169,6 +203,7 @@ public class VDU extends JComponent implements MouseListener, ActionListener {
     int refLabelWidth;
     int refUnitWidth;
     float labelRatio;
+    float unitRatio;
 
     public void setLabel(String label) {
       this.label = label;
@@ -176,6 +211,10 @@ public class VDU extends JComponent implements MouseListener, ActionListener {
 
     public void setValue(double value) {
       this.value = value;
+    }
+
+    public void setUnit(String unit) {
+      this.unit = unit;
     }
 
   }
@@ -217,9 +256,24 @@ public class VDU extends JComponent implements MouseListener, ActionListener {
     float cellWidth = layout[CELL_WIDTH];
     float cellHeight = layout[CELL_HEIGHT];
     float gap = getGap();
+    Polygon triangle = new Polygon();
+    triangle.addPoint((int)(gap * 0.5f), (int)(gap * 0.5f));
+    triangle.addPoint((int)(cellWidth + gap), (int)(gap * 0.5));
+    triangle.addPoint((int)(gap * 0.5f), (int)(cellHeight + gap));
     for (int i = 0; i < count; i++) {
       int col = i % cols;
       int row = i / cols;
+      // paint background
+      float x = col * (cellWidth + gap);
+      float y = row * (cellHeight + gap);
+      int cellX = (int)(col * cellWidth + gap * col);
+      int cellY = (int)(row * cellHeight + gap * row);
+      Graphics cellG = g.create(
+          cellX, cellY,
+          (int)(layout[CELL_WIDTH] + 2f * gap),
+          (int)(layout[CELL_HEIGHT] + 2f * gap));
+      cellG.setColor(Color.ORANGE);
+      cellG.fillPolygon(triangle);
       // convert and paint the value
       double value = cells.get(i).value;
       String strValue;
@@ -245,6 +299,14 @@ public class VDU extends JComponent implements MouseListener, ActionListener {
             (int)(layout[LABEL_Y] + row * cellHeight + gap * row + gap),
             (int)layout[LABEL_WIDTH],
             (int)layout[LABEL_HEIGHT]));
+      // paint the unit
+      unitComponent.setText(cells.get(i).unit);
+      unitComponent.paint(
+          g.create(
+            (int)(layout[UNIT_X] + col * cellWidth + gap * col + gap),
+            (int)(layout[UNIT_Y] + row * cellHeight + gap * row + gap),
+            (int)layout[UNIT_WIDTH],
+            (int)layout[UNIT_HEIGHT]));
     }
   }
 
@@ -255,30 +317,45 @@ public class VDU extends JComponent implements MouseListener, ActionListener {
   private int refValueWidth;
   private float valueRatio;
 
+  /** Width of the longest label. */
+  private int maxRefLabelWidth;
+
   /**
-   *  Should be called after dimension of some component changed.
+   *  Should be called after the content of some component changed. It means
+   *  content which could influence the dimensions of this component. This
+   *  method recalculates reference dimensions of all components.
    */
   private void update() {
+    maxRefLabelWidth = 0;
     // get the reference font metrics
     FontMetrics metrics = getFontMetrics(getFont().deriveFont(10.0f));
     refHeight = metrics.getHeight();
+    // calculate reference dimensions for the value
+    //int digits = 5;
+    double number = (Math.pow(10.0d, digits) - 1) * -1;
+    String text = format.format(number);
+    refValueWidth = metrics.stringWidth(text);
+    valueRatio = (float)refValueWidth / (float)refHeight;
+    // calculate dimensions of the components which are cell dependent
     for (Cell cell : cells) {
-      // create the text of the appropriate size
-      int digits = 5;
-      double number = (Math.pow(10.0d, digits) - 1) * -1;
-      String text = format.format(number);
-      refValueWidth = metrics.stringWidth(text);
-      // get rectangles for particular text
-      int width = metrics.stringWidth(text);
+      // label
       if (cell.label != null) {
         cell.refLabelWidth = metrics.stringWidth(cell.label);
+        maxRefLabelWidth = Math.max(maxRefLabelWidth, cell.refLabelWidth);
         cell.labelRatio = (float)cell.refLabelWidth / (float)refHeight;
       } else {
         cell.refLabelWidth = 0;
-        cell.labelRatio = 0.0f;
+        cell.labelRatio = 0f;
+      }
+      // unit
+      if (cell.unit != null) {
+        cell.refUnitWidth = metrics.stringWidth(cell.unit);
+        cell.unitRatio = (float)cell.refUnitWidth / (float)refHeight;
+      } else {
+        cell.refUnitWidth = 0;
+        cell.unitRatio = 0f;
       }
     }
-    valueRatio = (float)refValueWidth / (float)refHeight;
   }
 
   /** Auxiliary fields to detect window resize. */
@@ -299,7 +376,7 @@ public class VDU extends JComponent implements MouseListener, ActionListener {
    *  The gap between cells. It is the portion of the smaller component
    *  dimension.
    */
-  private float gapRatio = 1f/30f;
+  private float gapRatio = 1f/40f;
 
   /**
    *  Returns the gap size in pixels.
@@ -457,6 +534,7 @@ public class VDU extends JComponent implements MouseListener, ActionListener {
 
   //------------------------------------------------------------------ Options.
 
+  private static final int LAYOUT_ARRAY_SIZE = 16;
   /** Indexes into the layout array. */
   private static final int CELL_WIDTH = 0;
   private static final int CELL_HEIGHT = 1;
@@ -470,13 +548,17 @@ public class VDU extends JComponent implements MouseListener, ActionListener {
   private static final int LABEL_X = 9;
   private static final int LABEL_Y = 10;
   private static final int LABEL_FONT = 11;
+  private static final int UNIT_WIDTH = 12;
+  private static final int UNIT_HEIGHT = 13;
+  private static final int UNIT_X = 14;
+  private static final int UNIT_Y = 15;
 
-  private static float[] calculateLayout(int option,
+  private float[] calculateLayout(int option,
       float cellWidth, float cellHeight, float valueRatio, float refHeight) {
 
     switch (option) {
       case 0:
-        return oneLineLayout(cellWidth, cellHeight, valueRatio, refHeight);
+        return oneLineLayout(cellWidth, cellHeight, valueRatio, (float)maxRefLabelWidth / (float)refHeight, refHeight);
       case 1:
         return twoLinesLayout(cellWidth, cellHeight, valueRatio, refHeight);
       default:
@@ -490,34 +572,49 @@ public class VDU extends JComponent implements MouseListener, ActionListener {
    *  neccessary.
    */
   protected static float[] oneLineLayout(
-      float cellWidth, float cellHeight, float valueRatio, float refHeight) {
+      float cellWidth,
+      float cellHeight,
+      float valueRatio,
+      float maxLabelRatio,
+      float refHeight) {
 
-    float minLabelValueProportion = 3f/7f;
-    float labelValueFontRatio = 2f/3f;
+    // portion for a unit box
     float cellRatio = cellWidth / cellHeight;
-    float valueWidth;
-    float valueHeight;
-    if (valueRatio * (1f + minLabelValueProportion) > cellRatio) {
-      // if the label + value is wider than the cell
-      valueWidth = cellWidth * (1 - minLabelValueProportion);
-      valueHeight = valueWidth / valueRatio;
+    float labelValueFontRatio = 2f/3f;
+    float unitPortion = 1f/10f;
+    float unitRatio = unitPortion * cellRatio;
+    float minLabelPortion = 3f/10f;
+    float minLabelRatio = minLabelPortion * cellRatio;
+    float chainRatio = maxLabelRatio + valueRatio + cellRatio * unitPortion;
+    float height;
+    if (chainRatio <= cellRatio) {
+      // If the cell is wide enough to contain the whole chain:
+      // max label + value + unit
+      height = cellHeight;
+    } else if (cellRatio - valueRatio - unitRatio >= minLabelRatio) {
+      // If the cell is not wide enough, but the place for label is still wider
+      // than minimal portion for a label
+      height = cellHeight;
     } else {
-      // if the label + value fits the cell
-      valueHeight = cellHeight;
-      valueWidth = valueHeight * valueRatio;
+      // otherwise, scale the whole chain to fit the cell width
+      height = cellWidth / (minLabelRatio + valueRatio + unitRatio);
     }
-    float[] result = new float[12];
+    float[] result = new float[LAYOUT_ARRAY_SIZE];
     result[CELL_WIDTH] = cellWidth;
     result[CELL_HEIGHT] = cellHeight;
-    result[VALUE_WIDTH] = valueWidth;
-    result[VALUE_HEIGHT] = valueHeight;
-    result[VALUE_X] = cellWidth - valueWidth;
-    result[VALUE_Y] = 0f;
-    result[VALUE_FONT] = 10f * valueHeight / refHeight;
-    result[LABEL_WIDTH] = cellWidth - valueWidth;
-    result[LABEL_HEIGHT] = valueHeight;
+    result[VALUE_WIDTH] = height * valueRatio;
+    result[VALUE_HEIGHT] = height;
+    result[UNIT_WIDTH] = height * unitRatio;
+    result[UNIT_HEIGHT] = height;
+    result[LABEL_WIDTH] = cellWidth - result[VALUE_WIDTH] - result[UNIT_WIDTH];
+    result[LABEL_HEIGHT] = height;
     result[LABEL_X] = 0f;
     result[LABEL_Y] = 0f;
+    result[VALUE_X] = result[LABEL_WIDTH];
+    result[VALUE_Y] = 0f;
+    result[UNIT_X] = result[LABEL_WIDTH] + result[VALUE_WIDTH];
+    result[UNIT_Y] = 0f;
+    result[VALUE_FONT] = 10f * height / refHeight;
     result[LABEL_FONT] = result[VALUE_FONT] * labelValueFontRatio;
     return result;
   }
@@ -538,7 +635,7 @@ public class VDU extends JComponent implements MouseListener, ActionListener {
       valueHeight = cellHeight * (1f - minLabelValueProportion);
       valueWidth = valueHeight * valueRatio;
     }
-    float[] result = new float[12];
+    float[] result = new float[LAYOUT_ARRAY_SIZE];
     result[CELL_WIDTH] = cellWidth;
     result[CELL_HEIGHT] = cellHeight;
     result[VALUE_WIDTH] = valueWidth;

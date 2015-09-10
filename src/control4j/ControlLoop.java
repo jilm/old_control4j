@@ -31,7 +31,7 @@ import control4j.application.Property;
 import static control4j.tools.Logger.*;
 import static control4j.tools.LogMessages.*;
 
-import cz.lidinsky.tools.ToStringMultilineStyle;
+import cz.lidinsky.tools.ToStringBuilder;
 
 /**
  *
@@ -360,7 +360,7 @@ public class ControlLoop {
         writer.println(module.toString());
       }
       writer.println(
-          new ToStringMultilineStyle()
+          new ToStringBuilder()
               .toString());
       info("The dump file was created: " + dumpFile.getAbsolutePath());
       dump = false;

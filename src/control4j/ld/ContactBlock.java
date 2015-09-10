@@ -1,7 +1,7 @@
 package control4j.ld;
 
 /*
- *  Copyright 2013 Jiri Lidinsky
+ *  Copyright 2013, 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -19,7 +19,7 @@ package control4j.ld;
  */
 
 import cz.lidinsky.tools.IToStringBuildable;
-import cz.lidinsky.tools.ToStringMultilineStyle;
+import cz.lidinsky.tools.ToStringBuilder;
 
 /**
  *
@@ -28,7 +28,7 @@ public abstract class ContactBlock implements IToStringBuildable
 {
   @Override
   public String toString() {
-    return new ToStringMultilineStyle()
+    return new ToStringBuilder()
       .append(this)
       .toString();
   }

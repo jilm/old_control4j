@@ -49,7 +49,6 @@ import org.apache.commons.collections4.ListUtils;
 import cz.lidinsky.tools.CommonException;
 import cz.lidinsky.tools.ExceptionCode;
 import cz.lidinsky.tools.IToStringBuildable;
-import cz.lidinsky.tools.ToStringMultilineStyle;
 import cz.lidinsky.tools.ToStringBuilder;
 import cz.lidinsky.tools.graph.Graph;
 import cz.lidinsky.tools.graph.IGraph;
@@ -589,7 +588,7 @@ public class Preprocessor implements Iterable<Module>, IToStringBuildable {
 
   @Override
   public String toString() {
-    ToStringBuilder builder = new ToStringMultilineStyle();
+    ToStringBuilder builder = new ToStringBuilder();
     toString(builder);
     return builder.toString();
   }

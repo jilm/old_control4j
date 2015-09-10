@@ -24,7 +24,6 @@ import cz.lidinsky.tools.CommonException;
 import cz.lidinsky.tools.ExceptionCode;
 import cz.lidinsky.tools.IToStringBuildable;
 import cz.lidinsky.tools.ToStringBuilder;
-import cz.lidinsky.tools.ToStringMultilineStyle;
 
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.Graphs;
@@ -413,7 +412,7 @@ public class Sorter implements Iterable<Module>, IToStringBuildable {
 
   @Override
   public String toString() {
-    return new ToStringMultilineStyle()
+    return new ToStringBuilder()
       .append((IToStringBuildable)this)
       .toString();
   }

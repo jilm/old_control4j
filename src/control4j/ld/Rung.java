@@ -20,7 +20,6 @@ package control4j.ld;
 
 import cz.lidinsky.tools.IToStringBuildable;
 import cz.lidinsky.tools.ToStringBuilder;
-import cz.lidinsky.tools.ToStringMultilineStyle;
 
 import java.util.LinkedList;
 
@@ -71,7 +70,7 @@ public class Rung implements IToStringBuildable
 
   @Override
   public String toString() {
-    return new ToStringMultilineStyle()
+    return new ToStringBuilder()
       .append(this)
       .toString();
   }
