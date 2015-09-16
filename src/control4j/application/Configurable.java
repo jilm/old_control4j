@@ -18,6 +18,8 @@ package control4j.application;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import static cz.lidinsky.tools.Validate.notBlank;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -33,6 +35,8 @@ import control4j.ConfigItemNotFoundException;
 import control4j.IConfigBuffer;
 import control4j.tools.DuplicateElementException;
 
+import cz.lidinsky.tools.CommonException;
+import cz.lidinsky.tools.ExceptionCode;
 import cz.lidinsky.tools.ToStringBuilder;
 
 /**
@@ -49,8 +53,14 @@ import cz.lidinsky.tools.ToStringBuilder;
  */
 public abstract class Configurable extends DeclarationBase {
 
+  /**
+   *  An empty constructor.
+   */
   public Configurable() { }
 
+  /**
+   *  Internal storage for the configuration.
+   */
   private HashMap<String, Property> configuration
       = new HashMap<String, Property>();
 
@@ -81,17 +91,47 @@ public abstract class Configurable extends DeclarationBase {
     }
   }
 
+  /**
+   *  Returns the property value which is asociated with given key. This is
+   *  simply a shorthand for <code>getProperty(key).getValue()</code>.
+   *
+   *  @param key
+   *             identification of the value that is required
+   *
+   *  @return the value which was stored under the given key
+   *
+   *  @throws CommonException
+   *             if the parameter key is blank
+   *
+   *  @throws CommonException (NO_SUCH_ELEMENT)
+   *             if there is not a property with given key
+   */
   public String getValue(String key) {
-    Property property = configuration.get(key);
+    Property property = getProperty(key);
     if (property != null) {
       return property.getValue();
     } else {
-      throw new NoSuchElementException();
+      throw new CommonException()
+        .setCode(ExceptionCode.NO_SUCH_ELEMENT)
+        .set("message", "There is not a property under the given key")
+        .set("key", key);
     }
   }
 
+  /**
+   *  Returns property that is stored under the given key or <code>null</code>
+   *  if there is no property with given key.
+   *
+   *  @param key
+   *             required value identification
+   *
+   *  @return the value that is asociated with given key
+   *
+   *  @throws CommonException
+   *             if the parameter is blank
+   */
   public Property getProperty(String key) {
-    return configuration.get(key);
+    return configuration.get(notBlank(key));
   }
 
   /**

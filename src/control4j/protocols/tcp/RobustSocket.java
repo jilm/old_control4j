@@ -36,15 +36,9 @@ import org.apache.commons.collections4.Factory;
 
 /**
  *
- *  An easy to use class for request / response communication client over the
- *  TCP/IP protocol. A commutication is performed by the independent thread, so
- *  the methods for read and write doesn't block. If an exception is thrown
- *  during the communication, or during the communication negotiation, all of
- *  the resources which were created so far are closed and released, and the
- *  new process of communication connection is started. This process is
- *  completly transparent.
- *
- *  <p>The only thing you must do is to provide a factory to this class
+ *  An easy to use wrapper to the Socket class which provides socket that is
+ *  trying to make a connection evry time the read or write method is called
+ *  and the communication has not been created yet.
  *
  */
 public class RobustSocket implements java.io.Closeable {
@@ -67,8 +61,7 @@ public class RobustSocket implements java.io.Closeable {
   protected volatile boolean close = false;
 
   /**
-   *  Initialize internal fields. But it doesn't start the comunication. The
-   *  <code>start</code> method must be called to start communication.
+   *  Initialize internal fields.
    *
    *  @param host
    *             host name of the remote server
@@ -79,7 +72,7 @@ public class RobustSocket implements java.io.Closeable {
   public RobustSocket(String host, int port, int timeout) {
     this.host = host;
     this.port = port;
-    this.timeout = timeout;
+    //this.timeout = timeout;
     identification = "TCP/IP client; class: " + getClass().getName()
         + "; host: " + host + "; port: " + port;
   }
@@ -87,12 +80,7 @@ public class RobustSocket implements java.io.Closeable {
   private boolean connecting;
 
   /**
-   *  Causes the request - response loop to stop. Before the loop stops it
-   *  closes all of the resources. Once the loop is stopped, it cannot be
-   *  started again.
-   *
-   *  <p>If the request - response loop is not running, or if it has already
-   *  been stopped, nothing happens.
+   *  Close this socket.
    */
   public synchronized void close() {
     close = true;
