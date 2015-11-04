@@ -18,6 +18,9 @@ package control4j;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import cz.lidinsky.tools.CommonException;
+import cz.lidinsky.tools.ExceptionCode;
+
 abstract class ModuleCrate {
 
   static ModuleCrate create(
@@ -30,7 +33,7 @@ abstract class ModuleCrate {
     } else if (module instanceof ProcessModule) {
       return new ProcessModuleCrate((ProcessModule)module, inputMap, outputMap);
     } else {
-      throw new SyntaxErrorException()
+      throw new CommonException()
         .setCode(ExceptionCode.CLASS_CAST)
         .set("message", "Module implementation")
         .set("module class", module.getClass().getName());
@@ -86,7 +89,7 @@ abstract class ModuleCrate {
       if (inputMap != null) {
         this.inputMap = inputMap;
       } else if (module.getMandatoryInputSize() > 0) {
-        throw new SyntaxErrorException()
+        throw new CommonException()
           .setCode(ExceptionCode.NULL_POINTER)
           .set("message", "Input module without input!")
           .set("input required", module.getMandatoryInputSize())
@@ -169,7 +172,7 @@ abstract class ModuleCrate {
       if (inputMap != null) {
         this.inputMap = inputMap;
       } else if (module.getMandatoryInputSize() > 0) {
-        throw new SyntaxErrorException()
+        throw new CommonException()
           .setCode(ExceptionCode.NULL_POINTER)
           .set("message", "Process module without input!")
           .set("input required", module.getMandatoryInputSize())

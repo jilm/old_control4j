@@ -24,7 +24,17 @@ import control4j.ProcessModule;
 
 /**
  *
- *  Provides boolean AND operation.
+ *  Returns a result of the boolean AND operation on its input signals.  It
+ *  expects one or more input signals and provides exactly one output signal.
+ *
+ *  Input: variable, scalar boolean, it expects at least one input scalar
+ *  boolean value.
+ *
+ *  Output: 0, scalar boolean, Output signal gets a valid true value if and
+ *  only if all of the input signals contain valid true values. If at least one
+ *  input signal contains valid false value, then the output contains valid
+ *  false value. Otherwise the output contains invalid value. Timestamp of the
+ *  output corresponds to the actual system time.
  *
  */
 @AVariableInput
@@ -34,23 +44,23 @@ public class PMAnd extends ProcessModule
   /**
    *  Performs a logical AND operation of input signals and returns
    *  the result. It expects one or more input signals and provides
-   *  exactly one output signal. Value of output should be treated 
-   *  as a boolean value. 
+   *  exactly one output signal. Value of output should be treated
+   *  as a boolean value.
    *
    *  <p>Output signal contains a valid true value if and only if
    *  all of the input signals contain valid true values. If at least
    *  one input signal contains valid false value, then the output
    *  contains valid false value. Otherwise the output contains
-   *  invalid value. Timestamp of the output corresponds to the 
+   *  invalid value. Timestamp of the output corresponds to the
    *  actual system time.
    *
    *  @param input an array of size at least one. It shall not
    *            contain null value.
    *
-   *  @return an array of size one. It contains Signal whose value 
+   *  @return an array of size one. It contains Signal whose value
    *            is logical AND on the input signals. Returned signal
    *            is valid as long as it is possible to infer the
-   *            output value. Timestamp corresponds to the system 
+   *            output value. Timestamp corresponds to the system
    *            time in moment of module invocation.
    */
   @Override

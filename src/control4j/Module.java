@@ -124,24 +124,29 @@ public abstract class Module implements IToStringBuildable {
    *  @see ObjectMapDecorator
    */
   protected void initialize(IConfigBuffer configuration) {
-    // assign configuration items
-    ObjectMapDecorator<String> objectMap
+    try {
+      // assign configuration items
+      ObjectMapDecorator<String> objectMap
         = new ObjectMapDecorator<String>(String.class);
-    objectMap.setSetterFilter(PredicateUtils.allPredicate(
-        //ObjectMapUtils.getSetterSignatureCheckPredicate(),
-        ObjectMapUtils.getHasAnnotationPredicate(Setter.class)));
-    objectMap.setGetterFilter(PredicateUtils.falsePredicate());
-    objectMap.setSetterFactory(
-        ObjectMapUtils.stringSetterClosureFactory(true));
-    objectMap.setDecorated(this);
-    Set<String> keys = objectMap.keySet();
-    // TODO:
-    for (String key : keys) {
-      try {
-        objectMap.put(key, configuration.getString(key));
-      } catch (ConfigItemNotFoundException e) {
-        fine("ConfigItem missing: " + key);
+      objectMap.setSetterFilter(PredicateUtils.allPredicate(
+            //ObjectMapUtils.getSetterSignatureCheckPredicate(),
+            ObjectMapUtils.getHasAnnotationPredicate(Setter.class)));
+      objectMap.setGetterFilter(PredicateUtils.falsePredicate());
+      objectMap.setSetterFactory(
+          ObjectMapUtils.stringSetterClosureFactory(true));
+      objectMap.setDecorated(this);
+      Set<String> keys = objectMap.keySet();
+      // TODO:
+      for (String key : keys) {
+        try {
+          objectMap.put(key, configuration.getString(key));
+        } catch (ConfigItemNotFoundException e) {
+          fine("ConfigItem missing: " + key);
+        }
       }
+    } catch (Exception e) {
+      throw new CommonException()
+        .setCause(e);
     }
   }
 
@@ -185,7 +190,8 @@ public abstract class Module implements IToStringBuildable {
       }
     } catch (Exception e) {
       // TODO:
-      throw new SyntaxErrorException(e);
+      throw new CommonException()
+        .setCause(e);
     }
   }
 

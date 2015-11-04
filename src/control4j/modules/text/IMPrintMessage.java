@@ -20,27 +20,32 @@ package control4j.modules.text;
 
 import control4j.Signal;
 import control4j.AResource;
-import control4j.ConfigItem;
+//import control4j.ConfigItem;
 import control4j.InputModule;
 import control4j.IConfigBuffer;
 import control4j.resources.ITextWriter;
+import control4j.AMaxInput;
+import control4j.AMinInput;
+import cz.lidinsky.tools.reflect.Setter;
 
 /**
  *  Prints a preset text message on the given text device.
  *  Print can be controlled by the input signal.
  */
+@AMaxInput(1)
+@AMinInput(1)
 public class IMPrintMessage extends InputModule
 {
   /**
    *  Text device, the message will be printed on.
    */
-  @AResource(key="text-device")
+  @AResource
   public ITextWriter textDevice;
 
   /**
    *  Message that will be printed on the given text device.
    */
-  @ConfigItem 
+  @Setter("message")
   public String message;
 
   /**

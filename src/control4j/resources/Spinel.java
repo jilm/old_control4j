@@ -39,11 +39,19 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
 /**
+ *
  *  Provides communication with a device or devices through the socket with
  *  spinel protocol. The communication has the request / response form. Each
  *  request is placed into the queue and it is sent after all of the preceding
  *  requests were arranged. To arrange one request, the request is sent and the
  *  response must be received.
+ *
+ *  Properties:
+ *  <ul>
+ *    <li> host -- host name of the device
+ *    <li> port -- port number
+ *  </ul>
+ *
  */
 public class Spinel extends Resource implements Runnable {
 

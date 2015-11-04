@@ -25,9 +25,22 @@ import control4j.ConfigItem;
 import control4j.ProcessModule;
 
 /**
- *  A module which implements functionality of the comparator.
- *  It compares two input values and returns a boolean value that
- *  indicates relationship between them.
+ *  Implements functionality of the comparator.  It compares values on input
+ *  and returns a boolean value that indicates relationship between them. More
+ *  precisely, it expects two input signals. First of all the difference
+ *  between these two is computed: diff = input[1] - input[0]. The output
+ *  signal will be false if diff <= -hysteresis, the output will be true if
+ *  diff >= hysteresis, and the output will stay unchanged otherwise.
+ *
+ *  Property: hysteresis, default 0, the positive real number is expected.
+ *
+ *  Input: 0, scalar real number, the reference input
+ *
+ *  Input: 1, scalar real number, the input to compare
+ *
+ *  Output: 0, scalar boolean value, if at least one of input signals is
+ *  invalid, the output is invalid, otherwise, the output is valid. The
+ *  timestamp of the signal will be equal to the timestamp of input one.
  */
 @AMinInput(2)
 @AMaxInput(2)
@@ -46,7 +59,7 @@ public class PMComparator extends ProcessModule
    *  is true if diff >= hysteresis, and the output signal
    *  stays unchanged otherwise.
    *
-   *  @param input 
+   *  @param input
    *             must contain two Signal objects
    *
    *  @return an array of size one. Returned signal is valid

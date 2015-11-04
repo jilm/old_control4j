@@ -112,37 +112,44 @@ implements Transformer<control4j.application.Module, ModuleCrate> {
   protected int[] getInputMap(
       control4j.application.Module moduleDef, Module module) {
 
-    // resolve variable indexes
-    if (moduleDef.hasVariableInput()) {
-      try {
-        moduleDef.setVariableInputStartIndex(
-            module.getVariableInputFirstIndex());
-      } catch (UnsupportedOperationException e) {
-        // module definition contains variable input, but the module
-        // doesn't support it.
-        ErrorManager.newError()
-          .setCause(e);
-        return null;
+    try {
+
+      // resolve variable indexes
+      if (moduleDef.hasVariableInput()) {
+        try {
+          moduleDef.setVariableInputStartIndex(
+              module.getVariableInputFirstIndex());
+        } catch (UnsupportedOperationException e) {
+          // module definition contains variable input, but the module
+          // doesn't support it.
+          ErrorManager.newError()
+            .setCause(e);
+          return null;
+        }
       }
-    }
 
-    // calculate required size of the map array
-    int mapSize = module.getInputSize(moduleDef.getInputSize() - 1);
-    if (mapSize == 0) return null;
+      // calculate required size of the map array
+      int mapSize = module.getInputSize(moduleDef.getInputSize() - 1);
+      if (mapSize == 0) return null;
 
-    // allocate the map array
-    int[] map = new int[mapSize];
-    Arrays.fill(map, -1);
+      // allocate the map array
+      int[] map = new int[mapSize];
+      Arrays.fill(map, -1);
 
-    // fixed index input
-    for (int i=0; i<mapSize; i++) {
-      Input input = moduleDef.getInput(i);
-      if (input != null) {
-        map[i] = input.getPointer();
+      // fixed index input
+      for (int i=0; i<mapSize; i++) {
+        Input input = moduleDef.getInput(i);
+        if (input != null) {
+          map[i] = input.getPointer();
+        }
       }
-    }
 
-    return map;
+      return map;
+
+    } catch (Exception e) {
+      throw new CommonException()
+        .setCause(e);
+    }
   }
 
   /**
@@ -151,36 +158,43 @@ implements Transformer<control4j.application.Module, ModuleCrate> {
   protected int[] getOutputMap(
       control4j.application.Module moduleDef, Module module) {
 
-    // resolve variable indexes
-    if (moduleDef.hasVariableOutput()) {
-      try {
-        moduleDef.setVariableOutputStartIndex(
-            module.getVariableOutputFirstIndex());
-      } catch (UnsupportedOperationException e) {
-        // module definition contains variable input, but the module
-        // doesn't support it.
-        ErrorManager.newError()
-          .setCause(e);
-        return null;
+    try {
+
+      // resolve variable indexes
+      if (moduleDef.hasVariableOutput()) {
+        try {
+          moduleDef.setVariableOutputStartIndex(
+              module.getVariableOutputFirstIndex());
+        } catch (UnsupportedOperationException e) {
+          // module definition contains variable input, but the module
+          // doesn't support it.
+          ErrorManager.newError()
+            .setCause(e);
+          return null;
+        }
       }
-    }
 
-    int mapSize = module.getOutputSize(moduleDef.getOutputSize() - 1);
-    if (mapSize == 0) return null;
+      int mapSize = module.getOutputSize(moduleDef.getOutputSize() - 1);
+      if (mapSize == 0) return null;
 
-    // allocate the map array
-    int[] map = new int[mapSize];
-    Arrays.fill(map, -1);
+      // allocate the map array
+      int[] map = new int[mapSize];
+      Arrays.fill(map, -1);
 
-    // fixed index output
-    for (int i = 0; i < mapSize; i++) {
-      Output output = moduleDef.getOutput(i);
-      if (output != null) {
-        map[i] = output.getPointer();
+      // fixed index output
+      for (int i = 0; i < mapSize; i++) {
+        Output output = moduleDef.getOutput(i);
+        if (output != null) {
+          map[i] = output.getPointer();
+        }
       }
-    }
 
-    return map;
+      return map;
+
+    } catch (Exception e) {
+      throw new CommonException()
+        .setCause(e);
+    }
   }
 
 }

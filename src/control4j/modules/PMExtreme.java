@@ -23,7 +23,7 @@ import control4j.Signal;
 import control4j.ProcessModule;
 
 /**
- *  Returns a minimal and a maximal value of all the input signals. 
+ *  Returns a minimal and a maximal value of all the input signals.
  *  Moreover it returns index of input with minimal and maximal value.
  */
 @AMinInput(2)
@@ -45,14 +45,14 @@ public class PMExtreme extends ProcessModule
    *  signals is set to the current system time. The output signals are invalid
    *  if and only if there is no valid input signal.
    *
-   *  @param input 
+   *  @param input
    *             array of any size. It must not contain <code>null</code>
    *             value.
    *
-   *  @return an array of size four. It contains max value, index of input 
+   *  @return an array of size four. It contains max value, index of input
    *             with max value, min value, index of input with min value.
    */
-  @Override 
+  @Override
   public void process(
       Signal[] input, int inputLength, Signal[] output, int outputLength)
   {
