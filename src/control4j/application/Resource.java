@@ -20,6 +20,7 @@ package control4j.application;
 
 import static org.apache.commons.lang3.Validate.notBlank;
 
+import cz.lidinsky.tools.CommonException;
 import cz.lidinsky.tools.ToStringBuilder;
 
 /**
@@ -32,24 +33,42 @@ public class Resource extends Configurable {
   private String className;
 
   public Resource(String className) {
-    this.className = notBlank(className,
-        "Class name of the resource may not be blank!");
+    this.className = className;
   }
 
   public Resource() {}
 
   public Resource setClassName(String className) {
-    this.className = notBlank(className,
-        "Class name of the resource may not be blank!");
+    this.className = className;
     return this;
   }
 
   /**
    *  Returns a name of class that implements functionality
    *  of the resource.
+   *
+   *  @throws CommonException
+   *             if the className is null or blank value
    */
   public String getClassName() {
+    check();
     return className;
+  }
+
+  /**
+   *  Check the internal consistency of the object. If it is OK, nothing
+   *  happens, otherwise the exception is thrown. For this object, the
+   *  className may not be blank.
+   */
+  public void check() {
+    try {
+      notBlank(className);
+    } catch (Exception e) {
+      throw new CommonException()
+        .setCause(e)
+        .set("message", "The class of the resource must be defined!")
+        .set("reference", getDeclarationReferenceText());
+    }
   }
 
   @Override

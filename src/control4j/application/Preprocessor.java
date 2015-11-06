@@ -501,6 +501,7 @@ public class Preprocessor implements Iterable<Module>, IToStringBuildable {
         Resource resource
           = resources.get(reference.getHref(), reference.getScope());
         reference.getDecorated().putConfiguration(resource);
+        reference.getDecorated().setClassName(resource.getClassName());
       } catch (SyntaxErrorException e) {
         ErrorManager.newError()
           .setCause(e);

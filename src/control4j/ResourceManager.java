@@ -25,13 +25,15 @@ import java.util.HashMap;
 import static control4j.tools.LogMessages.*;
 import static control4j.tools.Logger.*;
 
+import cz.lidinsky.tools.CommonException;
+
 /**
  *
  *  An object which provides management of the resources.
  *
  *  <p>Resource is an instance of object which overrides class
  *  {@link control4j.resources.Resource}.
- *  
+ *
  *  <p>Each resource is identified by a unique identifier which is
  *  called name or id.
  *
@@ -48,7 +50,7 @@ import static control4j.tools.Logger.*;
  */
 public class ResourceManager
 {
-  
+
   /**
    *  A reference to the only instance of the resource manager.
    */
@@ -80,10 +82,9 @@ public class ResourceManager
   private ArrayList<Resource> resources = new ArrayList<Resource>();
 
   /**
-   *  Returns a resource that satisfies given criteria. If such
-   *  a resource already exists (it was requested earlier) this
-   *  method returns it. If doesn't it creates and returns new
-   *  instance.
+   *  Returns a resource that satisfies given criteria. If such a resource
+   *  already exists (it was requested earlier) this method returns it. If
+   *  doesn't it creates and returns new instance.
    */
   public Resource getResource(control4j.application.Resource definition)
       throws InstantiationException,
@@ -96,12 +97,19 @@ public class ResourceManager
         return resource;
       }
     }
-    // if not, create new instance
-    Resource resource
+
+    try {
+      // if not, create new instance
+      Resource resource
         = (Resource)(Class.forName(definition.getClassName()).newInstance());
-    resource.initialize(definition);
-    resources.add(resource);
-    return resource;
+      resource.initialize(definition);
+      resources.add(resource);
+      return resource;
+    } catch (Exception e) {
+      throw new CommonException()
+        .setCause(e)
+        .set("message", "A new resource instance could not be created!");
+    }
   }
 
   void prepare()

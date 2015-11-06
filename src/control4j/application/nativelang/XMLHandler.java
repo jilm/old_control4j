@@ -447,6 +447,7 @@ public class XMLHandler implements IXMLHandler
   {
     module = new Module()
         .setClassName(attributes.getValue("class"));
+    setDeclarationReference(module);
     return true;
   }
 

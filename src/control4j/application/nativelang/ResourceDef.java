@@ -21,6 +21,7 @@ package control4j.application.nativelang;
 import static org.apache.commons.lang3.Validate.notNull;
 import static org.apache.commons.lang3.Validate.notBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static control4j.tools.LogMessages.getMessage;
 
 import java.util.ArrayList;
@@ -28,6 +29,8 @@ import java.util.ArrayList;
 
 import control4j.application.Scope;
 
+import cz.lidinsky.tools.CommonException;
+import cz.lidinsky.tools.ExceptionCode;
 import cz.lidinsky.tools.ToStringBuilder;
 
 /**
@@ -99,13 +102,20 @@ public class ResourceDef extends DescriptionBase implements IDefinition {
   }
 
   protected void check() {
-    if (className == null) {
-      throw new IllegalStateException(getMessage("msg002", "className",
-          getDeclarationReferenceText()));
+    if (isBlank(className)) {
+      throw new CommonException()
+        .setCode(ExceptionCode.ILLEGAL_STATE)
+        .set("message",
+            "Class name of the resource def. may not be blank!")
+        .set("name", name)
+        .set("reference", getDeclarationReferenceText());
     }
-    if (name == null) {
-      throw new IllegalStateException(getMessage("msg002", "name",
-          getDeclarationReferenceText()));
+    if (isBlank(name)) {
+      throw new CommonException()
+        .setCode(ExceptionCode.ILLEGAL_STATE)
+        .set("message", "Name property of the resource def. may not be blank!")
+        .set("class name", className)
+        .set("reference", getDeclarationReferenceText());
     }
   }
 

@@ -20,6 +20,7 @@ package control4j.application.nativelang;
 
 import static org.apache.commons.lang3.Validate.notNull;
 import static org.apache.commons.lang3.Validate.notBlank;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 import static control4j.tools.LogMessages.getMessage;
 
@@ -35,16 +36,20 @@ import control4j.tools.XmlEndElement;
 
 import static control4j.tools.Logger.*;
 
+import cz.lidinsky.tools.CommonException;
+import cz.lidinsky.tools.ExceptionCode;
 import cz.lidinsky.tools.ToStringBuilder;
 
 /**
  *
- *  Represents a resource element inside the module.
- *  This object has two variants.
+ *  Represents a resource element inside the module.  This object has two
+ *  variants.
  *  <ol>
  *    <li>Resource fully described inside the module.
  *    <li>Resource which refers to some resource definition.
  *  </ol>
+ *  For the first variant the class name must be specified, for the second one
+ *  the href and scope are mandatory fields.
  *
  */
 public class Resource extends Configurable implements IReference {
@@ -65,6 +70,7 @@ public class Resource extends Configurable implements IReference {
   private String className;
 
   public String getClassName() {
+    check();
     return className;
   }
 
@@ -76,17 +82,18 @@ public class Resource extends Configurable implements IReference {
   private String href;
 
   public String getHref() {
+    check();
     return href;
   }
 
   public void setHref(String href) {
     this.href = trim(href);
-    isReference = href != null;
   }
 
   private int scope;
 
   public int getScope() {
+    check();
     return scope;
   }
 
@@ -97,7 +104,34 @@ public class Resource extends Configurable implements IReference {
   private boolean isReference;
 
   public boolean isReference() {
+    check();
     return isReference;
+  }
+
+  /**
+   *  Check inner consistency of the object. It means that either the class
+   *  name or the href may not be blank. If everything is OK, nothing happens.
+   *
+   *  @throws CommonException
+   *             if either both class name and href field contain blank values
+   *             or both of them are not blank
+   */
+  public void check() {
+    if (isBlank(href) && isBlank(className)) {
+      throw new CommonException()
+        .setCode(ExceptionCode.ILLEGAL_STATE)
+        .set("message", "Either href or class name properties must be defined!")
+        .set("reference", getDeclarationReferenceText());
+    } else if (!isBlank(href) && !isBlank(className)) {
+      throw new CommonException()
+        .setCode(ExceptionCode.ILLEGAL_STATE)
+        .set("message", "Both, href and class name are specified!")
+        .set("reference", getDeclarationReferenceText())
+        .set("href", href)
+        .set("class name", className);
+    } else {
+      isReference = !isBlank(href);
+    }
   }
 
   @Override

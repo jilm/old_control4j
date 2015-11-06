@@ -27,6 +27,7 @@ import control4j.application.Scope;
 import control4j.application.ErrorManager;
 import control4j.application.ReferenceDecorator;
 import control4j.tools.DuplicateElementException;
+import cz.lidinsky.tools.CommonException;
 
 /**
  *  An adapter which can translate objects from nativelang package
@@ -92,8 +93,13 @@ public class C4jToControlAdapter extends AbstractAdapter {
         } else {
           destModule.putResource(resource.getKey(), destResource);
         }
-      } catch (IllegalStateException e) {
-        // TODO: refrence x definition error
+      } catch (Exception e) {
+        throw new CommonException()
+          .setCause(e)
+          .set("message",
+              "It was not possible to translate a resource of some module!")
+          .set("resource ref", resource.getDeclarationReferenceText())
+          .set("module ref", module.getDeclarationReferenceText());
       }
     }
 
