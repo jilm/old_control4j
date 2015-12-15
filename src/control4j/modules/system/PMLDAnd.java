@@ -24,6 +24,9 @@ import control4j.AVariableInput;
 import control4j.ProcessModule;
 import control4j.Signal;
 
+/**
+ *  This module is used by the system, do not use it directly!
+ */
 @AMinInput(0)
 @AVariableInput
 @AOutputSize(1)

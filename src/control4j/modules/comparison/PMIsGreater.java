@@ -21,10 +21,45 @@ package control4j.modules.comparison;
 import control4j.Signal;
 import control4j.ProcessModule;
 
+/**
+ *  TODO:
+ *
+ *  <p>
+ *  </p>
+ *
+ *  <h3>Resources</h3>
+ *  <table>
+ *      <tr>
+ *          <td>table-name</td>
+ *          <td></td>
+ *          <td>A name of the table to insert to. The string value is
+ *          expected.</td>
+ *      </tr>
+ *  </table>
+ *
+ *  <h3>Property</h3>
+ *  <table>
+ *      <tr>
+ *          <td>message</td>
+ *          <td>The message which will be written into the log.</td>
+ *      </tr>
+ *  </table>
+ *
+ *  <h3>IO</h3>
+ *  <table>
+ *      <tr>
+ *          <td>Input</td>
+ *          <td>0</td>
+ *          <td>The control input; it expects scalar boolean signal. The
+ *          application exits after the value on this input becomes valid
+ *          true.</td>
+ *      </tr>
+ *  </table>
+ */
 public class PMIsGreater extends ProcessModule
 {
 
-  @Override 
+  @Override
   public void process(
       Signal[] input, int inputLength, Signal[] output, int outputLength)
   {

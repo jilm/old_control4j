@@ -1,7 +1,7 @@
 package control4j.modules.auxiliary;
 
 /*
- *  Copyright 2013 Jiri Lidinsky
+ *  Copyright 2013, 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -26,7 +26,41 @@ import control4j.InputModule;
 import static control4j.tools.Logger.info;
 
 /**
- *  Terminates the application as soon as the input signal is true.
+ *  Terminates the application.
+ *
+ *  <p>Application is not terminated immediately. It is terminated after the
+ *  current loop is finished. Even cycleEnd event is performed.</p>
+ *
+ *  <p>This method accepts only one scalar input signal. The input signal is
+ *  interpreted as a boolean value. The termination of the application is
+ *  scheduled to the end of the loop at the moment when the input signal is
+ *  valid and has true value.</p>
+ *
+ *  <p>The input may be omitted. In such a case only one scan is performed and
+ *  the application is terminated.</p>
+ *
+ *  <p>The event of application termination is loged to the standard
+ *  application log with the level info. Text of the log message may be
+ *  specified.</p>
+ *
+ *  <h3>Property</h3>
+ *  <table>
+ *      <tr>
+ *          <td>message</td>
+ *          <td>The message which will be written into the log.</td>
+ *      </tr>
+ *  </table>
+ *
+ *  <h3>IO</h3>
+ *  <table>
+ *      <tr>
+ *          <td>Input</td>
+ *          <td>0</td>
+ *          <td>The control input; it expects scalar boolean signal. The
+ *          application exits after the value on this input becomes valid
+ *          true.</td>
+ *      </tr>
+ *  </table>
  */
 @AMaxInput(1)
 public class IMExit extends InputModule
@@ -40,20 +74,20 @@ public class IMExit extends InputModule
 
   /**
    *  Terminates the application as soon as the input signal is true.
-   *  
+   *
    *  <p>Application is not terminated immediately. It is terminated
    *  after the current loop is finished. Even cycleEnd event is
    *  performed.
    *
    *  <p>This method accepts only one input signal. The input signal
-   *  is interpreted as a boolean value. The termination of the 
-   *  application is scheduled to the end of the loop at the moment 
+   *  is interpreted as a boolean value. The termination of the
+   *  application is scheduled to the end of the loop at the moment
    *  when the input signal is valid and has true value.
    *
    *  <p>The input may be omitted. The input array is empty, or it
    *  contains <code>null</code>. In such a case only one control
    *  loop is performed and the application is terminated.
-   *  
+   *
    *  <p>The event of application termination is loged to the standard
    *  application log with the level info. Text of the log message
    *  may be specified in the message variable.
@@ -65,8 +99,7 @@ public class IMExit extends InputModule
    *             just ignored.
    */
   @Override
-  public void put(Signal[] input, int inputLength)
-  {
+  public void put(Signal[] input, int inputLength) {
 
     boolean condition;
     if (inputLength == 0 || input[0] == null)
@@ -76,8 +109,7 @@ public class IMExit extends InputModule
     else
       condition = false;
 
-    if (condition)
-    {
+    if (condition) {
       info(message);
       Control.exit();
     }

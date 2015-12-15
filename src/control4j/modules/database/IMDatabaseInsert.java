@@ -25,17 +25,47 @@ import control4j.ConfigItem;
 import control4j.AResource;
 import control4j.resources.database.MySql;
 
+/**
+ *  Inserts a record into the database.
+ *
+ *  <h3>Resources</h3>
+ *  <table>
+ *      <tr>
+ *          <td>database</td>
+ *          <td>MySql</td>
+ *          <td>An object which provides access into the database.</td>
+ *      </tr>
+ *  </table>
+ *
+ *  <h3>Property</h3>
+ *  <table>
+ *      <tr>
+ *          <td>table-name</td>
+ *          <td>A name of the table to insert to. The string value is
+ *          expected.</td>
+ *      </tr>
+ *  </table>
+ *
+ *  <h3>IO</h3>
+ *  <table>
+ *      <tr>
+ *          <td>Input</td>
+ *          <td>0</td>
+ *          <td>The control input;<td>
+ *      </tr>
+ *  </table>
+ */
 public class IMDatabaseInsert extends InputModule
 {
-  @AResource 
+  @AResource
   public MySql database;
-  
+
   @ConfigItem(key="table-name")
   public String tableName;
-  
-  private StringBuilder query = new StringBuilder(); 
 
-  @Override 
+  private StringBuilder query = new StringBuilder();
+
+  @Override
   public void put(Signal[] input, int inputLength)
   {
     int size = inputLength - 1;
@@ -57,10 +87,10 @@ public class IMDatabaseInsert extends InputModule
       }
       appendSignal(size, input[size], query);
       query.append(';');
-      database.executeUpdate(query.toString());   
+      database.executeUpdate(query.toString());
     }
   }
-  
+
   private void appendSignal(int index, Signal signal, StringBuilder query)
   {
     query.append('(');

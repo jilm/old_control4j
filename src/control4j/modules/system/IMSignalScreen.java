@@ -44,6 +44,9 @@ import java.awt.GridLayout;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
+/**
+ *  A module used by the system, do not use it directly!
+ */
 @AVariableInput
 public class IMSignalScreen extends InputModule
 implements Factory<JComponent> {

@@ -25,6 +25,20 @@ import control4j.Signal;
 import control4j.ProcessModule;
 import java.util.Date;
 
+/**
+ *  Copy timestamp.
+ *
+ *  <h3>IO</h3>
+ *  <table>
+ *      <tr>
+ *          <td>Input</td>
+ *          <td>0</td>
+ *          <td>The control input; it expects scalar boolean signal. The
+ *          application exits after the value on this input becomes valid
+ *          true.</td>
+ *      </tr>
+ *  </table>
+ */
 @AMinInput(2)
 @AMaxInput(2)
 public class PMCopyTimestamp extends ProcessModule

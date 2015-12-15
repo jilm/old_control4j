@@ -25,6 +25,9 @@ import control4j.gui.Changer;
 import control4j.application.Module;
 import control4j.application.gui.Gui;
 
+/**
+ *  It is a module used by the system, do not use it directly!
+ */
 public class IMGuiChanger extends InputModule {
 
   protected Changer changer;

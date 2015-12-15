@@ -34,10 +34,35 @@ import control4j.resources.IServer;
 
 /**
  *
- *  Exports input signals through the given resource. This module
- *  is dedicated to provide data to another control4j instance, or
- *  to some external program or application.
+ *  Exports input signals through the given resource. This module is dedicated
+ *  to provide data to another control4j instance, or to some external program
+ *  or application.
  *
+ *  <h3>Resources</h3>
+ *  <table>
+ *      <tr>
+ *          <td>server</td>
+ *          <td>IServer</td>
+ *          <td>A connection to send data.</td>
+ *      </tr>
+ *  </table>
+ *
+ *  <h3>Property</h3>
+ *  <table>
+ *      <tr>
+ *          <td>message</td>
+ *          <td>The message which will be written into the log.</td>
+ *      </tr>
+ *  </table>
+ *
+ *  <h3>IO</h3>
+ *  <table>
+ *      <tr>
+ *          <td>Input</td>
+ *          <td></td>
+ *          <td>Signal which will be communicated.</td>
+ *      </tr>
+ *  </table>
  */
 @AVariableInput
 public class IMExport extends InputModule
@@ -75,7 +100,7 @@ public class IMExport extends InputModule
     {
       if (request instanceof DataRequest)
       {
-        DataResponse response 
+        DataResponse response
             = (DataResponse)((DataRequest)request).getResponse();
         for (int i=0; i<inputLength; i++)
           response.put(ids[i], input[i]);

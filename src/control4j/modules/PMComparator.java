@@ -29,8 +29,8 @@ import control4j.ProcessModule;
  *  and returns a boolean value that indicates relationship between them. More
  *  precisely, it expects two input signals. First of all the difference
  *  between these two is computed: diff = input[1] - input[0]. The output
- *  signal will be false if diff <= -hysteresis, the output will be true if
- *  diff >= hysteresis, and the output will stay unchanged otherwise.
+ *  signal will be false if diff &le; -hysteresis, the output will be true if
+ *  diff &ge; hysteresis, and the output will stay unchanged otherwise.
  *
  *  Property: hysteresis, default 0, the positive real number is expected.
  *

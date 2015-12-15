@@ -32,7 +32,9 @@ import cz.lidinsky.tools.ExceptionCode;
 import org.apache.commons.lang3.mutable.MutableObject;
 
 /**
- *  A module which is used to break feedback. Do not use it.
+ *  A module which is used to handle feedback. This module is used by the
+ *  application sorter to handle feedback inside the application. Do not use it
+ *  directly!
  */
 @AMinInput(1)
 public class IMBreakFeedback extends InputModule {
