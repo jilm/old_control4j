@@ -84,7 +84,7 @@ public class Server implements Runnable, java.io.Closeable
     this.port = port;
     this.clientFactory = clientFactory;
     identification = "Server, class: " + getClass().getName() 
-	+ ", port: " + port;
+        + ", port: " + port;
   }
 
   /**
@@ -116,7 +116,7 @@ public class Server implements Runnable, java.io.Closeable
       {
         serverSocket = new ServerSocket(port);
         info("A new ServerSocket was successfuly created\n" + identification);
-	status = STATUS_CONNECTED;
+        status = STATUS_CONNECTED;
         while (!stop)
         {
           try
@@ -126,29 +126,29 @@ public class Server implements Runnable, java.io.Closeable
           }
           catch (IOException ioe)
           {
-	    status = STATUS_ERROR;
+            status = STATUS_ERROR;
             catched(getClass().getName(), "run", ioe);
-	    warning("An exception while waiting for new connection " +
-		"going to recreate server socket ...\n" + identification);
+            warning("An exception while waiting for new connection "
+                + "going to recreate server socket ...\n" + identification);
           }
         }
       }
       catch (IOException e)
       {
-	status = STATUS_ERROR;
+        status = STATUS_ERROR;
         catched(getClass().getName(), "run", e);
-	warning("An attempt to create server socket failed!");
+        warning("An attempt to create server socket failed!");
       }
       finally
       {
-	if (serverSocket != null)
+        if (serverSocket != null)
           try { serverSocket.close(); } catch (IOException ioex) { }
-	serverSocket = null;
-	if (!stop)
-	{
+        serverSocket = null;
+        if (!stop)
+        {
           long waitTime = Math.round(Math.random() * 4000.0 + 1000.0);
           try { Thread.sleep(waitTime); } catch (InterruptedException ie) {}
-	}
+        }
       }
     }
     status = STATUS_STOP;

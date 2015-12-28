@@ -1,5 +1,3 @@
-package control4j.protocols.signal;
-
 /*
  *  Copyright 2015 Jiri Lidinsky
  *
@@ -18,53 +16,35 @@ package control4j.protocols.signal;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import java.util.HashMap;
-import java.util.Set;
+package control4j.protocols.signal;
+
+import static cz.lidinsky.tools.Validate.notNull;
 
 import control4j.Signal;
-import control4j.protocols.IResponse;
 
-public class DataResponse extends Response
-{
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
-  protected HashMap<String, Signal> data = new HashMap<String, Signal>();
+public class DataResponse extends Message {
 
-  public DataResponse()
-  {
+  private final Map<String, Signal> data;
+
+  public DataResponse(Map<String, Signal> data) {
+    this.data = Collections.unmodifiableMap(new HashMap<>(notNull(data)));
   }
 
-  public boolean isRequest()
-  {
+  public DataResponse() {
+    this.data = Collections.emptyMap();
+  }
+
+  public boolean isRequest() {
     return false;
   }
 
-  public void put(String id, Signal signal)
-  {
-    data.put(id, signal);
-  }
-
-  public Signal get(String id)
-  {
-    return data.get(id);
-  }
-
-  public Set<String> getIdSet()
-  {
-    return data.keySet();
-  }
-
-  @Override
-  public String toString()
-  {
-    StringBuilder sb = new StringBuilder();
-    sb.append(getClass().getName());
-    sb.append(data.toString());
-    return sb.toString();
-  }
-
-  public boolean isFinished()
-  {
-    return false;
+  public Map<String, Signal> getData() {
+    return data;
   }
 
 }

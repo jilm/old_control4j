@@ -1,5 +1,3 @@
-package control4j.modules;
-
 /*
  *  Copyright 2015 Jiri Lidinsky
  *
@@ -18,93 +16,74 @@ package control4j.modules;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import java.util.Collection;
+package control4j.modules;
 
-import control4j.InputModule;
 import control4j.AResource;
 import control4j.AVariableInput;
+import control4j.InputModule;
 import control4j.Signal;
-//import control4j.application.ModuleDeclaration;
-import control4j.protocols.IRequest;
-import control4j.protocols.signal.Request;
-import control4j.protocols.signal.Response;
-import control4j.protocols.signal.DataRequest;
-import control4j.protocols.signal.DataResponse;
-import control4j.resources.IServer;
+import control4j.resources.communication.SignalServer;
 
 /**
- *
  *  Exports input signals through the given resource. This module is dedicated
  *  to provide data to another control4j instance, or to some external program
  *  or application.
  *
  *  <h3>Resources</h3>
  *  <table>
+ *      <caption>Resources</caption>
  *      <tr>
  *          <td>server</td>
  *          <td>IServer</td>
- *          <td>A connection to send data.</td>
- *      </tr>
- *  </table>
- *
- *  <h3>Property</h3>
- *  <table>
- *      <tr>
- *          <td>message</td>
- *          <td>The message which will be written into the log.</td>
+ *          <td></td>
  *      </tr>
  *  </table>
  *
  *  <h3>IO</h3>
  *  <table>
+ *      <caption>IO</caption>
  *      <tr>
  *          <td>Input</td>
  *          <td></td>
- *          <td>Signal which will be communicated.</td>
+ *          <td>A signal which will be exported.</td>
  *      </tr>
  *  </table>
+ *
+ *  @see SignalServer
  */
 @AVariableInput
-public class IMExport extends InputModule
-{
+public class IMExport extends InputModule {
 
+  /** A server resource. */
   @AResource
-  public IServer<Request> server;
+  private SignalServer server;
 
   /** Names of the input signal that will be used as an identifier */
   protected String ids[];
 
   /**
-   *  The module needs to know the names of the input signals
-   *  to use them as ids inside the exprot message.
+   *  For identification purposes, the communicated signals are identified by
+   *  the signal label. This method collects all of the labels into the ids
+   *  field.
    */
-  /*                      TODO
   @Override
-  protected void initialize(ModuleDeclaration declaration)
-  {
+  public void initialize(control4j.application.Module declaration) {
     super.initialize(declaration);
-    ids = new String[declaration.getInputsSize()];
-    for (int i=0; i<ids.length; i++)
-      ids[i] = declaration.getInput(i).getSignal();
+    // get id's of the signals
+    int size = declaration.getInput().size();
+    ids = new String[size];
+    for (int i=0; i<size; i++) {
+      ids[i] = declaration.getInput().get(i).getSignal().getLabel();
+    }
   }
-  */
 
   /**
    *  Sends input signals throught the given server resource.
    */
   @Override
-  protected void put(Signal[] input, int inputLength)
-  {
-    Collection<Request> requests = server.getRequests();
-    for (Request request : requests)
-    {
-      if (request instanceof DataRequest)
-      {
-        DataResponse response
-            = (DataResponse)((DataRequest)request).getResponse();
-        for (int i=0; i<inputLength; i++)
-          response.put(ids[i], input[i]);
-      }
+  protected void put(Signal[] input, int inputLength) {
+    for (int i = 0; i < inputLength; i++) {
+      server.put(ids[i], input[i]);
     }
   }
 

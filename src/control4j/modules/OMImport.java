@@ -22,10 +22,9 @@ import java.util.Collection;
 
 import control4j.OutputModule;
 import control4j.AResource;
+import control4j.AVariableOutput;
 import control4j.Signal;
 //import control4j.application.ModuleDeclaration;
-import control4j.protocols.signal.Request;
-import control4j.protocols.signal.Response;
 import control4j.protocols.signal.DataRequest;
 import control4j.protocols.signal.DataResponse;
 import control4j.resources.communication.SignalClient;
@@ -34,8 +33,8 @@ import control4j.resources.communication.SignalClient;
  *
  *
  */
-public class OMImport extends OutputModule
-{
+@AVariableOutput
+public class OMImport extends OutputModule {
 
   @AResource
   public SignalClient client;
@@ -47,34 +46,30 @@ public class OMImport extends OutputModule
    *  The module needs to know the names of the input signals
    *  to use them as ids inside the exprot message.
    */
-  /*               TODO !!!
   @Override
-  protected void initialize(ModuleDeclaration declaration)
-  {
+  public void initialize(control4j.application.Module declaration) {
     super.initialize(declaration);
-    ids = new String[declaration.getOutputsSize()];
-    for (int i=0; i<ids.length; i++)
-      ids[i] = declaration.getOutput(i).getSignal();
+    int size = declaration.getOutput().size();
+    ids = new String[size];
+    for (int i=0; i<size; i++) {
+      ids[i] = declaration.getOutput().get(i).getSignal().getLabel();
+    }
   }
-  */
 
   /**
    *  Sends input signals throught the given server resource.
    */
   @Override
-  public void get(Signal[] output, int outputLength)
-  {
+  public void get(Signal[] output, int outputLength) {
     DataResponse response = (DataResponse)client.read();
-    if (response != null)
-    {
-      for (int i=0; i<outputLength; i++)
-      {
-        output[i] = response.get(ids[i]);
+    if (response != null) {
+      for (int i=0; i<outputLength; i++) {
+        output[i] = response.getData().get(ids[i]);
+        if (output[i] == null) {
+          output[i] = Signal.getSignal();
+        }
       }
     }
-    for (int i=0; i<outputLength; i++)
-      if (output[i] == null)
-        output[i] = Signal.getSignal();
   }
 
 }

@@ -1,7 +1,5 @@
-package control4j.resources.communication;
-
 /*
- *  Copyright 2013 Jiri Lidinsky
+ *  Copyright 2013, 2015 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -18,79 +16,87 @@ package control4j.resources.communication;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import java.io.IOException;
-import control4j.ConfigItem;
-import control4j.ICycleEventListener;
-import control4j.Signal;
-import control4j.resources.Resource;
-import control4j.tools.IResponseCrate;
-import control4j.protocols.signal.Client;
-import control4j.protocols.signal.Request;
-import control4j.protocols.signal.Response;
-import control4j.protocols.signal.DataRequest;
-import control4j.protocols.signal.DataResponse;
+package control4j.resources.communication;
+
 import static control4j.tools.Logger.*;
 
-public class SignalClient extends Resource implements ICycleEventListener
-{
+import control4j.ConfigItem;
+import control4j.ICycleEventListener;
+import control4j.Resource;
+import control4j.Signal;
+import control4j.protocols.signal.DataRequest;
+import control4j.protocols.signal.DataResponse;
+import control4j.protocols.signal.Message;
+import control4j.protocols.signal.XmlInputStream;
+import control4j.protocols.signal.XmlOutputStream;
+import control4j.protocols.tcp.IInputStream;
+import control4j.protocols.tcp.IOutputStream;
+import control4j.protocols.tcp.RobustSocket;
+import control4j.tools.IResponseCrate;
 
-  @ConfigItem
+import cz.lidinsky.tools.reflect.Setter;
+
+import java.io.IOException;
+
+/**
+ *  Dedicated for comunication with signal server. The request for data is
+ *  sent et the end of the scan.
+ */
+public class SignalClient extends Resource implements ICycleEventListener {
+
+  @Setter("host")
   public String host;
 
-  @ConfigItem
-  public int port;
+  @Setter("port")
+  public int port = 51234;
 
-  private Client client;
-  private IResponseCrate<Response> response;
-  private Request request;
+  private IInputStream<Message> inputStream;
+  private IOutputStream<Message> outputStream;
+
+  private DataRequest request = new DataRequest();
 
   @Override 
-  public void prepare()
-  {
-    client = new Client(host, port);
-    client.start();
+  public void prepare() {
+    RobustSocket socket = new RobustSocket(host, port, 3671);
+    inputStream = new XmlInputStream(socket.getInputStream());
+    outputStream = new XmlOutputStream(socket.getOutputStream());
   }
 
-  public void write(Request message)
-  {
+  public boolean isEquivalent(control4j.application.Resource declaration) {
+    return false; // TODO:
   }
 
-  public Response read()
-  {
-    try
-    {
-      if (response != null && response.isFinished())
-	return response.getResponse();
-      else
-        return null;
+  public DataResponse read() {
+    return response;
+  }
+
+  public void cycleStart() { }
+
+  public void processingStart() { }
+
+  private boolean active = false;
+  private DataResponse response = null;
+
+  public void cycleEnd() {
+    response = null;
+    if (!active) {
+      new Thread(this::run).start();
     }
-    catch (IOException e)
-    {
-      return null;
+  }
+
+  private void run() {
+    try {
+      active = true;
+      outputStream.write(request);
+      outputStream.write(request);
+      finest("Request for new data has been sent.");
+      response = (DataResponse)inputStream.readMessage();
+      finest("Response received.");
+    } catch (Exception e) {
+      catched(this.getClass().getName(), "run", e);
+    } finally {
+      active = false;
     }
-  }
-
-  public void cycleStart()
-  {
-  }
-
-  public void processingStart()
-  {
-  }
-
-  public void cycleEnd()
-  {
-    if (response == null || response.isFinished())
-      try
-      {
-        if (request == null) request = new DataRequest();
-        finest("Sending request: " + request.toString());
-        response = client.write(request);
-      }
-      catch (java.io.IOException e)
-      {
-        catched(getClass().getName(), "cycleEnd", e);
-      }
   }
 
 }

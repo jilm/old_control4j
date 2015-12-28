@@ -1,5 +1,3 @@
-package control4j.protocols.signal;
-
 /*
  *  Copyright 2015 Jiri Lidinsky
  *
@@ -18,93 +16,248 @@ package control4j.protocols.signal;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import java.io.InputStream;
+package control4j.protocols.signal;
+
+import static control4j.tools.Logger.*;
+import static cz.lidinsky.tools.Validate.notBlank;
+import static cz.lidinsky.tools.Validate.notNull;
+
+import control4j.Signal;
+import control4j.protocols.tcp.IInputStream;
+
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 
+/**
+ *  Reads and returns signals from underlying input stream in the XML format.
+ *
+ *  Two types of message are expected.
+ *
+ *  <p>Request:
+ *  {@code <request />}
+ *
+ *  <p>Response:
+ *  {@code
+ *  <set>
+ *    <invalid id="sig1" timestamp="..." />
+ *    <signal id="sig2" timestamp="..." value="15.47" />
+ *  </set>
+ *  }
+ */
 public class XmlInputStream extends InputStream
-{
+implements IInputStream<Message> {
 
-  private InputStream stream;
+  private final InputStream stream;
+  protected XMLStreamReader reader;
+  private final XMLInputFactory factory;
 
-  private final int BUFFER_SIZE = 20;
-  private final byte[] buffer = new byte[BUFFER_SIZE]; 
-  private int length = 0;
-  private boolean eof = false;
-  private boolean xmlHeader = true;
-  
-  public XmlInputStream(InputStream stream)
-  {
-    this.stream = stream;
+  /**
+   *  @param stream
+   *             a stream, the message will be reade from
+   */
+  public XmlInputStream(InputStream stream) {
+    this.stream = notNull(stream);
+    factory = XMLInputFactory.newFactory();
   }
 
-  private void fillBuffer() throws IOException
-  {
-    if (eof) return;
-    int available = stream.available();
-    if (available > 0)
-    {
-      int empty = BUFFER_SIZE - length;
-      int bytesToRead = Math.min(available, empty);
-      int returnCode = stream.read(buffer, length, bytesToRead);
-      if (returnCode < 0) 
-	eof = true;
-      else
-        length += returnCode;
-    }
-    else if (length == 0 && available == 0)
-    {
-      int returnCode = stream.read();
-      if (returnCode < 0)
-	eof = true;
-      else
-      {
-	buffer[0] = (byte)returnCode;
-	length ++;
+  /**
+   *  Reads and returns a character from the given input stream.
+   */
+  @Override
+  public int read() throws IOException {
+    int b = stream.read();
+    System.out.print((char)b);
+    return b;
+  }
+
+  /**
+   *  Reads and reaturns a message from the given input stream. This method
+   *  blocks until the whole message is read and available.
+   */
+  @Override
+  public Message readMessage() throws IOException {
+    try {
+      //System.out.println("Read message");
+      if (reader == null) {
+        reader = factory.createXMLStreamReader(this);
       }
+      // find root element
+      int eventType = nextTag();
+      if (eventType != XMLStreamReader.START_ELEMENT) {
+        throw new IOException("Start element expected");
+      }
+      String root = reader.getLocalName();
+      if (root.equals("set")) {
+        finest("Response detected.");
+        readDataMessage();
+        return new DataResponse(signalBuffer);
+      } else if (root.equals("request")) {
+        finest("Request detected.");
+        readRequest();
+        return new DataRequest();
+      } else {
+        throw new IOException("A set or request start element is expected");
+      }
+    } catch (XMLStreamException e) {
+      throw new IOException(e);
     }
   }
 
-  @Override
-  public int read() throws IOException
-  {
-    while (length < 5)
-    {
-      if (eof && length < 5 && length > 0) return get();
-      if (eof && length == 0) return -1;
-      fillBuffer();
-    }
-    // test for new xml
-    if (xmlHeader)
-    {
-      xmlHeader = false;
-      return get();
-    }
-    else if (new String(buffer, 0, 5).equals("<?xml"))
-    {
-      xmlHeader = true;
-      System.out.println("!!!");
-      return -1;
-    }
-    else
-      return get();
+  private int next() throws XMLStreamException {
+    int code = reader.next();
+    //System.out.print("xxxx");
+    System.out.print("...");
+    System.out.print(code);
+    System.out.print("...");
+    return code;
   }
 
-  private byte get()
-  {
-    byte result = buffer[0];
-    System.arraycopy(buffer, 1, buffer, 0, length-1);
-    length --;
-    System.out.print(Character.toChars(result));
-    return result;
+  private int nextTag() throws XMLStreamException {
+    int code = next();
+    while (code != XMLStreamReader.START_ELEMENT
+        && code != XMLStreamReader.END_ELEMENT) {
+      code = next();
+    }
+    return code;
   }
 
-  @Override
-  public int available()
-  {
-    if (length < 5) return 0;
-    for (int i=0; i<length-5; i++)
-      if (new String(buffer, i, 5).equals("<?xml")) return i;
-    return length-5;
+  private Map<String, Signal> signalBuffer;
+
+  /**
+   *  Reads the signal message. The result is stored in the signal buffer map.
+   */
+  private void readDataMessage()
+    throws XMLStreamException {
+      if (reader == null) {
+        reader = factory.createXMLStreamReader(this);
+      }
+      signalBuffer = new HashMap<>();
+      while (true) {
+        int codeType = nextTag();
+        //printCode();
+        if (codeType == reader.START_ELEMENT) {
+          readSignal();
+        } else if (codeType == reader.END_ELEMENT) {
+          break;
+        } else {
+          assert false;
+        }
+      }
+      findEndDocument();
+    }
+
+  /**
+   *  Reads and returns one signal from the xml input stream.
+   */
+  private void readSignal() throws XMLStreamException {
+    String signalType = reader.getLocalName();
+    // read invalid signal
+    if (signalType.equals("invalid")) {
+      readSignalAttributes();
+      Signal signal = Signal.getSignal(notNull(timestamp));
+      signalBuffer.put(notBlank(id), signal);
+      // read valid signal
+    } else if (signalType.equals("signal")) {
+      readSignalAttributes();
+      Signal signal = Signal.getSignal(value, notNull(timestamp));
+      signalBuffer.put(notBlank(id), signal);
+      // unsupported element
+    } else {
+      throw new XMLStreamException(
+          "invalid or signal start element is expected");
+    }
+    nextTag();
+  }
+
+  // signal attributes
+  private String id;
+  private Date timestamp;
+  private double value;
+  private String unit;
+
+  /**
+   *  Reads attributes that belong to the signal element from the xml reader
+   *  and stores them in the fields: id, timestamp, value.
+   *
+   *  @throws XMLStreamException
+   *              if the element contains unsupported attribute
+   */
+  private void readSignalAttributes() throws XMLStreamException {
+
+    id = null;
+    timestamp = null;
+    unit = null;
+    value = Double.NaN;
+
+    try {
+      int attributes = reader.getAttributeCount();
+      for (int i=0; i<attributes; i++) {
+        String attrName = reader.getAttributeLocalName(i);
+        String attrValue = reader.getAttributeValue(i);
+        if (attrName.equals("id")) {
+          id = attrValue;
+        } else if (attrName.equals("timestamp")) {
+          timestamp = XmlTools.parseDate(attrValue);
+        } else if (attrName.equals("value")) {
+          value = Double.parseDouble(attrValue);
+        } else if (attrName.equals("unit")) {
+          unit = attrValue;
+        } else {
+          throw new XMLStreamException("Usupported attribute: " + attrName);
+        }
+      }
+    } catch (java.text.ParseException e) {
+      throw new XMLStreamException("Timestamp is not in appropriate format");
+    }
+  }
+
+  public void readRequest() throws IOException {
+    try {
+      if (reader == null) {
+        reader = factory.createXMLStreamReader(this);
+      }
+      int codeType = nextTag();
+      if (codeType != reader.END_ELEMENT) {
+        throw new IOException("End element expected!");
+      }
+      findEndDocument();
+    } catch (XMLStreamException e) {
+      throw new IOException(e);
+    }
+  }
+
+  private void findEndDocument() throws XMLStreamException {
+    //while (reader.hasNext()) {
+      //int codeType = next();
+    //}
+    //reader.close();
+    //reader = null;
+    System.out.print("...end document...");
+  }
+
+  public void close() throws IOException { }
+
+  /**
+   *  For debug purposes only.
+   */
+  private void printCode() {
+    int code = reader.getEventType();
+    javax.xml.stream.Location location = reader.getLocation();
+    String message;
+    message = "[" + location.getLineNumber() + ", "
+      + location.getColumnNumber() + "]";
+    if (code == reader.START_ELEMENT || code == reader.END_ELEMENT) {
+      message += " " + code + ": " + reader.getName();
+    } else {
+      message += " " + code;
+    }
+    finest(message);
   }
 
 }

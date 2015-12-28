@@ -1,5 +1,3 @@
-package control4j.resources.communication;
-
 /*
  *  Copyright 2013, 2014, 2015 Jiri Lidinsky
  *
@@ -18,69 +16,77 @@ package control4j.resources.communication;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+package control4j.resources.communication;
+
+import static control4j.tools.Logger.*;
+import static cz.lidinsky.tools.Validate.notNull;
+import static cz.lidinsky.tools.Validate.notBlank;
+
+//import control4j.ConfigItem;
+import control4j.ICycleEventListener;
+import control4j.Resource;
+import control4j.Signal;
+import control4j.protocols.IMessage;
+import control4j.protocols.signal.DataRequest;
+import control4j.protocols.signal.DataResponse;
+import control4j.protocols.signal.Message;
+import control4j.protocols.signal.XmlInputStream;
+import control4j.protocols.signal.XmlOutputStream;
+import control4j.protocols.tcp.IClientFactory;
+import control4j.protocols.tcp.Respondent;
+import control4j.protocols.tcp.Server;
+import control4j.resources.IServer;
+import control4j.tools.InterchangePoint;
+import control4j.tools.Tools;
+
+import cz.lidinsky.tools.reflect.Setter;
+
 import java.io.EOFException;
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 import javax.xml.stream.XMLStreamException;
 
-import control4j.ConfigItem;
-import control4j.ICycleEventListener;
-import control4j.Signal;
-import control4j.protocols.IMessage;
-import control4j.protocols.tcp.IClientFactory;
-import control4j.protocols.tcp.Respondent;
-import control4j.protocols.tcp.Server;
-import control4j.protocols.signal.DataRequest;
-import control4j.protocols.signal.Request;
-import control4j.protocols.signal.Response;
-import control4j.protocols.signal.SignalRequestXmlInputStream;
-import control4j.protocols.signal.SignalResponseXmlOutputStream;
-import control4j.resources.IServer;
-import control4j.resources.Resource;
-import control4j.tools.InterchangePoint;
-import control4j.tools.Tools;
-import static control4j.tools.Logger.*;
-
 /**
+ *  Encapsulate a communication server which is dedicated to exchange signal
+ *  objects between different control4j instances. It opens a socket server
+ *  that listens on the given port. New client object is created for each new
+ *  incoming connection request.
  *
- *  Encapsulate a communication server which can provide signals as a native
- *  java objects.
+ *  <p>Signal values are collected in the internal buffer during the actual
+ *  scan. At the end of the scan, the response object is created, which will be
+ *  sent to clients. Simoultaneously the internal buffer is cleand.
  *
  *  @see control4j.protocols.tcp.Server
+ *  @see control4j.modules.IMExport
+ *  @see control4j.modules.OMImport
  *
  */
 public class SignalServer extends Resource
-implements IClientFactory, ICycleEventListener, IServer<Request>
-{
+implements IClientFactory, ICycleEventListener {
 
   /**
-   *  Port on which this server listens. This configuration item is
-   *  optional, defalt value is 51234.
+   *  Port on which this server listens. This configuration item is optional,
+   *  defalt value is 51234.
    */     
-  @ConfigItem(optional=true)
-  public int port = 51234;
+  @Setter("port")
+    public int port = 51234;
 
   private Server server;
 
-  /** A list of active clients. */
-  private LinkedList<Respondent<Request, Response>>
-      clients = new LinkedList<Respondent<Request, Response>>();
+  /** Buffer to store signals. */
+  private final Map<String, Signal> signalBuffer = new HashMap<>();
 
-  /** Temporary list of clients that are no longer active. */
-  private LinkedList<Respondent<Request, Response>> 
-      garbage = new LinkedList<Respondent<Request, Response>>();
-
-  /** A buffer of received requests. */
-  private LinkedList<Request> buffer = new LinkedList<Request>();
-
-  private DataRequest defaultRequest;
+  /** A response which is created at the end of the scan. */
+  private DataResponse response = new DataResponse();
 
   /**
    *  Create and run a server thread.
@@ -88,124 +94,71 @@ implements IClientFactory, ICycleEventListener, IServer<Request>
    *  @see control4j.protocols.tcp.Server
    */
   @Override
-  public void prepare()
-  {
-    server = new Server(port, this);
-    server.start();
+    public void prepare() {
+      server = new Server(port, this);
+      server.start();
+    }
+
+  /**
+   *  Given signals are stored into the internal buffer to be sent.
+   */
+  public synchronized void put(String id, Signal signal) {
+    signalBuffer.put(notBlank(id), notNull(signal));
   }
 
   /**
-   *  Returns all of the requests that were received before the 
-   *  current control loop begins.
-   *
-   *  @return a collection of all the received requests
+   *  Create new Respondent object which is responsible for taking care of the
+   *  client needs.
    */
-  public Collection<Request> getRequests()
-  {
-    return buffer;
-  }
-
-  /**
-   *  Create new Respondent object and add it to the clients list.
-   */
-  public void newClient(Socket socket)
-  {
-    try
-    {
-      SignalRequestXmlInputStream inputStream 
-          = new SignalRequestXmlInputStream(socket.getInputStream());
-      SignalResponseXmlOutputStream outputStream
-          = new SignalResponseXmlOutputStream(socket.getOutputStream());
-      Respondent<Request, Response> client 
-          = new Respondent<Request, Response>(inputStream, outputStream);
-      synchronized(clients)
-      {
-        clients.add(client);
-      }
-      info("New listener added, total number of listeners: " + clients.size());
+  @Override
+  public synchronized void newClient(Socket socket) {
+    try {
+      Respondent<Message, Message> client = new Respondent<Message, Message>(
+          new XmlInputStream(socket.getInputStream()),
+          new XmlOutputStream(socket.getOutputStream()),
+          this::getResponse);
+      info("New listener added.");
       client.initialize();
-    }
-    catch (IOException e)
-    {
+    } catch (IOException e) {
       catched(this.getClass().getName(), "newClient", e);
     }
-    catch (XMLStreamException e)
-    {
-      catched(this.getClass().getName(), "newClient", e);
-    }
+  }
+
+  /**
+   *  Returns a response to the given request. This method should be used by
+   *  the clients.
+   */
+  public synchronized DataResponse getResponse(Message request) {
+    return response;
   }
 
   /**
    *  Not used.
    */
-  public void cycleStart()
-  {
-  }
+  public void cycleStart() { }
 
   /**
-   *  Collect clients that have received request.
+   *  Not used.
    */
-  public void processingStart()
-  {
-    buffer.clear();
-    defaultRequest = new DataRequest();
-    buffer.add(defaultRequest);
-  }
+  public void processingStart() { }
 
   /**
-   *  Send response to each request.
+   *  Prepare new response.
    */
-  public void cycleEnd()
-  {
-    synchronized(clients)
-    {
-    for (Respondent<Request, Response> client : clients)
-      try
-      {
-	Request request = client.read();
-	if (request != null)
-	{
-	  finest("Going to reply for the request ...");
-	  Response response = defaultRequest.getResponse();
-	  client.write(response);
-	}
-      }
-      catch (java.io.IOException e)
-      {
-	Tools.close(client);
-	garbage.add(client);
-      }
-      catch (IllegalStateException e)
-      {
-      }
-    }
-    gc();
+  public void cycleEnd() {
+    response = new DataResponse(signalBuffer);
+    signalBuffer.clear();
   }
 
   @Override
-  public void dump(java.io.PrintWriter writer)
-  {
-    super.dump(writer);
-    writer.println("Port: " + port);
-    writer.println("Number of clients: " + clients.size());
-    writer.println("Server status: " + server.getStatus());
-  }
-
-  private void gc()
-  {
-    if (garbage.size() > 0)
-    {
-      synchronized(clients)
-      {
-        for (Respondent<Request, Response> client : garbage)
-        {
-          clients.remove(client);
-        }
-        info("Clients removed: " + garbage.size() 
-            + "; clients: " + clients.size());
+  public boolean isEquivalent(control4j.application.Resource definition) {
+    try {
+      if (definition.containsKey("port")) {
+        int port = Integer.parseInt(definition.getValue("port"));
+        return port == this.port; // TODO: check class
       }
-      garbage.clear();
-    }
+    } catch (Exception e) { }
+    return false;
   }
 
 }

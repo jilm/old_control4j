@@ -29,6 +29,7 @@ public class SorterTest {
 
   //--------------------------------------------------- Topological Sort Tests.
 
+  @Ignore
   @Test
   public void test1() {
     System.out.println(sorter1.toString());

@@ -18,21 +18,23 @@ package control4j.protocols.tcp;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import java.net.Socket;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.IOException;
-import java.util.Date;
-import control4j.tools.Queue;
-import control4j.tools.IResponseCrate;
-import control4j.tools.Tools;
 import static control4j.tools.LogMessages.*;
 import static control4j.tools.Logger.*;
 
-import org.apache.commons.collections4.Transformer;
+import control4j.tools.IResponseCrate;
+import control4j.tools.Queue;
+import control4j.tools.Tools;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.net.UnknownHostException;
+import java.util.Date;
+
 import org.apache.commons.collections4.Factory;
+import org.apache.commons.collections4.Transformer;
 
 /**
  *
@@ -75,6 +77,7 @@ public class RobustSocket implements java.io.Closeable {
     //this.timeout = timeout;
     identification = "TCP/IP client; class: " + getClass().getName()
         + "; host: " + host + "; port: " + port;
+    connect();
   }
 
   private boolean connecting;
@@ -191,6 +194,13 @@ public class RobustSocket implements java.io.Closeable {
         } else {
           throw new IOException("Not connected!");
         }
+      }
+    }
+
+    @Override
+    public synchronized void flush() throws IOException {
+      if (connected) {
+        outputStream.flush();
       }
     }
 
