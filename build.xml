@@ -90,6 +90,10 @@
         <fixcrlf srcdir="${srcdir}" />
         <!--<fixcrlf srcdir="conf" />-->
     </target>
+
+    <target name="fix">
+      <fixcrlf srcdir="${srcdir}" />
+    </target>
     
     <target name="jar" depends="compile, version, init" 
             description="Creates JAR file.">

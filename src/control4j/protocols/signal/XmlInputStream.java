@@ -85,10 +85,12 @@ implements IInputStream<Message> {
     try {
       //System.out.println("Read message");
       if (reader == null) {
-        reader = factory.createXMLStreamReader(this);
+        reader = factory.createXMLStreamReader(stream);
       }
       // find root element
+      finest("Waiting for the first event...");
       int eventType = nextTag();
+      finest("The first event is: " + Integer.toString(eventType));
       if (eventType != XMLStreamReader.START_ELEMENT) {
         throw new IOException("Start element expected");
       }
@@ -106,6 +108,8 @@ implements IInputStream<Message> {
       }
     } catch (XMLStreamException e) {
       throw new IOException(e);
+    } finally {
+        reader = null;
     }
   }
 

@@ -18,12 +18,13 @@ package control4j.protocols.tcp;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import java.net.Socket;
-import java.net.ServerSocket;
-import java.io.IOException;
-import java.io.EOFException;
-
 import static control4j.tools.Logger.*;
+
+import java.io.EOFException;
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.function.Consumer;
 
 /**
  *
@@ -35,8 +36,7 @@ import static control4j.tools.Logger.*;
  *  @see IClientFactory
  *
  */ 
-public class Server implements Runnable, java.io.Closeable
-{
+public class Server implements Runnable, java.io.Closeable {
 
   /** The server has not been started yet, or was already stopped. */
   public static final int STATUS_STOP = 0;
@@ -57,7 +57,7 @@ public class Server implements Runnable, java.io.Closeable
   
   /** A factory object that creates new client which will serve each new 
       request for connection. */
-  private IClientFactory clientFactory;
+  private Consumer<Socket> clientFactory;
 
   /** Status of the server. */
   private volatile int status = STATUS_STOP;
@@ -78,8 +78,7 @@ public class Server implements Runnable, java.io.Closeable
    *             a class that gives an appropriate client which can
    *             serve the new connection request
    */
-  public Server(int port, IClientFactory clientFactory)
-  {
+  public Server(int port, Consumer<Socket> clientFactory) {
     super();
     this.port = port;
     this.clientFactory = clientFactory;
@@ -90,8 +89,7 @@ public class Server implements Runnable, java.io.Closeable
   /**
    *  Starts the server.
    */
-  public void start()
-  {
+  public void start() {
     new Thread(this, identification).start();
   }
 
@@ -106,46 +104,34 @@ public class Server implements Runnable, java.io.Closeable
    *  <p>This method must be run as a separate thread from outside
    *  this object.
    */
-  public void run()
-  {
+  public void run() {
     ServerSocket serverSocket = null;
-    while (!stop)
-    {
+    while (!stop) {
       status = STATUS_RUNNING;
-      try
-      {
+      try {
         serverSocket = new ServerSocket(port);
         info("A new ServerSocket was successfuly created\n" + identification);
         status = STATUS_CONNECTED;
-        while (!stop)
-        {
-          try
-          {
+        while (!stop) {
+          try {
             Socket socket = serverSocket.accept();
-            clientFactory.newClient(socket);
-          }
-          catch (IOException ioe)
-          {
+            clientFactory.accept(socket);
+          } catch (IOException ioe) {
             status = STATUS_ERROR;
             catched(getClass().getName(), "run", ioe);
             warning("An exception while waiting for new connection "
                 + "going to recreate server socket ...\n" + identification);
           }
         }
-      }
-      catch (IOException e)
-      {
+      } catch (IOException e) {
         status = STATUS_ERROR;
         catched(getClass().getName(), "run", e);
         warning("An attempt to create server socket failed!");
-      }
-      finally
-      {
+      } finally {
         if (serverSocket != null)
           try { serverSocket.close(); } catch (IOException ioex) { }
         serverSocket = null;
-        if (!stop)
-        {
+        if (!stop) {
           long waitTime = Math.round(Math.random() * 4000.0 + 1000.0);
           try { Thread.sleep(waitTime); } catch (InterruptedException ie) {}
         }
@@ -157,16 +143,14 @@ public class Server implements Runnable, java.io.Closeable
   /**
    *  Returns a stutus of the server.
    */
-  public int getStatus()
-  {
+  public int getStatus() {
     return status;
   }
 
   /**
    *  Will close the server socket and stop the server thread.
    */
-  public void close()
-  {
+  public void close() {
     stop = true;
   }
 

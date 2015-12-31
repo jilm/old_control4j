@@ -95,7 +95,7 @@ implements IClientFactory, ICycleEventListener {
    */
   @Override
     public void prepare() {
-      server = new Server(port, this);
+      server = new Server(port, this::newClient);
       server.start();
     }
 
