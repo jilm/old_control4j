@@ -21,11 +21,13 @@ package control4j.protocols.signal;
 import java.util.Date;
 import java.text.SimpleDateFormat;
 import java.text.ParseException;
+import java.text.NumberFormat;
+import java.util.Locale;
 
 public class XmlTools
 {
 
-  protected static SimpleDateFormat dateFormat
+  protected static final SimpleDateFormat dateFormat
       = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 
   public static String formatDate(Date date)
@@ -36,6 +38,13 @@ public class XmlTools
   public static Date parseDate(String string) throws ParseException
   {
     return dateFormat.parse(string);
+  }
+  
+  protected static final NumberFormat numberFormat 
+          = NumberFormat.getNumberInstance(Locale.ENGLISH);
+  
+  public static String formatValue(double value) {
+      return numberFormat.format(value);
   }
 
 }

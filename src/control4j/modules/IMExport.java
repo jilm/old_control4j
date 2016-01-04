@@ -18,11 +18,30 @@
 
 package control4j.modules;
 
+import static cz.lidinsky.tools.Validate.notBlank;
+import static cz.lidinsky.tools.Validate.notNull;
+import static control4j.tools.Logger.*;
+
 import control4j.AResource;
 import control4j.AVariableInput;
+import control4j.ICycleEventListener;
 import control4j.InputModule;
 import control4j.Signal;
+import control4j.protocols.signal.DataRequest;
+import control4j.protocols.signal.DataResponse;
+import control4j.protocols.signal.Message;
+import control4j.protocols.signal.XmlInputStream;
+import control4j.protocols.signal.XmlOutputStream;
+import control4j.protocols.tcp.Respondent;
+import control4j.protocols.tcp.Server;
 import control4j.resources.communication.SignalServer;
+
+import cz.lidinsky.tools.reflect.Setter;
+
+import java.io.IOException;
+import java.net.Socket;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  *  Exports input signals through the given resource. This module is dedicated
@@ -52,11 +71,14 @@ import control4j.resources.communication.SignalServer;
  *  @see SignalServer
  */
 @AVariableInput
-public class IMExport extends InputModule {
+public class IMExport extends InputModule implements ICycleEventListener {
 
-  /** A server resource. */
-  @AResource
-  private SignalServer server;
+  private int port = 51234;
+
+  @Setter("port")
+  public void setPort(int port) {
+    this.port = port;
+  }
 
   /** Names of the input signal that will be used as an identifier */
   protected String ids[];
@@ -83,8 +105,77 @@ public class IMExport extends InputModule {
   @Override
   protected void put(Signal[] input, int inputLength) {
     for (int i = 0; i < inputLength; i++) {
-      server.put(ids[i], input[i]);
+      put(ids[i], input[i]);
     }
+  }
+
+  private Server server;
+
+  /** Buffer to store signals. */
+  private final Map<String, Signal> signalBuffer = new HashMap<>();
+
+  /** A response which is created at the end of the scan. */
+  private DataResponse response = new DataResponse();
+
+  /**
+   *  Create and run a server thread.
+   *
+   *  @see control4j.protocols.tcp.Server
+   */
+  @Override
+    public void prepare() {
+      server = new Server(port, this::newClient);
+      server.start();
+    }
+
+  /**
+   *  Given signals are stored into the internal buffer to be sent.
+   */
+  public synchronized void put(String id, Signal signal) {
+    signalBuffer.put(notBlank(id), notNull(signal));
+  }
+
+  /**
+   *  Create new Respondent object which is responsible for taking care of the
+   *  client needs.
+   */
+  public synchronized void newClient(Socket socket) {
+    try {
+      Respondent<Message, Message> client = new Respondent<Message, Message>(
+          new XmlInputStream(socket.getInputStream()),
+          new XmlOutputStream(socket.getOutputStream()),
+          this::getResponse);
+      info("New listener added.");
+      client.initialize();
+    } catch (IOException e) {
+      catched(this.getClass().getName(), "newClient", e);
+    }
+  }
+
+  /**
+   *  Returns a response to the given request. This method should be used by
+   *  the clients.
+   */
+  public synchronized DataResponse getResponse(Message request) {
+    return response;
+  }
+
+  /**
+   *  Not used.
+   */
+  public void cycleStart() { }
+
+  /**
+   *  Not used.
+   */
+  public void processingStart() { }
+
+  /**
+   *  Prepare new response.
+   */
+  public void cycleEnd() {
+    response = new DataResponse(signalBuffer);
+    signalBuffer.clear();
   }
 
 }

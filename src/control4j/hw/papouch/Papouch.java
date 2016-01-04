@@ -80,7 +80,7 @@ public class Papouch
 
   protected SpinelMessage send(SpinelMessage request) throws IOException
   {
-    IResponseCrate<SpinelMessage> responseCrate = channel.write(request);
+    IResponseCrate<SpinelMessage> responseCrate = channel.send(request);
     return responseCrate.getResponse();
   }
 }

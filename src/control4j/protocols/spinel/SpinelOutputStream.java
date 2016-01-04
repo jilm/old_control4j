@@ -47,7 +47,7 @@ implements IOutputStream<SpinelMessage>
    *  @param message
    *             message to send
    *
-   *  @throws IOExcetption 
+   *  @throws IOException 
    *             if somethig went wrong
    */
   public void write(SpinelMessage message) throws IOException

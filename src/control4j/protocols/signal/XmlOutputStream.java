@@ -45,7 +45,7 @@ implements IOutputStream<Message> {
   @Override
   public void write(int b) throws IOException {
     try {
-    System.out.print(new String(new int[] {b}, 0, 1));
+    //System.out.print(new String(new int[] {b}, 0, 1));
     } catch (Exception e) {}
     stream.write(b);
   }
@@ -88,8 +88,8 @@ implements IOutputStream<Message> {
       writer.writeStartElement("signal");
       writer.writeAttribute("id", id);
       writer.writeAttribute("timestamp", strTimestamp);
-      String strValue = String.format("%g", signal.getValue());
-      writer.writeAttribute("value", strValue);
+      //String strValue = String.format("%g", signal.getValue());
+      writer.writeAttribute("value", XmlTools.formatValue(signal.getValue()));
       String unit = signal.getUnit();
       if (unit != null && unit.length() > 0)
         writer.writeAttribute("unit", unit);
@@ -139,7 +139,7 @@ implements IOutputStream<Message> {
     writer.writeEndDocument();
     writer.flush();
     stream.flush();
-    stream.close();
+    //stream.close();
     finest("Request written...");
   }
 

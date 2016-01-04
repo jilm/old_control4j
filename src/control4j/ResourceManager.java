@@ -1,5 +1,3 @@
-package control4j;
-
 /*
  *  Copyright 2013, 2014, 2015 Jiri Lidinsky
  *
@@ -18,14 +16,21 @@ package control4j;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.HashMap;
+package control4j;
+
 import static control4j.tools.LogMessages.*;
 import static control4j.tools.Logger.*;
 
 import cz.lidinsky.tools.CommonException;
+import cz.lidinsky.tools.ExceptionCode;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  *
@@ -141,4 +146,79 @@ public class ResourceManager
     {
     }
   }
+
+  //-------------------------------------------------------------------------
+
+  /**
+   *  Contains all of the resource objects.
+   */
+  private final Map<Object, Object> cache = new HashMap<>();
+
+  /**
+   *  Returns requested resource object from the local cache or null.
+   *
+   *  @param key
+   *             a unique identification of the resource object.
+   */
+  private Object getResource(Object key) {
+    if (cache.containsKey(key)) {
+      return cache.get(key);
+    } else {
+      return null;
+    }
+  }
+
+  /**
+   *  Returns a resource under the given key, if there is some. Otherwise the
+   *  exception is thrown.
+   */
+  public static <T> T get(Class<T> _class, Object key) {
+    getInstance();
+    Object resource = manager.getResource(key);
+    if (resource == null) {
+      //resource = manager.createResource(_class, key);
+      throw new CommonException()
+        .setCode(ExceptionCode.NO_SUCH_ELEMENT)
+        .set("message", "There is no a resource with given key!")
+        .set("key", key.toString());
+    }
+    return _class.cast(resource);
+  }
+
+    public static <T> T getOrCreate(
+            final Class<T> _class, final Object key, final Supplier<T> factory) {
+        getInstance();
+        Object resource = manager.cache.get(key);
+        if (resource == null) {
+            resource = factory.get();
+            manager.cache.put(key, resource);
+            return _class.cast(resource);
+        } else {
+            return _class.cast(resource);
+        }
+    }
+
+    public static <T> T getOrCreate(
+            final Object key, final Supplier<T> factory) {
+        getInstance();
+        Object resource = manager.cache.get(key);
+        if (resource == null) {
+            resource = factory.get();
+            manager.cache.put(key, resource);
+            return (T)resource;
+        } else {
+            return (T)resource;
+        }
+    }
+
+  public static void replace(final Object key, final Object resource) {
+    getInstance();
+    manager.cache.put(key, resource);
+  }
+
+  public static <T> T remove(Object key) {
+    getInstance();
+    return (T)manager.cache.remove(key);
+  }
+
 }

@@ -85,6 +85,15 @@ public class SpinelMessage
     else
       dataLength = 0;
   }
+  
+  public SpinelMessage(int address, int instruction, int[] data, int offset, int length) {
+    this.adr = address;
+    this.sig = 0;
+    this.inst = instruction;
+    this.data = new int[length];
+    System.arraycopy(data, offset, this.data, 0, length);
+    this.dataLength = length;
+  }
 
   /**
    *  Create message with given parameters, without the data.

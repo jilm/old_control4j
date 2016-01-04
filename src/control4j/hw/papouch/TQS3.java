@@ -67,7 +67,7 @@ public class TQS3 extends Papouch
   public double getOneTimeMeasurement() throws IOException
   {
     SpinelMessage request = new SpinelMessage(address, MEASUREMENT);
-    IResponseCrate<SpinelMessage> responseCrate = channel.write(request);
+    IResponseCrate<SpinelMessage> responseCrate = channel.send(request);
     SpinelMessage response = responseCrate.getResponse();
     return getOneTimeMeasurement(response);
   } 
@@ -85,7 +85,7 @@ public class TQS3 extends Papouch
   public CommunicationParams getCommunicationParams() throws IOException
   {
     SpinelMessage request = new SpinelMessage(address, COMMUNICATION_PARAM_READ);
-    IResponseCrate<SpinelMessage> responseCrate = channel.write(request);
+    IResponseCrate<SpinelMessage> responseCrate = channel.send(request);
     SpinelMessage response = responseCrate.getResponse();
     return getCommunicationParams(response);
   }

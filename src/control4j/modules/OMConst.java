@@ -21,6 +21,7 @@ package control4j.modules;
 //import org.apache.commons.lang3.builder.ToStringBuilder;
 //import org.apache.commons.lang3.builder.ToStringStyle;
 
+import control4j.AOutputSize;
 import cz.lidinsky.tools.IToStringBuildable;
 import cz.lidinsky.tools.ToStringBuilder;
 import cz.lidinsky.tools.reflect.Setter;
@@ -37,6 +38,7 @@ import control4j.OutputModule;
  *  Output: 0, Scalar constant value which is specified by the value property.
  *             It is always valid and with the actual timestamp.
  */
+@AOutputSize(1)
 public class OMConst extends OutputModule implements IToStringBuildable
 {
 

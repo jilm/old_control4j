@@ -1,5 +1,3 @@
-package control4j.modules;
-
 /*
  *  Copyright 2015 Jiri Lidinsky
  *
@@ -18,26 +16,55 @@ package control4j.modules;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import java.util.Collection;
+package control4j.modules;
 
-import control4j.OutputModule;
+import static cz.lidinsky.tools.Validate.notBlank;
+import static control4j.tools.Logger.*;
+
 import control4j.AResource;
 import control4j.AVariableOutput;
+import control4j.OutputModule;
 import control4j.Signal;
-//import control4j.application.ModuleDeclaration;
+import control4j.application.Module;
 import control4j.protocols.signal.DataRequest;
 import control4j.protocols.signal.DataResponse;
-import control4j.resources.communication.SignalClient;
+//import control4j.resources.communication.SignalClient;
+import control4j.ICycleEventListener;
+import control4j.protocols.signal.XmlInputStream;
+import control4j.protocols.signal.XmlOutputStream;
+import control4j.tools.Tools;
+
+import cz.lidinsky.tools.reflect.Setter;
+
+import java.util.Collection;
+import java.net.Socket;
+import java.io.IOException;
 
 /**
  *
  *
  */
 @AVariableOutput
-public class OMImport extends OutputModule {
+public class OMImport extends OutputModule implements ICycleEventListener {
 
-  @AResource
-  public SignalClient client;
+  private String host;
+  private int port;
+
+  @Setter("host")
+  public void setHost(String host) {
+    this.host = notBlank(host);
+    if (connected) {
+      close();
+    }
+  }
+
+  @Setter("port")
+  public void setPort(int port) {
+    this.port = port;
+    if (connected) {
+      close();
+    }
+  }
 
   /** Names of the input signal that will be used as an identifier */
   protected String ids[];
@@ -56,12 +83,16 @@ public class OMImport extends OutputModule {
     }
   }
 
+  @Override
+  public void prepare() {
+    connect();
+  }
+
   /**
    *  Sends input signals throught the given server resource.
    */
   @Override
   public void get(Signal[] output, int outputLength) {
-    DataResponse response = (DataResponse)client.read();
     if (response != null) {
       for (int i=0; i<outputLength; i++) {
         output[i] = response.getData().get(ids[i]);
@@ -69,7 +100,87 @@ public class OMImport extends OutputModule {
           output[i] = Signal.getSignal();
         }
       }
+      response = null;
     }
+  }
+
+  @Override
+  public void cycleStart() {
+    try {
+      connect();
+      sendRequestReceiveResponse();
+    } catch (Exception e) {
+      catched(getClass().getName(), "cycleStart", e);
+    }
+  }
+
+  @Override
+  public void cycleEnd() {}
+
+  @Override
+  public void processingStart() {}
+
+  protected void sendRequestReceiveResponse() {
+    connect();
+    if (!receving && response == null) {
+      new Thread(this::run).start();
+    }
+  }
+
+  private DataRequest request = new DataRequest();
+  private DataResponse response;
+  private boolean receving = false;
+
+  protected void run() {
+    try {
+      finest("Going to write data request...");
+      outputStream.write(request);
+      finest("Waiting for a response...");
+      response = (DataResponse)inputStream.readMessage();
+      finest("Response recived.");
+    } catch (Exception e) {
+      catched(getClass().getName(), "run", e);
+      reconnect();
+    } finally {
+      receving = false;
+    }
+  }
+
+  private boolean connected = false;
+  private Socket socket;
+  private XmlInputStream inputStream;
+  private XmlOutputStream outputStream;
+
+  protected void connect() {
+    try {
+      if (!connected) {
+        finer("Going to connect to the server, host: " + host + ", port: " + Integer.toString(port));
+        socket = new Socket(host, port);
+        finer("Socket was created, going to create input and output streams ...");
+        inputStream = new XmlInputStream(socket.getInputStream());
+        outputStream = new XmlOutputStream(socket.getOutputStream());
+        connected = true;
+        finer("Clinet has been successfuly connected to the server.");
+      }
+    } catch (IOException e) {
+      catched(getClass().getName(), "connect", e);
+      close();
+    }
+  }
+
+  protected void reconnect() {
+    close();
+    connect();
+  }
+
+  public void close() {
+    connected = false;
+    Tools.close(socket);
+    Tools.close(inputStream);
+    Tools.close(outputStream);
+    socket = null;
+    inputStream = null;
+    outputStream = null;
   }
 
 }

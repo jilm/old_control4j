@@ -146,6 +146,11 @@ abstract class ModuleCrate {
     void execute(DataBuffer buffer) {
       Signal[] output = getOutputArray(outputMap.length);
       module.get(output, outputMap.length);
+      for (int i=0; i<outputMap.length; i++) {
+          if (output[i] == null) {
+              output[i] = Signal.getSignal();
+          }
+      }
       buffer.put(output, outputMap);
     }
 

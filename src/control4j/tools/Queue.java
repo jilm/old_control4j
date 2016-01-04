@@ -1,7 +1,7 @@
 package control4j.tools;
 
 /*
- *  Copyright 2013, 2015 Jiri Lidinsky
+ *  Copyright 2013, 2015, 2016 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -22,16 +22,16 @@ import java.util.LinkedList;
 
 /**
  *
- *  FIFO data structure. This data structure is dedicated for
- *  exchange information between threads. All of the methods
- *  are synchronized.
+ * FIFO data structure. This data structure is dedicated for information
+ * exchange between threads. All of the methods are synchronized.
  *
+ * @param <T>
  */
-public class Queue<E>
+public class Queue<T>
 {
 
   /** The queue. */
-  protected LinkedList<E> list = new LinkedList<E>();
+  protected final LinkedList<T> list = new LinkedList<>();
 
   /**
    *  Adds an item at the end of the queue.
@@ -39,7 +39,7 @@ public class Queue<E>
    *  @param item 
    *             an item to be added at the end of the queue
    */
-  public synchronized void queue(E item)
+  public synchronized void queue(T item)
   {
     list.add(item);
     notify();
@@ -51,7 +51,7 @@ public class Queue<E>
    *  @return an item at the head of the queue or null if
    *             the queue is empty
    */
-  public synchronized E dequeue()
+  public synchronized T dequeue()
   {
     return list.poll();
   }
@@ -71,11 +71,14 @@ public class Queue<E>
    *  
    *  @return an item at the head of the queue 
    */
-  public synchronized E blockingDequeue()
+  public synchronized T blockingDequeue()
   {
-    while (list.size() == 0)
-    {
-      try { wait(); } catch (InterruptedException e) {}
+    while (list.isEmpty()) {
+      try { 
+          wait(); 
+      } catch (InterruptedException e) {
+      // it is OK
+      }
     }
     return list.poll();
   }
@@ -88,7 +91,7 @@ public class Queue<E>
    */
   public synchronized boolean isEmpty()
   {
-    return list.size() == 0;
+    return list.isEmpty();
   }
   
 }

@@ -93,7 +93,7 @@ public class ControlLoop {
 
   private long cyclePeriod = 1000;
 
-  private long cycleDelay = 200;
+  private long cycleDelay = 400;
 
   ControlLoop set(String key, String value) {
     try {
@@ -229,7 +229,7 @@ public class ControlLoop {
         String message = getMessage("BrokenCycle");
         message = String.format(message, e.getMessage());
         warning(message);
-        dump(e, executedModule.getModule());
+        //dump(e, executedModule.getModule()); // TODO:
       }
   }
 

@@ -341,7 +341,7 @@ public abstract class Module implements IToStringBuildable {
   }
 
   public int getOutputSize(int lastDeclaredIndex) {
-    return Math.max(lastDeclaredIndex + 1, getIndexedOutputSize());
+    return Math.min(lastDeclaredIndex + 1, getIndexedOutputSize());
   }
 
   //----------------------------------------------------------- Initialization.
