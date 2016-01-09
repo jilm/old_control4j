@@ -18,17 +18,8 @@ package control4j.application.nativelang;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import java.util.ArrayList;
-import org.xml.sax.Attributes;
-
-import control4j.tools.IXmlHandler;
-import control4j.tools.ParseException;
-import control4j.tools.XmlReader;
-import control4j.tools.XmlStartElement;
-import control4j.tools.XmlEndElement;
 
 import cz.lidinsky.tools.ToStringBuilder;
-import cz.lidinsky.tools.ToStringStyle;
 
 /**
  *

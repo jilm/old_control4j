@@ -19,27 +19,18 @@ package control4j.application;
  */
 
 import static org.apache.commons.lang3.Validate.notNull;
-import static org.apache.commons.lang3.Validate.notBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 import static org.apache.commons.lang3.StringUtils.isBlank;
-import static control4j.tools.LogMessages.getMessage;
-import static control4j.tools.Logger.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Set;
 
-import org.apache.commons.lang3.tuple.Triple;
-import org.apache.commons.lang3.tuple.ImmutableTriple;
 
 import cz.lidinsky.tools.CommonException;
 import cz.lidinsky.tools.ExceptionCode;
-import control4j.tools.DeclarationReference;
 
 import cz.lidinsky.tools.ToStringBuilder;
 

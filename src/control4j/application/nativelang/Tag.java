@@ -45,8 +45,7 @@ public class Tag extends Configurable {
   }
 
   Tag setName(String name) {
-    this.name = trim(notBlank(name, "The name property may not be blank!\n"
-        + getDeclarationReferenceText()));
+    this.name = name;
     return this;
   }
 

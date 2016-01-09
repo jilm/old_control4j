@@ -1,7 +1,5 @@
-package control4j.tools;
-
 /*
- *  Copyright 2013, 2014 Jiri Lidinsky
+ *  Copyright 2013, 2014, 2016 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -18,51 +16,49 @@ package control4j.tools;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+package control4j.tools;
+
 /**
+ *  Serves as a reference to the point, where referenced object was declared.
+ *  To some line in the configuration file for example. It should return
+ *  information in the human readable form. This information is used in a log
+ *  message or in the error report.
  *
- *  Serves as a reference to some point, where somethig was declared. 
- *  To some line in the configuration file for example. It should 
- *  return information in the human readable form. This information 
- *  is used for example in logs or if it is necessary to report some 
- *  error or fault.
- *
- *  <p>Reference information may and should be hierarchical, the 
- *  example of output:<br>
+ *  <p>Reference information may and should be hierarchical.
+ *  The example of output:<br>
  *  This is the module object, class: PMAnd,<br>
  *  on line: 25, column: 6,<br>
  *  in the file: heating.xml,<br>
  *  project: project1<br>
  *
- *  <p>There are two kinds of methods to manipulate the content of the
- *  object. Methods which names begining word "set", set the content
- *  of this object. But if you have an object which points to the project
- *  and you want to create reference to the file within this project,
- *  use method which name begins to "add" on the project ref object. 
- *  This method creates and returnes new object and sets the project
- *  ref object as a parent.
+ *  <p>To create object which particularize some existing reference, call method
+ *  which starts with "specify" word.
  *
+ *  <p>This object is immutable.
  */
 public class DeclarationReference
 {
 
   /**
-   *
+   *  Point to the reference object which is more general.
    */
   private DeclarationReference parent;
 
   /**
-   *
+   *  The text.
    */
   private String reference;
 
   /**
    *  Creates an empty declaration reference.
    */
+  @Deprecated
   public DeclarationReference()
   {
     parent = null;
   }
 
+  @Deprecated
   public DeclarationReference(DeclarationReference parent)
   {
     this.parent = parent;
@@ -70,19 +66,52 @@ public class DeclarationReference
 
   public DeclarationReference(String text)
   {
-    setText(text);
+    this.reference = text;
+    this.parent = null;
   }
 
+  private DeclarationReference(String text, DeclarationReference parent) {
+      this.reference = text;
+      this.parent = parent;
+  }
+
+  @Deprecated
   public void setProject(String projectName)
   {
     reference = "in the project: " + projectName;
   }
 
+  /**
+   *  Creates and returns a reference object to the project with given name.
+   *
+   *  @param projectName
+   *             the name of the project
+   *
+   *  @return a reference object
+   */
+  public static DeclarationReference getProjectRef(String projectName) {
+      return new DeclarationReference("In the project: " + projectName);
+  }
+
+  public DeclarationReference specifyProject(String projectName) {
+      return new DeclarationReference("in the project: " + projectName, this);
+  }
+
+  @Deprecated
   public void setFile(String fileName)
   {
     reference = "in the file: " + fileName;
   }
 
+  public static DeclarationReference getFileRef(String fileName) {
+      return new DeclarationReference("In the file: " + fileName);
+  }
+
+  public DeclarationReference specifyFile(String fileName) {
+      return new DeclarationReference("in the file: " + fileName, this);
+  }
+
+  @Deprecated
   public DeclarationReference addFile(String filename)
   {
     DeclarationReference ref = new DeclarationReference(this);
@@ -152,5 +181,9 @@ public class DeclarationReference
     }
     return sb.toString();
   }
+
+    public DeclarationReference specify(String text) {
+        return new DeclarationReference(text, this);
+    }
 
 }

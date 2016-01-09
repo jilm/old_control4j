@@ -1,7 +1,5 @@
-package control4j.application.nativelang;
-
 /*
- *  Copyright 2015 Jiri Lidinsky
+ *  Copyright 2015, 2016 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -18,10 +16,7 @@ package control4j.application.nativelang;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import static org.apache.commons.lang3.Validate.notBlank;
-import static org.apache.commons.lang3.Validate.notNull;
-import static org.apache.commons.lang3.Validate.inclusiveBetween;
-import static org.apache.commons.lang3.StringUtils.trim;
+package control4j.application.nativelang;
 
 import cz.lidinsky.tools.ToStringBuilder;
 
@@ -36,17 +31,13 @@ public class Define extends DeclarationBase implements IDefinition {
 
   private String name;
 
+  @Override
   public String getName() {
-    if (name == null || value == null) {
-      throw new IllegalStateException("A name or a value attribute missing!"
-          + getDeclarationReferenceText());
-    }
     return name;
   }
 
   public void setName(final String name) {
-    this.name = trim(notBlank(name,
-        "Name attribute may not be empty\n" + getDeclarationReferenceText()));
+    this.name = name;
   }
 
   private int scope;
@@ -56,24 +47,17 @@ public class Define extends DeclarationBase implements IDefinition {
   }
 
   public void setScope(final int scope) {
-    inclusiveBetween(0, 1, scope, "Scope attribute must be between 0 and 1\n"
-        + getDeclarationReferenceText());
     this.scope = scope;
   }
 
   private String value;
 
   public String getValue() {
-    if (name == null || value == null) {
-      throw new IllegalStateException("A name or a value attribute missing!"
-          + getDeclarationReferenceText());
-    }
     return value;
   }
 
   Define setValue(final String value) {
-    this.value = notNull(value, "Value attribute may not be null value\n"
-        + getDeclarationReferenceText());
+    this.value = value;
     return this;
   }
 

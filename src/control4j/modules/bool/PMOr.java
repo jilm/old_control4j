@@ -27,6 +27,7 @@ import control4j.ProcessModule;
  *  Provides boolean OR operation.
  *
  */
+@AVariableInput
 public class PMOr extends ProcessModule
 {
 

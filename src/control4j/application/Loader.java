@@ -1,7 +1,5 @@
-package control4j.application;
-
 /*
- *  Copyright 2015 Jiri Lidinsky
+ *  Copyright 2015, 2016 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -18,16 +16,12 @@ package control4j.application;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+package control4j.application;
+
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.NoSuchElementException;
-import org.xml.sax.Attributes;
 
 import cz.lidinsky.tools.xml.XMLReader;
-import static control4j.tools.Logger.*;
 
 /**
  *

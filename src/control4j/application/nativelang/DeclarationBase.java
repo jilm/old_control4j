@@ -1,7 +1,5 @@
-package control4j.application.nativelang;
-
 /*
- *  Copyright 2013, 2014, 2015 Jiri Lidinsky
+ *  Copyright 2013, 2014, 2015, 2016 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -18,11 +16,12 @@ package control4j.application.nativelang;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+package control4j.application.nativelang;
+
 import control4j.tools.DeclarationReference;
 
 import cz.lidinsky.tools.IToStringBuildable;
 import cz.lidinsky.tools.ToStringBuilder;
-import cz.lidinsky.tools.ToStringStyle;
 
 /**
  * 

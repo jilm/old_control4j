@@ -77,6 +77,8 @@ public class XMLHandler implements IXMLHandler
 
   public XMLHandler() {}
 
+  public void setXMLReader(XMLReader reader) {}
+
   public XMLHandler(AbstractAdapter adapter) {
     this.adapter = adapter;
     // set object map decorator

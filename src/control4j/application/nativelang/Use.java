@@ -46,19 +46,18 @@ public class Use extends Configurable implements IReference {
   private String href;
 
   public String getHref() {
-    check();
+    //check();
     return href;
   }
 
   public void setHref(String href) {
-    this.href = trim(notBlank(href, getMessage("msg004", "href",
-        getDeclarationReferenceText())));
+      this.href = href;
   }
 
   private int scope;
 
   public int getScope() {
-    check();
+    //check();
     return scope;
   }
 

@@ -18,10 +18,10 @@ package control4j.application;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import control4j.tools.DeclarationReference;
 
 import cz.lidinsky.tools.ToStringBuilder;
 import cz.lidinsky.tools.Validate;
+import cz.lidinsky.tools.CommonException;
 
 import java.util.HashMap;
 import java.util.Set;
@@ -45,14 +45,20 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class Signal extends Configurable {
 
-  private String name;
+  private final String name;
 
   /**
    *  Crate a new empty signal definition object. The parameter name must be
    *  the name specified inside the application document.
    */
   public Signal(String name) {
+    try {
     this.name = Validate.notBlank(name);
+    } catch (Exception e) {
+      throw new CommonException()
+        .set("message", "The name of the signal may not be blank!")
+        .set("name", name);
+    }
   }
 
   //----------------------------------------------------- Default Signal Value.

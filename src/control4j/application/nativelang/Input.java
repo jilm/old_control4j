@@ -1,7 +1,5 @@
-package control4j.application.nativelang;
-
 /*
- *  Copyright 2015 Jiri Lidinsky
+ *  Copyright 2015, 2016 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -18,12 +16,9 @@ package control4j.application.nativelang;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import java.util.ArrayList;
-
-import control4j.tools.ParseException;
+package control4j.application.nativelang;
 
 import cz.lidinsky.tools.ToStringBuilder;
-import cz.lidinsky.tools.ToStringStyle;
 
 /**
  *

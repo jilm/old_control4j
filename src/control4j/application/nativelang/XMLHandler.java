@@ -19,21 +19,13 @@ package control4j.application.nativelang;
  */
 
 import static cz.lidinsky.tools.chain.Factory.getInstantiator;
-import static org.apache.commons.collections4.PredicateUtils.notNullPredicate;
 import static org.apache.commons.lang3.Validate.notNull;
 
-import java.util.ArrayList;
 import control4j.tools.ParseException;
-import org.xml.sax.Attributes;
 
 import control4j.SyntaxErrorException;
 import control4j.ExceptionCode;
-import control4j.application.ITranslatable;
-import control4j.application.ErrorManager;
-import control4j.application.ErrorRecord;
-import control4j.application.Scope;
-import control4j.application.ILoader;
-import control4j.tools.DuplicateElementException;
+import control4j.tools.DeclarationReference;
 import cz.lidinsky.tools.xml.IXMLHandler;
 import cz.lidinsky.tools.xml.XMLReader;
 import cz.lidinsky.tools.xml.AXMLStartElement;
@@ -42,17 +34,7 @@ import cz.lidinsky.tools.xml.AXMLText;
 import cz.lidinsky.tools.xml.AXMLDefaultUri;
 import cz.lidinsky.tools.chain.Factory;
 
-import java.io.InputStream;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.awt.Color;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
 import org.xml.sax.Attributes;
-import org.xml.sax.SAXException;
-
-import org.apache.commons.collections4.Transformer;
-import org.apache.commons.collections4.Predicate;
 
 /**
  *
@@ -80,12 +62,18 @@ public class XMLHandler implements IXMLHandler
 
   public void setXMLReader(XMLReader reader) {
     this.reader = notNull(reader);
+      java.io.File file = reader.getFile();
+      if (file != null) {
+          fileReference = DeclarationReference.getFileRef(file.toString());
+      }
   }
 
   /**
    *  An empty constructor.
    */
-  public XMLHandler() { }
+  public XMLHandler() {
+    fileReference = DeclarationReference.getFileRef("<unknown>");
+  }
 
   public void setDestination(AbstractAdapter destination) {
     this.adapter = destination;
@@ -99,7 +87,11 @@ public class XMLHandler implements IXMLHandler
    *
    */
 
-  public void startProcessing() { }
+  private DeclarationReference fileReference;
+
+  @Override
+  public void startProcessing() {
+  }
 
   /**
    *  Cleen up.
@@ -569,6 +561,7 @@ public class XMLHandler implements IXMLHandler
         .setKey(Parser.parseToken(attributes.getValue("key")))
         .setValue(attributes.getValue("value"));
     setReference(property, attributes);
+    setDeclarationReference(property);
     return property;
   }
 
@@ -600,22 +593,8 @@ public class XMLHandler implements IXMLHandler
 
   protected void setDeclarationReference(DeclarationBase object) {
     if (reader != null) {
-      object.setDeclarationReference(reader.getLocation());
+      object.setDeclarationReference(fileReference.specify(reader.getLocation()));
     }
-  }
-
-  /**
-   *  For debug purposes.
-   */
-  public static void main(String[] args) throws Exception
-  {
-    java.io.File file = new java.io.File(args[0]);
-    java.io.InputStream inputStream = new java.io.FileInputStream(file);
-    XMLHandler handler = new XMLHandler();
-    handler.adapter = new PrintAdapter();
-    XMLReader reader = new XMLReader();
-    reader.addHandler(handler);
-    reader.load(inputStream);
   }
 
 }

@@ -75,6 +75,8 @@ public class XMLHandler implements IXMLHandler
   {
   }
 
+  public void setXMLReader(XMLReader reader) {}
+
   public void setHandler(AbstractAdapter handler) {
     adapter = handler;
   }

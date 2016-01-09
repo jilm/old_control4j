@@ -20,20 +20,9 @@ package control4j.application;
 
 import static cz.lidinsky.tools.Validate.notBlank;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Set;
-
-import org.apache.commons.lang3.tuple.Triple;
-import org.apache.commons.lang3.tuple.ImmutableTriple;
-
-import control4j.ConfigBufferTemplate;
-import control4j.ConfigItemNotFoundException;
 import control4j.IConfigBuffer;
-import control4j.tools.DuplicateElementException;
 
 import cz.lidinsky.tools.CommonException;
 import cz.lidinsky.tools.ExceptionCode;
@@ -126,12 +115,9 @@ public abstract class Configurable extends DeclarationBase {
    *             required value identification
    *
    *  @return the value that is asociated with given key
-   *
-   *  @throws CommonException
-   *             if the parameter is blank
    */
   public Property getProperty(String key) {
-    return configuration.get(notBlank(key));
+    return configuration.get(key);
   }
 
   /**

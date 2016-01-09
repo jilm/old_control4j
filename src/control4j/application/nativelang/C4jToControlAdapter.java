@@ -20,9 +20,6 @@ package control4j.application.nativelang;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
-
 import control4j.application.Scope;
 import control4j.application.ErrorManager;
 import control4j.application.ReferenceDecorator;
@@ -50,6 +47,7 @@ public class C4jToControlAdapter extends AbstractAdapter {
   /**
    *  Call to start new inner local scope.
    */
+  @Override
   public void startLevel() {
     handler.startScope();
   }
@@ -58,6 +56,7 @@ public class C4jToControlAdapter extends AbstractAdapter {
    *  Call to end current inner local scope and to return to the parent
    *  scope.
    */
+  @Override
   public void endLevel() {
     handler.endScope();
   }
@@ -65,6 +64,7 @@ public class C4jToControlAdapter extends AbstractAdapter {
   /**
    *  Put a module object.
    */
+  @Override
   public void put(Module module) {
 
     Scope localScope = handler.getScopePointer();
@@ -72,7 +72,14 @@ public class C4jToControlAdapter extends AbstractAdapter {
       new control4j.application.Module(module.getClassName());
 
     // translate configuration
+    try {
     translateConfiguration(module, destModule, localScope);
+    } catch (Exception e) {
+      throw new CommonException()
+        .set("message", "Problem with module configuration translation!")
+        .set("module", module.toString())
+        .set("reference", module.getDeclarationReferenceText());
+    }
 
     // translate resource definitions
     for (Resource resource : module.getResources()) {
@@ -242,6 +249,7 @@ public class C4jToControlAdapter extends AbstractAdapter {
     return output;
   }
 
+  @Override
   public void put(Signal signal) {
     Scope localScope = handler.getScopePointer();
     control4j.application.Signal translated

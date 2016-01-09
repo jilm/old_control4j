@@ -18,16 +18,10 @@ package control4j.application.nativelang;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import static org.apache.commons.lang3.Validate.notNull;
-import static org.apache.commons.lang3.Validate.notBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static control4j.tools.LogMessages.getMessage;
 
-import java.util.ArrayList;
-//import org.xml.sax.Attributes;
-
-import control4j.application.Scope;
 
 import cz.lidinsky.tools.CommonException;
 import cz.lidinsky.tools.ExceptionCode;
@@ -60,13 +54,12 @@ public class ResourceDef extends DescriptionBase implements IDefinition {
    *  of the resource.
    */
   public String getClassName() {
-    check();
+    //check();
     return className;
   }
 
   ResourceDef setClassName(String className) {
-    this.className = trim(notBlank(className, getMessage("msg004", "class",
-        getDeclarationReferenceText())));
+    this.className = className;
     return this;
   }
 
@@ -75,17 +68,16 @@ public class ResourceDef extends DescriptionBase implements IDefinition {
   private int scope;
 
   public String getName() {
-    check();
+    //check();
     return name;
   }
 
   public void setName(String name) {
-    this.name = trim(notBlank(name, getMessage("msg004", "name",
-        getDeclarationReferenceText())));
+    this.name = name;
   }
 
   public int getScope() {
-    check();
+    //check();
     return scope;
   }
 

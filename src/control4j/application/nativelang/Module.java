@@ -1,7 +1,5 @@
-package control4j.application.nativelang;
-
 /*
- *  Copyright 2015 Jiri Lidinsky
+ *  Copyright 2015, 2016 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -18,145 +16,144 @@ package control4j.application.nativelang;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import static org.apache.commons.lang3.Validate.notNull;
-import static org.apache.commons.lang3.Validate.notBlank;
-import static org.apache.commons.lang3.StringUtils.trim;
+package control4j.application.nativelang;
+
 import static org.apache.commons.collections4.CollectionUtils.unmodifiableCollection;
 import static org.apache.commons.collections4.CollectionUtils.emptyIfNull;
-import static control4j.tools.LogMessages.getMessage;
-import static control4j.tools.Logger.*;
+import cz.lidinsky.tools.CommonException;
+import cz.lidinsky.tools.ExceptionCode;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Set;
-import java.util.Map;
-import org.xml.sax.Attributes;
 
 import cz.lidinsky.tools.ToStringBuilder;
-import cz.lidinsky.tools.ToStringStyle;
-import cz.lidinsky.tools.IToStringBuildable;
-
-import control4j.application.Scope;
+import java.util.List;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  *
- *  Stands for a module element.
+ * Stands for a module element.
  *
  */
 public class Module extends DescriptionBase {
 
-  public Module() {}
+    private String className;
+    private List<Resource> resources;
+    private List<Input> input;
+    private List<Output> output;
+    private List<String> inputTags;
+    private List<String> outputTags;
 
-  private String className;
+    /**
+     *  An empty constructor.
+     */
+    public Module() { }
 
-  public String getClassName() {
-    check();
-    return className;
-  }
-
-  Module setClassName(String className) {
-    this.className = trim(notBlank(className, getMessage("msg004",
-        "class name", getDeclarationReferenceText())));
-    return this;
-  }
-
-  private ArrayList<Resource> resources;
-
-  void add(Resource resource) {
-    notNull(resource, getMessage("msg006", "resource",
-        getDeclarationReferenceText()));
-    if (resources == null) {
-      resources = new ArrayList<Resource>();
+    /**
+     *  Creates an empty module object.
+     *
+     *  @param className a name of the class that implements functionality of a
+     *             module
+     */
+    public Module(String className) {
+        this.className = className;
     }
-    resources.add(resource);
-  }
 
-  public Collection<Resource> getResources() {
-    return unmodifiableCollection(emptyIfNull(resources));
-  }
-
-  private ArrayList<Input> input;
-
-  void add(Input input) {
-    notNull(input, getMessage("msg006", "input",
-        getDeclarationReferenceText()));
-    if (this.input == null) {
-      this.input = new ArrayList<Input>();
+    /**
+     *  Returns name of the class that implements the functionality of the
+     *  module.
+     *
+     *  @return name of the class that implements the functionality of the
+     *             module.
+     *
+     *  @throws CommonException
+     *             if the class name is eather null or empty
+     */
+    public String getClassName() {
+        return className;
     }
-    this.input.add(input);
-  }
 
-  public Collection<Input> getInput() {
-    return unmodifiableCollection(emptyIfNull(input));
-  }
-
-  private ArrayList<Output> output;
-
-  void add(Output output) {
-    notNull(output, getMessage("msg006", "output",
-        getDeclarationReferenceText()));
-    if (this.output == null) {
-      this.output = new ArrayList<Output>();
+    Module setClassName(String className) {
+        this.className = className;
+        return this;
     }
-    this.output.add(output);
-  }
 
-  public Collection<Output> getOutput() {
-    return unmodifiableCollection(emptyIfNull(output));
-  }
 
-  private ArrayList<String> inputTags;
-
-  void addInputTag(String tag) {
-    tag = trim(notBlank(tag, getMessage("msg004", "input tag",
-        getDeclarationReferenceText())));
-    if (inputTags == null) {
-      inputTags = new ArrayList<String>();
+    void add(Resource resource) {
+        resources = addNotNull(resource, resources);
     }
-    inputTags.add(tag);
-  }
 
-  public Collection<String> getInputTags() {
-    return unmodifiableCollection(emptyIfNull(inputTags));
-  }
-
-  private ArrayList<String> outputTags;
-
-  void addOutputTag(String tag) {
-    tag = trim(notBlank(tag, getMessage("msg004", "output tag",
-        getDeclarationReferenceText())));
-    if (outputTags == null) {
-      outputTags = new ArrayList<String>();
+    protected static <T> List<T> addNotNull(T item, List<T> list) {
+        if (item != null) {
+            if (list == null) {
+                list = new ArrayList<>();
+            }
+            list.add(item);
+        }
+        return list;
     }
-    outputTags.add(tag);
-  }
 
-  public Collection<String> getOutputTags() {
-    return unmodifiableCollection(emptyIfNull(outputTags));
-  }
+    public Collection<Resource> getResources() {
+        return unmodifiableCollection(emptyIfNull(resources));
+    }
 
-  /**
-   *  Creates an empty module object.
-   *
-   *  @param className
-   *             a name of the class that implements functionality
-   *             of a module
-   */
-  public Module(String className) {
-    setClassName(className);
-  }
 
-  protected void check() { }
+    void add(Input input) {
+        this.input = addNotNull(input, this.input);
+    }
 
-  @Override
-  public void toString(ToStringBuilder builder) {
-    super.toString(builder);
-    builder.append("className", className)
-        .append("resources", resources)
-        .append("input", input)
-        .append("output", output)
-        .append("inputTags", inputTags)
-        .append("outputTags", outputTags);
-  }
+    public Collection<Input> getInput() {
+        return unmodifiableCollection(emptyIfNull(input));
+    }
+
+
+    void add(Output output) {
+        this.output = addNotNull(output, this.output);
+    }
+
+    public Collection<Output> getOutput() {
+        return unmodifiableCollection(emptyIfNull(output));
+    }
+
+    void addInputTag(String tag) {
+        this.inputTags = addNotNull(tag, this.inputTags);
+    }
+
+    public Collection<String> getInputTags() {
+        return unmodifiableCollection(emptyIfNull(inputTags));
+    }
+
+
+    void addOutputTag(String tag) {
+        this.outputTags = addNotNull(tag, this.outputTags);
+    }
+
+    public Collection<String> getOutputTags() {
+        return unmodifiableCollection(emptyIfNull(outputTags));
+    }
+
+
+    protected void check() {
+        CommonException e = null;
+        if (isBlank(className)) {
+            e = new CommonException()
+                    .setCode(ExceptionCode.BLANK_ARGUMENT)
+                    .set("message", "Class name of the module may not be blank!");
+        }
+        if (e != null) {
+            throw e;
+        }
+    }
+
+    @Override
+    public void toString(ToStringBuilder builder) {
+        super.toString(builder);
+        builder.append("className", className)
+                .append("resources", resources)
+                .append("input", input)
+                .append("output", output)
+                .append("inputTags", inputTags)
+                .append("outputTags", outputTags);
+    }
 
 }

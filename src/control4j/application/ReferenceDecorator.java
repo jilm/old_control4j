@@ -23,6 +23,8 @@ import static org.apache.commons.lang3.Validate.notNull;
 import static org.apache.commons.lang3.StringUtils.trim;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
+import cz.lidinsky.tools.CommonException;
+
 public class ReferenceDecorator<S, T> {
 
   String href;
@@ -31,10 +33,19 @@ public class ReferenceDecorator<S, T> {
   protected S decorated;
 
   public ReferenceDecorator(String href, Scope scope, T value, S decorated) {
+    try {
     this.href = trim(notBlank(href));
     this.scope = notNull(scope);
     this.value = value;
     this.decorated = notNull(decorated);
+    } catch (Exception e) {
+      throw new CommonException()
+        .setCause(e)
+        .set("href", href)
+        .set("scope", scope)
+        .set("value", value)
+        .set("decorated", decorated);
+    }
   }
 
   public S getDecorated() {

@@ -18,23 +18,8 @@ package control4j.application.nativelang;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import static org.apache.commons.lang3.Validate.notNull;
-import static org.apache.commons.lang3.Validate.notBlank;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
-import static control4j.tools.LogMessages.getMessage;
-
-import java.util.ArrayList;
-import org.xml.sax.Attributes;
-
-import control4j.application.Scope;
-import control4j.tools.IXmlHandler;
-import control4j.tools.ParseException;
-import control4j.tools.XmlReader;
-import control4j.tools.XmlStartElement;
-import control4j.tools.XmlEndElement;
-
-import static control4j.tools.Logger.*;
 
 import cz.lidinsky.tools.CommonException;
 import cz.lidinsky.tools.ExceptionCode;
@@ -70,7 +55,7 @@ public class Resource extends Configurable implements IReference {
   private String className;
 
   public String getClassName() {
-    check();
+    //check();
     return className;
   }
 
@@ -82,7 +67,7 @@ public class Resource extends Configurable implements IReference {
   private String href;
 
   public String getHref() {
-    check();
+    //check();
     return href;
   }
 
@@ -93,7 +78,7 @@ public class Resource extends Configurable implements IReference {
   private int scope;
 
   public int getScope() {
-    check();
+    //check();
     return scope;
   }
 
@@ -104,7 +89,7 @@ public class Resource extends Configurable implements IReference {
   private boolean isReference;
 
   public boolean isReference() {
-    check();
+    //check();
     return isReference;
   }
 

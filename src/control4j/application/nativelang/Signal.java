@@ -45,16 +45,11 @@ public class Signal extends DescriptionBase implements IDefinition {
   private String name;
 
   public String getName() {
-    if (name == null) {
-      throw new IllegalStateException("Name attribute may not be null\n"
-          + getDeclarationReferenceText());
-    }
     return name;
   }
 
   public void setName(String name) {
-    this.name = trim(notBlank(name,
-        "Name attribute may not be blank" + getDeclarationReferenceText()));
+      this.name = name;
   }
 
   private int scope;
@@ -83,8 +78,7 @@ public class Signal extends DescriptionBase implements IDefinition {
   }
 
   void setDefaultValue(String value) {
-    valueT_1 = trim(notBlank(value, "Default value may not be blank.\n"
-        + getDeclarationReference()));
+    valueT_1 = value;
     isValueT_1Specified = true;
     isValueT_1Valid = true;
   }

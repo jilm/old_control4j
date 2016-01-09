@@ -1,7 +1,5 @@
-package control4j.application.nativelang;
-
 /*
- *  Copyright 2015 Jiri Lidinsky
+ *  Copyright 2015, 2016 Jiri Lidinsky
  *
  *  This file is part of control4j.
  *
@@ -18,8 +16,8 @@ package control4j.application.nativelang;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import static org.apache.commons.lang3.Validate.notNull;
-import static org.apache.commons.lang3.Validate.notBlank;
+package control4j.application.nativelang;
+
 import static org.apache.commons.lang3.StringUtils.trim;
 import static org.apache.commons.collections4.CollectionUtils.unmodifiableCollection;
 import static org.apache.commons.collections4.CollectionUtils.emptyIfNull;
@@ -27,18 +25,11 @@ import static control4j.tools.LogMessages.getMessage;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.NoSuchElementException;
 
 import control4j.application.Preprocessor;
-import control4j.application.Scope;
-import control4j.application.ErrorRecord;
-import control4j.application.ErrorManager;
-import control4j.tools.DuplicateElementException;
-import control4j.tools.ParseException;
-
-import cz.lidinsky.tools.IToStringBuildable;
 import cz.lidinsky.tools.ToStringBuilder;
+import java.util.List;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  *
@@ -57,34 +48,37 @@ public class Block extends DescriptionBase implements IDefinition {
   private String name;
 
   /** Returns a name, which is identification of the block. */
+  @Override
   public String getName() {
     return name;
   }
 
+  @Override
   public void setName(String name) {
-    this.name = trim(notBlank(name, getMessage("msg004", "name",
-        getDeclarationReferenceText())));
+    this.name = name;
   }
 
   private int scope;
 
+  @Override
   public int getScope() {
     return scope;
   }
 
+  @Override
   public void setScope(final int scope) {
     this.scope = scope;
   }
 
-  private ArrayList<String> input;
+  private List<String> input;
 
   public void addInput(String name) {
-    name = trim(notBlank(name, getMessage("msg004", "input name",
-        getDeclarationReferenceText())));
-    if (input == null) {
-      input = new ArrayList<String>();
-    }
-    input.add(name);
+      if (!isBlank(name)) {
+          if (input == null) {
+              input = new ArrayList<>();
+          }
+          input.add(trim(name));
+      }
   }
 
   public Collection<String> getInput() {
@@ -92,15 +86,15 @@ public class Block extends DescriptionBase implements IDefinition {
         emptyIfNull(input));
   }
 
-  private ArrayList<String> output;
+  private List<String> output;
 
   public void addOutput(String name) {
-    name = trim(notBlank(name, getMessage("msg004", "output name",
-        getDeclarationReferenceText())));
-    if (output == null) {
-      output = new ArrayList<String>();
-    }
-    output.add(name);
+      if (!isBlank(name)) {
+          if (output == null) {
+              output = new ArrayList<>();
+          }
+          output.add(trim(name));
+      }
   }
 
   public Collection<String> getOutput() {
@@ -111,12 +105,12 @@ public class Block extends DescriptionBase implements IDefinition {
   private ArrayList<Module> modules;
 
   public void add(Module module) {
-    notNull(module, getMessage("msg006", "module",
-        getDeclarationReferenceText()));
-    if (modules == null) {
-      modules = new ArrayList<Module>();
-    }
-    modules.add(module);
+      if (module != null) {
+          if (modules == null) {
+              modules = new ArrayList<>();
+          }
+          modules.add(module);
+      }
   }
 
   public Collection<Module> getModules() {
@@ -124,15 +118,15 @@ public class Block extends DescriptionBase implements IDefinition {
         emptyIfNull(modules));
   }
 
-  private ArrayList<Signal> signals;
+  private List<Signal> signals;
 
   public void add(Signal signal) {
-    notNull(signal, getMessage("msg006", "signal",
-        getDeclarationReferenceText()));
-    if (signals == null) {
-      signals = new ArrayList<Signal>();
-    }
-    signals.add(signal);
+      if (signal != null) {
+          if (signals == null) {
+              signals = new ArrayList<>();
+          }
+          signals.add(signal);
+      }
   }
 
   public Collection<Signal> getSignals() {
@@ -140,15 +134,15 @@ public class Block extends DescriptionBase implements IDefinition {
         emptyIfNull(signals));
   }
 
-  private ArrayList<Use> uses;
+  private List<Use> uses;
 
   public void add(Use use) {
-    notNull(use, getMessage("msg006", "use",
-        getDeclarationReferenceText()));
-    if (uses == null) {
-      uses = new ArrayList<Use>();
-    }
-    uses.add(use);
+      if (use != null) {
+          if (uses == null) {
+              uses = new ArrayList<>();
+          }
+          uses.add(use);
+      }
   }
 
   public Collection<Use> getUses() {
