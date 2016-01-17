@@ -125,8 +125,8 @@ abstract class ModuleCrate {
 
   private static class OutputModuleCrate extends ModuleCrate {
 
-    private OutputModule module;
-    private int[] outputMap;
+    private final OutputModule module;
+    private final int[] outputMap;
 
     OutputModuleCrate(OutputModule module, int[] outputMap) {
       this.module = module;

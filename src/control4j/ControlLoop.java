@@ -30,6 +30,7 @@ import control4j.application.Property;
 
 import static control4j.tools.Logger.*;
 import static control4j.tools.LogMessages.*;
+import cz.lidinsky.tools.CommonException;
 
 import cz.lidinsky.tools.ToStringBuilder;
 
@@ -184,6 +185,7 @@ public class ControlLoop {
 
     // The control loop !
     while (true)
+
       try {
         cycleStartTime = System.currentTimeMillis();
         // erase data buffer
@@ -226,9 +228,14 @@ public class ControlLoop {
         // if an exception arise during the processing some
         // of the module, the cycle is not completed and
         // problem is logged.
-        String message = getMessage("BrokenCycle");
-        message = String.format(message, e.getMessage());
-        warning(message);
+        //String message = getMessage("BrokenCycle");
+        //message = String.format(message, e.getMessage());
+        //warning(message);
+        warning(new CommonException()
+                  .setCause(e)
+                  .set("message", "The scan was not finished because of exception!")
+                  .set("module", executedModule)
+                .toString());
         //dump(e, executedModule.getModule()); // TODO:
       }
   }

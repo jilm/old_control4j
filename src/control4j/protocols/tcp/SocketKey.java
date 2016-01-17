@@ -59,11 +59,11 @@ public class SocketKey {
         return hash;
     }
 
-    private SocketKey setHost(String host) {
+    public SocketKey setHost(String host) {
         return new SocketKey(host, port);
     }
 
-    private SocketKey setPort(int port) {
+    public SocketKey setPort(int port) {
         return new SocketKey(host, port);
     }
 }   

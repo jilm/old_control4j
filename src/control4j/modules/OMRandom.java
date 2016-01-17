@@ -18,6 +18,7 @@ package control4j.modules;
  *  along with control4j.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import control4j.AOutputSize;
 import cz.lidinsky.tools.IToStringBuildable;
 import cz.lidinsky.tools.ToStringBuilder;
 import cz.lidinsky.tools.reflect.Setter;
@@ -32,6 +33,7 @@ import control4j.OutputModule;
  *  Output: 0, Scalar random value from rande 0.0 to 1.0.
  *             It is always valid and with the actual timestamp.
  */
+@AOutputSize(1)
 public class OMRandom extends OutputModule implements IToStringBuildable {
 
   @Override
